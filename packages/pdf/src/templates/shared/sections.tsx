@@ -246,6 +246,15 @@ const ItemTitle = ({ children, website }: { children: ReactNode; website: ItemWe
 	return <Link src={inlineWebsiteUrl}>{title}</Link>;
 };
 
+const ProfileTitle = ({ item }: { item: ProfileItem }) => {
+	const inlineWebsiteUrl = getInlineItemWebsiteUrl(item.website);
+	const title = <Bold>{item.network}</Bold>;
+
+	if (!inlineWebsiteUrl) return title;
+
+	return <Link src={inlineWebsiteUrl}>{title}</Link>;
+};
+
 const ItemWebsiteLink = ({ website }: { website: ItemWebsite }) => {
 	if (!shouldRenderSeparateItemWebsite(website)) return null;
 
@@ -315,10 +324,14 @@ const ProfileSection = ({
 						<SectionItemHeader>
 							<View style={composeStyles(inlineStyle)}>
 								<Icon name={item.icon as IconName} />
-								<Bold>{item.network}</Bold>
+								<ProfileTitle item={item} />
 							</View>
 						</SectionItemHeader>
-						<Link src={item.website.url}>{item.username}</Link>
+						{shouldRenderSeparateItemWebsite(item.website) ? (
+							<Link src={item.website.url}>{item.username}</Link>
+						) : (
+							<Text>{item.username}</Text>
+						)}
 					</SectionItem>
 				))}
 			</SectionItems>
