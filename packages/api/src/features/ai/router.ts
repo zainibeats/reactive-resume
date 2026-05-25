@@ -44,6 +44,13 @@ function throwResumeStructureError(error: ZodError): never {
 	});
 }
 
+function throwInvalidAiOutputError(error: ZodError | SyntaxError): never {
+	throw new ORPCError("BAD_REQUEST", {
+		message: "The AI returned an improperly formatted structure.",
+		cause: error instanceof ZodError ? flattenError(error) : error.message,
+	});
+}
+
 async function getRunnableProvider(userId: string, aiProviderId?: string) {
 	const provider = aiProviderId
 		? await aiProvidersService.getRunnableById({ id: aiProviderId, userId })
@@ -229,12 +236,7 @@ export const aiRouter = {
 				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
 				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError();
-				if (error instanceof ZodError) {
-					throw new ORPCError("BAD_REQUEST", {
-						message: "Invalid resume analysis structure",
-						cause: flattenError(error),
-					});
-				}
+				if (error instanceof ZodError || error instanceof SyntaxError) throwInvalidAiOutputError(error);
 				throw error;
 			}
 		}),

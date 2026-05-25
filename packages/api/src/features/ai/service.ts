@@ -274,9 +274,36 @@ function buildAnalyzeResumeSystemPrompt(resumeData: ResumeData): string {
 	return `${analyzeResumeSystemPromptTemplate}\n\n## Resume Data\n\n${JSON.stringify(resumeData, null, 2)}`;
 }
 
+function extractJsonObject(resultText: string) {
+	const first = resultText.indexOf("{");
+	const last = resultText.lastIndexOf("}");
+	if (first === -1 || last === -1 || last < first) throw new Error("AI returned no JSON object.");
+
+	return JSON.parse(resultText.substring(first, last + 1));
+}
+
 async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis> {
 	const model = getModel(input);
 	const systemPrompt = buildAnalyzeResumeSystemPrompt(input.resumeData);
+
+	if (isLmStudioEndpoint(input)) {
+		const result = await generateText({
+			model,
+			messages: [
+				{
+					role: "system",
+					content: `${systemPrompt}\n\nReturn ONLY a raw JSON object. Do not return markdown, code fences, or explanations. The JSON object must match this schema:\n\n${JSON.stringify(z.toJSONSchema(resumeAnalysisOutputSchema), null, 2)}`,
+				},
+				{
+					role: "user",
+					content:
+						"Analyze this resume and return a structured report with scorecard, overall score, strengths, and actionable suggestions.",
+				},
+			],
+		});
+
+		return resumeAnalysisSchema.parse(resumeAnalysisOutputSchema.parse(extractJsonObject(result.text)));
+	}
 
 	const result = await generateText({
 		model,

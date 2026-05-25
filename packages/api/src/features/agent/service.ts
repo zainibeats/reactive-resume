@@ -902,6 +902,9 @@ export const agentService = {
 					? resumeService.getById({ id: thread.workingResumeId, userId: input.userId }).catch(() => null)
 					: null,
 			]);
+			const hasRunnableProvider = thread.aiProviderId
+				? true
+				: !!(await aiProvidersService.getDefaultRunnable({ userId: input.userId }));
 
 			return {
 				thread: toThreadSummary(thread),
@@ -909,7 +912,7 @@ export const agentService = {
 				actions: actions.map(toAction),
 				attachments: attachments.map(toAttachment),
 				resume,
-				isReadOnly: thread.status === "archived" || !thread.workingResumeId || !thread.aiProviderId || !resume,
+				isReadOnly: thread.status === "archived" || !thread.workingResumeId || !hasRunnableProvider || !resume,
 			};
 		},
 
@@ -968,7 +971,7 @@ export const agentService = {
 			if (thread.activeRunId) {
 				throw new ORPCError("CONFLICT", { message: "This thread already has an active run." });
 			}
-			if (!thread.workingResumeId || !thread.aiProviderId) {
+			if (!thread.workingResumeId) {
 				throw new ORPCError("BAD_REQUEST", { message: "This thread is read-only." });
 			}
 			if (input.message.role !== "user" && input.message.role !== "assistant") {
@@ -976,16 +979,19 @@ export const agentService = {
 			}
 
 			const [runnableProvider, attachments] = await Promise.all([
-				aiProvidersService.getRunnableById({
-					id: thread.aiProviderId,
-					userId: input.userId,
-				}),
+				thread.aiProviderId
+					? aiProvidersService.getRunnableById({
+							id: thread.aiProviderId,
+							userId: input.userId,
+						})
+					: aiProvidersService.getDefaultRunnable({ userId: input.userId }),
 				getUnlinkedMessageAttachments({
 					ids: input.attachmentIds ?? [],
 					threadId: input.threadId,
 					userId: input.userId,
 				}),
 			]);
+			if (!runnableProvider) throw new ORPCError("BAD_REQUEST", { message: "No tested AI provider is available." });
 			const runId = generateId();
 			const streamId = generateId();
 			const controller = new AbortController();
