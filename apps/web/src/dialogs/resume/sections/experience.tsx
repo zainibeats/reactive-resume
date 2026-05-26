@@ -35,6 +35,7 @@ const defaultValues: FormValues = {
 	id: "",
 	hidden: false,
 	company: "",
+	mainEntryBold: false,
 	position: "",
 	location: "",
 	period: "",
@@ -48,7 +49,10 @@ export function CreateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: makeSectionItem(defaultValues, data?.item),
+		defaultValues: formSchema.parse({
+			...makeSectionItem(defaultValues, data?.item),
+			mainEntryBold: data?.item?.mainEntryBold ?? false,
+		}),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -100,7 +104,7 @@ export function UpdateExperienceDialog({ data }: DialogProps<"resume.sections.ex
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -163,6 +167,28 @@ const ExperienceForm = withForm({
 				<form.AppField name="company">{(field) => <field.TextField label={<Trans>Company</Trans>} />}</form.AppField>
 
 				<form.AppField name="location">{(field) => <field.TextField label={<Trans>Location</Trans>} />}</form.AppField>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold company</Trans>
+							</FormLabel>
+						</FormItem>
+					)}
+				</form.Field>
 
 				<form.AppField name="position">{(field) => <field.TextField label={<Trans>Position</Trans>} />}</form.AppField>
 

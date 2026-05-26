@@ -237,9 +237,23 @@ type ItemWebsite = {
 	inlineLink?: boolean | undefined;
 };
 
-const ItemTitle = ({ children, website }: { children: ReactNode; website: ItemWebsite }) => {
+const MainEntryText = ({ bold, children }: { bold: boolean; children: ReactNode }) => {
+	if (bold) return <Bold style={{ fontWeight: 700 }}>{children}</Bold>;
+
+	return <Text>{children}</Text>;
+};
+
+const ItemTitle = ({
+	bold = true,
+	children,
+	website,
+}: {
+	bold?: boolean;
+	children: ReactNode;
+	website: ItemWebsite;
+}) => {
 	const inlineWebsiteUrl = getInlineItemWebsiteUrl(website);
-	const title = <Bold>{children}</Bold>;
+	const title = <MainEntryText bold={bold}>{children}</MainEntryText>;
 
 	if (!inlineWebsiteUrl) return title;
 
@@ -377,7 +391,11 @@ const ExperienceSection = ({
 									</Text>
 								) : null
 							}
-							middle={<ItemTitle website={item.website}>{item.company}</ItemTitle>}
+							middle={
+								<ItemTitle bold={item.mainEntryBold ?? false} website={item.website}>
+									{item.company}
+								</ItemTitle>
+							}
 							trailing={<Text style={composeStyles(alignRightStyle)}>{item.period}</Text>}
 						/>
 					);
@@ -385,7 +403,9 @@ const ExperienceSection = ({
 					const renderSplitHeader = () => (
 						<>
 							<View style={composeStyles(splitRowStyle)}>
-								<ItemTitle website={item.website}>{item.company}</ItemTitle>
+								<ItemTitle bold={item.mainEntryBold ?? false} website={item.website}>
+									{item.company}
+								</ItemTitle>
 								{hasSplitRowText(headerLocation) && (
 									<Text style={composeStyles(alignRightStyle)}>{headerLocation}</Text>
 								)}
@@ -469,7 +489,11 @@ const EducationSection = ({
 										</Text>
 									) : null
 								}
-								middle={<ItemTitle website={item.website}>{item.school}</ItemTitle>}
+								middle={
+									<ItemTitle bold={item.mainEntryBold ?? false} website={item.website}>
+										{item.school}
+									</ItemTitle>
+								}
 								trailing={<Text style={composeStyles(alignRightStyle)}>{item.period}</Text>}
 							/>
 							{gradeAndLocation && <Text>{gradeAndLocation}</Text>}
@@ -479,7 +503,9 @@ const EducationSection = ({
 					const renderSplitHeader = () => (
 						<>
 							<View style={composeStyles(splitRowStyle)}>
-								<ItemTitle website={item.website}>{item.school}</ItemTitle>
+								<ItemTitle bold={item.mainEntryBold ?? false} website={item.website}>
+									{item.school}
+								</ItemTitle>
 								{hasSplitRowText(headerDegreeAndGrade) && (
 									<Text style={composeStyles(alignRightStyle)}>{headerDegreeAndGrade}</Text>
 								)}
@@ -533,7 +559,9 @@ const ProjectsSection = ({
 					<SectionItem key={item.id}>
 						<SectionItemHeader>
 							<View style={composeStyles(splitRowStyle)}>
-								<ItemTitle website={item.website}>{item.name}</ItemTitle>
+								<ItemTitle bold={item.mainEntryBold ?? false} website={item.website}>
+									{item.name}
+								</ItemTitle>
 								<Text style={composeStyles(alignRightStyle)}>{item.period}</Text>
 							</View>
 						</SectionItemHeader>
@@ -571,7 +599,7 @@ const SkillsSection = ({
 						<SectionItemHeader>
 							<View style={composeStyles(inlineStyle)}>
 								<Icon name={item.icon as IconName} />
-								<Bold>{item.name}</Bold>
+								<MainEntryText bold={item.mainEntryBold ?? false}>{item.name}</MainEntryText>
 							</View>
 						</SectionItemHeader>
 

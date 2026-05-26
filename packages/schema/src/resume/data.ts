@@ -128,6 +128,10 @@ export const certificationItemSchema = baseItemSchema.extend({
 
 export const educationItemSchema = baseItemSchema.extend({
 	school: z.string().min(1).describe("The name of the school or institution."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the school name should be rendered in bold. Defaults to false."),
 	degree: z.string().describe("The degree or qualification obtained."),
 	area: z.string().describe("The area of study or specialization."),
 	grade: z.string().describe("The grade or score achieved."),
@@ -148,6 +152,10 @@ export type RoleItem = z.infer<typeof roleItemSchema>;
 
 export const experienceItemSchema = baseItemSchema.extend({
 	company: z.string().min(1).describe("The name of the company or organization."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the company name should be rendered in bold. Defaults to false."),
 	position: z
 		.string()
 		.describe(
@@ -204,6 +212,10 @@ export const profileItemSchema = baseItemSchema.extend({
 
 export const projectItemSchema = baseItemSchema.extend({
 	name: z.string().min(1).describe("The name of the project."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the project name should be rendered in bold. Defaults to false."),
 	period: z.string().describe("The period of time the project was worked on."),
 	website: itemWebsiteSchema.describe("The link to the project, if any."),
 	description: z.string().describe("The description of the project. This should be a HTML-formatted string."),
@@ -233,6 +245,10 @@ export const skillItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
 	iconColor: iconColorSchema,
 	name: z.string().min(1).describe("The name of the skill."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the skill name should be rendered in bold. Defaults to false."),
 	proficiency: z
 		.string()
 		.describe(

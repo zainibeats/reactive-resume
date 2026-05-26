@@ -145,6 +145,7 @@ export const registerFonts = (typography: Typography, locale: Locale, hasCjkCont
 	for (const italic of [false, true]) {
 		registerFont(bodyFontFamily, bodyRange.lowest, italic);
 		registerFont(bodyFontFamily, bodyRange.highest, italic);
+		registerFont(bodyFontFamily, 700, italic);
 		registerFont(headingFontFamily, headingRange.lowest, italic);
 		registerFont(headingFontFamily, headingRange.highest, italic);
 	}
@@ -165,10 +166,10 @@ export const registerFonts = (typography: Typography, locale: Locale, hasCjkCont
 	};
 
 	if (bodyCjkFallback && bodyCjkFallback === headingCjkFallback) {
-		registerCjkFallback(bodyCjkFallback, [bodyRange, headingRange]);
+		registerCjkFallback(bodyCjkFallback, [bodyRange, headingRange, { lowest: 700, highest: 700 }]);
 	} else {
 		if (bodyCjkFallback) {
-			registerCjkFallback(bodyCjkFallback, [bodyRange]);
+			registerCjkFallback(bodyCjkFallback, [bodyRange, { lowest: 700, highest: 700 }]);
 		}
 		if (headingCjkFallback) {
 			registerCjkFallback(headingCjkFallback, [headingRange]);

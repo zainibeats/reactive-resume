@@ -38,6 +38,7 @@ const defaultValues: FormValues = {
 	icon: "acorn",
 	iconColor: "",
 	name: "",
+	mainEntryBold: false,
 	proficiency: "",
 	level: 0,
 	keywords: [],
@@ -48,7 +49,10 @@ export function CreateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: makeSectionItem(defaultValues, data?.item),
+		defaultValues: formSchema.parse({
+			...makeSectionItem(defaultValues, data?.item),
+			mainEntryBold: data?.item?.mainEntryBold ?? false,
+		}),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -100,7 +104,7 @@ export function UpdateSkillDialog({ data }: DialogProps<"resume.sections.skills.
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -227,6 +231,28 @@ const SkillForm = withForm({
 				<form.AppField name="proficiency">
 					{(field) => <field.TextField label={<Trans>Proficiency</Trans>} />}
 				</form.AppField>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold name</Trans>
+							</FormLabel>
+						</FormItem>
+					)}
+				</form.Field>
 
 				<form.Field name="level">
 					{(field) => (

@@ -31,6 +31,7 @@ const defaultValues: FormValues = {
 	id: "",
 	hidden: false,
 	school: "",
+	mainEntryBold: false,
 	degree: "",
 	area: "",
 	grade: "",
@@ -45,7 +46,10 @@ export function CreateEducationDialog({ data }: DialogProps<"resume.sections.edu
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: makeSectionItem(defaultValues, data?.item),
+		defaultValues: formSchema.parse({
+			...makeSectionItem(defaultValues, data?.item),
+			mainEntryBold: data?.item?.mainEntryBold ?? false,
+		}),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -97,7 +101,7 @@ export function UpdateEducationDialog({ data }: DialogProps<"resume.sections.edu
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -154,6 +158,28 @@ const EducationForm = withForm({
 				<form.AppField name="school">{(field) => <field.TextField label={<Trans>School</Trans>} />}</form.AppField>
 
 				<form.AppField name="area">{(field) => <field.TextField label={<Trans>Area of Study</Trans>} />}</form.AppField>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold school</Trans>
+							</FormLabel>
+						</FormItem>
+					)}
+				</form.Field>
 
 				<form.AppField name="degree">{(field) => <field.TextField label={<Trans>Degree</Trans>} />}</form.AppField>
 

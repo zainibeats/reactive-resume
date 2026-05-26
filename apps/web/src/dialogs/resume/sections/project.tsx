@@ -31,6 +31,7 @@ const defaultValues: FormValues = {
 	id: "",
 	hidden: false,
 	name: "",
+	mainEntryBold: false,
 	period: "",
 	website: { url: "", label: "", inlineLink: false },
 	description: "",
@@ -41,7 +42,10 @@ export function CreateProjectDialog({ data }: DialogProps<"resume.sections.proje
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: makeSectionItem(defaultValues, data?.item),
+		defaultValues: formSchema.parse({
+			...makeSectionItem(defaultValues, data?.item),
+			mainEntryBold: data?.item?.mainEntryBold ?? false,
+		}),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -93,7 +97,7 @@ export function UpdateProjectDialog({ data }: DialogProps<"resume.sections.proje
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -150,6 +154,28 @@ const ProjectForm = withForm({
 				<form.AppField name="name">{(field) => <field.TextField label={<Trans>Name</Trans>} />}</form.AppField>
 
 				<form.AppField name="period">{(field) => <field.TextField label={<Trans>Period</Trans>} />}</form.AppField>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2 sm:col-span-full">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold name</Trans>
+							</FormLabel>
+						</FormItem>
+					)}
+				</form.Field>
 
 				<form.Field name="website">
 					{(field) => (
