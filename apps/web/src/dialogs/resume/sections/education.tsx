@@ -44,12 +44,13 @@ const defaultValues: FormValues = {
 export function CreateEducationDialog({ data }: DialogProps<"resume.sections.education.create">) {
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const updateResumeData = useUpdateResumeData();
+	const initialValues: FormValues = {
+		...makeSectionItem(defaultValues, data?.item),
+		mainEntryBold: data?.item?.mainEntryBold ?? false,
+	};
 
 	const form = useAppForm({
-		defaultValues: formSchema.parse({
-			...makeSectionItem(defaultValues, data?.item),
-			mainEntryBold: data?.item?.mainEntryBold ?? false,
-		}),
+		defaultValues: initialValues,
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
