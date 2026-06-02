@@ -31,6 +31,7 @@ const defaultValues: FormValues = {
 	id: "",
 	hidden: false,
 	title: "",
+	mainEntryBold: false,
 	issuer: "",
 	date: "",
 	website: { url: "", label: "", inlineLink: false },
@@ -94,7 +95,7 @@ export function UpdateCertificationDialog({ data }: DialogProps<"resume.sections
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
 			updateResumeData((draft) => {
@@ -153,6 +154,28 @@ const CertificationForm = withForm({
 				<form.AppField name="issuer">{(field) => <field.TextField label={<Trans>Issuer</Trans>} />}</form.AppField>
 
 				<form.AppField name="date">{(field) => <field.TextField label={<Trans>Date</Trans>} />}</form.AppField>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold</Trans>
+							</FormLabel>
+						</FormItem>
+					)}
+				</form.Field>
 
 				<form.Field name="website">
 					{(field) => (

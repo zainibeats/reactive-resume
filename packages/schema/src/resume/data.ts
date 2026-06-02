@@ -126,6 +126,10 @@ export const awardItemSchema = baseItemSchema.extend({
 
 export const certificationItemSchema = baseItemSchema.extend({
 	title: z.string().min(1).describe("The title of the certification."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the certification title should be rendered in bold. Defaults to false."),
 	issuer: z.string().describe("The issuer of the certification."),
 	date: z.string().describe("The date when the certification was received."),
 	website: itemWebsiteSchema.describe("The website of the certification, if any."),

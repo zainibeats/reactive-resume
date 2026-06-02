@@ -792,7 +792,9 @@ const CertificationsSection = ({
 					<SectionItem key={item.id}>
 						<SectionItemHeader>
 							<View style={composeStyles(splitRowStyle)}>
-								<ItemTitle website={item.website}>{item.title}</ItemTitle>
+								<ItemTitle bold={item.mainEntryBold ?? false} website={item.website}>
+									{item.title}
+								</ItemTitle>
 								<Text style={composeStyles(alignEndStyle)}>{item.date}</Text>
 							</View>
 							<Text>{item.issuer}</Text>

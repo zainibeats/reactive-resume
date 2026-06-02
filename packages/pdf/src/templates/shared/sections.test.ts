@@ -23,6 +23,15 @@ describe("ItemTitle", () => {
 	});
 });
 
+describe("CertificationsSection", () => {
+	it("uses the certification bold toggle for title rendering", () => {
+		const certificationsBlock =
+			source.match(/const CertificationsSection = \([\s\S]*?const PublicationsSection/)?.[0] ?? "";
+
+		expect(certificationsBlock).toContain("bold={item.mainEntryBold ?? false}");
+	});
+});
+
 describe("SectionShell", () => {
 	it("keeps section and heading style rules when section heading icons are hidden", () => {
 		expect(source).toContain("<View style={composeStyles(sectionStyle, sectionRuleStyle)}>");
