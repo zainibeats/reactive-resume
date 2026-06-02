@@ -950,13 +950,22 @@ export const agentService = {
 			await getThread({ id: input.id, userId: input.userId });
 
 			await Promise.all([
-				getStorageService().delete(`uploads/${input.userId}/agent/${input.id}`),
 				db.delete(schema.agentAttachment).where(eq(schema.agentAttachment.threadId, input.id)),
 				db
 					.update(schema.agentThread)
 					.set({ status: "deleted", deletedAt: new Date() })
 					.where(and(eq(schema.agentThread.id, input.id), eq(schema.agentThread.userId, input.userId))),
 			]);
+
+			try {
+				await getStorageService().delete(`uploads/${input.userId}/agent/${input.id}`);
+			} catch (error) {
+				console.error("[agent] Failed to delete thread storage after soft-delete", {
+					threadId: input.id,
+					userId: input.userId,
+					error,
+				});
+			}
 		},
 	},
 

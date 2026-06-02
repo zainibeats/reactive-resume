@@ -12,6 +12,7 @@ import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
 import { Heading, Icon, Link, Text } from "../shared/primitives";
+import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
 
@@ -30,6 +31,10 @@ type ScizorStyles = Omit<TemplateStyleSlots, "page"> & {
 
 type ScizorTemplate = {
 	colors: TemplateColorRoles;
+	styles: ScizorStyles;
+};
+
+type ScizorHeaderProps = {
 	styles: ScizorStyles;
 };
 
@@ -60,7 +65,7 @@ export const ScizorPage = ({ page, pageIndex }: TemplatePageProps) => {
 	);
 };
 
-const Header = ({ styles }: { styles: ScizorStyles }) => {
+const Header = ({ styles }: ScizorHeaderProps) => {
 	const { basics, picture } = useRender();
 	const hasPicture = hasTemplatePicture(picture);
 
@@ -103,9 +108,10 @@ const Header = ({ styles }: { styles: ScizorStyles }) => {
 };
 
 const useScizorTemplate = (): ScizorTemplate => {
-	const { picture, metadata } = useRender();
+	const { picture, metadata, rtl } = useRender();
 
 	return useMemo(() => {
+		const r = createRtlStyleHelpers(rtl);
 		const foreground = rgbaStringToHex(metadata.design.colors.text);
 		const background = rgbaStringToHex(metadata.design.colors.background);
 		const primary = rgbaStringToHex(metadata.design.colors.primary);
@@ -118,6 +124,7 @@ const useScizorTemplate = (): ScizorTemplate => {
 			fontWeight: metadata.typography.body.fontWeights[0] ?? "400",
 			lineHeight: metadata.typography.body.lineHeight,
 			color: foreground,
+			...r.text,
 		} satisfies Style;
 
 		const baseStyles = StyleSheet.create({
@@ -132,6 +139,7 @@ const useScizorTemplate = (): ScizorTemplate => {
 				fontFamily: metadata.typography.body.fontFamily,
 				fontSize: metadata.typography.body.fontSize,
 				lineHeight: metadata.typography.body.lineHeight,
+				direction: r.pageDirection,
 			},
 			text: bodyText,
 			heading: {
@@ -140,24 +148,56 @@ const useScizorTemplate = (): ScizorTemplate => {
 				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "700",
 				lineHeight: metadata.typography.heading.lineHeight,
 				color: foreground,
+				...r.text,
 			},
-			div: { rowGap: metrics.gapY(0.125), columnGap: metrics.gapX(1 / 3) },
-			inline: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(1 / 3) },
-			link: { textDecoration: "none", color: foreground },
-			small: { fontSize: metadata.typography.body.fontSize * 0.875 },
-			bold: { fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "700", color: foreground },
-			richParagraph: { margin: 0, ...bodyText },
-			richListItemRow: { flexDirection: "row", columnGap: metrics.gapX(1 / 3), alignItems: "flex-start" },
-			richListItemMarker: { width: metadata.typography.body.fontSize, textAlign: "right", ...bodyText },
-			richListItemContent: { flex: 1, ...bodyText },
-			splitRow: {
+			div: {
+				rowGap: metrics.gapY(0.125),
+				columnGap: metrics.gapX(1 / 3),
+			},
+			inline: {
+				flexDirection: r.row,
+				alignItems: "center",
+				columnGap: metrics.gapX(1 / 3),
+			},
+			link: {
+				textDecoration: "none",
+				color: foreground,
+			},
+			small: {
+				fontSize: metadata.typography.body.fontSize * 0.875,
+			},
+			bold: {
+				fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "700",
+				color: foreground,
+			},
+			richParagraph: {
+				margin: 0,
+				...bodyText,
+			},
+			richListItemRow: {
 				flexDirection: "row",
+				columnGap: metrics.gapX(1 / 3),
+				alignItems: "flex-start",
+			},
+			richListItemMarker: {
+				...bodyText,
+				width: metadata.typography.body.fontSize,
+				textAlign: r.listMarkerTextAlign,
+			},
+			richListItemContent: {
+				...bodyText,
+				flex: 1,
+			},
+			splitRow: {
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				alignItems: "flex-start",
 				justifyContent: "space-between",
 				columnGap: metrics.gapX(2 / 3),
 			},
-			alignRight: { textAlign: "right", minWidth: 0, maxWidth: "100%", flexShrink: 1 },
+			alignEnd: {
+				...r.alignEnd,
+			},
 			section: {
 				flexDirection: "column",
 				rowGap: metrics.gapY(0.25),
@@ -171,18 +211,32 @@ const useScizorTemplate = (): ScizorTemplate => {
 				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "700",
 				textTransform: "uppercase",
 			},
-			sectionItems: { rowGap: metrics.itemGapY },
-			item: { rowGap: metrics.gapY(0.125) },
-			levelContainer: { width: "100%" },
-			levelItem: { borderColor: primary },
-			levelItemActive: { backgroundColor: primary },
+			sectionItems: {
+				rowGap: metrics.itemGapY,
+			},
+			item: {
+				rowGap: metrics.gapY(0.125),
+			},
+			levelContainer: {
+				width: "100%",
+			},
+			levelItem: {
+				borderColor: primary,
+			},
+			levelItemActive: {
+				backgroundColor: primary,
+			},
 			header: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				alignItems: "flex-start",
 				columnGap: metrics.gapX(1),
 				paddingBottom: metrics.gapY(0.35),
 			},
-			headerIdentity: { flex: 1, alignItems: "flex-start", rowGap: metrics.gapY(0.45) },
+			headerIdentity: {
+				flex: 1,
+				...r.headerIdentity,
+				rowGap: metrics.gapY(0.45),
+			},
 			headerName: {
 				color: foreground,
 				fontSize: metadata.typography.heading.fontSize * 1.85,
@@ -193,15 +247,17 @@ const useScizorTemplate = (): ScizorTemplate => {
 				borderBottomWidth: 2,
 				borderBottomColor: divider,
 			},
-			headerHeadline: { color: foreground },
+			headerHeadline: {
+				color: foreground,
+			},
 			headerContactRow: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				rowGap: metrics.gapY(0.125),
 				columnGap: metrics.gapX(0.55),
 			},
 			headerContactItem: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				alignItems: "center",
 				columnGap: metrics.gapX(1 / 6),
 				color: foreground,
@@ -218,7 +274,9 @@ const useScizorTemplate = (): ScizorTemplate => {
 				shadowWidth: picture.shadowWidth,
 				transform: `rotate(${picture.rotation}deg)`,
 			},
-			sections: { flexDirection: "column" },
+			sections: {
+				flexDirection: "column",
+			},
 		});
 
 		const accentFor = ({ colors }: TemplateStyleContext) => colors.primary;
@@ -240,5 +298,5 @@ const useScizorTemplate = (): ScizorTemplate => {
 				}),
 			} satisfies ScizorStyles,
 		};
-	}, [picture, metadata]);
+	}, [picture, metadata, rtl]);
 };

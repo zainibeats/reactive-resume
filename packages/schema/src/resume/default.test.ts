@@ -20,6 +20,10 @@ describe("defaultResumeData", () => {
 		expect(defaultResumeData.metadata.page.format).toBe("a4");
 	});
 
+	it("shows link underlines by default", () => {
+		expect(defaultResumeData.metadata.page.hideLinkUnderline).toBe(false);
+	});
+
 	it("starts with no resume content", () => {
 		expect(defaultResumeData.basics.name).toBe("");
 		expect(defaultResumeData.summary.content).toBe("");

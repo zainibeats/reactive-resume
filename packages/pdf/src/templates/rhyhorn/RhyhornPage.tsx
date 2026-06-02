@@ -13,6 +13,7 @@ import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
 import { Heading, Icon, Link, Text } from "../shared/primitives";
+import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
 
@@ -32,6 +33,10 @@ type RhyhornStyles = Omit<TemplateStyleSlots, "page"> & {
 
 type RhyhornTemplate = {
 	colors: TemplateColorRoles;
+	styles: RhyhornStyles;
+};
+
+type RhyhornHeaderProps = {
 	styles: RhyhornStyles;
 };
 
@@ -69,10 +74,13 @@ export const RhyhornPage = ({ page, pageIndex }: TemplatePageProps) => {
 	);
 };
 
-const Header = ({ styles }: { styles: RhyhornStyles }) => {
+const Header = ({ styles }: RhyhornHeaderProps) => {
 	const { basics, picture } = useRender();
 	const hasPicture = hasTemplatePicture(picture);
-	const contactItems: { id: string; content: ReactNode }[] = [];
+	const contactItems: {
+		id: string;
+		content: ReactNode;
+	}[] = [];
 
 	if (basics.email) {
 		contactItems.push({
@@ -153,14 +161,16 @@ const Header = ({ styles }: { styles: RhyhornStyles }) => {
 };
 
 const useRhyhornTemplate = (): RhyhornTemplate => {
-	const { picture, metadata } = useRender();
+	const { picture, metadata, rtl } = useRender();
 
 	return useMemo(() => {
+		const r = createRtlStyleHelpers(rtl);
 		const foreground = rgbaStringToHex(metadata.design.colors.text);
 		const background = rgbaStringToHex(metadata.design.colors.background);
 		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const colors: TemplateColorRoles = { foreground, background, primary };
 		const metrics = getTemplateMetrics(metadata.page);
+		const contactGap = metrics.gapX(0.5);
 
 		const bodyText = {
 			fontFamily: metadata.typography.body.fontFamily,
@@ -168,6 +178,7 @@ const useRhyhornTemplate = (): RhyhornTemplate => {
 			fontWeight: metadata.typography.body.fontWeights[0] ?? "400",
 			lineHeight: metadata.typography.body.lineHeight,
 			color: foreground,
+			...r.text,
 		} satisfies Style;
 
 		const baseStyles = StyleSheet.create({
@@ -180,6 +191,7 @@ const useRhyhornTemplate = (): RhyhornTemplate => {
 				fontFamily: metadata.typography.body.fontFamily,
 				fontSize: metadata.typography.body.fontSize,
 				lineHeight: metadata.typography.body.lineHeight,
+				direction: r.pageDirection,
 			},
 			text: bodyText,
 			heading: {
@@ -188,49 +200,112 @@ const useRhyhornTemplate = (): RhyhornTemplate => {
 				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "600",
 				lineHeight: metadata.typography.heading.lineHeight,
 				color: foreground,
+				...r.text,
 			},
-			div: { rowGap: metrics.gapY(0.125), columnGap: metrics.gapX(1 / 3) },
-			inline: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(1 / 3) },
-			link: { textDecoration: "none", color: foreground },
-			small: { fontSize: metadata.typography.body.fontSize * 0.875 },
-			bold: { fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600" },
-			richParagraph: { margin: 0, ...bodyText },
-			richListItemRow: { flexDirection: "row", columnGap: metrics.gapX(1 / 3), alignItems: "flex-start" },
-			richListItemMarker: { width: metadata.typography.body.fontSize, textAlign: "right", ...bodyText },
-			richListItemContent: { flex: 1, ...bodyText },
-			splitRow: {
+			div: {
+				rowGap: metrics.gapY(0.125),
+				columnGap: metrics.gapX(1 / 3),
+			},
+			inline: {
+				flexDirection: r.row,
+				alignItems: "center",
+				columnGap: metrics.gapX(1 / 3),
+			},
+			link: {
+				textDecoration: "none",
+				color: foreground,
+			},
+			small: {
+				fontSize: metadata.typography.body.fontSize * 0.875,
+			},
+			bold: {
+				fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600",
+			},
+			richParagraph: {
+				margin: 0,
+				...bodyText,
+			},
+			richListItemRow: {
+				// Stays `row` for both LTR and RTL; the <li> renderer swaps DOM order for RTL.
 				flexDirection: "row",
+				columnGap: metrics.gapX(1 / 3),
+				alignItems: "flex-start",
+			},
+			richListItemMarker: {
+				// bodyText spread first so `textAlign` below isn't clobbered by bodyText.textAlign.
+				...bodyText,
+				width: metadata.typography.body.fontSize,
+				textAlign: r.listMarkerTextAlign,
+			},
+			richListItemContent: {
+				...bodyText,
+				flex: 1,
+			},
+			splitRow: {
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				alignItems: "flex-start",
 				justifyContent: "space-between",
 				columnGap: metrics.gapX(2 / 3),
 			},
-			alignRight: { textAlign: "right", minWidth: 0, maxWidth: "100%", flexShrink: 1 },
-			section: { flexDirection: "column", rowGap: metrics.gapY(0.25) },
-			sectionHeading: { color: primary, borderBottomWidth: 1, borderBottomColor: primary },
-			item: { rowGap: metrics.gapY(0.125) },
-			levelContainer: { width: "100%" },
-			levelItem: { borderColor: primary },
-			levelItemActive: { backgroundColor: primary },
-			header: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(0.5) },
-			headerTitle: { flex: 1, rowGap: metrics.gapY(0.5) },
-			headerIdentity: { textAlign: "left", alignItems: "flex-start", rowGap: metrics.gapY(0.35) },
-			headerName: { fontSize: metadata.typography.heading.fontSize * 1.5, lineHeight: headerNameLineHeight },
-			contactList: { flexDirection: "row", flexWrap: "wrap", rowGap: metrics.gapY(0.125) },
-			contactItem: {
-				flexDirection: "row",
+			alignEnd: {
+				...r.alignEnd,
+			},
+			section: {
+				flexDirection: "column",
+				rowGap: metrics.gapY(0.25),
+			},
+			sectionHeading: {
+				color: primary,
+				borderBottomWidth: 1,
+				borderBottomColor: primary,
+				textAlign: r.sectionHeadingTextAlign,
+			},
+			item: {
+				rowGap: metrics.gapY(0.125),
+			},
+			levelContainer: {
+				width: "100%",
+			},
+			levelItem: {
+				borderColor: primary,
+			},
+			levelItemActive: {
+				backgroundColor: primary,
+			},
+			header: {
+				flexDirection: r.row,
 				alignItems: "center",
-				borderRightWidth: 1,
-				borderRightColor: primary,
-				paddingRight: metrics.gapX(0.5),
-				marginRight: metrics.gapX(0.5),
+				columnGap: metrics.gapX(0.5),
+			},
+			headerTitle: {
+				flex: 1,
+				rowGap: metrics.gapY(0.5),
+			},
+			headerIdentity: {
+				...r.headerIdentity,
+				rowGap: metrics.gapY(0.35),
+			},
+			headerName: {
+				fontSize: metadata.typography.heading.fontSize * 1.5,
+				lineHeight: headerNameLineHeight,
+			},
+			contactList: {
+				flexDirection: r.row,
+				flexWrap: "wrap",
+				rowGap: metrics.gapY(0.125),
+			},
+			contactItem: {
+				flexDirection: r.row,
+				alignItems: "center",
+				...r.contactSeparator(primary, contactGap),
 			},
 			contactItemContent: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				alignItems: "center",
 				columnGap: metrics.gapX(1 / 6),
 			},
-			contactItemLast: { borderRightWidth: 0, paddingRight: 0, marginRight: 0 },
+			contactItemLast: r.contactSeparatorClear,
 			picture: {
 				width: picture.size,
 				height: picture.size,
@@ -262,5 +337,5 @@ const useRhyhornTemplate = (): RhyhornTemplate => {
 				}),
 			} satisfies RhyhornStyles,
 		};
-	}, [picture, metadata]);
+	}, [picture, metadata, rtl]);
 };

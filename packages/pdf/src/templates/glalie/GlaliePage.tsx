@@ -12,6 +12,7 @@ import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
 import { Heading, Icon, Link, Text } from "../shared/primitives";
+import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
 
@@ -34,6 +35,10 @@ type GlalieStyles = Omit<TemplateStyleSlots, "page"> & {
 
 type GlalieTemplate = {
 	colors: TemplateColorRoles;
+	styles: GlalieStyles;
+};
+
+type GlalieHeaderProps = {
 	styles: GlalieStyles;
 };
 
@@ -90,7 +95,7 @@ export const GlaliePage = ({ page, pageIndex }: TemplatePageProps) => {
 	);
 };
 
-const Header = ({ styles }: { styles: GlalieStyles }) => {
+const Header = ({ styles }: GlalieHeaderProps) => {
 	const { basics, picture } = useRender();
 	const hasPicture = hasTemplatePicture(picture);
 
@@ -144,9 +149,10 @@ const getPrimaryTint = (primaryColor: string, opacity: number): string => {
 };
 
 const useGlalieTemplate = (): GlalieTemplate => {
-	const { picture, metadata } = useRender();
+	const { picture, metadata, rtl } = useRender();
 
 	return useMemo(() => {
+		const r = createRtlStyleHelpers(rtl);
 		const foreground = rgbaStringToHex(metadata.design.colors.text);
 		const background = rgbaStringToHex(metadata.design.colors.background);
 		const primary = rgbaStringToHex(metadata.design.colors.primary);
@@ -166,6 +172,7 @@ const useGlalieTemplate = (): GlalieTemplate => {
 			fontWeight: metadata.typography.body.fontWeights[0] ?? "400",
 			lineHeight: metadata.typography.body.lineHeight,
 			color: foreground,
+			...r.text,
 		} satisfies Style;
 
 		const baseStyles = StyleSheet.create({
@@ -175,6 +182,7 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				fontFamily: metadata.typography.body.fontFamily,
 				fontSize: metadata.typography.body.fontSize,
 				lineHeight: metadata.typography.body.lineHeight,
+				direction: r.pageDirection,
 			},
 			text: bodyText,
 			heading: {
@@ -183,39 +191,87 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "600",
 				lineHeight: metadata.typography.heading.lineHeight,
 				color: foreground,
+				...r.text,
 			},
-			div: { rowGap: metrics.gapY(0.125), columnGap: metrics.gapX(1 / 3) },
-			inline: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(1 / 3) },
-			link: { textDecoration: "none", color: foreground },
-			small: { fontSize: metadata.typography.body.fontSize * 0.875 },
-			bold: { fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600" },
-			richParagraph: { margin: 0, ...bodyText },
-			richListItemRow: { flexDirection: "row", columnGap: metrics.gapX(1 / 3), alignItems: "flex-start" },
-			richListItemMarker: { width: metadata.typography.body.fontSize, textAlign: "right", ...bodyText },
-			richListItemContent: { flex: 1, ...bodyText },
-			splitRow: {
+			div: {
+				rowGap: metrics.gapY(0.125),
+				columnGap: metrics.gapX(1 / 3),
+			},
+			inline: {
+				flexDirection: r.row,
+				alignItems: "center",
+				columnGap: metrics.gapX(1 / 3),
+			},
+			link: {
+				textDecoration: "none",
+				color: foreground,
+			},
+			small: {
+				fontSize: metadata.typography.body.fontSize * 0.875,
+			},
+			bold: {
+				fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600",
+			},
+			richParagraph: {
+				margin: 0,
+				...bodyText,
+			},
+			richListItemRow: {
 				flexDirection: "row",
+				columnGap: metrics.gapX(1 / 3),
+				alignItems: "flex-start",
+			},
+			richListItemMarker: {
+				...bodyText,
+				width: metadata.typography.body.fontSize,
+				textAlign: r.listMarkerTextAlign,
+			},
+			richListItemContent: {
+				...bodyText,
+				flex: 1,
+			},
+			splitRow: {
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				alignItems: "flex-start",
 				justifyContent: "space-between",
 				columnGap: metrics.gapX(2 / 3),
 			},
-			alignRight: { textAlign: "right", minWidth: 0, maxWidth: "100%", flexShrink: 1 },
-			section: { flexDirection: "column", rowGap: metrics.gapY(0.25) },
-			sectionHeading: { borderBottomWidth: 1, borderBottomColor: primary },
-			item: { rowGap: metrics.gapY(0.125) },
-			levelContainer: { width: "100%" },
-			levelItem: { borderColor: primary },
-			levelItemActive: { backgroundColor: primary },
+			alignEnd: {
+				...r.alignEnd,
+			},
+			section: {
+				flexDirection: "column",
+				rowGap: metrics.gapY(0.25),
+			},
+			sectionHeading: {
+				borderBottomWidth: 1,
+				borderBottomColor: primary,
+			},
+			item: {
+				rowGap: metrics.gapY(0.125),
+			},
+			levelContainer: {
+				width: "100%",
+			},
+			levelItem: {
+				borderColor: primary,
+			},
+			levelItemActive: {
+				backgroundColor: primary,
+			},
 			sidebarBackground: {
 				position: "absolute",
 				top: 0,
 				bottom: 0,
-				left: 0,
+				...r.anchorToStart(0),
 				width: `${metadata.layout.sidebarWidth}%`,
 				backgroundColor: primaryTint,
 			},
-			layout: { flexDirection: "row", minHeight: "100%" },
+			layout: {
+				flexDirection: r.row,
+				minHeight: "100%",
+			},
 			sidebarColumn: {
 				zIndex: 1,
 				backgroundColor: primaryTint,
@@ -223,8 +279,13 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				paddingTop: metrics.page.paddingVertical,
 				rowGap: metrics.sectionGap,
 			},
-			sidebarContent: { overflow: "hidden" },
-			mainColumn: { flex: 1, zIndex: 1 },
+			sidebarContent: {
+				overflow: "hidden",
+			},
+			mainColumn: {
+				flex: 1,
+				zIndex: 1,
+			},
 			mainContent: {
 				paddingHorizontal: metrics.page.paddingHorizontal,
 				paddingTop: metrics.page.paddingVertical,
@@ -245,18 +306,32 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				shadowWidth: picture.shadowWidth,
 				transform: `rotate(${picture.rotation}deg)`,
 			},
-			headerTitle: { alignItems: "center", textAlign: "center" },
-			headerIdentity: { alignItems: "center", textAlign: "center", rowGap: metrics.gapY(0.35) },
-			headerName: { fontSize: metadata.typography.heading.fontSize * 1.5, lineHeight: headerNameLineHeight },
+			headerTitle: {
+				alignItems: "center",
+				textAlign: "center",
+			},
+			headerIdentity: {
+				alignItems: "center",
+				textAlign: "center",
+				rowGap: metrics.gapY(0.35),
+			},
+			headerName: {
+				fontSize: metadata.typography.heading.fontSize * 1.5,
+				lineHeight: headerNameLineHeight,
+			},
 			contactList: {
 				width: "100%",
 				borderWidth: 1,
 				borderColor: primary,
-				borderRadius: picture.borderRadius / 4,
+				borderRadius: 0,
 				padding: metrics.gapX(0.75),
 				rowGap: metrics.gapY(0.125),
 			},
-			contactItem: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(1 / 6) },
+			contactItem: {
+				flexDirection: r.row,
+				alignItems: "center",
+				columnGap: metrics.gapX(1 / 6),
+			},
 		});
 
 		const accentFor = ({ colors }: TemplateStyleContext) => colors.primary;
@@ -284,5 +359,5 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				}),
 			} satisfies GlalieStyles,
 		};
-	}, [picture, metadata]);
+	}, [picture, metadata, rtl]);
 };

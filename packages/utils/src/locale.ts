@@ -69,3 +69,21 @@ export function isLocale(value: unknown): value is Locale {
 export function isCJKLocale(locale: Locale): boolean {
 	return locale === "zh-CN" || locale === "zh-TW" || locale === "ja-JP" || locale === "ko-KR";
 }
+
+const RTL_LANGUAGES = new Set([
+	"ar", // Arabic
+	"ckb", // Kurdish (Sorani)
+	"dv", // Dhivehi
+	"fa", // Persian
+	"he", // Hebrew
+	"ps", // Pashto
+	"sd", // Sindhi
+	"ug", // Uyghur
+	"ur", // Urdu
+	"yi", // Yiddish
+]);
+
+export function isRTL(locale: string): boolean {
+	const language = locale.split("-")[0]?.toLowerCase() ?? "";
+	return RTL_LANGUAGES.has(language);
+}

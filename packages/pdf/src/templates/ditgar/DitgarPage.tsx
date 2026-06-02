@@ -13,6 +13,7 @@ import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
 import { Heading, Icon, Link, Text } from "../shared/primitives";
+import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
 
@@ -36,6 +37,11 @@ type DitgarStyles = Omit<TemplateStyleSlots, "page"> & {
 type DitgarTemplate = {
 	colors: TemplateColorRoles;
 	styles: DitgarStyles;
+};
+
+type DitgarHeaderProps = {
+	styles: DitgarStyles;
+	colors: TemplateColorRoles;
 };
 
 const ditgarFeatures = {
@@ -101,7 +107,7 @@ export const DitgarPage = ({ page, pageIndex }: TemplatePageProps) => {
 	);
 };
 
-const Header = ({ styles, colors }: { styles: DitgarStyles; colors: TemplateColorRoles }) => {
+const Header = ({ styles, colors }: DitgarHeaderProps) => {
 	const { basics, picture } = useRender();
 	const hasPicture = hasTemplatePicture(picture);
 
@@ -166,9 +172,10 @@ const getPrimaryTint = (primaryColor: string, opacity: number): string => {
 };
 
 const useDitgarTemplate = (): DitgarTemplate => {
-	const { picture, metadata } = useRender();
+	const { picture, metadata, rtl } = useRender();
 
 	return useMemo(() => {
+		const r = createRtlStyleHelpers(rtl);
 		const foreground = rgbaStringToHex(metadata.design.colors.text);
 		const background = rgbaStringToHex(metadata.design.colors.background);
 		const primary = rgbaStringToHex(metadata.design.colors.primary);
@@ -188,16 +195,18 @@ const useDitgarTemplate = (): DitgarTemplate => {
 			fontWeight: metadata.typography.body.fontWeights[0] ?? "400",
 			lineHeight: metadata.typography.body.lineHeight,
 			color: foreground,
+			...r.text,
 		} satisfies Style;
 
 		const baseStyles = StyleSheet.create({
 			page: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				color: foreground,
 				backgroundColor: background,
 				fontFamily: metadata.typography.body.fontFamily,
 				fontSize: metadata.typography.body.fontSize,
 				lineHeight: metadata.typography.body.lineHeight,
+				direction: r.pageDirection,
 			},
 			text: bodyText,
 			heading: {
@@ -206,25 +215,59 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "600",
 				lineHeight: metadata.typography.heading.lineHeight,
 				color: foreground,
+				...r.text,
 			},
-			div: { rowGap: metrics.gapY(0.125), columnGap: metrics.gapX(1 / 3) },
-			inline: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(1 / 3) },
-			link: { textDecoration: "none", color: foreground },
-			small: { fontSize: metadata.typography.body.fontSize * 0.875 },
-			bold: { fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600" },
-			richParagraph: { margin: 0, ...bodyText },
-			richListItemRow: { flexDirection: "row", columnGap: metrics.gapX(1 / 3), alignItems: "flex-start" },
-			richListItemMarker: { width: metadata.typography.body.fontSize, textAlign: "right", ...bodyText },
-			richListItemContent: { flex: 1, ...bodyText },
-			splitRow: {
+			div: {
+				rowGap: metrics.gapY(0.125),
+				columnGap: metrics.gapX(1 / 3),
+			},
+			inline: {
+				flexDirection: r.row,
+				alignItems: "center",
+				columnGap: metrics.gapX(1 / 3),
+			},
+			link: {
+				textDecoration: "none",
+				color: foreground,
+			},
+			small: {
+				fontSize: metadata.typography.body.fontSize * 0.875,
+			},
+			bold: {
+				fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600",
+			},
+			richParagraph: {
+				margin: 0,
+				...bodyText,
+			},
+			richListItemRow: {
 				flexDirection: "row",
+				columnGap: metrics.gapX(1 / 3),
+				alignItems: "flex-start",
+			},
+			richListItemMarker: {
+				...bodyText,
+				width: metadata.typography.body.fontSize,
+				textAlign: r.listMarkerTextAlign,
+			},
+			richListItemContent: {
+				...bodyText,
+				flex: 1,
+			},
+			splitRow: {
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				alignItems: "flex-start",
 				justifyContent: "space-between",
 				columnGap: metrics.gapX(2 / 3),
 			},
-			alignRight: { textAlign: "right", minWidth: 0, maxWidth: "100%", flexShrink: 1 },
-			section: { flexDirection: "column", rowGap: metrics.gapY(0.25) },
+			alignEnd: {
+				...r.alignEnd,
+			},
+			section: {
+				flexDirection: "column",
+				rowGap: metrics.gapY(0.25),
+			},
 			sectionHeading: {
 				fontSize: metadata.typography.heading.fontSize * 0.9,
 				color: primary,
@@ -232,10 +275,18 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				borderBottomColor: primary,
 				paddingBottom: metrics.gapY(0.125),
 			},
-			item: { rowGap: metrics.gapY(0.125) },
-			levelContainer: { width: "70%" },
-			levelItem: { borderColor: primary },
-			levelItemActive: { backgroundColor: primary },
+			item: {
+				rowGap: metrics.gapY(0.125),
+			},
+			levelContainer: {
+				width: "70%",
+			},
+			levelItem: {
+				borderColor: primary,
+			},
+			levelItemActive: {
+				backgroundColor: primary,
+			},
 			sidebarColumn: {
 				flexShrink: 0,
 				backgroundColor: primaryTint,
@@ -245,7 +296,9 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				paddingTop: metrics.page.paddingVertical,
 				paddingBottom: metrics.page.paddingVertical,
 			},
-			mainColumn: { flex: 1 },
+			mainColumn: {
+				flex: 1,
+			},
 			mainContent: {
 				paddingHorizontal: metrics.page.paddingHorizontal,
 				paddingTop: metrics.page.paddingVertical,
@@ -277,8 +330,7 @@ const useDitgarTemplate = (): DitgarTemplate => {
 			},
 			headerTitle: {},
 			headerIdentity: {
-				textAlign: "left",
-				alignItems: "flex-start",
+				...r.headerIdentity,
 				rowGap: metrics.gapY(0.35),
 			},
 			headerName: {
@@ -286,10 +338,14 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				lineHeight: headerNameLineHeight,
 				color: background,
 			},
-			headerText: { color: background },
-			contactList: { rowGap: metrics.gapY(0.125) },
+			headerText: {
+				color: background,
+			},
+			contactList: {
+				rowGap: metrics.gapY(0.125),
+			},
 			contactItem: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				alignItems: "center",
 				columnGap: metrics.gapX(1 / 6),
 			},
@@ -314,8 +370,8 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				richParagraph: (context) => ({ ...baseStyles.richParagraph, color: foregroundFor(context) }),
 				richListItemMarker: (context) => ({ ...baseStyles.richListItemMarker, color: foregroundFor(context) }),
 				richListItemContent: (context) => ({ ...baseStyles.richListItemContent, color: foregroundFor(context) }),
-				alignRight: (context) => ({
-					...baseStyles.alignRight,
+				alignEnd: (context) => ({
+					...baseStyles.alignEnd,
 					...(context.placement === "sidebar" ? { textAlign: "left" } : {}),
 				}),
 				sectionHeading: (context) => ({
@@ -343,5 +399,5 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				}),
 			} satisfies DitgarStyles,
 		};
-	}, [picture, metadata]);
+	}, [picture, metadata, rtl]);
 };

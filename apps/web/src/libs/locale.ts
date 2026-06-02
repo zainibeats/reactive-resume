@@ -3,7 +3,9 @@ import type { Locale } from "@reactive-resume/utils/locale";
 import { i18n } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import Cookies from "js-cookie";
-import { localeSchema } from "@reactive-resume/utils/locale";
+import { isRTL, localeSchema } from "@reactive-resume/utils/locale";
+
+export { isRTL };
 
 const storageKey = "locale";
 const defaultLocale: Locale = "en-US";
@@ -74,24 +76,6 @@ export function isLocale(locale: string): locale is Locale {
 export const resolveLocale = (locale: string): Locale => {
 	return isLocale(locale) ? locale : defaultLocale;
 };
-
-const RTL_LANGUAGES = new Set([
-	"ar", // Arabic
-	"ckb", // Kurdish (Sorani)
-	"dv", // Dhivehi
-	"fa", // Persian
-	"he", // Hebrew
-	"ps", // Pashto
-	"sd", // Sindhi
-	"ug", // Uyghur
-	"ur", // Urdu
-	"yi", // Yiddish
-]);
-
-export function isRTL(locale: string): boolean {
-	const language = locale.split("-")[0].toLowerCase();
-	return RTL_LANGUAGES.has(language);
-}
 
 export const getLocale = () => {
 	const locale = Cookies.get(storageKey);

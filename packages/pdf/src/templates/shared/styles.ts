@@ -4,6 +4,10 @@ export type TemplatePlacement = "main" | "sidebar";
 
 export type StyleInput = Style | Style[] | null | undefined;
 
+type LinkStyleOptions = {
+	hideUnderline?: boolean;
+};
+
 export const composeStyles = (...styles: StyleInput[]): Style[] => {
 	return styles.flatMap((style) => {
 		if (!style) return [];
@@ -14,12 +18,18 @@ export const composeStyles = (...styles: StyleInput[]): Style[] => {
 };
 
 const linkUnderlineStyle = { textDecoration: "underline" } satisfies Style;
+const linkNoUnderlineStyle = { textDecoration: "none" } satisfies Style;
 
-export const composeLinkStyles = (...styles: StyleInput[]): Style[] => composeStyles(...styles, linkUnderlineStyle);
+const resolveLinkDecorationStyle = ({ hideUnderline = false }: LinkStyleOptions = {}) =>
+	hideUnderline ? linkNoUnderlineStyle : linkUnderlineStyle;
+
+export const composeLinkStyles = (options: LinkStyleOptions = {}, ...styles: StyleInput[]): Style[] =>
+	composeStyles(...styles, resolveLinkDecorationStyle(options));
 
 export const mergeStyles = (...styles: StyleInput[]): Style => Object.assign({}, ...composeStyles(...styles));
 
-export const mergeLinkStyles = (...styles: StyleInput[]): Style => mergeStyles(...styles, linkUnderlineStyle);
+export const mergeLinkStyles = (options: LinkStyleOptions = {}, ...styles: StyleInput[]): Style =>
+	mergeStyles(...styles, resolveLinkDecorationStyle(options));
 
 // Increased from 1.2 to 1.3 to prevent descenders (g, p, y, etc.) from being
 // clipped by the overflow:hidden applied in safeTextStyle on all Heading elements.

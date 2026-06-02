@@ -58,7 +58,7 @@ export type TemplateStyleSlots = {
 	richListItemMarker?: TemplateStyleSlot;
 	richListItemContent?: TemplateStyleSlot;
 	splitRow?: TemplateStyleSlot;
-	alignRight?: TemplateStyleSlot;
+	alignEnd?: TemplateStyleSlot;
 	inlineItemHeader?: TemplateStyleSlot;
 	inlineItemHeaderLeading?: TemplateStyleSlot;
 	inlineItemHeaderMiddle?: TemplateStyleSlot;
@@ -66,6 +66,8 @@ export type TemplateStyleSlots = {
 	sectionItemHeader?: TemplateStyleSlot;
 	section?: TemplateStyleSlot;
 	sectionHeading?: TemplateStyleSlot;
+	sectionHeadingContainer?: TemplateStyleSlot;
+	sectionHeadingIcon?: TemplateIconSlot;
 	sectionItems?: TemplateStyleSlot;
 	item?: TemplateStyleSlot;
 	levelContainer?: TemplateStyleSlot;

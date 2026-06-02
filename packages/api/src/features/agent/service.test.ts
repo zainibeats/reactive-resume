@@ -1194,8 +1194,42 @@ describe("agentService.threads.delete", () => {
 
 		await agentService.threads.delete({ id: "thread-own", userId: "user-own" });
 
+		expect(dbMock.delete).toHaveBeenCalledBefore(storageServiceMock.delete as never);
+		expect(updateSet).toHaveBeenCalledBefore(storageServiceMock.delete as never);
 		expect(storageServiceMock.delete).toHaveBeenCalledWith("uploads/user-own/agent/thread-own");
 		expect(dbMock.delete).toHaveBeenCalled();
+		expect(updateSet).toHaveBeenCalledWith(expect.objectContaining({ status: "deleted" }));
+	});
+
+	it("still completes when storage cleanup fails after the thread is soft-deleted", async () => {
+		const ownedThread = buildArchivedThread({
+			id: "thread-own",
+			userId: "user-own",
+			status: "active",
+			activeRunId: null,
+			activeStreamId: null,
+			archivedAt: null,
+		});
+
+		dbMock.select.mockImplementation(() => {
+			const limit = vi.fn(async () => [ownedThread]);
+			const where = vi.fn(() => ({ limit }));
+			const from = vi.fn(() => ({ where }));
+			return { from };
+		});
+
+		const deleteWhere = vi.fn(async () => undefined);
+		dbMock.delete.mockReturnValue({ where: deleteWhere });
+
+		const updateWhere = vi.fn(async () => undefined);
+		const updateSet = vi.fn(() => ({ where: updateWhere }));
+		dbMock.update.mockReturnValue({ set: updateSet });
+
+		storageServiceMock.delete.mockRejectedValue(new Error("storage unavailable"));
+
+		const { agentService } = await import("./service");
+
+		await expect(agentService.threads.delete({ id: "thread-own", userId: "user-own" })).resolves.toBeUndefined();
 		expect(updateSet).toHaveBeenCalledWith(expect.objectContaining({ status: "deleted" }));
 	});
 });

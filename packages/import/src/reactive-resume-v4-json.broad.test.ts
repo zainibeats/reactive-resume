@@ -227,6 +227,10 @@ describe("ReactiveResumeV4JSONImporter — broad section mapping", () => {
 		expect(result.picture.borderWidth).toBeGreaterThan(0);
 	});
 
+	it("maps v4 underline link preference to the v5 hide underline page setting", () => {
+		expect(result.metadata.page.hideLinkUnderline).toBe(true);
+	});
+
 	it("maps summary content", () => {
 		expect(result.summary.content).toBe("<p>About me</p>");
 		expect(result.summary.hidden).toBe(false);

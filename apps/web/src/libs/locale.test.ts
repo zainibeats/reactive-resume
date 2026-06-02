@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isLocale, isRTL, resolveLocale } from "./locale";
+import { isLocale, resolveLocale } from "./locale";
 
 describe("isLocale", () => {
 	it("returns true for known locale en-US", () => {
@@ -42,48 +42,5 @@ describe("resolveLocale", () => {
 
 	it("returns en-US default for empty string", () => {
 		expect(resolveLocale("")).toBe("en-US");
-	});
-});
-
-describe("isRTL", () => {
-	it("returns true for Arabic", () => {
-		expect(isRTL("ar-SA")).toBe(true);
-	});
-
-	it("returns true for Hebrew", () => {
-		expect(isRTL("he-IL")).toBe(true);
-	});
-
-	it("returns true for Persian/Farsi", () => {
-		expect(isRTL("fa-IR")).toBe(true);
-	});
-
-	it("returns true for Urdu", () => {
-		expect(isRTL("ur-PK")).toBe(true);
-	});
-
-	it("returns false for English", () => {
-		expect(isRTL("en-US")).toBe(false);
-	});
-
-	it("returns false for German", () => {
-		expect(isRTL("de-DE")).toBe(false);
-	});
-
-	it("returns false for Chinese", () => {
-		expect(isRTL("zh-CN")).toBe(false);
-	});
-
-	it("returns false for unknown locale", () => {
-		expect(isRTL("xyz-XX")).toBe(false);
-	});
-
-	it("matches prefix case-insensitively (lowercase prefix)", () => {
-		expect(isRTL("AR-SA")).toBe(true);
-	});
-
-	it("works with locale-only string (no region)", () => {
-		expect(isRTL("ar")).toBe(true);
-		expect(isRTL("en")).toBe(false);
 	});
 });

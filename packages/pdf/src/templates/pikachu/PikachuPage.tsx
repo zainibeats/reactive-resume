@@ -12,6 +12,7 @@ import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
 import { Heading, Icon, Link, Text } from "../shared/primitives";
+import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
 
@@ -35,6 +36,11 @@ type PikachuStyles = Omit<TemplateStyleSlots, "page"> & {
 type PikachuTemplate = {
 	colors: TemplateColorRoles;
 	styles: PikachuStyles;
+};
+
+type PikachuHeaderProps = {
+	styles: PikachuStyles;
+	colors: TemplateColorRoles;
 };
 
 const pikachuFeatures = {
@@ -95,7 +101,7 @@ export const PikachuPage = ({ page, pageIndex }: TemplatePageProps) => {
 	);
 };
 
-const Header = ({ styles, colors }: { styles: PikachuStyles; colors: TemplateColorRoles }) => {
+const Header = ({ styles, colors }: PikachuHeaderProps) => {
 	const { basics } = useRender();
 
 	return (
@@ -147,9 +153,10 @@ const Header = ({ styles, colors }: { styles: PikachuStyles; colors: TemplateCol
 };
 
 const usePikachuTemplate = (): PikachuTemplate => {
-	const { picture, metadata } = useRender();
+	const { picture, metadata, rtl } = useRender();
 
 	return useMemo(() => {
+		const r = createRtlStyleHelpers(rtl);
 		const foreground = rgbaStringToHex(metadata.design.colors.text);
 		const background = rgbaStringToHex(metadata.design.colors.background);
 		const primary = rgbaStringToHex(metadata.design.colors.primary);
@@ -162,6 +169,7 @@ const usePikachuTemplate = (): PikachuTemplate => {
 			fontWeight: metadata.typography.body.fontWeights[0] ?? "400",
 			lineHeight: metadata.typography.body.lineHeight,
 			color: foreground,
+			...r.text,
 		} satisfies Style;
 
 		const baseStyles = StyleSheet.create({
@@ -173,6 +181,7 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				fontFamily: metadata.typography.body.fontFamily,
 				fontSize: metadata.typography.body.fontSize,
 				lineHeight: metadata.typography.body.lineHeight,
+				direction: r.pageDirection,
 			},
 			text: bodyText,
 			heading: {
@@ -181,43 +190,90 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "600",
 				lineHeight: metadata.typography.heading.lineHeight,
 				color: foreground,
+				...r.text,
 			},
-			div: { rowGap: metrics.gapY(0.125), columnGap: metrics.gapX(1 / 3) },
-			inline: { flexDirection: "row", alignItems: "center", columnGap: metrics.gapX(1 / 3) },
-			link: { textDecoration: "none", color: foreground },
-			small: { fontSize: metadata.typography.body.fontSize * 0.875 },
-			bold: { fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600" },
-			richParagraph: { margin: 0, ...bodyText },
-			richListItemRow: { flexDirection: "row", columnGap: metrics.gapX(1 / 3), alignItems: "flex-start" },
-			richListItemMarker: { width: metadata.typography.body.fontSize, textAlign: "right", ...bodyText },
-			richListItemContent: { flex: 1, ...bodyText },
-			splitRow: {
+			div: {
+				rowGap: metrics.gapY(0.125),
+				columnGap: metrics.gapX(1 / 3),
+			},
+			inline: {
+				flexDirection: r.row,
+				alignItems: "center",
+				columnGap: metrics.gapX(1 / 3),
+			},
+			link: {
+				textDecoration: "none",
+				color: foreground,
+			},
+			small: {
+				fontSize: metadata.typography.body.fontSize * 0.875,
+			},
+			bold: {
+				fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600",
+			},
+			richParagraph: {
+				margin: 0,
+				...bodyText,
+			},
+			richListItemRow: {
 				flexDirection: "row",
+				columnGap: metrics.gapX(1 / 3),
+				alignItems: "flex-start",
+			},
+			richListItemMarker: {
+				...bodyText,
+				width: metadata.typography.body.fontSize,
+				textAlign: r.listMarkerTextAlign,
+			},
+			richListItemContent: {
+				...bodyText,
+				flex: 1,
+			},
+			splitRow: {
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				alignItems: "flex-start",
 				justifyContent: "space-between",
 				columnGap: metrics.gapX(2 / 3),
 			},
-			alignRight: { textAlign: "right", minWidth: 0, maxWidth: "100%", flexShrink: 1 },
-			section: { flexDirection: "column", rowGap: metrics.gapY(0.25) },
-			sectionHeading: { borderBottomWidth: 1, borderBottomColor: primary },
-			item: { rowGap: metrics.gapY(0.125) },
-			levelContainer: { width: "100%" },
-			levelItem: { borderColor: primary },
-			levelItemActive: { backgroundColor: primary },
+			alignEnd: {
+				...r.alignEnd,
+			},
+			section: {
+				flexDirection: "column",
+				rowGap: metrics.gapY(0.25),
+			},
+			sectionHeading: {
+				borderBottomWidth: 1,
+				borderBottomColor: primary,
+			},
+			item: {
+				rowGap: metrics.gapY(0.125),
+			},
+			levelContainer: {
+				width: "100%",
+			},
+			levelItem: {
+				borderColor: primary,
+			},
+			levelItemActive: {
+				backgroundColor: primary,
+			},
 			layout: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				columnGap: metrics.columnGap,
 			},
 			sidebarColumn: {
 				flexShrink: 0,
 			},
-			sidebarContent: { overflow: "hidden" },
+			sidebarContent: {
+				overflow: "hidden",
+			},
 			mainColumn: {
 				flex: 1,
 			},
 			headerRow: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				alignItems: "center",
 				columnGap: metrics.gapX(1),
 			},
@@ -237,8 +293,7 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				paddingBottom: metrics.gapY(0.5),
 			},
 			headerIdentity: {
-				textAlign: "left",
-				alignItems: "flex-start",
+				...r.headerIdentity,
 				rowGap: metrics.gapY(0.35),
 			},
 			headerName: {
@@ -246,15 +301,17 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				fontSize: metadata.typography.heading.fontSize * 1.5,
 				lineHeight: headerNameLineHeight,
 			},
-			headerText: { color: background },
+			headerText: {
+				color: background,
+			},
 			contactList: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				flexWrap: "wrap",
 				rowGap: metrics.gapY(0.125),
 				columnGap: metrics.gapX(0.75),
 			},
 			contactItem: {
-				flexDirection: "row",
+				flexDirection: r.row,
 				alignItems: "center",
 				columnGap: metrics.gapX(1 / 6),
 			},
@@ -297,5 +354,5 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				}),
 			} satisfies PikachuStyles,
 		};
-	}, [picture, metadata]);
+	}, [picture, metadata, rtl]);
 };

@@ -2,8 +2,15 @@ import type { ColorResult } from "@uiw/color-convert";
 import { hsvaToHex, rgbaStringToHsva } from "@uiw/color-convert";
 
 export function rgbaStringToHex(rgba: string): string {
+	const color = parseColorString(rgba);
+	if (color) return `#${toHexComponent(color.r)}${toHexComponent(color.g)}${toHexComponent(color.b)}`;
+
 	const hsva = rgbaStringToHsva(rgba);
 	return hsvaToHex(hsva);
+}
+
+function toHexComponent(value: number): string {
+	return Math.max(0, Math.min(255, value)).toString(16).padStart(2, "0");
 }
 
 export function parseColorString(value: string): ColorResult["rgba"] | null {
@@ -46,4 +53,17 @@ export function parseColorString(value: string): ColorResult["rgba"] | null {
 	}
 
 	return null;
+}
+
+/** Returns true if the given color string is perceptually dark (luminance < 128). */
+export function isDarkColor(colorString: string): boolean {
+	const color = parseColorString(colorString);
+	if (!color) return false;
+	const alpha = Math.max(0, Math.min(1, color.a ?? 1));
+	const r = color.r * alpha + 255 * (1 - alpha);
+	const g = color.g * alpha + 255 * (1 - alpha);
+	const b = color.b * alpha + 255 * (1 - alpha);
+	// Relative luminance (ITU-R BT.601)
+	const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+	return luminance < 128;
 }
