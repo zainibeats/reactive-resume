@@ -5,6 +5,7 @@ import type { Resume } from "./draft";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "@lingui/core";
+import { ORPCError } from "@orpc/client";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { useBuilderResumeUpdateSubscription, useResumeStore, useResumeUpdateSubscription } from "./draft";
 
@@ -32,6 +33,14 @@ const toastMocks = vi.hoisted(() => ({
 
 vi.mock("@orpc/client", () => ({
 	consumeEventIterator: consumeEventIteratorMock,
+	ORPCError: class ORPCError extends Error {
+		code: string;
+
+		constructor(code: string) {
+			super(code);
+			this.code = code;
+		}
+	},
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -248,6 +257,30 @@ describe("builder resume autosave", () => {
 			expect.objectContaining({ duration: Number.POSITIVE_INFINITY }),
 		);
 		expect(orpcMocks.patchResume).not.toHaveBeenCalled();
+	});
+
+	it("does not keep retrying when the resume update returns NOT_FOUND", async () => {
+		const initial = makeResume("resume-not-found");
+		orpcMocks.updateResume.mockRejectedValue(new ORPCError("NOT_FOUND"));
+		useResumeStore.getState().initialize(initial);
+
+		useResumeStore.getState().updateResumeData((draft) => {
+			draft.basics.name = "Unsaved Name";
+		});
+
+		vi.advanceTimersByTime(500);
+		await flushMicrotasks();
+
+		expect(toastMocks.error).toHaveBeenCalledWith(
+			"This resume could not be saved because it is no longer available.",
+			expect.objectContaining({ duration: Number.POSITIVE_INFINITY }),
+		);
+
+		orpcMocks.updateResume.mockClear();
+		vi.advanceTimersByTime(1000);
+		await flushMicrotasks();
+
+		expect(orpcMocks.updateResume).not.toHaveBeenCalled();
 	});
 });
 

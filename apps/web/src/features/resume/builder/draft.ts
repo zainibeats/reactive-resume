@@ -2,7 +2,7 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import type { WritableDraft } from "immer";
 import { t } from "@lingui/core/macro";
-import { consumeEventIterator } from "@orpc/client";
+import { consumeEventIterator, ORPCError } from "@orpc/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { debounce, isEqual } from "es-toolkit";
@@ -126,6 +126,16 @@ async function flushResumeSave(id: string) {
 		}
 	} catch (error: unknown) {
 		if (error instanceof DOMException && error.name === "AbortError") return;
+
+		if (error instanceof ORPCError && error.code === "NOT_FOUND") {
+			runtime.pendingResume = undefined;
+			runtime.hasPendingLocalChanges = false;
+			runtime.syncErrorToastId = toast.error(t`This resume could not be saved because it is no longer available.`, {
+				id: runtime.syncErrorToastId,
+				duration: Number.POSITIVE_INFINITY,
+			});
+			return;
+		}
 
 		runtime.pendingResume ??= submitted;
 		runtime.hasPendingLocalChanges = true;
