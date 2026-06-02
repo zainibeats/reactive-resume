@@ -184,7 +184,7 @@ const ExperienceForm = withForm({
 								}
 							/>
 							<FormLabel className="mt-0!">
-								<Trans>Bold company</Trans>
+								<Trans>Bold</Trans>
 							</FormLabel>
 						</FormItem>
 					)}

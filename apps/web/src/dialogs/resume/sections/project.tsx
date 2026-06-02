@@ -171,7 +171,7 @@ const ProjectForm = withForm({
 								}
 							/>
 							<FormLabel className="mt-0!">
-								<Trans>Bold name</Trans>
+								<Trans>Bold</Trans>
 							</FormLabel>
 						</FormItem>
 					)}

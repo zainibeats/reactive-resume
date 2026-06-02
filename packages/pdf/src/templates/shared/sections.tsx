@@ -361,11 +361,17 @@ const MainEntryText = ({ bold, children }: { bold: boolean; children: ReactNode 
 
 const ItemTitle = ({ bold = true, children, website }: ItemTitleProps) => {
 	const inlineWebsiteUrl = getInlineItemWebsiteUrl(website);
-	const title = <MainEntryText bold={bold}>{children}</MainEntryText>;
+	const boldStyle = useTemplateStyle("bold");
 
-	if (!inlineWebsiteUrl) return title;
+	if (!inlineWebsiteUrl) return <MainEntryText bold={bold}>{children}</MainEntryText>;
 
-	return <Link src={inlineWebsiteUrl}>{title}</Link>;
+	if (!bold) return <Link src={inlineWebsiteUrl}>{children}</Link>;
+
+	return (
+		<Link src={inlineWebsiteUrl} style={composeStyles(boldStyle, { fontWeight: 700 })}>
+			{children}
+		</Link>
+	);
 };
 
 const ProfileTitle = ({ item }: { item: ProfileItem }) => {

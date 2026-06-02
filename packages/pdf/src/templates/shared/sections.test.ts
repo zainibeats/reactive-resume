@@ -14,6 +14,15 @@ describe("ExperienceSection", () => {
 	});
 });
 
+describe("ItemTitle", () => {
+	it("does not make inline title links bold unless mainEntryBold is enabled", () => {
+		const itemTitleBlock = source.match(/const ItemTitle = \([\s\S]*?\n};/)?.[0] ?? "";
+
+		expect(itemTitleBlock).toContain("if (!bold) return <Link src={inlineWebsiteUrl}>{children}</Link>;");
+		expect(itemTitleBlock).not.toContain("{title}");
+	});
+});
+
 describe("SectionShell", () => {
 	it("keeps section and heading style rules when section heading icons are hidden", () => {
 		expect(source).toContain("<View style={composeStyles(sectionStyle, sectionRuleStyle)}>");

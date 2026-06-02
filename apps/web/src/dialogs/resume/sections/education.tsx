@@ -175,7 +175,7 @@ const EducationForm = withForm({
 								}
 							/>
 							<FormLabel className="mt-0!">
-								<Trans>Bold school</Trans>
+								<Trans>Bold</Trans>
 							</FormLabel>
 						</FormItem>
 					)}
