@@ -164,6 +164,43 @@ describe("builder resume autosave", () => {
 		expect(orpcMocks.patchResume).not.toHaveBeenCalled();
 	});
 
+	it("can undo and redo local document edits", async () => {
+		const initial = makeResume("resume-history");
+		const edited = withBasicsName(initial, "Edited Name");
+		orpcMocks.updateResume.mockResolvedValue(edited);
+		useResumeStore.getState().initialize(initial);
+
+		useResumeStore.getState().updateResumeData((draft) => {
+			draft.basics.name = "Edited Name";
+		});
+
+		expect(useResumeStore.getState().undoStack).toHaveLength(1);
+		expect(useResumeStore.getState().redoStack).toHaveLength(0);
+
+		useResumeStore.getState().undoResumeData();
+
+		expect(useResumeStore.getState().resume?.data.basics.name).toBe(initial.data.basics.name);
+		expect(useResumeStore.getState().undoStack).toHaveLength(0);
+		expect(useResumeStore.getState().redoStack).toHaveLength(1);
+
+		useResumeStore.getState().redoResumeData();
+
+		expect(useResumeStore.getState().resume?.data.basics.name).toBe("Edited Name");
+		expect(useResumeStore.getState().undoStack).toHaveLength(1);
+		expect(useResumeStore.getState().redoStack).toHaveLength(0);
+	});
+
+	it("does not add history entries for no-op document edits", () => {
+		const initial = makeResume("resume-noop");
+		useResumeStore.getState().initialize(initial);
+
+		useResumeStore.getState().updateResumeData(() => {});
+
+		expect(useResumeStore.getState().undoStack).toHaveLength(0);
+		expect(useResumeStore.getState().redoStack).toHaveLength(0);
+		expect(orpcMocks.updateResume).not.toHaveBeenCalled();
+	});
+
 	it("saves the latest pending snapshot after an in-flight save resolves", async () => {
 		const initial = makeResume("resume-in-flight");
 		const first = withBasicsName(initial, "First Name");
@@ -346,6 +383,11 @@ describe("resume update stream subscription", () => {
 
 		expect(queryClientMock.setQueryData).toHaveBeenCalledWith(["resume", "getById", initial.id], remote);
 		expect(useResumeStore.getState().resume?.data.basics.name).toBe("Remote Name");
+		expect(useResumeStore.getState().undoStack).toHaveLength(1);
+
+		useResumeStore.getState().undoResumeData();
+
+		expect(useResumeStore.getState().resume?.data.basics.name).toBe(initial.data.basics.name);
 	});
 
 	it("does not overwrite pending local builder edits when a remote update arrives", async () => {

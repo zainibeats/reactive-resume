@@ -4,7 +4,6 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import {
 	BrainIcon,
-	ChatCircleDotsIcon,
 	GearSixIcon,
 	KeyIcon,
 	ReadCvLogoIcon,
@@ -46,11 +45,6 @@ const appSidebarItems = [
 		icon: <ReadCvLogoIcon />,
 		label: msg`Resumes`,
 		href: "/dashboard/resumes",
-	},
-	{
-		icon: <ChatCircleDotsIcon />,
-		label: msg`Agents`,
-		href: "/agent",
 	},
 ] as const satisfies SidebarItem[];
 

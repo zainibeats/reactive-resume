@@ -1,7 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
-	ChatCircleDotsIcon,
 	GearIcon,
 	HouseSimpleIcon,
 	KeyIcon,
@@ -43,16 +42,6 @@ export function NavigationCommandGroup() {
 				>
 					<ReadCvLogoIcon />
 					<Trans>Resumes</Trans>
-				</CommandItem>
-
-				<CommandItem
-					disabled={!session}
-					keywords={[t`Agent`, t`Artificial Intelligence`]}
-					value="navigation.agent"
-					onSelect={() => onNavigate("/agent")}
-				>
-					<ChatCircleDotsIcon />
-					<Trans>Agent</Trans>
 				</CommandItem>
 
 				<CommandItem

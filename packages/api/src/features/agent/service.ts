@@ -1,5 +1,4 @@
 import type { JsonPatchOperation } from "@reactive-resume/resume/patch";
-import type { Locale } from "@reactive-resume/utils/locale";
 import type { FilePart, ImagePart, ModelMessage, TextPart, UIMessage } from "ai";
 import type { getModel } from "../ai/service";
 import { ORPCError } from "@orpc/client";
@@ -8,14 +7,12 @@ import { convertToModelMessages, stepCountIs, ToolLoopAgent } from "ai";
 import { and, asc, count, desc, eq, gte, inArray, isNull, max, sql } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
-import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
 import { assertAgentEnvironment } from "../ai/credentials";
 import { getAgentModel } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { resumeService } from "../resume/service";
 import { getStorageService, inferContentType } from "../storage/service";
-import { buildAgentDraftResumeName, buildUniqueAgentDraftSlug } from "./resume";
 import { claimActiveAgentRun, clearActiveAgentRunIfCurrent } from "./runs";
 import { agentStreamLifecycle } from "./streams";
 import { buildAgentInstructions, buildAgentTools } from "./tools";
@@ -48,9 +45,8 @@ type AgentAttachmentRecord = typeof schema.agentAttachment.$inferSelect;
 
 type CreateThreadInput = {
 	userId: string;
-	locale: Locale;
 	aiProviderId?: string;
-	sourceResumeId?: string;
+	targetResumeId: string;
 };
 
 type SendMessageInput = {
@@ -454,45 +450,9 @@ function attachModelPartsToLatestUserMessage(
 	);
 }
 
-async function getExistingResumeSlugs(userId: string) {
-	const rows = await db
-		.select({ slug: schema.resume.slug })
-		.from(schema.resume)
-		.where(eq(schema.resume.userId, userId));
-	return new Set(rows.map((row) => row.slug));
-}
-
 async function createWorkingResume(input: CreateThreadInput) {
-	if (input.sourceResumeId) {
-		const source = await resumeService.getById({ id: input.sourceResumeId, userId: input.userId });
-		const existingSlugs = await getExistingResumeSlugs(input.userId);
-		const name = buildAgentDraftResumeName(source.name);
-		const slug = buildUniqueAgentDraftSlug(source.name, existingSlugs);
-
-		const id = await resumeService.create({
-			userId: input.userId,
-			name,
-			slug,
-			tags: [...source.tags],
-			locale: input.locale,
-			data: cloneResumeData(source.data),
-		});
-
-		return { id, source, title: name };
-	}
-
-	const existingSlugs = await getExistingResumeSlugs(input.userId);
-	const name = "AI Draft";
-	const id = await resumeService.create({
-		userId: input.userId,
-		name,
-		slug: buildUniqueAgentDraftSlug(name, existingSlugs),
-		tags: [],
-		locale: input.locale,
-		data: cloneResumeData(defaultResumeData),
-	});
-
-	return { id, source: null, title: name };
+	const resume = await resumeService.getById({ id: input.targetResumeId, userId: input.userId });
+	return { id: resume.id, title: resume.name };
 }
 
 async function getThread(input: { id: string; userId: string }) {
@@ -867,7 +827,7 @@ export const agentService = {
 				.values({
 					userId: input.userId,
 					aiProviderId: selectedProvider.id,
-					sourceResumeId: input.sourceResumeId ?? null,
+					sourceResumeId: null,
 					workingResumeId: working.id,
 					title: "New thread",
 				})

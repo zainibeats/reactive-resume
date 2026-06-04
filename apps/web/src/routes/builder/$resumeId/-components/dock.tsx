@@ -4,6 +4,8 @@ import { t } from "@lingui/core/macro";
 import {
 	AlignCenterHorizontalIcon,
 	AlignTopIcon,
+	ArrowClockwiseIcon,
+	ArrowCounterClockwiseIcon,
 	ChatCircleDotsIcon,
 	CircleNotchIcon,
 	CubeFocusIcon,
@@ -14,7 +16,6 @@ import {
 	MagnifyingGlassMinusIcon,
 	MagnifyingGlassPlusIcon,
 } from "@phosphor-icons/react";
-import { useNavigate } from "@tanstack/react-router";
 import { m } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
 import { useControls } from "react-zoom-pan-pinch";
@@ -25,19 +26,30 @@ import { Button } from "@reactive-resume/ui/components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@reactive-resume/ui/components/tooltip";
 import { downloadWithAnchor, generateFilename } from "@reactive-resume/utils/file";
 import { cn } from "@reactive-resume/utils/style";
-import { useCurrentResume } from "@/features/resume/builder/draft";
+import {
+	useCanRedoResumeData,
+	useCanUndoResumeData,
+	useCurrentResume,
+	useRedoResumeData,
+	useUndoResumeData,
+} from "@/features/resume/builder/draft";
 import { createResumePdfBlob } from "@/features/resume/export/pdf-document";
 import { authClient } from "@/libs/auth/client";
 
 type BuilderDockProps = {
 	pageLayout: BuilderPreviewPageLayout;
 	onTogglePageLayout: () => void;
+	isAssistantOpen: boolean;
+	onToggleAssistant: () => void;
 };
 
-export function BuilderDock({ pageLayout, onTogglePageLayout }: BuilderDockProps) {
+export function BuilderDock({ pageLayout, onTogglePageLayout, isAssistantOpen, onToggleAssistant }: BuilderDockProps) {
 	const { data: session } = authClient.useSession();
 	const resume = useCurrentResume();
-	const navigate = useNavigate();
+	const canUndo = useCanUndoResumeData();
+	const canRedo = useCanRedoResumeData();
+	const undoResumeData = useUndoResumeData();
+	const redoResumeData = useRedoResumeData();
 
 	const [_, copyToClipboard] = useCopyToClipboard();
 	const { zoomIn, zoomOut, centerView } = useControls();
@@ -103,6 +115,14 @@ export function BuilderDock({ pageLayout, onTogglePageLayout }: BuilderDockProps
 				transition={{ duration: 0.2, ease: "easeOut" }}
 				className="flex items-center rounded-r-full rounded-l-full bg-popover px-2 shadow-xl will-change-[transform,opacity]"
 			>
+				<DockIcon
+					icon={ArrowCounterClockwiseIcon}
+					title={t`Undo`}
+					disabled={!canUndo}
+					onClick={() => undoResumeData()}
+				/>
+				<DockIcon icon={ArrowClockwiseIcon} title={t`Redo`} disabled={!canRedo} onClick={() => redoResumeData()} />
+				<div className="mx-1 h-8 w-px bg-border" />
 				<DockIcon icon={MagnifyingGlassPlusIcon} title={t`Zoom in`} onClick={() => zoomIn(0.1)} />
 				<DockIcon icon={MagnifyingGlassMinusIcon} title={t`Zoom out`} onClick={() => zoomOut(0.1)} />
 				<DockIcon icon={CubeFocusIcon} title={t`Center view`} onClick={() => centerView()} />
@@ -113,11 +133,9 @@ export function BuilderDock({ pageLayout, onTogglePageLayout }: BuilderDockProps
 				/>
 				<DockIcon
 					icon={ChatCircleDotsIcon}
-					title={t`Open AI agent`}
-					onClick={() => {
-						if (!resume) return;
-						void navigate({ to: "/agent/new", search: { resumeId: resume.id } });
-					}}
+					title={t`Open assistant`}
+					active={isAssistantOpen}
+					onClick={onToggleAssistant}
 				/>
 				<div className="mx-1 h-8 w-px bg-border" />
 				<DockIcon icon={LinkSimpleIcon} title={t`Copy URL`} onClick={() => onCopyUrl()} />

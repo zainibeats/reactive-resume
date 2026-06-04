@@ -110,10 +110,6 @@ vi.mock("../storage/service", () => ({
 	getStorageService: vi.fn(() => storageServiceMock),
 	inferContentType: vi.fn(),
 }));
-vi.mock("./resume", () => ({
-	buildAgentDraftResumeName: vi.fn(),
-	buildUniqueAgentDraftSlug: vi.fn(),
-}));
 vi.mock("./runs", () => ({
 	claimActiveAgentRun: claimActiveAgentRunMock,
 	clearActiveAgentRunIfCurrent: clearActiveAgentRunIfCurrentMock,
@@ -125,7 +121,6 @@ vi.mock("./tools", () => ({
 	buildAgentInstructions: vi.fn(),
 	buildAgentTools: vi.fn(() => ({})),
 }));
-vi.mock("@reactive-resume/schema/resume/default", () => ({ defaultResumeData: {} }));
 vi.mock("@reactive-resume/utils/string", () => ({ generateId: () => "test-id" }));
 vi.mock("@orpc/server", () => ({ streamToEventIterator: vi.fn() }));
 
@@ -213,6 +208,76 @@ function selectWhereOrderByLimitResult(rows: unknown[]) {
 	const from = vi.fn(() => ({ where }));
 	return { from };
 }
+
+describe("agentService.threads.create", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("targets an existing resume directly when targetResumeId is provided", async () => {
+		const insertedValues: unknown[] = [];
+		const createdAt = new Date("2026-06-04T00:00:00.000Z");
+		const updatedAt = new Date("2026-06-04T00:00:00.000Z");
+
+		aiProvidersServiceMock.getDefaultRunnable.mockResolvedValue({
+			id: "provider-1",
+			label: "Provider",
+			provider: "openai",
+			model: "gpt-5",
+			apiKey: "secret",
+			baseURL: null,
+		});
+		resumeServiceMock.getById.mockResolvedValue({
+			id: "resume-1",
+			name: "Active Resume",
+			data: {},
+			updatedAt,
+		});
+		dbMock.insert.mockReturnValue({
+			values: vi.fn((value) => {
+				insertedValues.push(value);
+				return {
+					returning: vi.fn(async () => [
+						{
+							id: "thread-1",
+							userId: "user-1",
+							aiProviderId: "provider-1",
+							sourceResumeId: null,
+							workingResumeId: "resume-1",
+							title: "New thread",
+							status: "active",
+							activeRunId: null,
+							activeStreamId: null,
+							activeRunStartedAt: null,
+							lastMessageAt: updatedAt,
+							archivedAt: null,
+							deletedAt: null,
+							createdAt,
+							updatedAt,
+						},
+					]),
+				};
+			}),
+		});
+
+		const { agentService } = await import("./service");
+
+		const result = await agentService.threads.create({
+			userId: "user-1",
+			targetResumeId: "resume-1",
+		});
+
+		expect(resumeServiceMock.getById).toHaveBeenCalledWith({ id: "resume-1", userId: "user-1" });
+		expect(resumeServiceMock.create).toBeUndefined();
+		expect(insertedValues).toEqual([
+			expect.objectContaining({
+				sourceResumeId: null,
+				workingResumeId: "resume-1",
+			}),
+		]);
+		expect(result).toEqual(expect.objectContaining({ id: "thread-1", workingResumeId: "resume-1" }));
+	});
+});
 
 describe("agentService.threads.get", () => {
 	beforeEach(() => {

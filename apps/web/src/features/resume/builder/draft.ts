@@ -28,6 +28,8 @@ type ResumeStoreState = {
 	resume: Resume | null;
 	resumeId?: string;
 	isReady: boolean;
+	undoStack: ResumeData[];
+	redoStack: ResumeData[];
 };
 
 type ResumeStoreActions = {
@@ -38,6 +40,8 @@ type ResumeStoreActions = {
 	updateResumeData: (fn: (draft: WritableDraft<ResumeData>) => void) => void;
 	patchResume: (fn: (draft: WritableDraft<Resume>) => void) => void;
 	mergeResumeMetadata: (resume: Resume) => void;
+	undoResumeData: () => void;
+	redoResumeData: () => void;
 };
 
 type ResumeStore = ResumeStoreState & ResumeStoreActions;
@@ -60,6 +64,7 @@ type ResumeUpdateSubscriptionOptions = {
 };
 
 const SAVE_DEBOUNCE_MS = 500;
+const MAX_RESUME_HISTORY = 100;
 const runtimes = new Map<string, Runtime>();
 
 let lockedToastId: string | number | undefined;
@@ -74,6 +79,11 @@ function cloneResumeData(data: ResumeData): ResumeData {
 
 function cloneResume(resume: Resume): Resume {
 	return { ...resume, data: cloneResumeData(resume.data) };
+}
+
+function pushResumeHistory(stack: ResumeData[], data: ResumeData) {
+	stack.push(cloneResumeData(data));
+	if (stack.length > MAX_RESUME_HISTORY) stack.shift();
 }
 
 function createResumeUpdateEventIterator(resumeId: string) {
@@ -225,6 +235,8 @@ export const useResumeStore = create<ResumeStore>()(
 		resume: null,
 		resumeId: undefined,
 		isReady: false,
+		undoStack: [],
+		redoStack: [],
 
 		initialize: (resume) => {
 			if (resume) setRuntimeBaseline(resume);
@@ -233,6 +245,8 @@ export const useResumeStore = create<ResumeStore>()(
 				state.resume = resume;
 				state.resumeId = resume?.id;
 				state.isReady = resume !== null;
+				state.undoStack = [];
+				state.redoStack = [];
 			});
 		},
 
@@ -241,6 +255,8 @@ export const useResumeStore = create<ResumeStore>()(
 				state.resume = null;
 				state.resumeId = undefined;
 				state.isReady = false;
+				state.undoStack = [];
+				state.redoStack = [];
 			});
 		},
 
@@ -249,13 +265,25 @@ export const useResumeStore = create<ResumeStore>()(
 				state.resume = resume;
 				state.resumeId = resume.id;
 				state.isReady = true;
+				state.undoStack = [];
+				state.redoStack = [];
 			});
 		},
 
 		replaceResumeFromServer: (resume) => {
 			setRuntimeBaseline(resume);
+			const currentResume = get().resume;
+			const historyEntry =
+				currentResume?.id === resume.id && !isEqual(currentResume.data, resume.data)
+					? cloneResumeData(currentResume.data)
+					: null;
 
 			set((state) => {
+				if (historyEntry) {
+					pushResumeHistory(state.undoStack, historyEntry);
+					state.redoStack = [];
+				}
+
 				state.resume = resume;
 				state.resumeId = resume.id;
 				state.isReady = true;
@@ -294,13 +322,84 @@ export const useResumeStore = create<ResumeStore>()(
 				return;
 			}
 
+			const before = cloneResumeData(currentResume.data);
+			let didChange = false;
+
 			set((state) => {
 				if (!state.resume) return;
 				fn(state.resume.data as WritableDraft<ResumeData>);
+
+				if (!isEqual(before, state.resume.data)) {
+					pushResumeHistory(state.undoStack, before);
+					state.redoStack = [];
+					didChange = true;
+				}
 			});
 
-			getRuntime(currentResume.id).hasPendingLocalChanges = true;
-			syncCurrentResume(currentResume.id);
+			if (didChange) {
+				getRuntime(currentResume.id).hasPendingLocalChanges = true;
+				syncCurrentResume(currentResume.id);
+			}
+		},
+
+		undoResumeData: () => {
+			const currentResume = get().resume;
+			if (!currentResume) return;
+
+			if (currentResume.isLocked) {
+				lockedToastId = toast.error(t`This resume is locked and cannot be updated.`, {
+					id: lockedToastId,
+				});
+				return;
+			}
+
+			const currentData = cloneResumeData(currentResume.data);
+			let didChange = false;
+
+			set((state) => {
+				if (!state.resume || state.undoStack.length === 0) return;
+				const previous = state.undoStack.pop();
+				if (!previous) return;
+
+				pushResumeHistory(state.redoStack, currentData);
+				state.resume.data = previous;
+				didChange = true;
+			});
+
+			if (didChange) {
+				getRuntime(currentResume.id).hasPendingLocalChanges = true;
+				syncCurrentResume(currentResume.id);
+			}
+		},
+
+		redoResumeData: () => {
+			const currentResume = get().resume;
+			if (!currentResume) return;
+
+			if (currentResume.isLocked) {
+				lockedToastId = toast.error(t`This resume is locked and cannot be updated.`, {
+					id: lockedToastId,
+				});
+				return;
+			}
+
+			const currentData = cloneResumeData(currentResume.data);
+			let didChange = false;
+
+			set((state) => {
+				if (!state.resume || state.redoStack.length === 0) return;
+				const next = state.redoStack.pop();
+				if (!next) return;
+
+				pushResumeHistory(state.undoStack, currentData);
+				state.resume.data = next;
+				didChange = true;
+			});
+
+			if (didChange) {
+				getRuntime(currentResume.id).hasPendingLocalChanges = true;
+				syncCurrentResume(currentResume.id);
+			}
 		},
 	})),
 );
@@ -319,6 +418,22 @@ export function useMergeResumeMetadata() {
 
 export function usePatchResume() {
 	return useResumeStore((state) => state.patchResume);
+}
+
+export function useCanUndoResumeData() {
+	return useResumeStore((state) => state.undoStack.length > 0);
+}
+
+export function useCanRedoResumeData() {
+	return useResumeStore((state) => state.redoStack.length > 0);
+}
+
+export function useUndoResumeData() {
+	return useResumeStore((state) => state.undoResumeData);
+}
+
+export function useRedoResumeData() {
+	return useResumeStore((state) => state.redoResumeData);
 }
 
 function useBuilderResumeSelector<T>(selector: (resume: Resume) => T): T | undefined {

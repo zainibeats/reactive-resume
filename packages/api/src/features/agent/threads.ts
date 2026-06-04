@@ -29,14 +29,18 @@ export const threadsRouter = {
 			operationId: "createAgentThread",
 			summary: "Create agent thread",
 		})
-		.input(z.object({ aiProviderId: z.string().optional(), sourceResumeId: z.string().optional() }))
+		.input(
+			z.object({
+				aiProviderId: z.string().optional(),
+				targetResumeId: z.string(),
+			}),
+		)
 		.handler(async ({ context, input }) => {
 			try {
 				return await agentService.threads.create({
 					userId: context.user.id,
-					locale: context.locale,
 					...(input.aiProviderId ? { aiProviderId: input.aiProviderId } : {}),
-					...(input.sourceResumeId ? { sourceResumeId: input.sourceResumeId } : {}),
+					targetResumeId: input.targetResumeId,
 				});
 			} catch (error) {
 				if (isAgentEnvironmentUnavailable(error)) throwUnavailable();
