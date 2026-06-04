@@ -390,7 +390,7 @@ export function AISettingsSection() {
 						<XCircleIcon className="text-rose-600" />
 					)}
 					<span className={cn(hasUsableProvider ? "text-emerald-700" : "text-muted-foreground")}>
-						{hasUsableProvider ? <Trans>Agent ready</Trans> : <Trans>No tested provider</Trans>}
+						{hasUsableProvider ? <Trans>Assistant ready</Trans> : <Trans>No tested provider</Trans>}
 					</span>
 				</p>
 			</div>
@@ -424,7 +424,7 @@ export function AISettingsSection() {
 
 				{providers?.length === 0 ? (
 					<div className="rounded-md border border-dashed p-6 text-center text-muted-foreground text-sm">
-						<Trans>Add and test a provider before starting an agent thread.</Trans>
+						<Trans>Add and test a provider before using the builder assistant.</Trans>
 					</div>
 				) : null}
 

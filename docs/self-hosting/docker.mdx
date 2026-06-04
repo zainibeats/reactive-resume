@@ -107,7 +107,7 @@ S3_BUCKET=""
 S3_FORCE_PATH_STYLE="false"
 
 # --- AI features (optional) ---
-# ENCRYPTION_SECRET is required for saved AI providers. REDIS_URL is also required for the AI Agent workspace.
+# ENCRYPTION_SECRET is required for saved AI providers. REDIS_URL is also required for the AI assistant.
 # The rest of Reactive Resume can run without these.
 REDIS_URL=""
 # Generated using `openssl rand -hex 32`
@@ -262,7 +262,7 @@ docker compose logs -f reactive-resume
         S3 storage (<code>S3_&#42;</code>)
       </li>
       <li>
-        AI providers and AI Agent workspace (<code>ENCRYPTION_SECRET</code>, <code>REDIS_URL</code>)
+        AI providers and assistant (<code>ENCRYPTION_SECRET</code>, <code>REDIS_URL</code>)
       </li>
       <li>
         Feature flags (<code>FLAG_&#42;</code>)
@@ -336,20 +336,20 @@ openssl rand -hex 32
   - **`LOCAL_STORAGE_PATH`** (optional): Overrides the local data directory. Defaults to `/app/data` in the official Docker image and `<workspace>/data` in development. The container validates this path is writable at startup and refuses to start otherwise.
   - **Rootless Docker**: `/app/data` remains the container path. Prefer the named volume from the example Compose file, or make sure a bind-mounted host directory is writable by the container's `node` user mapping.
   - **S3/S3-compatible**: Configure `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_REGION`, `S3_ENDPOINT`, and `S3_BUCKET`.
-  - **Agent attachments/private objects**: The AI Agent workspace requires S3-compatible storage for private objects. Local storage rejects private objects.
+  - **Private objects**: S3-compatible storage is required for features that need private uploaded objects. Local storage rejects private objects.
   - **`S3_FORCE_PATH_STYLE`** controls bucket addressing (defaults to `"false"`):
     - `"true"` for path-style URLs (`https://endpoint/bucket`) common with MinIO/SeaweedFS.
     - `"false"` for virtual-hosted-style URLs (`https://bucket.endpoint`) common with AWS S3 / Cloudflare R2.
 </Accordion>
 
 <Accordion title="AI features (optional)">
-  Saved AI provider management is usable only when **`ENCRYPTION_SECRET`** is configured. The AI Agent workspace also requires **`REDIS_URL`**. The rest of Reactive Resume can run without them.
+  Saved AI provider management is usable only when **`ENCRYPTION_SECRET`** is configured. The AI assistant also requires **`REDIS_URL`**. The rest of Reactive Resume can run without them.
 
-  - **`REDIS_URL`**: Redis connection string used by the AI Agent workspace.
+  - **`REDIS_URL`**: Redis connection string used by AI assistant streams and run state.
   - **`ENCRYPTION_SECRET`**: Secret used to encrypt saved AI provider credentials. Generate with `openssl rand -hex 32`.
   - Live web research depends on the selected AI provider/model supporting native web search. The app does not run its own URL crawler.
 
-  If you use the Postgres-only Compose example above and want the AI Agent workspace, add a Redis service or use managed Redis, then set `REDIS_URL`.
+  If you use the Postgres-only Compose example above and want the AI assistant, add a Redis service or use managed Redis, then set `REDIS_URL`.
 </Accordion>
 
 <Accordion title="Feature Flags">

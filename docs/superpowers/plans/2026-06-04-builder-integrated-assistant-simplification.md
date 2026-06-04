@@ -27,8 +27,8 @@ Simplify the product around one workflow: creating and editing great resumes. Th
 - [x] Remove or redirect standalone `/agent`, `/agent/new`, and `/agent/$threadId` routes after the builder panel reaches feature parity.
 - [x] Remove the “Duplicate as AI Draft” flow and related draft naming helpers if no longer used.
 - [x] Collapse duplicate AI chat paths so there is one primary assistant implementation for resume editing.
-- [ ] Keep PDF/DOCX AI import and resume analysis only if they remain useful inside the core resume-building workflow.
-- [ ] Keep MCP routes and package mounted for now; revisit after the builder assistant simplification stabilizes.
+- [x] Keep PDF/DOCX AI import and resume analysis only if they remain useful inside the core resume-building workflow.
+- [x] Keep MCP routes and package mounted for now; revisit after the builder assistant simplification stabilizes.
 
 ## Open Questions
 
@@ -38,6 +38,8 @@ Simplify the product around one workflow: creating and editing great resumes. Th
 - Decision: undo should use grouped edit transactions, especially for high-frequency field edits.
 - Decision: assistant patch results should show tool output by default.
 - Decision: assistant sends should be blocked while there are unsaved local edits.
+- Decision: keep resume analysis and PDF/DOCX AI import because they start or improve the same builder workflow without reviving the separate agent workspace.
+- Decision: keep MCP routes and `@reactive-resume/mcp` mounted for now; this simplification removes only the standalone agent workspace UX.
 
 ## Validation Targets
 
