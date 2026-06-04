@@ -34,10 +34,10 @@ Simplify the product around one workflow: creating and editing great resumes. Th
 
 - Decision: metadata changes remain separate settings actions for now. The shared document undo stack tracks only `resume.data`, which matches builder field edits and assistant-applied resume patches without mixing in route/title/sharing/security state.
 
-- Should the builder assistant be a right-side resizable panel, a bottom drawer, or a floating panel?
-- Should undo restore one entire resume snapshot per edit, or should grouped edit transactions be introduced for high-frequency fields?
-- Should assistant tool results be visible in detail by default, or collapsed behind a compact “changed X fields” card?
-- Should an assistant run be blocked while there are unsaved local edits, or should the builder flush pending edits before sending the prompt?
+- Decision: the builder assistant should be a bottom panel/drawer.
+- Decision: undo should use grouped edit transactions, especially for high-frequency field edits.
+- Decision: assistant patch results should show tool output by default.
+- Decision: assistant sends should be blocked while there are unsaved local edits.
 
 ## Validation Targets
 
