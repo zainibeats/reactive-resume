@@ -57,7 +57,8 @@ function parseAgentSseStream(stream: ReadableStream<string>) {
 function messageText(message: UIMessage) {
 	return message.parts
 		.filter((part) => part.type === "text")
-		.map((part) => part.text)
+		.map((part) => part.text.trim())
+		.filter(Boolean)
 		.join("\n");
 }
 
@@ -146,6 +147,8 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 
 					{messages.map((message) => {
 						const text = messageText(message);
+						const hasPatch = message.role === "assistant" && hasAppliedPatch(message);
+						if (!text && !hasPatch) return null;
 
 						return (
 							<div
@@ -155,7 +158,7 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 									message.role === "user" ? "ms-auto bg-primary text-primary-foreground" : "me-auto bg-muted",
 								)}
 							>
-								{message.role === "assistant" && hasAppliedPatch(message) ? (
+								{hasPatch ? (
 									<Badge variant="secondary" className="mb-2 rounded-md">
 										<Trans>Resume updated</Trans>
 									</Badge>

@@ -862,9 +862,19 @@ export const agentService = {
 					? resumeService.getById({ id: thread.workingResumeId, userId: input.userId }).catch(() => null)
 					: null,
 			]);
-			const hasRunnableProvider = thread.aiProviderId
-				? true
-				: !!(await aiProvidersService.getDefaultRunnable({ userId: input.userId }));
+			let hasRunnableProvider = false;
+			if (thread.aiProviderId) {
+				try {
+					hasRunnableProvider = !!(await aiProvidersService.getRunnableById({
+						id: thread.aiProviderId,
+						userId: input.userId,
+					}));
+				} catch (error) {
+					if (!(error instanceof ORPCError)) throw error;
+				}
+			} else {
+				hasRunnableProvider = !!(await aiProvidersService.getDefaultRunnable({ userId: input.userId }));
+			}
 
 			return {
 				thread: toThreadSummary(thread),

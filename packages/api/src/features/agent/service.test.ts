@@ -322,6 +322,34 @@ describe("agentService.threads.get", () => {
 		expect(result.thread.status).toBe("archived");
 		expect(result.resume).toEqual(expect.objectContaining({ id: "resume-1" }));
 	});
+
+	it("returns isReadOnly: true when the stored provider is no longer runnable", async () => {
+		const activeThread = buildActiveThread();
+
+		dbMock.select
+			.mockImplementationOnce(() => selectLimitResult([activeThread]))
+			.mockImplementationOnce(() => selectOrderByResult([]))
+			.mockImplementationOnce(() => selectOrderByResult([]))
+			.mockImplementationOnce(() => selectOrderByResult([]));
+
+		resumeServiceMock.getById.mockResolvedValue({
+			id: "resume-1",
+			name: "Resume",
+			data: {},
+			updatedAt: new Date(),
+		});
+		aiProvidersServiceMock.getRunnableById.mockRejectedValue(
+			new ORPCError("BAD_REQUEST", { message: "AI provider must be tested and enabled before use." }),
+		);
+
+		const { agentService } = await import("./service");
+
+		const result = await agentService.threads.get({ id: "thread-1", userId: "user-1" });
+
+		expect(aiProvidersServiceMock.getRunnableById).toHaveBeenCalledWith({ id: "provider-1", userId: "user-1" });
+		expect(aiProvidersServiceMock.getDefaultRunnable).not.toHaveBeenCalled();
+		expect(result.isReadOnly).toBe(true);
+	});
 });
 
 describe("buildAttachmentModelParts", () => {
