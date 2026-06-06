@@ -268,7 +268,7 @@ describe("agentService.threads.create", () => {
 		});
 
 		expect(resumeServiceMock.getById).toHaveBeenCalledWith({ id: "resume-1", userId: "user-1" });
-		expect(resumeServiceMock.create).toBeUndefined();
+		expect("create" in resumeServiceMock).toBe(false);
 		expect(insertedValues).toEqual([
 			expect.objectContaining({
 				sourceResumeId: null,
