@@ -96,13 +96,29 @@ const loadMessages = async (locale: Locale) => {
 	return messages;
 };
 
+const mergeFallbackMessages = (messages: Messages, fallbackMessages: Messages): Messages => {
+	const mergedMessages = { ...fallbackMessages, ...messages };
+
+	for (const key of Object.keys(mergedMessages)) {
+		const message = mergedMessages[key];
+		const isMissingMessage = message === "" || (Array.isArray(message) && message.length === 0);
+
+		if (isMissingMessage) mergedMessages[key] = fallbackMessages[key];
+	}
+
+	return mergedMessages;
+};
+
 export const getLocaleMessages = async (locale: string) => {
 	const resolvedLocale = resolveLocale(locale);
 	let messages: Messages;
 
 	try {
 		messages = await loadMessages(resolvedLocale);
-		return { locale: resolvedLocale, messages };
+		if (resolvedLocale === defaultLocale) return { locale: resolvedLocale, messages };
+
+		const fallbackMessages = await loadMessages(defaultLocale);
+		return { locale: resolvedLocale, messages: mergeFallbackMessages(messages, fallbackMessages) };
 	} catch {
 		messages = await loadMessages(defaultLocale);
 		return { locale: defaultLocale, messages };

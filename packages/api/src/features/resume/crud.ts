@@ -310,6 +310,36 @@ export const crudRouter = {
 			});
 		}),
 
+	dismissParentUpdates: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/resumes/{id}/sync/dismiss",
+			tags: ["Resumes"],
+			operationId: "dismissResumeParentUpdates",
+			summary: "Dismiss parent resume updates",
+			description: "Marks current parent changes as reviewed without applying them to the derived resume's content.",
+			successDescription: "The parent updates were dismissed.",
+		})
+		.input(resumeDto.dismissParentUpdates.input)
+		.use(resumeMutationRateLimit)
+		.output(resumeDto.dismissParentUpdates.output)
+		.errors({
+			RESUME_HAS_NO_PARENT: {
+				message: "This resume is not derived from another resume.",
+				status: 400,
+			},
+			RESUME_PARENT_NOT_FOUND: {
+				message: "The parent resume could not be found.",
+				status: 404,
+			},
+		})
+		.handler(async ({ context, input }) => {
+			return resumeService.dismissParentUpdates({
+				id: input.id,
+				userId: context.user.id,
+			});
+		}),
+
 	delete: protectedProcedure
 		.route({
 			method: "DELETE",

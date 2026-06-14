@@ -612,6 +612,70 @@ export const resumeService = {
 		return resume;
 	},
 
+	dismissParentUpdates: async (input: { id: string; userId: string }) => {
+		const resume = await db.transaction(async (tx) => {
+			const [child] = await tx
+				.select({
+					id: schema.resume.id,
+					isLocked: schema.resume.isLocked,
+					parentId: schema.resume.parentId,
+				})
+				.from(schema.resume)
+				.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
+				.for("update");
+
+			if (!child) throw new ORPCError("NOT_FOUND");
+			if (child.isLocked) throw new ORPCError("RESUME_LOCKED");
+			if (!child.parentId) throw new ORPCError("RESUME_HAS_NO_PARENT", { status: 400 });
+
+			const [parent] = await tx
+				.select({
+					data: schema.resume.data,
+					revision: schema.resume.revision,
+				})
+				.from(schema.resume)
+				.where(and(eq(schema.resume.id, child.parentId), eq(schema.resume.userId, input.userId)));
+
+			if (!parent) throw new ORPCError("RESUME_PARENT_NOT_FOUND", { status: 404 });
+
+			const [resume] = await tx
+				.update(schema.resume)
+				.set({
+					parentData: parent.data,
+					parentRevision: parent.revision,
+				})
+				.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
+				.returning({
+					id: schema.resume.id,
+					name: schema.resume.name,
+					slug: schema.resume.slug,
+					tags: schema.resume.tags,
+					data: schema.resume.data,
+					revision: schema.resume.revision,
+					parentId: schema.resume.parentId,
+					parentRevision: schema.resume.parentRevision,
+					isPublic: schema.resume.isPublic,
+					isLocked: schema.resume.isLocked,
+					updatedAt: schema.resume.updatedAt,
+					hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
+				});
+
+			if (!resume) throw new ORPCError("NOT_FOUND");
+
+			return resume;
+		});
+
+		await notifyResumeUpdated({
+			type: "resume.updated",
+			resumeId: resume.id,
+			userId: input.userId,
+			updatedAt: resume.updatedAt.toISOString(),
+			mutation: "sync",
+		});
+
+		return resume;
+	},
+
 	update: async (input: {
 		id: string;
 		userId: string;

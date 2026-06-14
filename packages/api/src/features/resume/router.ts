@@ -26,5 +26,6 @@ export const resumeRouter = {
 	createDerived: crudRouter.createDerived,
 	getSyncStatus: crudRouter.getSyncStatus,
 	applyParentUpdates: crudRouter.applyParentUpdates,
+	dismissParentUpdates: crudRouter.dismissParentUpdates,
 	delete: crudRouter.delete,
 };

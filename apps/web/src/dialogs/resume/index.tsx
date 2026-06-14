@@ -352,11 +352,11 @@ export function DeriveResumeDialog({ data }: DialogProps<"resume.derive">) {
 		},
 		validators: { onSubmit: formSchema },
 		onSubmit: ({ value }) => {
-			const toastId = toast.loading(t`Creating your derived resume...`);
+			const toastId = toast.loading(t`Creating child resume...`);
 
 			createDerivedResume(value, {
 				onSuccess: async (id) => {
-					toast.success(t`Your derived resume has been created successfully.`, { id: toastId });
+					toast.success(t`Child resume created successfully.`, { id: toastId });
 					closeDialog();
 
 					if (!data.shouldRedirect) return;
@@ -383,10 +383,10 @@ export function DeriveResumeDialog({ data }: DialogProps<"resume.derive">) {
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-x-2">
 					<GitBranchIcon />
-					<Trans>Derive Resume</Trans>
+					<Trans>Create child resume</Trans>
 				</DialogTitle>
 				<DialogDescription>
-					<Trans>Create a linked child resume that can receive future updates from this parent.</Trans>
+					<Trans>Create a linked child resume that can review and merge future updates from this parent.</Trans>
 				</DialogDescription>
 			</DialogHeader>
 
@@ -402,7 +402,7 @@ export function DeriveResumeDialog({ data }: DialogProps<"resume.derive">) {
 
 				<DialogFooter>
 					<Button type="submit" disabled={isPending}>
-						<Trans>Derive</Trans>
+						<Trans>Create child resume</Trans>
 					</Button>
 				</DialogFooter>
 			</form>

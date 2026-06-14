@@ -118,7 +118,7 @@ export function ResumeContextMenu({ resume, children }: Props) {
 
 				<ContextMenuItem onClick={handleDerive}>
 					<GitBranchIcon />
-					<Trans comment="Resume card context menu action to create a linked child resume">Derive</Trans>
+					<Trans comment="Resume card context menu action to create a linked child resume">Create child resume</Trans>
 				</ContextMenuItem>
 
 				<ContextMenuItem onClick={handleToggleLock}>

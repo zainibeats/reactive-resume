@@ -158,6 +158,11 @@ export const resumeDto = {
 		output: resumeOutputSchema,
 	},
 
+	dismissParentUpdates: {
+		input: resumeSchema.pick({ id: true }),
+		output: resumeOutputSchema,
+	},
+
 	delete: {
 		input: resumeSchema.pick({ id: true }),
 		output: z.void(),

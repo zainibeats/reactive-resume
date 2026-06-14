@@ -116,7 +116,7 @@ export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 
 				<DropdownMenuItem onClick={handleDerive}>
 					<GitBranchIcon />
-					<Trans comment="Resume card dropdown action to create a linked child resume">Derive</Trans>
+					<Trans comment="Resume card dropdown action to create a linked child resume">Create child resume</Trans>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem onClick={handleToggleLock}>
