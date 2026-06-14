@@ -34,6 +34,16 @@ export const resumeDialogSchemas = [
 			shouldRedirect: z.boolean().optional(),
 		}),
 	}),
+	z.object({
+		type: z.literal("resume.derive"),
+		data: z.object({
+			id: z.string(),
+			name: z.string(),
+			slug: z.string(),
+			tags: z.array(z.string()),
+			shouldRedirect: z.boolean().optional(),
+		}),
+	}),
 	z.object({ type: z.literal("resume.template.gallery"), data: z.undefined() }),
 	z.object({
 		type: z.literal("resume.sections.profiles.create"),

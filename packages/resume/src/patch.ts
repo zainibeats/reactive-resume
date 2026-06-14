@@ -23,6 +23,69 @@ export function createResumePatches(previous: ResumeData, next: ResumeData): Jso
 	return z.array(jsonPatchOperationSchema).parse(jsonpatch.compare(previous, next));
 }
 
+function decodeJsonPointerSegment(segment: string): string {
+	return segment.replaceAll("~1", "/").replaceAll("~0", "~");
+}
+
+function getJsonPointerParent(path: string): string {
+	if (path === "") return "";
+
+	const index = path.lastIndexOf("/");
+	return index <= 0 ? "" : path.slice(0, index);
+}
+
+function getValueAtJsonPointer(document: unknown, path: string): unknown {
+	if (path === "") return document;
+	if (!path.startsWith("/")) return undefined;
+
+	return path
+		.slice(1)
+		.split("/")
+		.map(decodeJsonPointerSegment)
+		.reduce<unknown>((value, segment) => {
+			if (value === undefined || value === null) return undefined;
+			if (Array.isArray(value)) return value[segment === "-" ? value.length : Number(segment)];
+			if (typeof value === "object") return (value as Record<string, unknown>)[segment];
+			return undefined;
+		}, document);
+}
+
+function valuesEqual(left: unknown, right: unknown): boolean {
+	return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function conflictPathForOperation(operation: JsonPatchOperation): string {
+	switch (operation.op) {
+		case "add":
+			return getJsonPointerParent(operation.path);
+		case "copy":
+		case "move":
+			return operation.from;
+		case "remove":
+		case "replace":
+		case "test":
+			return operation.path;
+	}
+}
+
+export function findResumePatchConflicts(input: {
+	base: ResumeData;
+	target: ResumeData;
+	operations: JsonPatchOperation[];
+}): string[] {
+	const conflictPaths = new Set<string>();
+
+	for (const operation of input.operations) {
+		const conflictPath = conflictPathForOperation(operation);
+		const baseValue = getValueAtJsonPointer(input.base, conflictPath);
+		const targetValue = getValueAtJsonPointer(input.target, conflictPath);
+
+		if (!valuesEqual(baseValue, targetValue)) conflictPaths.add(conflictPath);
+	}
+
+	return Array.from(conflictPaths).sort((a, b) => a.localeCompare(b));
+}
+
 /**
  * A structured error thrown when a JSON Patch operation fails.
  * Contains only the relevant details -- never the full document tree.

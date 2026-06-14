@@ -24,6 +24,10 @@ export const resume = pg.pgTable(
 			.notNull()
 			.$type<ResumeData>()
 			.$defaultFn(() => defaultResumeData),
+		revision: pg.integer("revision").notNull().default(1),
+		parentId: pg.text("parent_id"),
+		parentRevision: pg.integer("parent_revision"),
+		parentData: pg.jsonb("parent_data").$type<ResumeData>(),
 		userId: pg
 			.text("user_id")
 			.notNull()
@@ -38,9 +42,17 @@ export const resume = pg.pgTable(
 	(t) => [
 		pg.unique().on(t.slug, t.userId),
 		pg.index().on(t.userId),
+		pg.index().on(t.parentId),
 		pg.index().on(t.createdAt.asc()),
 		pg.index().on(t.userId, t.updatedAt.desc()),
 		pg.index().on(t.isPublic, t.slug, t.userId),
+		pg
+			.foreignKey({
+				columns: [t.parentId],
+				foreignColumns: [t.id],
+				name: "resume_parent_id_resume_id_fk",
+			})
+			.onDelete("set null"),
 	],
 );
 

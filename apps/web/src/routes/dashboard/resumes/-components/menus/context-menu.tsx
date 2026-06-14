@@ -4,6 +4,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	CopySimpleIcon,
 	FolderOpenIcon,
+	GitBranchIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
 	PencilSimpleLineIcon,
@@ -42,6 +43,10 @@ export function ResumeContextMenu({ resume, children }: Props) {
 
 	const handleDuplicate = () => {
 		openDialog("resume.duplicate", resume);
+	};
+
+	const handleDerive = () => {
+		openDialog("resume.derive", resume);
 	};
 
 	const handleToggleLock = async () => {
@@ -109,6 +114,11 @@ export function ResumeContextMenu({ resume, children }: Props) {
 				<ContextMenuItem onClick={handleDuplicate}>
 					<CopySimpleIcon />
 					<Trans comment="Resume card context menu action to create a copy">Duplicate</Trans>
+				</ContextMenuItem>
+
+				<ContextMenuItem onClick={handleDerive}>
+					<GitBranchIcon />
+					<Trans comment="Resume card context menu action to create a linked child resume">Derive</Trans>
 				</ContextMenuItem>
 
 				<ContextMenuItem onClick={handleToggleLock}>

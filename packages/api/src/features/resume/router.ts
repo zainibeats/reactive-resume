@@ -23,5 +23,8 @@ export const resumeRouter = {
 	verifyPassword: sharingRouter.verifyPassword,
 	removePassword: sharingRouter.removePassword,
 	duplicate: crudRouter.duplicate,
+	createDerived: crudRouter.createDerived,
+	getSyncStatus: crudRouter.getSyncStatus,
+	applyParentUpdates: crudRouter.applyParentUpdates,
 	delete: crudRouter.delete,
 };

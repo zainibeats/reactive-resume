@@ -223,6 +223,93 @@ export const crudRouter = {
 			});
 		}),
 
+	createDerived: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/resumes/{id}/derive",
+			tags: ["Resumes"],
+			operationId: "createDerivedResume",
+			summary: "Create a derived resume",
+			description:
+				"Creates a child resume from an existing parent resume. The child stores the parent revision and a parent data snapshot so future parent updates can be reviewed and applied.",
+			successDescription: "The ID of the newly created derived resume.",
+		})
+		.input(resumeDto.createDerived.input)
+		.use(resumeMutationRateLimit)
+		.output(resumeDto.createDerived.output)
+		.errors({
+			RESUME_SLUG_ALREADY_EXISTS: {
+				message: "A resume with this slug already exists.",
+				status: 400,
+			},
+		})
+		.handler(async ({ context, input }) => {
+			return resumeService.createDerived({
+				id: input.id,
+				userId: context.user.id,
+				name: input.name,
+				slug: input.slug,
+				tags: input.tags,
+			});
+		}),
+
+	getSyncStatus: protectedProcedure
+		.route({
+			method: "GET",
+			path: "/resumes/{id}/sync",
+			tags: ["Resumes"],
+			operationId: "getResumeSyncStatus",
+			summary: "Get resume sync status",
+			description:
+				"Returns parent/child sync state for a derived resume, including parent patch operations and conflict paths.",
+			successDescription: "The sync status for the resume.",
+		})
+		.input(resumeDto.getSyncStatus.input)
+		.output(resumeDto.getSyncStatus.output)
+		.handler(async ({ context, input }) => {
+			return resumeService.getSyncStatus({ id: input.id, userId: context.user.id });
+		}),
+
+	applyParentUpdates: protectedProcedure
+		.route({
+			method: "POST",
+			path: "/resumes/{id}/sync",
+			tags: ["Resumes"],
+			operationId: "applyResumeParentUpdates",
+			summary: "Apply parent resume updates",
+			description:
+				"Applies parent changes to a derived resume using the stored parent snapshot. Conflicting child edits are rejected unless force is true.",
+			successDescription: "The synced resume.",
+		})
+		.input(resumeDto.applyParentUpdates.input)
+		.use(resumeMutationRateLimit)
+		.output(resumeDto.applyParentUpdates.output)
+		.errors({
+			RESUME_HAS_NO_PARENT: {
+				message: "This resume is not derived from another resume.",
+				status: 400,
+			},
+			RESUME_PARENT_NOT_FOUND: {
+				message: "The parent resume could not be found.",
+				status: 404,
+			},
+			RESUME_SYNC_CONFLICT: {
+				message: "The child resume has changes that overlap with parent updates.",
+				status: 409,
+			},
+			INVALID_PATCH_OPERATIONS: {
+				message: "The parent update patch could not be applied.",
+				status: 400,
+			},
+		})
+		.handler(async ({ context, input }) => {
+			return resumeService.applyParentUpdates({
+				id: input.id,
+				userId: context.user.id,
+				force: input.force,
+			});
+		}),
+
 	delete: protectedProcedure
 		.route({
 			method: "DELETE",

@@ -18,6 +18,9 @@ export type Resume = {
 	slug: string;
 	tags: string[];
 	data: ResumeData;
+	revision: number;
+	parentId?: string | null;
+	parentRevision?: number | null;
 	isLocked: boolean;
 	updatedAt: Date;
 	hasPassword?: boolean;
@@ -306,6 +309,9 @@ export const useResumeStore = create<ResumeStore>()(
 				state.resume.tags = resume.tags;
 				state.resume.isLocked = resume.isLocked;
 				state.resume.updatedAt = resume.updatedAt;
+				state.resume.revision = resume.revision;
+				state.resume.parentId = resume.parentId;
+				state.resume.parentRevision = resume.parentRevision;
 				state.resume.hasPassword = resume.hasPassword;
 				state.resume.isPublic = resume.isPublic;
 			});

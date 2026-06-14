@@ -1,5 +1,5 @@
 import { defineDialogRenderer, defineDialogRendererRegistry } from "../renderer-registry";
-import { CreateResumeDialog, DuplicateResumeDialog, UpdateResumeDialog } from ".";
+import { CreateResumeDialog, DeriveResumeDialog, DuplicateResumeDialog, UpdateResumeDialog } from ".";
 import { ImportResumeDialog } from "./import";
 import { CreateAwardDialog, UpdateAwardDialog } from "./sections/award";
 import { CreateCertificationDialog, UpdateCertificationDialog } from "./sections/certification";
@@ -22,6 +22,7 @@ export const resumeDialogRendererRegistry = defineDialogRendererRegistry("resume
 	defineDialogRenderer("resume.create", () => <CreateResumeDialog />),
 	defineDialogRenderer("resume.update", ({ data }) => <UpdateResumeDialog data={data} />),
 	defineDialogRenderer("resume.duplicate", ({ data }) => <DuplicateResumeDialog data={data} />),
+	defineDialogRenderer("resume.derive", ({ data }) => <DeriveResumeDialog data={data} />),
 	defineDialogRenderer("resume.import", () => <ImportResumeDialog />),
 	defineDialogRenderer("resume.template.gallery", () => <TemplateGalleryDialog />),
 	defineDialogRenderer("resume.sections.profiles.create", ({ data }) => <CreateProfileDialog data={data} />),

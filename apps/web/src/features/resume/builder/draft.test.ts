@@ -92,6 +92,7 @@ function makeResume(id: string): Resume {
 		slug: id,
 		tags: [],
 		data: cloneResumeData(defaultResumeData),
+		revision: 1,
 		isLocked: false,
 		isPublic: false,
 		hasPassword: false,

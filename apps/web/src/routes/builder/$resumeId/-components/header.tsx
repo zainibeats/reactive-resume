@@ -1,8 +1,10 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
+	ArrowsClockwiseIcon,
 	CaretDownIcon,
 	CopySimpleIcon,
+	GitBranchIcon,
 	HouseSimpleIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
@@ -10,7 +12,7 @@ import {
 	SidebarSimpleIcon,
 	TrashSimpleIcon,
 } from "@phosphor-icons/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -82,6 +84,7 @@ function BuilderHeaderDropdown() {
 	const confirm = useConfirm();
 	const navigate = useNavigate();
 	const { openDialog } = useDialogStore();
+	const queryClient = useQueryClient();
 
 	const resume = useCurrentResume();
 	const patchResume = usePatchResume();
@@ -90,9 +93,17 @@ function BuilderHeaderDropdown() {
 	const slug = resume.slug;
 	const tags = resume.tags;
 	const isLocked = resume.isLocked;
+	const parentId = resume.parentId;
 
 	const { mutate: deleteResume } = useMutation(orpc.resume.delete.mutationOptions());
 	const { mutate: setLockedResume } = useMutation(orpc.resume.setLocked.mutationOptions());
+	const { mutate: applyParentUpdates, isPending: isApplyingParentUpdates } = useMutation(
+		orpc.resume.applyParentUpdates.mutationOptions(),
+	);
+	const { data: syncStatus } = useQuery({
+		...orpc.resume.getSyncStatus.queryOptions({ input: { id } }),
+		enabled: Boolean(parentId),
+	});
 
 	const handleUpdate = () => {
 		openDialog("resume.update", { id, name, slug, tags });
@@ -100,6 +111,30 @@ function BuilderHeaderDropdown() {
 
 	const handleDuplicate = () => {
 		openDialog("resume.duplicate", { id, name, slug, tags, shouldRedirect: true });
+	};
+
+	const handleDerive = () => {
+		openDialog("resume.derive", { id, name, slug, tags, shouldRedirect: true });
+	};
+
+	const handleApplyParentUpdates = () => {
+		const toastId = toast.loading(t`Applying parent updates...`);
+
+		applyParentUpdates(
+			{ id },
+			{
+				onSuccess: (updated) => {
+					patchResume((draft) => {
+						Object.assign(draft, updated);
+					});
+					void queryClient.invalidateQueries({ queryKey: orpc.resume.getSyncStatus.queryKey({ input: { id } }) });
+					toast.success(t`Parent updates have been applied.`, { id: toastId });
+				},
+				onError: (error) => {
+					toast.error(getResumeErrorMessage(error), { id: toastId });
+				},
+			},
+		);
 	};
 
 	const handleToggleLock = async () => {
@@ -169,6 +204,21 @@ function BuilderHeaderDropdown() {
 					<CopySimpleIcon className="me-2" />
 					<Trans>Duplicate</Trans>
 				</DropdownMenuItem>
+
+				<DropdownMenuItem onClick={handleDerive}>
+					<GitBranchIcon className="me-2" />
+					<Trans>Derive</Trans>
+				</DropdownMenuItem>
+
+				{syncStatus?.isBehind && (
+					<DropdownMenuItem
+						disabled={isLocked || syncStatus.hasConflicts || isApplyingParentUpdates}
+						onClick={handleApplyParentUpdates}
+					>
+						<ArrowsClockwiseIcon className="me-2" />
+						{syncStatus.hasConflicts ? <Trans>Parent updates need review</Trans> : <Trans>Apply parent updates</Trans>}
+					</DropdownMenuItem>
+				)}
 
 				<DropdownMenuItem onClick={handleToggleLock}>
 					{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}

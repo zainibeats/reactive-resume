@@ -10,7 +10,12 @@ import { get } from "es-toolkit/compat";
 import { match } from "ts-pattern";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
-import { applyResumePatches, ResumePatchError } from "@reactive-resume/resume/patch";
+import {
+	applyResumePatches,
+	createResumePatches,
+	findResumePatchConflicts,
+	ResumePatchError,
+} from "@reactive-resume/resume/patch";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
 import { getStorageService } from "../storage/service";
@@ -33,7 +38,11 @@ async function applyResumePatchTx(
 	input: { id: string; userId: string; operations: JsonPatchOperation[]; expectedUpdatedAt?: Date },
 ) {
 	const [existing] = await client
-		.select({ data: schema.resume.data, isLocked: schema.resume.isLocked, updatedAt: schema.resume.updatedAt })
+		.select({
+			data: schema.resume.data,
+			isLocked: schema.resume.isLocked,
+			updatedAt: schema.resume.updatedAt,
+		})
 		.from(schema.resume)
 		.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
 		.for("update");
@@ -65,7 +74,7 @@ async function applyResumePatchTx(
 
 	const [resume] = await client
 		.update(schema.resume)
-		.set({ data: patchedData })
+		.set({ data: patchedData, revision: sql`${schema.resume.revision} + 1` })
 		.where(
 			and(
 				eq(schema.resume.id, input.id),
@@ -80,6 +89,9 @@ async function applyResumePatchTx(
 			slug: schema.resume.slug,
 			tags: schema.resume.tags,
 			data: schema.resume.data,
+			revision: schema.resume.revision,
+			parentId: schema.resume.parentId,
+			parentRevision: schema.resume.parentRevision,
 			isPublic: schema.resume.isPublic,
 			isLocked: schema.resume.isLocked,
 			updatedAt: schema.resume.updatedAt,
@@ -230,6 +242,21 @@ async function notifyResumeUpdated(event: ResumeUpdatedEvent) {
 	}
 }
 
+function getSyncPlan(input: { parentData: ResumeData; parentSnapshot: ResumeData; childData: ResumeData }) {
+	const operations = createResumePatches(input.parentSnapshot, input.parentData);
+	const conflicts = findResumePatchConflicts({
+		base: input.parentSnapshot,
+		target: input.childData,
+		operations,
+	});
+
+	return {
+		operations,
+		conflicts,
+		hasConflicts: conflicts.length > 0,
+	};
+}
+
 export const resumeService = {
 	tags,
 	statistics,
@@ -244,6 +271,9 @@ export const resumeService = {
 				tags: schema.resume.tags,
 				isPublic: schema.resume.isPublic,
 				isLocked: schema.resume.isLocked,
+				revision: schema.resume.revision,
+				parentId: schema.resume.parentId,
+				parentRevision: schema.resume.parentRevision,
 				createdAt: schema.resume.createdAt,
 				updatedAt: schema.resume.updatedAt,
 			})
@@ -273,6 +303,9 @@ export const resumeService = {
 				slug: schema.resume.slug,
 				tags: schema.resume.tags,
 				data: schema.resume.data,
+				revision: schema.resume.revision,
+				parentId: schema.resume.parentId,
+				parentRevision: schema.resume.parentRevision,
 				isPublic: schema.resume.isPublic,
 				isLocked: schema.resume.isLocked,
 				updatedAt: schema.resume.updatedAt,
@@ -343,6 +376,7 @@ export const resumeService = {
 				tags: input.tags,
 				userId: input.userId,
 				data,
+				revision: 1,
 			});
 
 			await notifyResumeUpdated({
@@ -364,6 +398,218 @@ export const resumeService = {
 			console.error("Failed to create resume:", error);
 			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create resume" });
 		}
+	},
+
+	createDerived: async (input: { id: string; userId: string; name: string; slug: string; tags: string[] }) => {
+		const [parent] = await db
+			.select({
+				data: schema.resume.data,
+				revision: schema.resume.revision,
+			})
+			.from(schema.resume)
+			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
+
+		if (!parent) throw new ORPCError("NOT_FOUND");
+
+		const id = generateId();
+
+		try {
+			await db.insert(schema.resume).values({
+				id,
+				name: input.name,
+				slug: input.slug,
+				tags: input.tags,
+				userId: input.userId,
+				data: parent.data,
+				revision: 1,
+				parentId: input.id,
+				parentRevision: parent.revision,
+				parentData: parent.data,
+			});
+
+			await notifyResumeUpdated({
+				type: "resume.updated",
+				resumeId: id,
+				userId: input.userId,
+				updatedAt: new Date().toISOString(),
+				mutation: "create",
+			});
+
+			return id;
+		} catch (error) {
+			if (get(error, "cause.constraint") === "resume_slug_user_id_unique") {
+				throw new ORPCError("RESUME_SLUG_ALREADY_EXISTS", { status: 400 });
+			}
+
+			console.error("Failed to create derived resume:", error);
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create derived resume" });
+		}
+	},
+
+	getSyncStatus: async (input: { id: string; userId: string }) => {
+		const [child] = await db
+			.select({
+				id: schema.resume.id,
+				revision: schema.resume.revision,
+				parentId: schema.resume.parentId,
+				parentRevision: schema.resume.parentRevision,
+				parentData: schema.resume.parentData,
+				data: schema.resume.data,
+			})
+			.from(schema.resume)
+			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
+
+		if (!child) throw new ORPCError("NOT_FOUND");
+
+		if (!child.parentId || !child.parentData) {
+			return {
+				hasParent: false,
+				parent: null,
+				childRevision: child.revision,
+				lastSyncedParentRevision: null,
+				isBehind: false,
+				operationCount: 0,
+				operations: [],
+				conflicts: [],
+				hasConflicts: false,
+			};
+		}
+
+		const [parent] = await db
+			.select({
+				id: schema.resume.id,
+				name: schema.resume.name,
+				revision: schema.resume.revision,
+				updatedAt: schema.resume.updatedAt,
+				data: schema.resume.data,
+			})
+			.from(schema.resume)
+			.where(and(eq(schema.resume.id, child.parentId), eq(schema.resume.userId, input.userId)));
+
+		if (!parent) {
+			return {
+				hasParent: false,
+				parent: null,
+				childRevision: child.revision,
+				lastSyncedParentRevision: child.parentRevision,
+				isBehind: false,
+				operationCount: 0,
+				operations: [],
+				conflicts: [],
+				hasConflicts: false,
+			};
+		}
+
+		const plan = getSyncPlan({
+			parentData: parent.data,
+			parentSnapshot: child.parentData,
+			childData: child.data,
+		});
+
+		return {
+			hasParent: true,
+			parent: {
+				id: parent.id,
+				name: parent.name,
+				revision: parent.revision,
+				updatedAt: parent.updatedAt,
+			},
+			childRevision: child.revision,
+			lastSyncedParentRevision: child.parentRevision,
+			isBehind: plan.operations.length > 0 || child.parentRevision !== parent.revision,
+			operationCount: plan.operations.length,
+			operations: plan.operations,
+			conflicts: plan.conflicts,
+			hasConflicts: plan.hasConflicts,
+		};
+	},
+
+	applyParentUpdates: async (input: { id: string; userId: string; force?: boolean }) => {
+		const resume = await db.transaction(async (tx) => {
+			const [child] = await tx
+				.select({
+					id: schema.resume.id,
+					data: schema.resume.data,
+					isLocked: schema.resume.isLocked,
+					parentId: schema.resume.parentId,
+					parentData: schema.resume.parentData,
+				})
+				.from(schema.resume)
+				.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
+				.for("update");
+
+			if (!child) throw new ORPCError("NOT_FOUND");
+			if (child.isLocked) throw new ORPCError("RESUME_LOCKED");
+			if (!child.parentId || !child.parentData) throw new ORPCError("RESUME_HAS_NO_PARENT", { status: 400 });
+
+			const [parent] = await tx
+				.select({
+					data: schema.resume.data,
+					revision: schema.resume.revision,
+				})
+				.from(schema.resume)
+				.where(and(eq(schema.resume.id, child.parentId), eq(schema.resume.userId, input.userId)));
+
+			if (!parent) throw new ORPCError("RESUME_PARENT_NOT_FOUND", { status: 404 });
+
+			const plan = getSyncPlan({
+				parentData: parent.data,
+				parentSnapshot: child.parentData,
+				childData: child.data,
+			});
+
+			if (plan.hasConflicts && !input.force) {
+				throw new ORPCError("RESUME_SYNC_CONFLICT", {
+					status: 409,
+					message: "The child resume has changes that overlap with parent updates.",
+					data: { conflicts: plan.conflicts },
+				});
+			}
+
+			let data = child.data;
+
+			if (plan.operations.length > 0) {
+				data = applyResumePatches(child.data, plan.operations);
+			}
+
+			const [resume] = await tx
+				.update(schema.resume)
+				.set({
+					data,
+					parentData: parent.data,
+					parentRevision: parent.revision,
+					revision: plan.operations.length > 0 ? sql`${schema.resume.revision} + 1` : sql`${schema.resume.revision}`,
+				})
+				.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
+				.returning({
+					id: schema.resume.id,
+					name: schema.resume.name,
+					slug: schema.resume.slug,
+					tags: schema.resume.tags,
+					data: schema.resume.data,
+					revision: schema.resume.revision,
+					parentId: schema.resume.parentId,
+					parentRevision: schema.resume.parentRevision,
+					isPublic: schema.resume.isPublic,
+					isLocked: schema.resume.isLocked,
+					updatedAt: schema.resume.updatedAt,
+					hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
+				});
+
+			if (!resume) throw new ORPCError("NOT_FOUND");
+
+			return resume;
+		});
+
+		await notifyResumeUpdated({
+			type: "resume.updated",
+			resumeId: resume.id,
+			userId: input.userId,
+			updatedAt: resume.updatedAt.toISOString(),
+			mutation: "sync",
+		});
+
+		return resume;
 	},
 
 	update: async (input: {
@@ -393,7 +639,7 @@ export const resumeService = {
 		try {
 			const [resume] = await db
 				.update(schema.resume)
-				.set(updateData)
+				.set({ ...updateData, revision: sql`${schema.resume.revision} + 1` })
 				.where(
 					and(
 						eq(schema.resume.id, input.id),
@@ -407,6 +653,9 @@ export const resumeService = {
 					slug: schema.resume.slug,
 					tags: schema.resume.tags,
 					data: schema.resume.data,
+					revision: schema.resume.revision,
+					parentId: schema.resume.parentId,
+					parentRevision: schema.resume.parentRevision,
 					isPublic: schema.resume.isPublic,
 					isLocked: schema.resume.isLocked,
 					updatedAt: schema.resume.updatedAt,

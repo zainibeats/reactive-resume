@@ -4,6 +4,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	CopySimpleIcon,
 	FolderOpenIcon,
+	GitBranchIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
 	PencilSimpleLineIcon,
@@ -42,6 +43,10 @@ export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 
 	const handleDuplicate = () => {
 		openDialog("resume.duplicate", resume);
+	};
+
+	const handleDerive = () => {
+		openDialog("resume.derive", resume);
 	};
 
 	const handleToggleLock = async () => {
@@ -107,6 +112,11 @@ export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 				<DropdownMenuItem onClick={handleDuplicate}>
 					<CopySimpleIcon />
 					<Trans comment="Resume card dropdown action to create a copy">Duplicate</Trans>
+				</DropdownMenuItem>
+
+				<DropdownMenuItem onClick={handleDerive}>
+					<GitBranchIcon />
+					<Trans comment="Resume card dropdown action to create a linked child resume">Derive</Trans>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem onClick={handleToggleLock}>

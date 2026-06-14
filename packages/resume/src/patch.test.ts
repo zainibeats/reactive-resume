@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
-import { applyResumePatches, createResumePatches, jsonPatchOperationSchema, ResumePatchError } from "./patch";
+import {
+	applyResumePatches,
+	createResumePatches,
+	findResumePatchConflicts,
+	jsonPatchOperationSchema,
+	ResumePatchError,
+} from "./patch";
 
 describe("jsonPatchOperationSchema", () => {
 	it("validates add op", () => {
@@ -193,6 +199,76 @@ describe("applyResumePatches", () => {
 
 		const removed = applyResumePatches(withItem, [{ op: "remove", path: "/sections/skills/items/0" }]);
 		expect(removed.sections.skills.items).toHaveLength(0);
+	});
+});
+
+describe("findResumePatchConflicts", () => {
+	it("returns no conflicts when the child has not changed the parent-touched path", () => {
+		const operations = createResumePatches(defaultResumeData, {
+			...defaultResumeData,
+			basics: { ...defaultResumeData.basics, name: "Alice" },
+		});
+
+		expect(findResumePatchConflicts({ base: defaultResumeData, target: defaultResumeData, operations })).toEqual([]);
+	});
+
+	it("reports a conflict when the child changed the same path as the parent", () => {
+		const operations = createResumePatches(defaultResumeData, {
+			...defaultResumeData,
+			basics: { ...defaultResumeData.basics, name: "Alice" },
+		});
+		const target = { ...defaultResumeData, basics: { ...defaultResumeData.basics, name: "Tailored" } };
+
+		expect(findResumePatchConflicts({ base: defaultResumeData, target, operations })).toEqual(["/basics/name"]);
+	});
+
+	it("checks the container for add operations", () => {
+		const operations = createResumePatches(defaultResumeData, {
+			...defaultResumeData,
+			sections: {
+				...defaultResumeData.sections,
+				skills: {
+					...defaultResumeData.sections.skills,
+					items: [
+						{
+							id: "abcdef0123456789",
+							hidden: false,
+							icon: "",
+							iconColor: "",
+							name: "TypeScript",
+							proficiency: "Advanced",
+							level: 4,
+							keywords: [],
+						},
+					],
+				},
+			},
+		});
+		const target = {
+			...defaultResumeData,
+			sections: {
+				...defaultResumeData.sections,
+				skills: {
+					...defaultResumeData.sections.skills,
+					items: [
+						{
+							id: "fedcba9876543210",
+							hidden: false,
+							icon: "",
+							iconColor: "",
+							name: "Go",
+							proficiency: "Advanced",
+							level: 4,
+							keywords: [],
+						},
+					],
+				},
+			},
+		};
+
+		expect(findResumePatchConflicts({ base: defaultResumeData, target, operations })).toEqual([
+			"/sections/skills/items",
+		]);
 	});
 });
 

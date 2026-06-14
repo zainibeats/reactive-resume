@@ -2,7 +2,14 @@ import type { RouterInput } from "@/libs/orpc/client";
 import type { DialogProps } from "../store";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { CaretDownIcon, MagicWandIcon, PencilSimpleLineIcon, PlusIcon, TestTubeIcon } from "@phosphor-icons/react";
+import {
+	CaretDownIcon,
+	GitBranchIcon,
+	MagicWandIcon,
+	PencilSimpleLineIcon,
+	PlusIcon,
+	TestTubeIcon,
+} from "@phosphor-icons/react";
 import { useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
@@ -323,6 +330,79 @@ export function DuplicateResumeDialog({ data }: DialogProps<"resume.duplicate">)
 				<DialogFooter>
 					<Button type="submit" disabled={isPending}>
 						<Trans>Duplicate</Trans>
+					</Button>
+				</DialogFooter>
+			</form>
+		</DialogContent>
+	);
+}
+
+export function DeriveResumeDialog({ data }: DialogProps<"resume.derive">) {
+	const navigate = useNavigate();
+	const closeDialog = useDialogStore((state) => state.closeDialog);
+
+	const { mutate: createDerivedResume, isPending } = useMutation(orpc.resume.createDerived.mutationOptions());
+
+	const form = useAppForm({
+		defaultValues: {
+			id: data.id,
+			name: `${data.name} (Tailored)`,
+			slug: `${data.slug}-tailored`,
+			tags: data.tags,
+		},
+		validators: { onSubmit: formSchema },
+		onSubmit: ({ value }) => {
+			const toastId = toast.loading(t`Creating your derived resume...`);
+
+			createDerivedResume(value, {
+				onSuccess: async (id) => {
+					toast.success(t`Your derived resume has been created successfully.`, { id: toastId });
+					closeDialog();
+
+					if (!data.shouldRedirect) return;
+					void navigate({ to: "/builder/$resumeId", params: { resumeId: id } });
+				},
+				onError: (error) => {
+					toast.error(getResumeErrorMessage(error), { id: toastId });
+				},
+			});
+		},
+	});
+
+	const name = useStore(form.store, (s) => s.values.name);
+
+	useEffect(() => {
+		if (!name) return;
+		form.setFieldValue("slug", slugify(name));
+	}, [form, name]);
+
+	useFormBlocker(form);
+
+	return (
+		<DialogContent>
+			<DialogHeader>
+				<DialogTitle className="flex items-center gap-x-2">
+					<GitBranchIcon />
+					<Trans>Derive Resume</Trans>
+				</DialogTitle>
+				<DialogDescription>
+					<Trans>Create a linked child resume that can receive future updates from this parent.</Trans>
+				</DialogDescription>
+			</DialogHeader>
+
+			<form
+				className="space-y-4"
+				onSubmit={(event) => {
+					event.preventDefault();
+					event.stopPropagation();
+					void form.handleSubmit();
+				}}
+			>
+				<ResumeForm form={form} />
+
+				<DialogFooter>
+					<Button type="submit" disabled={isPending}>
+						<Trans>Derive</Trans>
 					</Button>
 				</DialogFooter>
 			</form>
