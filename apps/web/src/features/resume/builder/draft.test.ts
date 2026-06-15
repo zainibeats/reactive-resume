@@ -7,7 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "@lingui/core";
 import { ORPCError } from "@orpc/client";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
-import { useBuilderResumeUpdateSubscription, useResumeStore, useResumeUpdateSubscription } from "./draft";
+import {
+	flushPendingResumeSave,
+	useBuilderResumeUpdateSubscription,
+	useResumeStore,
+	useResumeUpdateSubscription,
+} from "./draft";
 
 const orpcMocks = vi.hoisted(() => ({
 	getResumeById: vi.fn(),
@@ -319,6 +324,27 @@ describe("builder resume autosave", () => {
 		await flushMicrotasks();
 
 		expect(orpcMocks.updateResume).not.toHaveBeenCalled();
+	});
+
+	it("flushes a pending local save before continuing", async () => {
+		const initial = makeResume("resume-flush");
+		const saved = withBasicsName(initial, "Local Name");
+		orpcMocks.updateResume.mockResolvedValue(saved);
+		useResumeStore.getState().initialize(initial);
+
+		useResumeStore.getState().updateResumeData((draft) => {
+			draft.basics.name = "Local Name";
+		});
+
+		await act(async () => {
+			await flushPendingResumeSave(initial.id);
+		});
+
+		expect(orpcMocks.updateResume).toHaveBeenCalledWith(
+			{ id: initial.id, data: expect.objectContaining({ basics: expect.objectContaining({ name: "Local Name" }) }) },
+			expect.any(Object),
+		);
+		expect(useResumeStore.getState().resume?.data.basics.name).toBe("Local Name");
 	});
 });
 

@@ -55,6 +55,7 @@ type Runtime = {
 	hasPendingLocalChanges: boolean;
 	isSaving: boolean;
 	pendingResume?: Resume;
+	savingPromise?: Promise<void>;
 	syncErrorToastId?: string | number;
 	syncResume: ReturnType<typeof debounce<(resume: Resume) => void>>;
 	beforeUnloadHandler?: () => void;
@@ -101,9 +102,23 @@ function setRuntimeBaseline(resume: Resume) {
 
 async function flushResumeSave(id: string) {
 	const runtime = runtimes.get(id);
-	if (!runtime || runtime.isSaving || !runtime.pendingResume) return;
+	if (!runtime?.pendingResume) return runtime?.savingPromise;
+	if (runtime.isSaving) return runtime.savingPromise;
 
+	const savingPromise = savePendingResume(id, runtime);
+	runtime.savingPromise = savingPromise;
+
+	try {
+		await savingPromise;
+	} finally {
+		if (runtime.savingPromise === savingPromise) runtime.savingPromise = undefined;
+	}
+}
+
+async function savePendingResume(id: string, runtime: Runtime) {
 	const submitted = runtime.pendingResume;
+	if (!submitted) return;
+
 	const submittedData = cloneResumeData(submitted.data);
 	runtime.pendingResume = undefined;
 	runtime.isSaving = true;
@@ -159,6 +174,21 @@ async function flushResumeSave(id: string) {
 	} finally {
 		runtime.isSaving = false;
 		if (runtime.pendingResume && runtime.syncErrorToastId === undefined) void flushResumeSave(id);
+	}
+}
+
+export async function flushPendingResumeSave(id: string) {
+	const runtime = runtimes.get(id);
+	if (!runtime) return;
+
+	runtime.syncResume.flush();
+
+	while (runtime.pendingResume || runtime.isSaving) {
+		await flushResumeSave(id);
+
+		if (runtime.syncErrorToastId !== undefined && runtime.pendingResume) {
+			throw new Error("The resume has unsaved changes that could not be saved.");
+		}
 	}
 }
 

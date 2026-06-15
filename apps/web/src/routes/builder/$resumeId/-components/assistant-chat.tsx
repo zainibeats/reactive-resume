@@ -5,13 +5,14 @@ import { Trans } from "@lingui/react/macro";
 import { eventIteratorToUnproxiedDataStream } from "@orpc/client";
 import { PaperPlaneRightIcon, StopIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
 import { ScrollArea } from "@reactive-resume/ui/components/scroll-area";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { cn } from "@reactive-resume/utils/style";
+import { flushPendingResumeSave, useCurrentResume } from "@/features/resume/builder/draft";
 import { client, orpc, streamClient } from "@/libs/orpc/client";
 
 type BuilderAssistantChatProps = {
@@ -66,9 +67,25 @@ function hasAppliedPatch(message: UIMessage) {
 	return message.parts.some((part) => part.type === "tool-apply_resume_patch" && "output" in part && part.output);
 }
 
+export function shouldSendAnsweredAskUserQuestion({ messages }: { messages: UIMessage[] }) {
+	const message = messages.at(-1);
+	if (message?.role !== "assistant") return false;
+
+	return message.parts.some((part) => {
+		const toolPart = part as UIMessage["parts"][number] & { state?: string };
+
+		return (
+			toolPart.type === "tool-ask_user_question" &&
+			(toolPart.state === "output-available" || toolPart.state === "output-error")
+		);
+	});
+}
+
 export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }: BuilderAssistantChatProps) {
 	const queryClient = useQueryClient();
+	const resume = useCurrentResume();
 	const [input, setInput] = useState("");
+	const [isFlushingResume, setIsFlushingResume] = useState(false);
 	const [lastSyncedThreadId, setLastSyncedThreadId] = useState<string | null>(null);
 
 	const refreshThread = useCallback(async () => {
@@ -104,7 +121,7 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 		messages: initialMessages,
 		resume: !!activeRunId,
 		transport,
-		sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+		sendAutomaticallyWhen: shouldSendAnsweredAskUserQuestion,
 		onFinish: () => {
 			void refreshThread();
 		},
@@ -116,15 +133,23 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 		setMessages(initialMessages);
 	}, [initialMessages, lastSyncedThreadId, setMessages, threadId]);
 
-	const isStreaming = status === "submitted" || status === "streaming";
+	const isStreaming = status === "submitted" || status === "streaming" || isFlushingResume;
 
-	const send = () => {
+	const send = async () => {
 		const text = input.trim();
 		if (!text || isStreaming) return;
 
-		clearError();
-		sendMessage({ text });
-		setInput("");
+		setIsFlushingResume(true);
+		try {
+			await flushPendingResumeSave(resume.id);
+			clearError();
+			sendMessage({ text });
+			setInput("");
+		} catch {
+			toast.error(t`Save the latest resume changes before asking the assistant to edit it.`);
+		} finally {
+			setIsFlushingResume(false);
+		}
 	};
 
 	const stopRun = async () => {
