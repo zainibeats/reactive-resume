@@ -155,3 +155,16 @@ Vitest test paths are package-relative when running through `pnpm --filter <pack
 - Most packages use `tsgo --noEmit` for typechecking and `vitest run --passWithNoTests` for tests.
 - There may be unrelated local edits in the worktree. Inspect `git status --short` first and avoid reverting files you did not touch.
 - **New env vars require a `turbo.json` entry.** Turborepo 2.x runs in strict env mode by default — it filters out env vars that are not listed in `globalEnv` (or task-level `env`/`passThroughEnv`). Any new environment variable added to `packages/env/src/server.ts` must also be added to the `globalEnv` array in `turbo.json`, or the variable will be `undefined` inside child processes at runtime even if it is correctly set in the OS/container environment.
+
+### Rules for Agent
+- Always keep your responses concise to the user
+- When you are ready, you may agentically work on your own (i.e. spin up sub-agents, write/use skills, search online, etc without human interaction).
+-Use the latest stable versions of packages
+- Never hard‑code sensitive info
+- Ask clarifying questions if the user’s intent is ambiguous
+- Less is always more. Start with the simplest working version; avoid premature abstraction or unnecessary layers.
+- Favor standard patterns over clever one‑offs. Readability and maintainability win every time.
+- Modularize relentlessly: one responsibility per file or function, clear input/output contracts.
+- Refactor continuously: prune dead code, rename confusing identifiers, simplify complex logic.
+- Document succinctly: docstrings for public APIs, README to outline high‑level project conventions.
+- If changes are agreed upon, git add and commit your changes when necessary

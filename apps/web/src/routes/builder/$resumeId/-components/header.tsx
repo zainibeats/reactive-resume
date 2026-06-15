@@ -1,3 +1,4 @@
+import type { SyncDiff } from "./sync-diff";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
@@ -43,29 +44,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { getResumeErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useBuilderSidebar } from "../-store/sidebar";
-
-type SyncDiff = {
-	op: "add" | "remove" | "replace" | "move" | "copy" | "test";
-	path: string;
-	from: string | null;
-	hasPrevious: boolean;
-	hasNext: boolean;
-	previous: unknown | null;
-	next: unknown | null;
-	hasConflict: boolean;
-};
-
-function formatDiffValue(value: unknown, hasValue: boolean): string {
-	if (!hasValue) return t`No value`;
-	if (typeof value === "string") return value.length > 0 ? value : '""';
-	if (value === null) return "null";
-
-	try {
-		return JSON.stringify(value, null, 2);
-	} catch {
-		return String(value);
-	}
-}
+import { formatDiffPath, formatDiffValue } from "./sync-diff";
 
 function getDiffOperationLabel(op: SyncDiff["op"]) {
 	switch (op) {
@@ -109,10 +88,12 @@ function ParentChangeDiff({ diff }: { diff: SyncDiff }) {
 						<Trans>Conflict</Trans>
 					</Badge>
 				)}
-				<span className="min-w-0 flex-1 truncate font-mono text-muted-foreground text-xs">{diff.path}</span>
+				<span className="min-w-0 flex-1 truncate text-muted-foreground text-xs" title={diff.path}>
+					{formatDiffPath(diff.path)}
+				</span>
 				{diff.from && (
-					<span className="truncate font-mono text-muted-foreground text-xs">
-						<Trans>from {diff.from}</Trans>
+					<span className="truncate text-muted-foreground text-xs" title={diff.from}>
+						<Trans>from</Trans> {formatDiffPath(diff.from)}
 					</span>
 				)}
 			</div>
@@ -307,10 +288,8 @@ function ChildResumeSyncAlert() {
 						<div className="rounded-lg border bg-muted/30 p-3">
 							<div className="font-medium text-sm">{syncStatus.parent?.name}</div>
 							<div className="mt-1 text-muted-foreground text-sm">
-								<Trans>
-									Last synced revision {syncStatus.lastSyncedParentRevision}; parent revision{" "}
-									{syncStatus.parent?.revision}.
-								</Trans>
+								<Trans>Last synced revision</Trans> {syncStatus.lastSyncedParentRevision};{" "}
+								<Trans>parent revision</Trans> {syncStatus.parent?.revision}.
 							</div>
 						</div>
 
