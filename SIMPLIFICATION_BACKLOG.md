@@ -40,7 +40,7 @@ References:
 
 ## Medium Refactors
 
-### Make the rich text toolbar table-driven - Partially done
+### Make the rich text toolbar table-driven - Done
 
 `RichInput` manually repeats toolbar command state and rendering for marks, headings, alignment, lists, table operations, and utility commands.
 
@@ -50,10 +50,7 @@ Completed change:
 - Render headings and alignment dropdowns from config.
 - Render simple toggle/button groups from config.
 - Keep link and color pickers custom because they have richer behavior.
-
-Remaining follow-up:
-
-- Consider whether the editor state selector should also be descriptor-driven, or leave it explicit if the current shape remains easier to type.
+- Extracted shared toolbar state helpers and descriptor maps for repeated marks, headings, alignment, list commands, code commands, and table commands.
 
 References:
 

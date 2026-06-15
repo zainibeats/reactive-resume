@@ -206,32 +206,201 @@ export function RichInput({ value, onChange, style, className, editorClassName, 
 	);
 }
 
+type ToolbarToggleState = {
+	isActive: boolean;
+	canRun: boolean;
+	run: () => boolean;
+};
+
+type ToolbarButtonState = {
+	canRun: boolean;
+	run: () => boolean;
+};
+
+function createToolbarToggleState(editor: Editor, options: ToolbarToggleStateOptions): ToolbarToggleState {
+	return {
+		isActive: options.isActive(editor) ?? false,
+		canRun: options.canRun(editor) ?? false,
+		run: () => options.run(editor),
+	};
+}
+
+function createToolbarButtonState(editor: Editor, options: ToolbarButtonStateOptions): ToolbarButtonState {
+	return {
+		canRun: options.canRun(editor) ?? false,
+		run: () => options.run(editor),
+	};
+}
+
+type ToolbarToggleStateOptions = {
+	isActive: (editor: Editor) => boolean;
+	canRun: (editor: Editor) => boolean;
+	run: (editor: Editor) => boolean;
+};
+
+type ToolbarButtonStateOptions = {
+	canRun: (editor: Editor) => boolean;
+	run: (editor: Editor) => boolean;
+};
+
+const boldToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("bold"),
+	canRun: (editor: Editor) => editor.can().chain().toggleBold().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleBold().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const italicToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("italic"),
+	canRun: (editor: Editor) => editor.can().chain().toggleItalic().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleItalic().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const underlineToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("underline"),
+	canRun: (editor: Editor) => editor.can().chain().toggleUnderline().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleUnderline().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const strikeToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("strike"),
+	canRun: (editor: Editor) => editor.can().chain().toggleStrike().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleStrike().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const inlineCodeToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("code"),
+	canRun: (editor: Editor) => editor.can().chain().toggleCode().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleCode().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const codeBlockToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("codeBlock"),
+	canRun: (editor: Editor) => editor.can().chain().toggleCodeBlock().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run(),
+} satisfies ToolbarToggleStateOptions;
+
+function createHeadingToolbarState(editor: Editor, level: 1 | 2 | 3 | 4 | 5 | 6): ToolbarToggleState {
+	return createToolbarToggleState(editor, {
+		isActive: (editor) => editor.isActive("heading", { level }),
+		canRun: (editor) => editor.can().chain().toggleHeading({ level }).run(),
+		run: (editor) => editor.chain().focus().toggleHeading({ level }).run(),
+	});
+}
+
+function createTextAlignToolbarState(editor: Editor, textAlign: "left" | "center" | "right" | "justify") {
+	return createToolbarToggleState(editor, {
+		isActive: (editor) => editor.isActive({ textAlign }),
+		canRun: (editor) => editor.can().chain().toggleTextAlign(textAlign).run(),
+		run: (editor) => editor.chain().focus().toggleTextAlign(textAlign).run(),
+	});
+}
+
+const bulletListToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("bulletList"),
+	canRun: (editor: Editor) => editor.can().chain().toggleBulletList().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleBulletList().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const orderedListToolbarState = {
+	isActive: (editor: Editor) => editor.isActive("orderedList"),
+	canRun: (editor: Editor) => editor.can().chain().toggleOrderedList().run(),
+	run: (editor: Editor) => editor.chain().focus().toggleOrderedList().run(),
+} satisfies ToolbarToggleStateOptions;
+
+const liftListItemToolbarState = {
+	canRun: (editor: Editor) => editor.can().chain().liftListItem("listItem").run(),
+	run: (editor: Editor) => editor.chain().focus().liftListItem("listItem").run(),
+} satisfies ToolbarButtonStateOptions;
+
+const sinkListItemToolbarState = {
+	canRun: (editor: Editor) => editor.can().chain().sinkListItem("listItem").run(),
+	run: (editor: Editor) => editor.chain().focus().sinkListItem("listItem").run(),
+} satisfies ToolbarButtonStateOptions;
+
+const tableToolbarStates = {
+	insertTable: {
+		canRun: (editor: Editor) => editor.can().chain().insertTable().run(),
+		run: (editor: Editor) => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+	},
+	addColumnBefore: {
+		canRun: (editor: Editor) => editor.can().chain().addColumnBefore().run(),
+		run: (editor: Editor) => editor.chain().focus().addColumnBefore().run(),
+	},
+	addColumnAfter: {
+		canRun: (editor: Editor) => editor.can().chain().addColumnAfter().run(),
+		run: (editor: Editor) => editor.chain().focus().addColumnAfter().run(),
+	},
+	addRowBefore: {
+		canRun: (editor: Editor) => editor.can().chain().addRowBefore().run(),
+		run: (editor: Editor) => editor.chain().focus().addRowBefore().run(),
+	},
+	addRowAfter: {
+		canRun: (editor: Editor) => editor.can().chain().addRowAfter().run(),
+		run: (editor: Editor) => editor.chain().focus().addRowAfter().run(),
+	},
+	deleteColumn: {
+		canRun: (editor: Editor) => editor.can().chain().deleteColumn().run(),
+		run: (editor: Editor) => editor.chain().focus().deleteColumn().run(),
+	},
+	deleteRow: {
+		canRun: (editor: Editor) => editor.can().chain().deleteRow().run(),
+		run: (editor: Editor) => editor.chain().focus().deleteRow().run(),
+	},
+	deleteTable: {
+		canRun: (editor: Editor) => editor.can().chain().deleteTable().run(),
+		run: (editor: Editor) => editor.chain().focus().deleteTable().run(),
+	},
+} satisfies Record<string, ToolbarButtonStateOptions>;
+
 function useEditorToolbarState(editor: Editor) {
 	const prompt = usePrompt();
 
 	const state = useEditorState({
 		editor,
 		selector: (ctx) => {
+			const bold = createToolbarToggleState(ctx.editor, boldToolbarState);
+			const italic = createToolbarToggleState(ctx.editor, italicToolbarState);
+			const underline = createToolbarToggleState(ctx.editor, underlineToolbarState);
+			const strike = createToolbarToggleState(ctx.editor, strikeToolbarState);
+			const heading1 = createHeadingToolbarState(ctx.editor, 1);
+			const heading2 = createHeadingToolbarState(ctx.editor, 2);
+			const heading3 = createHeadingToolbarState(ctx.editor, 3);
+			const heading4 = createHeadingToolbarState(ctx.editor, 4);
+			const heading5 = createHeadingToolbarState(ctx.editor, 5);
+			const heading6 = createHeadingToolbarState(ctx.editor, 6);
+			const leftAlign = createTextAlignToolbarState(ctx.editor, "left");
+			const centerAlign = createTextAlignToolbarState(ctx.editor, "center");
+			const rightAlign = createTextAlignToolbarState(ctx.editor, "right");
+			const justifyAlign = createTextAlignToolbarState(ctx.editor, "justify");
+			const bulletList = createToolbarToggleState(ctx.editor, bulletListToolbarState);
+			const orderedList = createToolbarToggleState(ctx.editor, orderedListToolbarState);
+			const liftListItem = createToolbarButtonState(ctx.editor, liftListItemToolbarState);
+			const sinkListItem = createToolbarButtonState(ctx.editor, sinkListItemToolbarState);
+			const inlineCode = createToolbarToggleState(ctx.editor, inlineCodeToolbarState);
+			const codeBlock = createToolbarToggleState(ctx.editor, codeBlockToolbarState);
+			const table = Object.fromEntries(
+				Object.entries(tableToolbarStates).map(([name, options]) => [
+					name,
+					createToolbarButtonState(ctx.editor, options),
+				]),
+			) as Record<keyof typeof tableToolbarStates, ToolbarButtonState>;
+
 			return {
-				// Bold
-				isBold: ctx.editor.isActive("bold") ?? false,
-				canBold: ctx.editor.can().chain().toggleBold().run() ?? false,
-				toggleBold: () => ctx.editor.chain().focus().toggleBold().run(),
+				isBold: bold.isActive,
+				canBold: bold.canRun,
+				toggleBold: bold.run,
 
-				// Italic
-				isItalic: ctx.editor.isActive("italic") ?? false,
-				canItalic: ctx.editor.can().chain().toggleItalic().run() ?? false,
-				toggleItalic: () => ctx.editor.chain().focus().toggleItalic().run(),
+				isItalic: italic.isActive,
+				canItalic: italic.canRun,
+				toggleItalic: italic.run,
 
-				// Underline
-				isUnderline: ctx.editor.isActive("underline") ?? false,
-				canUnderline: ctx.editor.can().chain().toggleUnderline().run() ?? false,
-				toggleUnderline: () => ctx.editor.chain().focus().toggleUnderline().run(),
+				isUnderline: underline.isActive,
+				canUnderline: underline.canRun,
+				toggleUnderline: underline.run,
 
-				// Strike
-				isStrike: ctx.editor.isActive("strike") ?? false,
-				canStrike: ctx.editor.can().chain().toggleStrike().run() ?? false,
-				toggleStrike: () => ctx.editor.chain().focus().toggleStrike().run(),
+				isStrike: strike.isActive,
+				canStrike: strike.canRun,
+				toggleStrike: strike.run,
 
 				// Highlight Color
 				isHighlight: ctx.editor.isActive("highlight") ?? false,
@@ -246,78 +415,64 @@ function useEditorToolbarState(editor: Editor) {
 				setTextColor: (color: string) => ctx.editor.chain().focus().setColor(color).run(),
 				unsetTextColor: () => ctx.editor.chain().focus().unsetColor().run(),
 
-				// Heading 1
-				isHeading1: ctx.editor.isActive("heading", { level: 1 }) ?? false,
-				canHeading1: ctx.editor.can().chain().toggleHeading({ level: 1 }).run() ?? false,
-				toggleHeading1: () => ctx.editor.chain().focus().toggleHeading({ level: 1 }).run(),
+				isHeading1: heading1.isActive,
+				canHeading1: heading1.canRun,
+				toggleHeading1: heading1.run,
 
-				// Heading 2
-				isHeading2: ctx.editor.isActive("heading", { level: 2 }) ?? false,
-				canHeading2: ctx.editor.can().chain().toggleHeading({ level: 2 }).run() ?? false,
-				toggleHeading2: () => ctx.editor.chain().focus().toggleHeading({ level: 2 }).run(),
+				isHeading2: heading2.isActive,
+				canHeading2: heading2.canRun,
+				toggleHeading2: heading2.run,
 
-				// Heading 3
-				isHeading3: ctx.editor.isActive("heading", { level: 3 }) ?? false,
-				canHeading3: ctx.editor.can().chain().toggleHeading({ level: 3 }).run() ?? false,
-				toggleHeading3: () => ctx.editor.chain().focus().toggleHeading({ level: 3 }).run(),
+				isHeading3: heading3.isActive,
+				canHeading3: heading3.canRun,
+				toggleHeading3: heading3.run,
 
-				// Heading 4
-				isHeading4: ctx.editor.isActive("heading", { level: 4 }) ?? false,
-				canHeading4: ctx.editor.can().chain().toggleHeading({ level: 4 }).run() ?? false,
-				toggleHeading4: () => ctx.editor.chain().focus().toggleHeading({ level: 4 }).run(),
+				isHeading4: heading4.isActive,
+				canHeading4: heading4.canRun,
+				toggleHeading4: heading4.run,
 
-				// Heading 5
-				isHeading5: ctx.editor.isActive("heading", { level: 5 }) ?? false,
-				canHeading5: ctx.editor.can().chain().toggleHeading({ level: 5 }).run() ?? false,
-				toggleHeading5: () => ctx.editor.chain().focus().toggleHeading({ level: 5 }).run(),
+				isHeading5: heading5.isActive,
+				canHeading5: heading5.canRun,
+				toggleHeading5: heading5.run,
 
-				// Heading 6
-				isHeading6: ctx.editor.isActive("heading", { level: 6 }) ?? false,
-				canHeading6: ctx.editor.can().chain().toggleHeading({ level: 6 }).run() ?? false,
-				toggleHeading6: () => ctx.editor.chain().focus().toggleHeading({ level: 6 }).run(),
+				isHeading6: heading6.isActive,
+				canHeading6: heading6.canRun,
+				toggleHeading6: heading6.run,
 
 				// Paragraph
 				isParagraph: ctx.editor.isActive("paragraph") ?? false,
 				canParagraph: ctx.editor.can().chain().setParagraph().run() ?? false,
 				setParagraph: () => ctx.editor.chain().focus().setParagraph().run(),
 
-				// Left Align
-				isLeftAlign: ctx.editor.isActive({ textAlign: "left" }) ?? false,
-				canLeftAlign: ctx.editor.can().chain().toggleTextAlign("left").run() ?? false,
-				toggleLeftAlign: () => ctx.editor.chain().focus().toggleTextAlign("left").run(),
+				isLeftAlign: leftAlign.isActive,
+				canLeftAlign: leftAlign.canRun,
+				toggleLeftAlign: leftAlign.run,
 
-				// Center Align
-				isCenterAlign: ctx.editor.isActive({ textAlign: "center" }) ?? false,
-				canCenterAlign: ctx.editor.can().chain().toggleTextAlign("center").run() ?? false,
-				toggleCenterAlign: () => ctx.editor.chain().focus().toggleTextAlign("center").run(),
+				isCenterAlign: centerAlign.isActive,
+				canCenterAlign: centerAlign.canRun,
+				toggleCenterAlign: centerAlign.run,
 
-				// Right Align
-				isRightAlign: ctx.editor.isActive({ textAlign: "right" }) ?? false,
-				canRightAlign: ctx.editor.can().chain().toggleTextAlign("right").run() ?? false,
-				toggleRightAlign: () => ctx.editor.chain().focus().toggleTextAlign("right").run(),
+				isRightAlign: rightAlign.isActive,
+				canRightAlign: rightAlign.canRun,
+				toggleRightAlign: rightAlign.run,
 
-				// Justify Align
-				isJustifyAlign: ctx.editor.isActive({ textAlign: "justify" }) ?? false,
-				canJustifyAlign: ctx.editor.can().chain().toggleTextAlign("justify").run() ?? false,
-				toggleJustifyAlign: () => ctx.editor.chain().focus().toggleTextAlign("justify").run(),
+				isJustifyAlign: justifyAlign.isActive,
+				canJustifyAlign: justifyAlign.canRun,
+				toggleJustifyAlign: justifyAlign.run,
 
-				// Bullet List
-				isBulletList: ctx.editor.isActive("bulletList") ?? false,
-				canBulletList: ctx.editor.can().chain().toggleBulletList().run() ?? false,
-				toggleBulletList: () => ctx.editor.chain().focus().toggleBulletList().run(),
+				isBulletList: bulletList.isActive,
+				canBulletList: bulletList.canRun,
+				toggleBulletList: bulletList.run,
 
-				// Ordered List
-				isOrderedList: ctx.editor.isActive("orderedList") ?? false,
-				canOrderedList: ctx.editor.can().chain().toggleOrderedList().run() ?? false,
-				toggleOrderedList: () => ctx.editor.chain().focus().toggleOrderedList().run(),
+				isOrderedList: orderedList.isActive,
+				canOrderedList: orderedList.canRun,
+				toggleOrderedList: orderedList.run,
 
-				// Outdent List Item
-				canLiftListItem: ctx.editor.can().chain().liftListItem("listItem").run() ?? false,
-				liftListItem: () => ctx.editor.chain().focus().liftListItem("listItem").run(),
+				canLiftListItem: liftListItem.canRun,
+				liftListItem: liftListItem.run,
 
-				// Indent List Item
-				canSinkListItem: ctx.editor.can().chain().sinkListItem("listItem").run() ?? false,
-				sinkListItem: () => ctx.editor.chain().focus().sinkListItem("listItem").run(),
+				canSinkListItem: sinkListItem.canRun,
+				sinkListItem: sinkListItem.run,
 
 				// Link
 				isLink: ctx.editor.isActive("link") ?? false,
@@ -342,33 +497,30 @@ function useEditorToolbarState(editor: Editor) {
 				},
 				unsetLink: () => ctx.editor.chain().focus().unsetLink().run(),
 
-				// Inline Code
-				isInlineCode: ctx.editor.isActive("code") ?? false,
-				canInlineCode: ctx.editor.can().chain().toggleCode().run() ?? false,
-				toggleInlineCode: () => ctx.editor.chain().focus().toggleCode().run(),
+				isInlineCode: inlineCode.isActive,
+				canInlineCode: inlineCode.canRun,
+				toggleInlineCode: inlineCode.run,
 
-				// Code Block
-				isCodeBlock: ctx.editor.isActive("codeBlock") ?? false,
-				canCodeBlock: ctx.editor.can().chain().toggleCodeBlock().run() ?? false,
-				toggleCodeBlock: () => ctx.editor.chain().focus().toggleCodeBlock().run(),
+				isCodeBlock: codeBlock.isActive,
+				canCodeBlock: codeBlock.canRun,
+				toggleCodeBlock: codeBlock.run,
 
-				// Table
-				insertTable: () => ctx.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
-				canInsertTable: ctx.editor.can().chain().insertTable().run() ?? false,
-				addColumnBefore: () => ctx.editor.chain().focus().addColumnBefore().run(),
-				canAddColumnBefore: ctx.editor.can().chain().addColumnBefore().run() ?? false,
-				addColumnAfter: () => ctx.editor.chain().focus().addColumnAfter().run(),
-				canAddColumnAfter: ctx.editor.can().chain().addColumnAfter().run() ?? false,
-				addRowBefore: () => ctx.editor.chain().focus().addRowBefore().run(),
-				canAddRowBefore: ctx.editor.can().chain().addRowBefore().run() ?? false,
-				addRowAfter: () => ctx.editor.chain().focus().addRowAfter().run(),
-				canAddRowAfter: ctx.editor.can().chain().addRowAfter().run() ?? false,
-				deleteColumn: () => ctx.editor.chain().focus().deleteColumn().run(),
-				canDeleteColumn: ctx.editor.can().chain().deleteColumn().run() ?? false,
-				deleteRow: () => ctx.editor.chain().focus().deleteRow().run(),
-				canDeleteRow: ctx.editor.can().chain().deleteRow().run() ?? false,
-				deleteTable: () => ctx.editor.chain().focus().deleteTable().run(),
-				canDeleteTable: ctx.editor.can().chain().deleteTable().run() ?? false,
+				insertTable: table.insertTable.run,
+				canInsertTable: table.insertTable.canRun,
+				addColumnBefore: table.addColumnBefore.run,
+				canAddColumnBefore: table.addColumnBefore.canRun,
+				addColumnAfter: table.addColumnAfter.run,
+				canAddColumnAfter: table.addColumnAfter.canRun,
+				addRowBefore: table.addRowBefore.run,
+				canAddRowBefore: table.addRowBefore.canRun,
+				addRowAfter: table.addRowAfter.run,
+				canAddRowAfter: table.addRowAfter.canRun,
+				deleteColumn: table.deleteColumn.run,
+				canDeleteColumn: table.deleteColumn.canRun,
+				deleteRow: table.deleteRow.run,
+				canDeleteRow: table.deleteRow.canRun,
+				deleteTable: table.deleteTable.run,
+				canDeleteTable: table.deleteTable.canRun,
 
 				// Hard Break
 				setHardBreak: () => ctx.editor.chain().focus().setHardBreak().run(),
