@@ -25,6 +25,17 @@ import { publishResumeUpdated } from "./events";
 
 type DbOrTx = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
 
+type ResumeSyncDiff = {
+	op: JsonPatchOperation["op"];
+	path: string;
+	from: string | null;
+	hasPrevious: boolean;
+	hasNext: boolean;
+	previous: unknown | null;
+	next: unknown | null;
+	hasConflict: boolean;
+};
+
 function resumeVersionConflict(updatedAt: Date) {
 	return new ORPCError("RESUME_VERSION_CONFLICT", {
 		status: 409,
@@ -253,8 +264,59 @@ function getSyncPlan(input: { parentData: ResumeData; parentSnapshot: ResumeData
 	return {
 		operations,
 		conflicts,
+		diffs: createResumeSyncDiffs({
+			operations,
+			conflicts,
+			previousData: input.parentSnapshot,
+			nextData: input.parentData,
+		}),
 		hasConflicts: conflicts.length > 0,
 	};
+}
+
+function decodeJsonPointerSegment(segment: string): string {
+	return segment.replaceAll("~1", "/").replaceAll("~0", "~");
+}
+
+function getValueAtJsonPointer(document: unknown, path: string): unknown {
+	if (path === "") return document;
+	if (!path.startsWith("/")) return undefined;
+
+	return path
+		.slice(1)
+		.split("/")
+		.map(decodeJsonPointerSegment)
+		.reduce<unknown>((value, segment) => {
+			if (value === undefined || value === null) return undefined;
+			if (Array.isArray(value)) return value[segment === "-" ? value.length : Number(segment)];
+			if (typeof value === "object") return (value as Record<string, unknown>)[segment];
+			return undefined;
+		}, document);
+}
+
+function createResumeSyncDiffs(input: {
+	operations: JsonPatchOperation[];
+	conflicts: string[];
+	previousData: ResumeData;
+	nextData: ResumeData;
+}): ResumeSyncDiff[] {
+	return input.operations.map((operation) => {
+		const previous = getValueAtJsonPointer(input.previousData, operation.path);
+		const next = getValueAtJsonPointer(input.nextData, operation.path);
+
+		return {
+			op: operation.op,
+			path: operation.path,
+			from: "from" in operation ? operation.from : null,
+			hasPrevious: operation.op !== "add" && previous !== undefined,
+			hasNext: operation.op !== "remove" && next !== undefined,
+			previous: operation.op !== "add" && previous !== undefined ? previous : null,
+			next: operation.op !== "remove" && next !== undefined ? next : null,
+			hasConflict: input.conflicts.some(
+				(conflict) => operation.path === conflict || operation.path.startsWith(`${conflict}/`),
+			),
+		};
+	});
 }
 
 export const resumeService = {
@@ -470,6 +532,7 @@ export const resumeService = {
 				isBehind: false,
 				operationCount: 0,
 				operations: [],
+				diffs: [],
 				conflicts: [],
 				hasConflicts: false,
 			};
@@ -495,6 +558,7 @@ export const resumeService = {
 				isBehind: false,
 				operationCount: 0,
 				operations: [],
+				diffs: [],
 				conflicts: [],
 				hasConflicts: false,
 			};
@@ -519,6 +583,7 @@ export const resumeService = {
 			isBehind: plan.operations.length > 0 || child.parentRevision !== parent.revision,
 			operationCount: plan.operations.length,
 			operations: plan.operations,
+			diffs: plan.diffs,
 			conflicts: plan.conflicts,
 			hasConflicts: plan.hasConflicts,
 		};

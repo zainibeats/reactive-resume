@@ -19,6 +19,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
+import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
 	Dialog,
@@ -42,6 +43,101 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { getResumeErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useBuilderSidebar } from "../-store/sidebar";
+
+type SyncDiff = {
+	op: "add" | "remove" | "replace" | "move" | "copy" | "test";
+	path: string;
+	from: string | null;
+	hasPrevious: boolean;
+	hasNext: boolean;
+	previous: unknown | null;
+	next: unknown | null;
+	hasConflict: boolean;
+};
+
+function formatDiffValue(value: unknown, hasValue: boolean): string {
+	if (!hasValue) return t`No value`;
+	if (typeof value === "string") return value.length > 0 ? value : '""';
+	if (value === null) return "null";
+
+	try {
+		return JSON.stringify(value, null, 2);
+	} catch {
+		return String(value);
+	}
+}
+
+function getDiffOperationLabel(op: SyncDiff["op"]) {
+	switch (op) {
+		case "add":
+			return t`Added`;
+		case "remove":
+			return t`Removed`;
+		case "replace":
+			return t`Changed`;
+		case "move":
+			return t`Moved`;
+		case "copy":
+			return t`Copied`;
+		case "test":
+			return t`Checked`;
+	}
+}
+
+function getDiffOperationVariant(op: SyncDiff["op"]): "default" | "secondary" | "destructive" | "outline" {
+	switch (op) {
+		case "add":
+		case "copy":
+			return "default";
+		case "remove":
+			return "destructive";
+		case "replace":
+		case "move":
+			return "secondary";
+		case "test":
+			return "outline";
+	}
+}
+
+function ParentChangeDiff({ diff }: { diff: SyncDiff }) {
+	return (
+		<li className="overflow-hidden rounded-lg border bg-background">
+			<div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-3 py-2">
+				<Badge variant={getDiffOperationVariant(diff.op)}>{getDiffOperationLabel(diff.op)}</Badge>
+				{diff.hasConflict && (
+					<Badge variant="destructive">
+						<Trans>Conflict</Trans>
+					</Badge>
+				)}
+				<span className="min-w-0 flex-1 truncate font-mono text-muted-foreground text-xs">{diff.path}</span>
+				{diff.from && (
+					<span className="truncate font-mono text-muted-foreground text-xs">
+						<Trans>from {diff.from}</Trans>
+					</span>
+				)}
+			</div>
+
+			<div className="grid gap-0 md:grid-cols-2">
+				<div className="min-w-0 border-b md:border-e md:border-b-0">
+					<div className="border-b bg-destructive/5 px-3 py-1.5 font-medium text-destructive text-xs">
+						<Trans>Previous</Trans>
+					</div>
+					<pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words p-3 font-mono text-muted-foreground text-xs">
+						{formatDiffValue(diff.previous, diff.hasPrevious)}
+					</pre>
+				</div>
+				<div className="min-w-0">
+					<div className="border-b bg-primary/5 px-3 py-1.5 font-medium text-primary text-xs">
+						<Trans>Parent update</Trans>
+					</div>
+					<pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words p-3 font-mono text-xs">
+						{formatDiffValue(diff.next, diff.hasNext)}
+					</pre>
+				</div>
+			</div>
+		</li>
+	);
+}
 
 export function BuilderHeader() {
 	const resume = useCurrentResume();
@@ -194,7 +290,7 @@ function ChildResumeSyncAlert() {
 			</div>
 
 			<Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-				<DialogContent>
+				<DialogContent className="xl:max-w-5xl">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-x-2">
 							<GitBranchIcon />
@@ -238,14 +334,9 @@ function ChildResumeSyncAlert() {
 								<Trans>Parent changes</Trans>
 							</div>
 							{syncStatus.operations.length > 0 ? (
-								<ul className="mt-2 max-h-56 divide-y overflow-auto rounded-lg border text-sm">
-									{syncStatus.operations.map((operation, index) => (
-										<li key={`${operation.op}-${operation.path}-${index}`} className="flex items-center gap-x-2 p-2">
-											<span className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-xs uppercase">
-												{operation.op}
-											</span>
-											<span className="truncate font-mono text-muted-foreground text-xs">{operation.path}</span>
-										</li>
+								<ul className="mt-2 max-h-[min(60svh,36rem)] space-y-3 overflow-auto pe-1 text-sm">
+									{syncStatus.diffs.map((diff, index) => (
+										<ParentChangeDiff key={`${diff.op}-${diff.path}-${index}`} diff={diff} />
 									))}
 								</ul>
 							) : (

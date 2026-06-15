@@ -33,6 +33,17 @@ const resumeOutputSchema = resumeSchema
 	.omit({ password: true, userId: true, createdAt: true, parentData: true })
 	.extend({ hasPassword: z.boolean() });
 
+const syncDiffSchema = z.object({
+	op: z.enum(["add", "remove", "replace", "move", "copy", "test"]),
+	path: z.string(),
+	from: z.string().nullable(),
+	hasPrevious: z.boolean(),
+	hasNext: z.boolean(),
+	previous: z.unknown().nullable(),
+	next: z.unknown().nullable(),
+	hasConflict: z.boolean(),
+});
+
 export const resumeDto = {
 	list: {
 		input: z
@@ -148,6 +159,7 @@ export const resumeDto = {
 			isBehind: z.boolean(),
 			operationCount: z.number().int().min(0),
 			operations: z.array(jsonPatchOperationSchema),
+			diffs: z.array(syncDiffSchema),
 			conflicts: z.array(z.string()),
 			hasConflicts: z.boolean(),
 		}),
