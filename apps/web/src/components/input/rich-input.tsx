@@ -1,4 +1,5 @@
 import type { Editor, UseEditorOptions } from "@tiptap/react";
+import type { ReactNode } from "react";
 import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
@@ -48,7 +49,6 @@ import { EditorContent, EditorContext, useEditor, useEditorState } from "@tiptap
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { match } from "ts-pattern";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@reactive-resume/ui/components/dialog";
@@ -384,6 +384,43 @@ function useEditorToolbarState(editor: Editor) {
 
 type EditorToolbarState = ReturnType<typeof useEditorToolbarState>;
 
+type ToolbarSize = "sm" | "lg";
+
+type ToolbarToggleAction = {
+	id: string;
+	title: string;
+	icon: ReactNode;
+	pressed: boolean;
+	disabled: boolean;
+	onPressedChange: () => void;
+};
+
+type ToolbarButtonAction = {
+	id: string;
+	title?: string;
+	icon: ReactNode;
+	disabled?: boolean;
+	onClick: () => unknown;
+};
+
+type ToolbarCheckboxAction = {
+	id: string;
+	label: ReactNode;
+	icon: ReactNode;
+	checked: boolean;
+	disabled: boolean;
+	onCheckedChange: () => void;
+};
+
+type ToolbarMenuAction = {
+	id: string;
+	label: ReactNode;
+	icon: ReactNode;
+	disabled: boolean;
+	variant?: "destructive";
+	onClick: () => unknown;
+};
+
 export function resolveHighlightToolbarState(isHighlight: boolean, highlightColor: string | null) {
 	const visibleHighlightColor = highlightColor ?? (isHighlight ? defaultHighlightColor : undefined);
 
@@ -401,61 +438,370 @@ function EditorToolbar({ editor, isFullscreen }: EditorToolbarProps) {
 	return renderEditorToolbar(state, isFullscreen);
 }
 
+type ToolbarToggleProps = {
+	action: ToolbarToggleAction;
+	size: ToolbarSize;
+};
+
+function ToolbarToggle({ action, size }: ToolbarToggleProps) {
+	return (
+		<Toggle
+			size={size}
+			tabIndex={-1}
+			className="rounded-none"
+			title={action.title}
+			pressed={action.pressed}
+			disabled={action.disabled}
+			onPressedChange={action.onPressedChange}
+		>
+			{action.icon}
+		</Toggle>
+	);
+}
+
+type ToolbarButtonProps = {
+	action: ToolbarButtonAction;
+	size: ToolbarSize;
+};
+
+function ToolbarButton({ action, size }: ToolbarButtonProps) {
+	return (
+		<Button
+			size={size}
+			tabIndex={-1}
+			variant="ghost"
+			className="rounded-none"
+			title={action.title}
+			disabled={action.disabled}
+			onClick={action.onClick}
+		>
+			{action.icon}
+		</Button>
+	);
+}
+
+type ToolbarSelectMenuProps = {
+	actions: ToolbarCheckboxAction[];
+	defaultIcon: ReactNode;
+	separatorAfter?: string;
+	size: ToolbarSize;
+};
+
+function ToolbarSelectMenu({ actions, defaultIcon, separatorAfter, size }: ToolbarSelectMenuProps) {
+	const activeAction = actions.find((action) => action.checked);
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger
+				render={
+					<Button size={size} tabIndex={-1} variant="ghost" className="rounded-none">
+						{activeAction?.icon ?? defaultIcon}
+					</Button>
+				}
+			/>
+
+			<DropdownMenuContent>
+				{actions.map((action) => (
+					<FragmentWithSeparator key={action.id} separator={action.id === separatorAfter}>
+						<DropdownMenuCheckboxItem
+							disabled={action.disabled}
+							checked={action.checked}
+							onCheckedChange={action.onCheckedChange}
+						>
+							{action.label}
+						</DropdownMenuCheckboxItem>
+					</FragmentWithSeparator>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
+
+type FragmentWithSeparatorProps = {
+	children: ReactNode;
+	separator: boolean;
+};
+
+function FragmentWithSeparator({ children, separator }: FragmentWithSeparatorProps) {
+	return (
+		<>
+			{children}
+			{separator && <DropdownMenuSeparator />}
+		</>
+	);
+}
+
 function renderEditorToolbar(state: EditorToolbarState, isFullscreen: boolean) {
 	const { visibleHighlightColor, canClearHighlight } = resolveHighlightToolbarState(
 		state.isHighlight,
 		state.highlightColor,
 	);
+	const toolbarSize = isFullscreen ? "lg" : "sm";
+	const markActions = [
+		{
+			id: "bold",
+			title: t`Bold`,
+			icon: <TextBolderIcon className="size-3.5" />,
+			pressed: state.isBold,
+			disabled: !state.canBold,
+			onPressedChange: state.toggleBold,
+		},
+		{
+			id: "italic",
+			title: t`Italic`,
+			icon: <TextItalicIcon className="size-3.5" />,
+			pressed: state.isItalic,
+			disabled: !state.canItalic,
+			onPressedChange: state.toggleItalic,
+		},
+		{
+			id: "underline",
+			title: t`Underline`,
+			icon: <TextUnderlineIcon className="size-3.5" />,
+			pressed: state.isUnderline,
+			disabled: !state.canUnderline,
+			onPressedChange: state.toggleUnderline,
+		},
+		{
+			id: "strike",
+			title: t`Strike`,
+			icon: <TextStrikethroughIcon className="size-3.5" />,
+			pressed: state.isStrike,
+			disabled: !state.canStrike,
+			onPressedChange: state.toggleStrike,
+		},
+	] satisfies ToolbarToggleAction[];
+	const blockActions = [
+		{
+			id: "paragraph",
+			label: <Trans>Paragraph</Trans>,
+			icon: <ParagraphIcon className="size-3.5" />,
+			checked: state.isParagraph,
+			disabled: !state.canParagraph,
+			onCheckedChange: state.setParagraph,
+		},
+		{
+			id: "heading-1",
+			label: <Trans>Heading 1</Trans>,
+			icon: <TextHOneIcon className="size-3.5" />,
+			checked: state.isHeading1,
+			disabled: !state.canHeading1,
+			onCheckedChange: state.toggleHeading1,
+		},
+		{
+			id: "heading-2",
+			label: <Trans>Heading 2</Trans>,
+			icon: <TextHTwoIcon className="size-3.5" />,
+			checked: state.isHeading2,
+			disabled: !state.canHeading2,
+			onCheckedChange: state.toggleHeading2,
+		},
+		{
+			id: "heading-3",
+			label: <Trans>Heading 3</Trans>,
+			icon: <TextHThreeIcon className="size-3.5" />,
+			checked: state.isHeading3,
+			disabled: !state.canHeading3,
+			onCheckedChange: state.toggleHeading3,
+		},
+		{
+			id: "heading-4",
+			label: <Trans>Heading 4</Trans>,
+			icon: <TextHFourIcon className="size-3.5" />,
+			checked: state.isHeading4,
+			disabled: !state.canHeading4,
+			onCheckedChange: state.toggleHeading4,
+		},
+		{
+			id: "heading-5",
+			label: <Trans>Heading 5</Trans>,
+			icon: <TextHFiveIcon className="size-3.5" />,
+			checked: state.isHeading5,
+			disabled: !state.canHeading5,
+			onCheckedChange: state.toggleHeading5,
+		},
+		{
+			id: "heading-6",
+			label: <Trans>Heading 6</Trans>,
+			icon: <TextHSixIcon className="size-3.5" />,
+			checked: state.isHeading6,
+			disabled: !state.canHeading6,
+			onCheckedChange: state.toggleHeading6,
+		},
+	] satisfies ToolbarCheckboxAction[];
+	const alignActions = [
+		{
+			id: "left",
+			label: <Trans>Left Align</Trans>,
+			icon: <TextAlignLeftIcon className="size-3.5" />,
+			checked: state.isLeftAlign,
+			disabled: !state.canLeftAlign,
+			onCheckedChange: state.toggleLeftAlign,
+		},
+		{
+			id: "center",
+			label: <Trans>Center Align</Trans>,
+			icon: <TextAlignCenterIcon className="size-3.5" />,
+			checked: state.isCenterAlign,
+			disabled: !state.canCenterAlign,
+			onCheckedChange: state.toggleCenterAlign,
+		},
+		{
+			id: "right",
+			label: <Trans>Right Align</Trans>,
+			icon: <TextAlignRightIcon className="size-3.5" />,
+			checked: state.isRightAlign,
+			disabled: !state.canRightAlign,
+			onCheckedChange: state.toggleRightAlign,
+		},
+		{
+			id: "justify",
+			label: <Trans>Justify Align</Trans>,
+			icon: <TextAlignJustifyIcon className="size-3.5" />,
+			checked: state.isJustifyAlign,
+			disabled: !state.canJustifyAlign,
+			onCheckedChange: state.toggleJustifyAlign,
+		},
+	] satisfies ToolbarCheckboxAction[];
+	const listToggleActions = [
+		{
+			id: "bullet-list",
+			title: t`Bullet List`,
+			icon: <ListBulletsIcon className="size-3.5" />,
+			pressed: state.isBulletList,
+			disabled: !state.canBulletList,
+			onPressedChange: state.toggleBulletList,
+		},
+		{
+			id: "ordered-list",
+			title: t`Ordered List`,
+			icon: <ListNumbersIcon className="size-3.5" />,
+			pressed: state.isOrderedList,
+			disabled: !state.canOrderedList,
+			onPressedChange: state.toggleOrderedList,
+		},
+	] satisfies ToolbarToggleAction[];
+	const listButtonActions = [
+		{
+			id: "outdent",
+			icon: <TextOutdentIcon className="size-3.5" />,
+			disabled: !state.canLiftListItem,
+			onClick: state.liftListItem,
+		},
+		{
+			id: "indent",
+			icon: <TextIndentIcon className="size-3.5" />,
+			disabled: !state.canSinkListItem,
+			onClick: state.sinkListItem,
+		},
+	] satisfies ToolbarButtonAction[];
+	const codeActions = [
+		{
+			id: "inline-code",
+			title: t`Inline Code`,
+			icon: <CodeSimpleIcon className="size-3.5" />,
+			pressed: state.isInlineCode,
+			disabled: !state.canInlineCode,
+			onPressedChange: state.toggleInlineCode,
+		},
+		{
+			id: "code-block",
+			title: t`Code Block`,
+			icon: <CodeBlockIcon className="size-3.5" />,
+			pressed: state.isCodeBlock,
+			disabled: !state.canCodeBlock,
+			onPressedChange: state.toggleCodeBlock,
+		},
+	] satisfies ToolbarToggleAction[];
+	const tableActionGroups: ToolbarMenuAction[][] = [
+		[
+			{
+				id: "insert-table",
+				label: <Trans>Insert Table</Trans>,
+				icon: <PlusIcon />,
+				disabled: !state.canInsertTable,
+				onClick: state.insertTable,
+			},
+		],
+		[
+			{
+				id: "add-column-before",
+				label: <Trans>Add Column Before</Trans>,
+				icon: <ColumnsPlusLeftIcon />,
+				disabled: !state.canAddColumnBefore,
+				onClick: state.addColumnBefore,
+			},
+			{
+				id: "add-column-after",
+				label: <Trans>Add Column After</Trans>,
+				icon: <ColumnsPlusRightIcon />,
+				disabled: !state.canAddColumnAfter,
+				onClick: state.addColumnAfter,
+			},
+		],
+		[
+			{
+				id: "add-row-before",
+				label: <Trans>Add Row Before</Trans>,
+				icon: <RowsPlusTopIcon />,
+				disabled: !state.canAddRowBefore,
+				onClick: state.addRowBefore,
+			},
+			{
+				id: "add-row-after",
+				label: <Trans>Add Row After</Trans>,
+				icon: <RowsPlusBottomIcon />,
+				disabled: !state.canAddRowAfter,
+				onClick: state.addRowAfter,
+			},
+		],
+		[
+			{
+				id: "delete-column",
+				label: <Trans>Delete Column</Trans>,
+				icon: <TrashSimpleIcon />,
+				disabled: !state.canDeleteColumn,
+				onClick: state.deleteColumn,
+			},
+			{
+				id: "delete-row",
+				label: <Trans>Delete Row</Trans>,
+				icon: <TrashSimpleIcon />,
+				disabled: !state.canDeleteRow,
+				onClick: state.deleteRow,
+			},
+		],
+		[
+			{
+				id: "delete-table",
+				label: <Trans>Delete Table</Trans>,
+				icon: <TrashSimpleIcon />,
+				disabled: !state.canDeleteTable,
+				variant: "destructive",
+				onClick: state.deleteTable,
+			},
+		],
+	];
+	const utilityActions = [
+		{
+			id: "hard-break",
+			title: t`New Line`,
+			icon: <KeyReturnIcon className="size-3.5" />,
+			onClick: state.setHardBreak,
+		},
+		{
+			id: "horizontal-rule",
+			title: t`Separator`,
+			icon: <MinusIcon className="size-3.5" />,
+			onClick: state.setHorizontalRule,
+		},
+	] satisfies ToolbarButtonAction[];
 
 	return (
 		<div className="flex flex-wrap items-center gap-y-0.5 rounded-md rounded-b-none border border-b-0">
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Bold`}
-				pressed={state.isBold}
-				disabled={!state.canBold}
-				onPressedChange={state.toggleBold}
-			>
-				<TextBolderIcon className="size-3.5" />
-			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Italic`}
-				pressed={state.isItalic}
-				disabled={!state.canItalic}
-				onPressedChange={state.toggleItalic}
-			>
-				<TextItalicIcon className="size-3.5" />
-			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Underline`}
-				pressed={state.isUnderline}
-				disabled={!state.canUnderline}
-				onPressedChange={state.toggleUnderline}
-			>
-				<TextUnderlineIcon className="size-3.5" />
-			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Strike`}
-				pressed={state.isStrike}
-				disabled={!state.canStrike}
-				onPressedChange={state.toggleStrike}
-			>
-				<TextStrikethroughIcon className="size-3.5" />
-			</Toggle>
+			{markActions.map((action) => (
+				<ToolbarToggle key={action.id} action={action} size={toolbarSize} />
+			))}
 
 			<ColorPicker
 				defaultValue={defaultHighlightColor}
@@ -465,7 +811,7 @@ function renderEditorToolbar(state: EditorToolbarState, isFullscreen: boolean) {
 					<PopoverTrigger
 						render={
 							<Button
-								size={isFullscreen ? "lg" : "sm"}
+								size={toolbarSize}
 								tabIndex={-1}
 								variant="ghost"
 								className={cn("rounded-none px-2", state.isHighlight && "bg-muted text-foreground")}
@@ -525,7 +871,7 @@ function renderEditorToolbar(state: EditorToolbarState, isFullscreen: boolean) {
 					<PopoverTrigger
 						render={
 							<Button
-								size={isFullscreen ? "lg" : "sm"}
+								size={toolbarSize}
 								tabIndex={-1}
 								variant="ghost"
 								className={cn("rounded-none px-2", state.textColor && "bg-muted text-foreground")}
@@ -579,299 +925,79 @@ function renderEditorToolbar(state: EditorToolbarState, isFullscreen: boolean) {
 
 			<div className="mx-1 h-5 w-px bg-border" />
 
-			<DropdownMenu>
-				<DropdownMenuTrigger
-					render={
-						<Button size={isFullscreen ? "lg" : "sm"} tabIndex={-1} variant="ghost" className="rounded-none">
-							{match(state)
-								.with({ isParagraph: true }, () => <ParagraphIcon className="size-3.5" />)
-								.with({ isHeading1: true }, () => <TextHOneIcon className="size-3.5" />)
-								.with({ isHeading2: true }, () => <TextHTwoIcon className="size-3.5" />)
-								.with({ isHeading3: true }, () => <TextHThreeIcon className="size-3.5" />)
-								.with({ isHeading4: true }, () => <TextHFourIcon className="size-3.5" />)
-								.with({ isHeading5: true }, () => <TextHFiveIcon className="size-3.5" />)
-								.with({ isHeading6: true }, () => <TextHSixIcon className="size-3.5" />)
-								.otherwise(() => (
-									<ParagraphIcon className="size-3.5" />
-								))}
-						</Button>
-					}
-				/>
+			<ToolbarSelectMenu
+				actions={blockActions}
+				defaultIcon={<ParagraphIcon className="size-3.5" />}
+				separatorAfter="paragraph"
+				size={toolbarSize}
+			/>
 
-				<DropdownMenuContent>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canParagraph}
-						checked={state.isParagraph}
-						onCheckedChange={state.setParagraph}
-					>
-						<Trans>Paragraph</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading1}
-						checked={state.isHeading1}
-						onCheckedChange={state.toggleHeading1}
-					>
-						<Trans>Heading 1</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading2}
-						checked={state.isHeading2}
-						onCheckedChange={state.toggleHeading2}
-					>
-						<Trans>Heading 2</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading3}
-						checked={state.isHeading3}
-						onCheckedChange={state.toggleHeading3}
-					>
-						<Trans>Heading 3</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading4}
-						checked={state.isHeading4}
-						onCheckedChange={state.toggleHeading4}
-					>
-						<Trans>Heading 4</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading5}
-						checked={state.isHeading5}
-						onCheckedChange={state.toggleHeading5}
-					>
-						<Trans>Heading 5</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canHeading6}
-						checked={state.isHeading6}
-						onCheckedChange={state.toggleHeading6}
-					>
-						<Trans>Heading 6</Trans>
-					</DropdownMenuCheckboxItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-
-			<DropdownMenu>
-				<DropdownMenuTrigger
-					render={
-						<Button size={isFullscreen ? "lg" : "sm"} tabIndex={-1} variant="ghost" className="rounded-none">
-							{match(state)
-								.with({ isLeftAlign: true }, () => <TextAlignLeftIcon className="size-3.5" />)
-								.with({ isCenterAlign: true }, () => <TextAlignCenterIcon className="size-3.5" />)
-								.with({ isRightAlign: true }, () => <TextAlignRightIcon className="size-3.5" />)
-								.with({ isJustifyAlign: true }, () => <TextAlignJustifyIcon className="size-3.5" />)
-								.otherwise(() => (
-									<TextAlignLeftIcon className="size-3.5" />
-								))}
-						</Button>
-					}
-				/>
-
-				<DropdownMenuContent>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canLeftAlign}
-						checked={state.isLeftAlign}
-						onCheckedChange={state.toggleLeftAlign}
-					>
-						<Trans>Left Align</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canCenterAlign}
-						checked={state.isCenterAlign}
-						onCheckedChange={state.toggleCenterAlign}
-					>
-						<Trans>Center Align</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canRightAlign}
-						checked={state.isRightAlign}
-						onCheckedChange={state.toggleRightAlign}
-					>
-						<Trans>Right Align</Trans>
-					</DropdownMenuCheckboxItem>
-					<DropdownMenuCheckboxItem
-						disabled={!state.canJustifyAlign}
-						checked={state.isJustifyAlign}
-						onCheckedChange={state.toggleJustifyAlign}
-					>
-						<Trans>Justify Align</Trans>
-					</DropdownMenuCheckboxItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<ToolbarSelectMenu
+				actions={alignActions}
+				defaultIcon={<TextAlignLeftIcon className="size-3.5" />}
+				size={toolbarSize}
+			/>
 
 			<div className="mx-1 h-5 w-px bg-border" />
 
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Bullet List`}
-				pressed={state.isBulletList}
-				disabled={!state.canBulletList}
-				onPressedChange={state.toggleBulletList}
-			>
-				<ListBulletsIcon className="size-3.5" />
-			</Toggle>
+			{listToggleActions.map((action) => (
+				<ToolbarToggle key={action.id} action={action} size={toolbarSize} />
+			))}
 
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Ordered List`}
-				pressed={state.isOrderedList}
-				disabled={!state.canOrderedList}
-				onPressedChange={state.toggleOrderedList}
-			>
-				<ListNumbersIcon className="size-3.5" />
-			</Toggle>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				disabled={!state.canLiftListItem}
-				onClick={state.liftListItem}
-			>
-				<TextOutdentIcon className="size-3.5" />
-			</Button>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				disabled={!state.canSinkListItem}
-				onClick={state.sinkListItem}
-			>
-				<TextIndentIcon className="size-3.5" />
-			</Button>
+			{listButtonActions.map((action) => (
+				<ToolbarButton key={action.id} action={action} size={toolbarSize} />
+			))}
 
 			<div className="mx-1 h-5 w-px bg-border" />
 
 			{state.isLink ? (
-				<Button
-					size={isFullscreen ? "lg" : "sm"}
-					tabIndex={-1}
-					variant="ghost"
-					className="rounded-none"
-					onClick={state.unsetLink}
-				>
+				<Button size={toolbarSize} tabIndex={-1} variant="ghost" className="rounded-none" onClick={state.unsetLink}>
 					<LinkBreakIcon className="size-3.5" />
 				</Button>
 			) : (
-				<Button
-					size={isFullscreen ? "lg" : "sm"}
-					tabIndex={-1}
-					variant="ghost"
-					className="rounded-none"
-					onClick={state.setLink}
-				>
+				<Button size={toolbarSize} tabIndex={-1} variant="ghost" className="rounded-none" onClick={state.setLink}>
 					<LinkIcon className="size-3.5" />
 				</Button>
 			)}
 
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Inline Code`}
-				pressed={state.isInlineCode}
-				disabled={!state.canInlineCode}
-				onPressedChange={state.toggleInlineCode}
-			>
-				<CodeSimpleIcon className="size-3.5" />
-			</Toggle>
-
-			<Toggle
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				className="rounded-none"
-				title={t`Code Block`}
-				pressed={state.isCodeBlock}
-				disabled={!state.canCodeBlock}
-				onPressedChange={state.toggleCodeBlock}
-			>
-				<CodeBlockIcon className="size-3.5" />
-			</Toggle>
+			{codeActions.map((action) => (
+				<ToolbarToggle key={action.id} action={action} size={toolbarSize} />
+			))}
 
 			<DropdownMenu>
 				<DropdownMenuTrigger
 					render={
-						<Button
-							size={isFullscreen ? "lg" : "sm"}
-							tabIndex={-1}
-							variant="ghost"
-							className="rounded-none"
-							title={t`Table`}
-						>
+						<Button size={toolbarSize} tabIndex={-1} variant="ghost" className="rounded-none" title={t`Table`}>
 							<TableIcon className="size-3.5" />
 						</Button>
 					}
 				/>
 
 				<DropdownMenuContent>
-					<DropdownMenuItem disabled={!state.canInsertTable} onClick={state.insertTable}>
-						<PlusIcon />
-						<Trans>Insert Table</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem disabled={!state.canAddColumnBefore} onClick={state.addColumnBefore}>
-						<ColumnsPlusLeftIcon />
-						<Trans>Add Column Before</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem disabled={!state.canAddColumnAfter} onClick={state.addColumnAfter}>
-						<ColumnsPlusRightIcon />
-						<Trans>Add Column After</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem disabled={!state.canAddRowBefore} onClick={state.addRowBefore}>
-						<RowsPlusTopIcon />
-						<Trans>Add Row Before</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem disabled={!state.canAddRowAfter} onClick={state.addRowAfter}>
-						<RowsPlusBottomIcon />
-						<Trans>Add Row After</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem disabled={!state.canDeleteColumn} onClick={state.deleteColumn}>
-						<TrashSimpleIcon />
-						<Trans>Delete Column</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem disabled={!state.canDeleteRow} onClick={state.deleteRow}>
-						<TrashSimpleIcon />
-						<Trans>Delete Row</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem variant="destructive" disabled={!state.canDeleteTable} onClick={state.deleteTable}>
-						<TrashSimpleIcon />
-						<Trans>Delete Table</Trans>
-					</DropdownMenuItem>
+					{tableActionGroups.map((group, index) => (
+						<FragmentWithSeparator
+							key={group.map((action) => action.id).join("-")}
+							separator={index < tableActionGroups.length - 1}
+						>
+							{group.map((action) => (
+								<DropdownMenuItem
+									key={action.id}
+									variant={action.variant}
+									disabled={action.disabled}
+									onClick={action.onClick}
+								>
+									{action.icon}
+									{action.label}
+								</DropdownMenuItem>
+							))}
+						</FragmentWithSeparator>
+					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				title={t`New Line`}
-				onClick={state.setHardBreak}
-			>
-				<KeyReturnIcon className="size-3.5" />
-			</Button>
-
-			<Button
-				size={isFullscreen ? "lg" : "sm"}
-				tabIndex={-1}
-				variant="ghost"
-				className="rounded-none"
-				title={t`Separator`}
-				onClick={state.setHorizontalRule}
-			>
-				<MinusIcon className="size-3.5" />
-			</Button>
+			{utilityActions.map((action) => (
+				<ToolbarButton key={action.id} action={action} size={toolbarSize} />
+			))}
 		</div>
 	);
 }
