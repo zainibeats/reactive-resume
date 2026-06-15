@@ -1,7 +1,7 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
 import type { ResumeAnalysis } from "@reactive-resume/schema/resume/analysis";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { ModelMessage, UIMessage } from "ai";
+import type { ModelMessage, TimeoutConfiguration, UIMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -72,6 +72,8 @@ type GetModelInput = {
 
 const MAX_AI_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_AI_FILE_BASE64_CHARS = Math.ceil((MAX_AI_FILE_BYTES * 4) / 3) + 4;
+const LOCAL_AI_STEP_TIMEOUT_MS = 10 * 60 * 1000;
+const LOCAL_AI_CHUNK_TIMEOUT_MS = 10 * 60 * 1000;
 
 export function getModel(input: GetModelInput) {
 	const { provider, model, apiKey } = input;
@@ -104,6 +106,39 @@ export function getAgentModel(input: GetModelInput) {
 	if (!supportsProviderNativeWebSearch(input)) return getModel(input);
 
 	return createOpenAI({ apiKey: input.apiKey, baseURL: resolveAiBaseUrl(input) }).responses(input.model);
+}
+
+function isLocalAiProvider(input: Pick<GetModelInput, "provider" | "baseURL">) {
+	if (input.provider === "ollama" || input.provider === "lmstudio") return true;
+	if (input.provider !== "openai-compatible") return false;
+
+	try {
+		const baseURL = new URL(resolveAiBaseUrl({ provider: input.provider, baseURL: input.baseURL ?? null }));
+		return (
+			baseURL.hostname === "localhost" ||
+			baseURL.hostname === "127.0.0.1" ||
+			baseURL.hostname === "::1" ||
+			baseURL.hostname.endsWith(".local")
+		);
+	} catch {
+		return false;
+	}
+}
+
+export function getAiRequestTimeout(
+	input: Pick<GetModelInput, "provider" | "baseURL">,
+): TimeoutConfiguration | undefined {
+	if (!isLocalAiProvider(input)) return undefined;
+
+	return {
+		stepMs: LOCAL_AI_STEP_TIMEOUT_MS,
+		chunkMs: LOCAL_AI_CHUNK_TIMEOUT_MS,
+	};
+}
+
+function getAiRequestTimeoutOption(input: Pick<GetModelInput, "provider" | "baseURL">) {
+	const timeout = getAiRequestTimeout(input);
+	return timeout ? { timeout } : {};
 }
 
 const aiCredentialsSchema = z.object({
@@ -149,6 +184,7 @@ export async function testConnection(input: TestConnectionInput): Promise<boolea
 
 	const result = await generateText({
 		model: getModel(input),
+		...getAiRequestTimeoutOption(input),
 		output: Output.choice({ options: [RESPONSE_OK] }),
 		messages: [{ role: "user", content: `Respond only with JSON Object: { "result": "${RESPONSE_OK}" }` }],
 	});
@@ -193,6 +229,7 @@ async function parsePdf(input: ParsePdfInput): Promise<ResumeData> {
 
 	const result = await generateText({
 		model,
+		...getAiRequestTimeoutOption(input),
 		messages: buildResumeParsingMessages({
 			systemPrompt: pdfParserSystemPrompt,
 			userPrompt: pdfParserUserPrompt,
@@ -214,6 +251,7 @@ async function parseDocx(input: ParseDocxInput): Promise<ResumeData> {
 
 	const result = await generateText({
 		model,
+		...getAiRequestTimeoutOption(input),
 		messages: buildResumeParsingMessages({
 			systemPrompt: docxParserSystemPrompt,
 			userPrompt: docxParserUserPrompt,
@@ -241,6 +279,7 @@ async function chat(input: ChatInput) {
 
 	const result = streamText({
 		model,
+		...getAiRequestTimeoutOption(input),
 		system: systemPrompt,
 		messages: await convertToModelMessages(input.messages),
 		tools: {
@@ -289,6 +328,7 @@ async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis>
 	if (isLmStudioEndpoint(input)) {
 		const result = await generateText({
 			model,
+			...getAiRequestTimeoutOption(input),
 			messages: [
 				{
 					role: "system",
@@ -307,6 +347,7 @@ async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis>
 
 	const result = await generateText({
 		model,
+		...getAiRequestTimeoutOption(input),
 		output: Output.object({ schema: resumeAnalysisOutputSchema }),
 		messages: [
 			{ role: "system", content: systemPrompt },

@@ -21,6 +21,17 @@ type BuilderAssistantChatProps = {
 	activeRunId: string | null;
 };
 
+type AskUserQuestionPart = UIMessage["parts"][number] & {
+	toolCallId: string;
+	state?: string;
+	input?: {
+		question?: string;
+		choices?: string[];
+		recommendedChoice?: string;
+	};
+	output?: unknown;
+};
+
 function parseAgentSseStream(stream: ReadableStream<string>) {
 	let buffer = "";
 	const eventBoundary = /\r?\n\r?\n/;
@@ -65,6 +76,15 @@ function messageText(message: UIMessage) {
 
 function hasAppliedPatch(message: UIMessage) {
 	return message.parts.some((part) => part.type === "tool-apply_resume_patch" && "output" in part && part.output);
+}
+
+function getAskUserQuestionParts(message: UIMessage) {
+	if (message.role !== "assistant") return [];
+
+	return message.parts.filter((part): part is AskUserQuestionPart => {
+		const toolPart = part as AskUserQuestionPart;
+		return toolPart.type === "tool-ask_user_question" && typeof toolPart.toolCallId === "string";
+	});
 }
 
 export function shouldSendAnsweredAskUserQuestion({ messages }: { messages: UIMessage[] }) {
@@ -116,7 +136,7 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 		[threadId],
 	);
 
-	const { messages, sendMessage, setMessages, status, error, clearError } = useChat({
+	const { messages, sendMessage, setMessages, status, error, clearError, addToolResult } = useChat({
 		id: threadId,
 		messages: initialMessages,
 		resume: !!activeRunId,
@@ -134,6 +154,14 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 	}, [initialMessages, lastSyncedThreadId, setMessages, threadId]);
 
 	const isStreaming = status === "submitted" || status === "streaming" || isFlushingResume;
+
+	const answerQuestion = useCallback(
+		(toolCallId: string, answer: string) => {
+			clearError();
+			addToolResult({ tool: "ask_user_question", toolCallId, output: answer });
+		},
+		[addToolResult, clearError],
+	);
 
 	const send = async () => {
 		const text = input.trim();
@@ -173,7 +201,8 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 					{messages.map((message) => {
 						const text = messageText(message);
 						const hasPatch = message.role === "assistant" && hasAppliedPatch(message);
-						if (!text && !hasPatch) return null;
+						const questions = getAskUserQuestionParts(message);
+						if (!text && !hasPatch && questions.length === 0) return null;
 
 						return (
 							<div
@@ -189,6 +218,44 @@ export function BuilderAssistantChat({ threadId, initialMessages, activeRunId }:
 									</Badge>
 								) : null}
 								{text ? <div className="whitespace-pre-wrap">{text}</div> : null}
+								{questions.map((question) => {
+									const prompt = question.input?.question?.trim();
+									const choices = question.input?.choices?.filter(Boolean) ?? [];
+									const answered = question.state === "output-available";
+									const answer = typeof question.output === "string" ? question.output : undefined;
+
+									if (!prompt && !answer) return null;
+
+									return (
+										<div key={question.toolCallId} className={cn(text || hasPatch ? "mt-3" : undefined)}>
+											{prompt ? <div className="font-medium">{prompt}</div> : null}
+											{answered ? (
+												<div className="mt-2 rounded-md border bg-background px-2 py-1.5 text-muted-foreground text-xs">
+													{answer}
+												</div>
+											) : choices.length > 0 ? (
+												<div className="mt-2 flex flex-wrap gap-1.5">
+													{choices.map((choice) => (
+														<Button
+															key={choice}
+															type="button"
+															size="sm"
+															variant={choice === question.input?.recommendedChoice ? "default" : "outline"}
+															disabled={isStreaming}
+															onClick={() => answerQuestion(question.toolCallId, choice)}
+														>
+															{choice}
+														</Button>
+													))}
+												</div>
+											) : (
+												<div className="mt-2 text-muted-foreground text-xs">
+													<Trans>Reply in the message box below.</Trans>
+												</div>
+											)}
+										</div>
+									);
+								})}
 							</div>
 						);
 					})}

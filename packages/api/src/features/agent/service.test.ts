@@ -102,7 +102,7 @@ vi.mock("ai", () => ({
 	ToolLoopAgent: vi.fn(),
 }));
 
-vi.mock("../ai/service", () => ({ getAgentModel: vi.fn() }));
+vi.mock("../ai/service", () => ({ getAgentModel: vi.fn(), getAiRequestTimeout: vi.fn() }));
 vi.mock("../ai/credentials", () => ({ assertAgentEnvironment: vi.fn() }));
 vi.mock("../ai-providers/service", () => ({ aiProvidersService: aiProvidersServiceMock }));
 vi.mock("../resume/service", () => ({ resumeService: resumeServiceMock }));
@@ -488,6 +488,78 @@ describe("agentService.messages.send", () => {
 				}),
 			}),
 		]);
+	});
+
+	it("passes local provider request timeout through to the agent stream", async () => {
+		const activeThread = buildActiveThread();
+		const persistedMessage = {
+			id: "message-1",
+			userId: "user-1",
+			threadId: "thread-1",
+			role: "user",
+			status: "completed",
+			sequence: 0,
+			uiMessage: {
+				id: "ui-message-1",
+				role: "user",
+				parts: [{ type: "text", text: "Rewrite my bullets" }],
+			},
+		};
+		const timeout = { stepMs: 600_000, chunkMs: 600_000 };
+
+		dbMock.select
+			.mockImplementationOnce(() => selectLimitResult([activeThread]))
+			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: -1 }]))
+			.mockImplementationOnce(() => selectWhereResult([{ total: 1 }]))
+			.mockImplementationOnce(() => selectOrderByResult([persistedMessage]));
+
+		dbMock.insert.mockReturnValue({
+			values: vi.fn(() => ({ returning: vi.fn(async () => [persistedMessage]) })),
+		});
+		dbMock.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
+
+		claimActiveAgentRunMock.mockResolvedValue(true);
+		aiProvidersServiceMock.getRunnableById.mockResolvedValue({
+			id: "provider-1",
+			provider: "lmstudio",
+			model: "local-model",
+			apiKey: "",
+			baseURL: "http://localhost:1234/v1",
+		});
+		aiProvidersServiceMock.markUsed.mockResolvedValue(undefined);
+
+		const [{ convertToModelMessages, ToolLoopAgent }, { agentStreamLifecycle }, { streamToEventIterator }, aiService] =
+			await Promise.all([import("ai"), import("./streams"), import("@orpc/server"), import("../ai/service")]);
+		const streamMock = vi.fn(async () => ({ toUIMessageStream: vi.fn(() => new ReadableStream()) }));
+		vi.mocked(aiService.getAiRequestTimeout).mockReturnValue(timeout);
+		vi.mocked(convertToModelMessages).mockResolvedValue([
+			{ role: "user", content: [{ type: "text", text: "Rewrite my bullets" }] },
+		]);
+		class MockToolLoopAgent {
+			stream = streamMock;
+		}
+		vi.mocked(ToolLoopAgent).mockImplementation(MockToolLoopAgent as never);
+		vi.mocked(agentStreamLifecycle.create).mockResolvedValue(new ReadableStream());
+		vi.mocked(streamToEventIterator).mockReturnValue("iterator" as never);
+
+		const { agentService } = await import("./service");
+
+		await agentService.messages.send({
+			threadId: "thread-1",
+			userId: "user-1",
+			message: {
+				id: "ui-message-1",
+				role: "user",
+				parts: [{ type: "text", text: "Rewrite my bullets" }],
+				// biome-ignore lint/suspicious/noExplicitAny: minimal fixture for unit test
+			} as any,
+		});
+
+		expect(aiService.getAiRequestTimeout).toHaveBeenCalledWith({
+			provider: "lmstudio",
+			baseURL: "http://localhost:1234/v1",
+		});
+		expect(streamMock).toHaveBeenCalledWith(expect.objectContaining({ timeout }));
 	});
 
 	it("stores snapshotData and applies a valid JSON Patch without a timestamp conflict guard", async () => {
@@ -1039,7 +1111,6 @@ describe("agentService.messages.send", () => {
 					}),
 				],
 			}),
-			legacyAnswerMessage.uiMessage,
 			retryMessage.uiMessage,
 		]);
 	});

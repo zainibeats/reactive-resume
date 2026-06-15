@@ -9,7 +9,7 @@ import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { generateId } from "@reactive-resume/utils/string";
 import { assertAgentEnvironment } from "../ai/credentials";
-import { getAgentModel } from "../ai/service";
+import { getAgentModel, getAiRequestTimeout } from "../ai/service";
 import { aiProvidersService } from "../ai-providers/service";
 import { resumeService } from "../resume/service";
 import { getStorageService, inferContentType } from "../storage/service";
@@ -17,7 +17,7 @@ import { claimActiveAgentRun, clearActiveAgentRunIfCurrent } from "./runs";
 import { agentStreamLifecycle } from "./streams";
 import { buildAgentInstructions, buildAgentTools } from "./tools";
 
-const MAX_AGENT_STEPS = 30;
+const MAX_AGENT_STEPS = 10;
 const MAX_ATTACHMENTS_PER_MESSAGE = 10;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const MAX_THREAD_ATTACHMENT_BYTES = 100 * 1024 * 1024;
@@ -546,6 +546,7 @@ async function repairLegacyAskUserQuestionAnswers(
 	input: { threadId: string; userId: string },
 ) {
 	const nextRows = [...rows];
+	const answerRowIdsToOmit = new Set<string>();
 	const updates: Promise<unknown>[] = [];
 
 	for (let index = 0; index < nextRows.length - 1; index++) {
@@ -560,6 +561,7 @@ async function repairLegacyAskUserQuestionAnswers(
 		if (!toolCallId || !answer) continue;
 
 		const mergedMessage = answerAskUserQuestionToolCall(assistantMessage, toolCallId, answer);
+		answerRowIdsToOmit.add(answerRow.id);
 		nextRows[index] = {
 			...assistantRow,
 			uiMessage: mergedMessage as unknown as AgentMessageRecord["uiMessage"],
@@ -584,7 +586,7 @@ async function repairLegacyAskUserQuestionAnswers(
 
 	await Promise.all(updates);
 
-	return nextRows;
+	return nextRows.filter((row) => !answerRowIdsToOmit.has(row.id));
 }
 
 async function cleanupActiveRun(input: {
@@ -1053,9 +1055,14 @@ export const agentService = {
 					}),
 				});
 
+				const agentTimeout = getAiRequestTimeout({
+					provider: runnableProvider.provider,
+					baseURL: runnableProvider.baseURL ?? "",
+				});
 				const result = await agent.stream({
 					messages: attachModelPartsToLatestUserMessage(modelMessages, attachmentModelParts),
 					abortSignal: controller.signal,
+					...(agentTimeout ? { timeout: agentTimeout } : {}),
 				});
 
 				return streamToEventIterator(
