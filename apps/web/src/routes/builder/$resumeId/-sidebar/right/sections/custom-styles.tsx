@@ -99,6 +99,104 @@ const exactFourControlGridClassName = "grid grid-cols-1 gap-3 @min-[20rem]:grid-
 const compactSpacingInputClassName =
 	"h-8 w-18 max-w-18 min-w-0 px-1.5 text-center text-xs tabular-nums placeholder:text-[0.68rem] placeholder:uppercase placeholder:tracking-wide";
 
+type StringIntentProperty = {
+	[K in keyof StyleIntent]-?: NonNullable<StyleIntent[K]> extends string ? K : never;
+}[keyof StyleIntent];
+
+type NumberIntentProperty = {
+	[K in keyof StyleIntent]-?: NonNullable<StyleIntent[K]> extends number ? K : never;
+}[keyof StyleIntent];
+
+type ColorIntentField = {
+	property: StringIntentProperty;
+	label: string;
+	idSuffix: string;
+	placeholder: string;
+	fallback: string;
+};
+
+type NumberIntentField = {
+	property: NumberIntentProperty;
+	label: string;
+	idSuffix: string;
+	min: number;
+	max: number;
+	step?: number;
+};
+
+type SelectIntentField<TValue extends string = string> = {
+	property: StringIntentProperty;
+	label: string;
+	idSuffix: string;
+	options: readonly ComboboxOption<TValue>[];
+};
+
+const colorIntentFields = [
+	{
+		property: "color",
+		label: "Text Color",
+		idSuffix: "color",
+		placeholder: "rgba(0, 0, 0, 1)",
+		fallback: "rgba(0, 0, 0, 1)",
+	},
+	{
+		property: "backgroundColor",
+		label: "Background",
+		idSuffix: "background",
+		placeholder: "rgba(255, 255, 255, 1)",
+		fallback: "rgba(255, 255, 255, 1)",
+	},
+	{
+		property: "textDecorationColor",
+		label: "Text Decoration Color",
+		idSuffix: "text-decoration-color",
+		placeholder: "rgba(0, 0, 0, 1)",
+		fallback: "rgba(0, 0, 0, 1)",
+	},
+] as const satisfies readonly ColorIntentField[];
+
+const textNumberIntentFields = [
+	{ property: "fontSize", label: "Font Size", idSuffix: "font-size", min: 6, max: 48, step: undefined },
+	{ property: "lineHeight", label: "Line Height", idSuffix: "line-height", min: 0.5, max: 4, step: 0.05 },
+	{ property: "letterSpacing", label: "Letter Spacing", idSuffix: "letter-spacing", min: -16, max: 16, step: 0.1 },
+] as const satisfies readonly NumberIntentField[];
+
+const textSelectIntentFields = [
+	{ property: "fontStyle", label: "Font Style", idSuffix: "font-style", options: fontStyleOptions },
+	{
+		property: "textDecoration",
+		label: "Text Decoration",
+		idSuffix: "text-decoration",
+		options: textDecorationOptions,
+	},
+	{
+		property: "textDecorationStyle",
+		label: "Decoration Style",
+		idSuffix: "text-decoration-style",
+		options: textDecorationStyleOptions,
+	},
+	{ property: "textAlign", label: "Text Align", idSuffix: "text-align", options: textAlignOptions },
+	{
+		property: "textTransform",
+		label: "Text Transform",
+		idSuffix: "text-transform",
+		options: textTransformOptions,
+	},
+] as const satisfies readonly SelectIntentField[];
+
+const borderNumberIntentFields = [
+	{ property: "borderWidth", label: "Border Width", idSuffix: "border-width", min: 0, max: 24, step: undefined },
+	{ property: "borderRadius", label: "Border Radius", idSuffix: "border-radius", min: 0, max: 72, step: undefined },
+] as const satisfies readonly NumberIntentField[];
+
+const borderColorIntentField = {
+	property: "borderColor",
+	label: "Border Color",
+	idSuffix: "border-color",
+	placeholder: "rgba(0, 0, 0, 1)",
+	fallback: "rgba(0, 0, 0, 1)",
+} as const satisfies ColorIntentField;
+
 export function CustomStylesSectionBuilder() {
 	return (
 		<SectionBase type="styles" className="space-y-4">
@@ -130,6 +228,12 @@ function CustomStylesSectionForm() {
 	const targetLabel = getTargetLabel(data, target);
 	const slotLabel = getSlotLabel(slot);
 
+	const removeRule = (ruleId: string) => {
+		updateResumeData((draft) => {
+			draft.metadata.styleRules = (draft.metadata.styleRules ?? []).filter((rule) => rule.id !== ruleId);
+		});
+	};
+
 	const upsertIntent = (patch: Partial<StyleIntent>) => {
 		const nextIntent = compactIntent({ ...currentIntent, ...patch });
 
@@ -158,9 +262,7 @@ function CustomStylesSectionForm() {
 	};
 
 	const resetRule = () => {
-		updateResumeData((draft) => {
-			draft.metadata.styleRules = (draft.metadata.styleRules ?? []).filter((rule) => rule.id !== ruleId);
-		});
+		removeRule(ruleId);
 	};
 
 	const updateRuleEnabled = (ruleId: string, enabled: boolean) => {
@@ -181,9 +283,7 @@ function CustomStylesSectionForm() {
 	};
 
 	const deleteRule = (ruleId: string) => {
-		updateResumeData((draft) => {
-			draft.metadata.styleRules = (draft.metadata.styleRules ?? []).filter((rule) => rule.id !== ruleId);
-		});
+		removeRule(ruleId);
 	};
 
 	return (
@@ -482,30 +582,17 @@ function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleInten
 		<div className="space-y-3">
 			<ControlPanel title="Color">
 				<div className={exactFourControlGridClassName}>
-					<ColorField
-						label={`${labelStart}Text Color`}
-						id={`${idPrefix}-color`}
-						value={intent.color}
-						placeholder="rgba(0, 0, 0, 1)"
-						fallback="rgba(0, 0, 0, 1)"
-						onChange={(color) => onChange({ color })}
-					/>
-					<ColorField
-						label={`${labelStart}Background`}
-						id={`${idPrefix}-background`}
-						value={intent.backgroundColor}
-						placeholder="rgba(255, 255, 255, 1)"
-						fallback="rgba(255, 255, 255, 1)"
-						onChange={(backgroundColor) => onChange({ backgroundColor })}
-					/>
-					<ColorField
-						label={`${labelStart}Text Decoration Color`}
-						id={`${idPrefix}-text-decoration-color`}
-						value={intent.textDecorationColor}
-						placeholder="rgba(0, 0, 0, 1)"
-						fallback="rgba(0, 0, 0, 1)"
-						onChange={(textDecorationColor) => onChange({ textDecorationColor })}
-					/>
+					{colorIntentFields.map((field) => (
+						<ColorField
+							key={field.property}
+							label={`${labelStart}${field.label}`}
+							id={`${idPrefix}-${field.idSuffix}`}
+							value={intent[field.property]}
+							placeholder={field.placeholder}
+							fallback={field.fallback}
+							onChange={(value) => onChange(createStringIntentPatch(field.property, value))}
+						/>
+					))}
 					<NumberInput
 						label={`${labelStart}Opacity`}
 						id={`${idPrefix}-opacity`}
@@ -520,73 +607,34 @@ function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleInten
 
 			<ControlPanel title="Text">
 				<div className={controlGridClassName}>
-					<NumberInput
-						label={`${labelStart}Font Size`}
-						id={`${idPrefix}-font-size`}
-						value={intent.fontSize}
-						min={6}
-						max={48}
-						onChange={(fontSize) => onChange({ fontSize })}
-					/>
+					{textNumberIntentFields.map((field) => (
+						<NumberInput
+							key={field.property}
+							label={`${labelStart}${field.label}`}
+							id={`${idPrefix}-${field.idSuffix}`}
+							value={intent[field.property]}
+							min={field.min}
+							max={field.max}
+							step={field.step}
+							onChange={(value) => onChange(createNumberIntentPatch(field.property, value))}
+						/>
+					))}
 					<FontWeightField
 						label={`${labelStart}Font Weight`}
 						id={`${idPrefix}-font-weight`}
 						value={intent.fontWeight}
 						onChange={(fontWeight) => onChange({ fontWeight })}
 					/>
-					<IntentSelectField
-						label={`${labelStart}Font Style`}
-						id={`${idPrefix}-font-style`}
-						value={intent.fontStyle}
-						options={fontStyleOptions}
-						onChange={(fontStyle) => onChange({ fontStyle })}
-					/>
-					<NumberInput
-						label={`${labelStart}Line Height`}
-						id={`${idPrefix}-line-height`}
-						value={intent.lineHeight}
-						min={0.5}
-						max={4}
-						step={0.05}
-						onChange={(lineHeight) => onChange({ lineHeight })}
-					/>
-					<NumberInput
-						label={`${labelStart}Letter Spacing`}
-						id={`${idPrefix}-letter-spacing`}
-						value={intent.letterSpacing}
-						min={-16}
-						max={16}
-						step={0.1}
-						onChange={(letterSpacing) => onChange({ letterSpacing })}
-					/>
-					<IntentSelectField
-						label={`${labelStart}Text Decoration`}
-						id={`${idPrefix}-text-decoration`}
-						value={intent.textDecoration}
-						options={textDecorationOptions}
-						onChange={(textDecoration) => onChange({ textDecoration })}
-					/>
-					<IntentSelectField
-						label={`${labelStart}Decoration Style`}
-						id={`${idPrefix}-text-decoration-style`}
-						value={intent.textDecorationStyle}
-						options={textDecorationStyleOptions}
-						onChange={(textDecorationStyle) => onChange({ textDecorationStyle })}
-					/>
-					<IntentSelectField
-						label={`${labelStart}Text Align`}
-						id={`${idPrefix}-text-align`}
-						value={intent.textAlign}
-						options={textAlignOptions}
-						onChange={(textAlign) => onChange({ textAlign })}
-					/>
-					<IntentSelectField
-						label={`${labelStart}Text Transform`}
-						id={`${idPrefix}-text-transform`}
-						value={intent.textTransform}
-						options={textTransformOptions}
-						onChange={(textTransform) => onChange({ textTransform })}
-					/>
+					{textSelectIntentFields.map((field) => (
+						<IntentSelectField
+							key={field.property}
+							label={`${labelStart}${field.label}`}
+							id={`${idPrefix}-${field.idSuffix}`}
+							value={intent[field.property]}
+							options={field.options}
+							onChange={(value) => onChange(createStringIntentPatch(field.property, value))}
+						/>
+					))}
 				</div>
 			</ControlPanel>
 
@@ -626,29 +674,25 @@ function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleInten
 						options={borderStyleOptions}
 						onChange={(borderStyle) => onChange({ borderStyle })}
 					/>
-					<NumberInput
-						label={`${labelStart}Border Width`}
-						id={`${idPrefix}-border-width`}
-						value={intent.borderWidth}
-						min={0}
-						max={24}
-						onChange={(borderWidth) => onChange({ borderWidth })}
-					/>
-					<NumberInput
-						label={`${labelStart}Border Radius`}
-						id={`${idPrefix}-border-radius`}
-						value={intent.borderRadius}
-						min={0}
-						max={72}
-						onChange={(borderRadius) => onChange({ borderRadius })}
-					/>
+					{borderNumberIntentFields.map((field) => (
+						<NumberInput
+							key={field.property}
+							label={`${labelStart}${field.label}`}
+							id={`${idPrefix}-${field.idSuffix}`}
+							value={intent[field.property]}
+							min={field.min}
+							max={field.max}
+							step={field.step}
+							onChange={(value) => onChange(createNumberIntentPatch(field.property, value))}
+						/>
+					))}
 					<ColorField
-						label={`${labelStart}Border Color`}
-						id={`${idPrefix}-border-color`}
-						value={intent.borderColor}
-						placeholder="rgba(0, 0, 0, 1)"
-						fallback="rgba(0, 0, 0, 1)"
-						onChange={(borderColor) => onChange({ borderColor })}
+						label={`${labelStart}${borderColorIntentField.label}`}
+						id={`${idPrefix}-${borderColorIntentField.idSuffix}`}
+						value={intent[borderColorIntentField.property]}
+						placeholder={borderColorIntentField.placeholder}
+						fallback={borderColorIntentField.fallback}
+						onChange={(value) => onChange(createStringIntentPatch(borderColorIntentField.property, value))}
 					/>
 				</div>
 			</ControlPanel>
@@ -881,6 +925,14 @@ function createPaddingSidePatch(
 }
 
 function createMarginSidePatch(property: MarginSideProperty, value: number | undefined): Partial<StyleIntent> {
+	return { [property]: value };
+}
+
+function createStringIntentPatch(property: StringIntentProperty, value: string | undefined): Partial<StyleIntent> {
+	return { [property]: value };
+}
+
+function createNumberIntentPatch(property: NumberIntentProperty, value: number | undefined): Partial<StyleIntent> {
 	return { [property]: value };
 }
 

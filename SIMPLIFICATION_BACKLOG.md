@@ -59,15 +59,19 @@ References:
 
 - `apps/web/src/components/input/rich-input.tsx:209`
 
-### Simplify custom style editor controls
+### Simplify custom style editor controls - Partially done
 
 `CustomStylesSectionBuilder` hand-writes each style intent control. The same field shapes repeat across color, text, spacing, and border groups.
 
-Candidate change:
+Completed change:
 
 - Define grouped field config for style intent properties.
 - Render fields through existing `ColorField`, `NumberInput`, and `IntentSelectField`.
 - Extract shared rule deletion/filtering used by reset and delete paths.
+
+Remaining follow-up:
+
+- Consider whether spacing controls and applied-rule summaries should also move to descriptor config, or leave them explicit because their value merging and display logic are more specialized.
 
 References:
 

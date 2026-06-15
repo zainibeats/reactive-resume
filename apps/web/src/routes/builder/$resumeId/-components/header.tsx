@@ -401,7 +401,7 @@ function BuilderHeaderDropdown() {
 	};
 
 	const handleDelete = async () => {
-		const confirmation = await confirm(t`Are you sure you want to delete this resume?`, {
+		const confirmation = await confirm(t`Are you sure you want to delete "${name}"?`, {
 			description: t`This action cannot be undone.`,
 		});
 

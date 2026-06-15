@@ -273,6 +273,70 @@ type ChatInput = z.infer<typeof aiCredentialsSchema> & {
 	resumeUpdatedAt: Date;
 };
 
+type ProposalToolPart = UIMessage["parts"][number] & {
+	input?: unknown;
+	output?: unknown;
+};
+
+function isProposalToolPart(part: UIMessage["parts"][number]): part is ProposalToolPart {
+	return part.type === "tool-propose_resume_patches";
+}
+
+function summarizeProposalToolPart(part: ProposalToolPart) {
+	const result = resumePatchProposalToolOutputSchema.safeParse(part.output);
+	const input = resumePatchProposalToolInputSchema.safeParse(part.input);
+	const proposals = result.success ? result.data.proposals : input.success ? input.data.proposals : [];
+
+	if (proposals.length === 0) return undefined;
+
+	return [
+		"Prepared resume patch proposal:",
+		...proposals.map((proposal) => {
+			const operations = proposal.operations.map((operation) => `${operation.op} ${operation.path}`).join(", ");
+			return `- ${proposal.title}${operations ? ` (${operations})` : ""}`;
+		}),
+	].join("\n");
+}
+
+function getMessageText(message: UIMessage) {
+	return message.parts
+		.filter((part) => part.type === "text")
+		.map((part) => part.text.trim())
+		.filter(Boolean)
+		.join("\n");
+}
+
+export function convertToOllamaChatMessages(messages: UIMessage[]): ModelMessage[] {
+	const modelMessages: ModelMessage[] = [];
+
+	for (const message of messages) {
+		const text = getMessageText(message);
+
+		if (message.role === "user") {
+			if (text) modelMessages.push({ role: "user", content: text });
+			continue;
+		}
+
+		if (message.role !== "assistant") continue;
+
+		const proposalSummaries = message.parts
+			.filter(isProposalToolPart)
+			.map(summarizeProposalToolPart)
+			.filter((summary): summary is string => Boolean(summary));
+		const content = [text, ...proposalSummaries].filter(Boolean).join("\n\n");
+
+		if (content) modelMessages.push({ role: "assistant", content });
+	}
+
+	return modelMessages;
+}
+
+async function getChatModelMessages(input: Pick<ChatInput, "provider" | "messages">) {
+	if (input.provider === "ollama") return convertToOllamaChatMessages(input.messages);
+
+	return convertToModelMessages(input.messages);
+}
+
 async function chat(input: ChatInput) {
 	const model = getModel(input);
 	const systemPrompt = buildChatSystemPrompt(input.resumeData);
@@ -281,7 +345,7 @@ async function chat(input: ChatInput) {
 		model,
 		...getAiRequestTimeoutOption(input),
 		system: systemPrompt,
-		messages: await convertToModelMessages(input.messages),
+		messages: await getChatModelMessages(input),
 		tools: {
 			propose_resume_patches: tool({
 				description:
@@ -299,7 +363,7 @@ async function chat(input: ChatInput) {
 				},
 			}),
 		},
-		stopWhen: stepCountIs(3),
+		...(input.provider === "ollama" ? {} : { stopWhen: stepCountIs(3) }),
 	});
 
 	return streamToEventIterator(result.toUIMessageStream());
@@ -325,7 +389,7 @@ async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis>
 	const model = getModel(input);
 	const systemPrompt = buildAnalyzeResumeSystemPrompt(input.resumeData);
 
-	if (isLmStudioEndpoint(input)) {
+	if (input.provider === "ollama" || isLmStudioEndpoint(input)) {
 		const result = await generateText({
 			model,
 			...getAiRequestTimeoutOption(input),
