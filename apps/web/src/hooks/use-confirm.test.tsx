@@ -30,6 +30,23 @@ describe("useConfirm", () => {
 		expect(promise).toBeInstanceOf(Promise);
 	});
 
+	it("renders React nodes in the title and description", async () => {
+		const { result } = renderHook(() => useConfirm(), { wrapper });
+
+		await act(async () => {
+			void result.current(<span>Delete resume?</span>, {
+				description: (
+					<>
+						Resume: <strong>Engineering Resume</strong>
+					</>
+				),
+			});
+		});
+
+		expect(document.body.textContent).toContain("Delete resume?");
+		expect(document.body.textContent).toContain("Engineering Resume");
+	});
+
 	it("resolves false when the dialog is dismissed", async () => {
 		const { result } = renderHook(() => useConfirm(), { wrapper });
 

@@ -75,6 +75,103 @@ const MAX_AI_FILE_BASE64_CHARS = Math.ceil((MAX_AI_FILE_BYTES * 4) / 3) + 4;
 const LOCAL_AI_STEP_TIMEOUT_MS = 10 * 60 * 1000;
 const LOCAL_AI_CHUNK_TIMEOUT_MS = 10 * 60 * 1000;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isOllamaChatStreamObject(value: Record<string, unknown>) {
+	return (
+		"message" in value ||
+		"done" in value ||
+		"done_reason" in value ||
+		"tool_calls" in value ||
+		"eval_count" in value ||
+		"prompt_eval_count" in value ||
+		"total_duration" in value
+	);
+}
+
+export function normalizeOllamaChatStreamLine(line: string, model: string, now = () => new Date()) {
+	const trimmedLine = line.trim();
+	if (!trimmedLine) return line;
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(trimmedLine);
+	} catch {
+		return line;
+	}
+
+	if (!isRecord(parsed) || "error" in parsed || !isOllamaChatStreamObject(parsed)) return line;
+
+	const normalized = { ...parsed };
+	const message = isRecord(normalized.message) ? { ...normalized.message } : {};
+
+	if (Array.isArray(normalized.tool_calls) && !("tool_calls" in message)) {
+		message.tool_calls = normalized.tool_calls;
+		delete normalized.tool_calls;
+	}
+
+	if (typeof message.role !== "string") message.role = "assistant";
+	if (typeof message.content !== "string") message.content = "";
+
+	if (typeof normalized.model !== "string") normalized.model = model;
+	if (typeof normalized.created_at !== "string") normalized.created_at = now().toISOString();
+	if (typeof normalized.done !== "boolean") normalized.done = false;
+	normalized.message = message;
+
+	return JSON.stringify(normalized);
+}
+
+function shouldNormalizeOllamaChatStream(input: RequestInfo | URL, init?: RequestInit) {
+	const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+	if (!url.endsWith("/chat")) return false;
+	if (typeof init?.body !== "string") return false;
+
+	try {
+		const body = JSON.parse(init.body) as { stream?: unknown };
+		return body.stream === true;
+	} catch {
+		return false;
+	}
+}
+
+function createOllamaChatStreamTransform(model: string) {
+	const decoder = new TextDecoder();
+	const encoder = new TextEncoder();
+	let buffer = "";
+
+	return new TransformStream<Uint8Array, Uint8Array>({
+		transform(chunk, controller) {
+			buffer += decoder.decode(chunk, { stream: true });
+			const lines = buffer.split("\n");
+			buffer = lines.pop() ?? "";
+
+			for (const line of lines) {
+				controller.enqueue(encoder.encode(`${normalizeOllamaChatStreamLine(line, model)}\n`));
+			}
+		},
+		flush(controller) {
+			const finalText = decoder.decode();
+			if (finalText) buffer += finalText;
+			if (buffer) controller.enqueue(encoder.encode(normalizeOllamaChatStreamLine(buffer, model)));
+		},
+	});
+}
+
+function createOllamaFetch(model: string): typeof fetch {
+	return async (input, init) => {
+		const response = await fetch(input, init);
+		if (!response.body || !shouldNormalizeOllamaChatStream(input, init)) return response;
+
+		return new Response(response.body.pipeThrough(createOllamaChatStreamTransform(model)), {
+			headers: response.headers,
+			status: response.status,
+			statusText: response.statusText,
+		});
+	};
+}
+
 export function getModel(input: GetModelInput) {
 	const { provider, model, apiKey } = input;
 	const baseURL = resolveAiBaseUrl(input);
@@ -94,6 +191,7 @@ export function getModel(input: GetModelInput) {
 			const ollama = createOllama({
 				name: "ollama",
 				baseURL,
+				fetch: createOllamaFetch(model),
 				...(apiKey ? { headers: { Authorization: `Bearer ${apiKey}` } } : {}),
 			});
 

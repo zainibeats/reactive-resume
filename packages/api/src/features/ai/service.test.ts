@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { convertToModelMessages, modelMessageSchema } from "ai";
 
 let convertToOllamaChatMessages: typeof import("./service").convertToOllamaChatMessages;
+let normalizeOllamaChatStreamLine: typeof import("./service").normalizeOllamaChatStreamLine;
 
 describe("AI chat service", () => {
 	beforeAll(async () => {
@@ -10,7 +11,7 @@ describe("AI chat service", () => {
 		vi.stubEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres");
 		vi.stubEnv("AUTH_SECRET", "test-secret");
 
-		({ convertToOllamaChatMessages } = await import("./service"));
+		({ convertToOllamaChatMessages, normalizeOllamaChatStreamLine } = await import("./service"));
 	});
 
 	const messagesWithProposal: UIMessage[] = [
@@ -155,5 +156,72 @@ describe("AI chat service", () => {
 		expect(modelMessages.map((message) => message.role)).toEqual(["user", "assistant", "user"]);
 		expect(JSON.stringify(modelMessages)).toContain("/sections/references/items");
 		expect(JSON.stringify(modelMessages)).toContain("Prepared resume patch proposal");
+	});
+
+	it("normalizes Ollama final chat stream chunks without a message envelope", () => {
+		const line = JSON.stringify({
+			done: true,
+			done_reason: "stop",
+			total_duration: 100,
+			prompt_eval_count: 12,
+			eval_count: 3,
+		});
+		const normalized = JSON.parse(
+			normalizeOllamaChatStreamLine(line, "llama3.2", () => new Date("2026-06-15T00:00:00.000Z")),
+		);
+
+		expect(normalized).toEqual({
+			model: "llama3.2",
+			created_at: "2026-06-15T00:00:00.000Z",
+			done: true,
+			done_reason: "stop",
+			total_duration: 100,
+			prompt_eval_count: 12,
+			eval_count: 3,
+			message: { role: "assistant", content: "" },
+		});
+	});
+
+	it("wraps top-level Ollama tool calls in the chat message envelope", () => {
+		const line = JSON.stringify({
+			tool_calls: [
+				{
+					function: {
+						name: "apply_resume_patch",
+						arguments: { title: "Rewrite summary", operations: [] },
+					},
+				},
+			],
+		});
+		const normalized = JSON.parse(
+			normalizeOllamaChatStreamLine(line, "llama3.2", () => new Date("2026-06-15T00:00:00.000Z")),
+		);
+
+		expect(normalized).toEqual({
+			model: "llama3.2",
+			created_at: "2026-06-15T00:00:00.000Z",
+			done: false,
+			message: {
+				role: "assistant",
+				content: "",
+				tool_calls: [
+					{
+						function: {
+							name: "apply_resume_patch",
+							arguments: { title: "Rewrite summary", operations: [] },
+						},
+					},
+				],
+			},
+		});
+	});
+
+	it("leaves non-chat and error stream lines unchanged", () => {
+		const errorLine = JSON.stringify({ error: "model unloaded" });
+		const unrelatedLine = JSON.stringify({ status: "pulling manifest" });
+
+		expect(normalizeOllamaChatStreamLine(errorLine, "llama3.2")).toBe(errorLine);
+		expect(normalizeOllamaChatStreamLine(unrelatedLine, "llama3.2")).toBe(unrelatedLine);
+		expect(normalizeOllamaChatStreamLine("not json", "llama3.2")).toBe("not json");
 	});
 });

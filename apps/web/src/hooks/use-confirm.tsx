@@ -12,19 +12,19 @@ import {
 import { cn } from "@reactive-resume/utils/style";
 
 interface ConfirmOptions {
-	description?: string;
-	confirmText?: string;
-	cancelText?: string;
+	description?: React.ReactNode;
+	confirmText?: React.ReactNode;
+	cancelText?: React.ReactNode;
 }
 
 interface ConfirmState extends ConfirmOptions {
 	open: boolean;
-	title: string;
+	title: React.ReactNode;
 	resolve: ((value: boolean) => void) | null;
 }
 
 type ConfirmContextType = {
-	confirm: (title: string, options?: ConfirmOptions) => Promise<boolean>;
+	confirm: (title: React.ReactNode, options?: ConfirmOptions) => Promise<boolean>;
 };
 
 type ConfirmDialogProviderProps = {
@@ -43,7 +43,7 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
 		cancelText: undefined,
 	});
 
-	const confirm = React.useCallback(async (title: string, options?: ConfirmOptions): Promise<boolean> => {
+	const confirm = React.useCallback(async (title: React.ReactNode, options?: ConfirmOptions): Promise<boolean> => {
 		return new Promise<boolean>((resolve) => {
 			setState({
 				open: true,

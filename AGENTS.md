@@ -39,6 +39,7 @@ Internal packages are source-consumed through `package.json` export maps that po
 - The builder shell lives under `apps/web/src/routes/builder/$resumeId`. The nested preview route is client-only (`ssr: false`), while the public resume route `apps/web/src/routes/$username/$slug.tsx` uses `ssr: "data-only"`.
 - Browser-only resume preview code lives under `apps/web/src/features/resume/preview`, and public resume PDF viewer code lives under `apps/web/src/features/resume/public`. Keep PDF.js/canvas/browser APIs out of SSR paths and out of `packages/pdf`.
 - The isomorphic oRPC client is in `apps/web/src/libs/orpc/client.ts`; server calls use an in-process router client and browser calls use `/api/rpc` with credentials included.
+- For Lingui-backed confirmation dialogs, avoid adding new `t`/`Trans` messages or putting dynamic user data directly inside `t` template strings unless catalogs are updated in the same change. In production, missing compiled catalog entries can render hashed ids such as `pkD36F`. Prefer existing cataloged messages, or pass React nodes to `useConfirm` and render dynamic/plain labels outside Lingui.
 - For React components with explicit props, prefer a named TypeScript props type over inline object annotations in the function signature, especially once the props include more than one field or generics. For example:
 
 ```ts
