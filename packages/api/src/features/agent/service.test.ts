@@ -98,6 +98,7 @@ vi.mock("drizzle-orm", () => ({
 
 vi.mock("ai", () => ({
 	convertToModelMessages: vi.fn(),
+	generateText: vi.fn(),
 	stepCountIs: vi.fn(),
 	ToolLoopAgent: vi.fn(),
 }));
@@ -125,6 +126,7 @@ vi.mock("@reactive-resume/utils/string", () => ({ generateId: () => "test-id" })
 vi.mock("@orpc/server", () => ({ streamToEventIterator: vi.fn() }));
 
 beforeEach(() => {
+	vi.clearAllMocks();
 	for (const mock of Object.values(dbMock)) mock.mockReset();
 	dbMock.transaction.mockImplementation(async <T>(callback: (tx: typeof dbMock) => Promise<T>) => callback(dbMock));
 	clearActiveAgentRunIfCurrentMock.mockReset();
@@ -560,6 +562,131 @@ describe("agentService.messages.send", () => {
 			baseURL: "http://localhost:1234/v1",
 		});
 		expect(streamMock).toHaveBeenCalledWith(expect.objectContaining({ timeout }));
+	});
+
+	it("uses a direct JSON Patch flow for Ollama edits instead of the tool loop", async () => {
+		const activeThread = buildActiveThread();
+		const persistedUserMessage = {
+			id: "message-1",
+			userId: "user-1",
+			threadId: "thread-1",
+			role: "user",
+			status: "completed",
+			sequence: 0,
+			uiMessage: {
+				id: "ui-message-1",
+				role: "user",
+				parts: [{ type: "text", text: "Rewrite my summary" }],
+			},
+		};
+		const persistedAssistantMessage = {
+			id: "message-2",
+			userId: "user-1",
+			threadId: "thread-1",
+			role: "assistant",
+			status: "completed",
+			sequence: 1,
+			uiMessage: {
+				id: "assistant-message-1",
+				role: "assistant",
+				parts: [{ type: "text", text: "I rewrote the summary." }],
+			},
+		};
+		const beforeUpdatedAt = new Date("2026-05-01T00:00:00.000Z");
+		const patchedUpdatedAt = new Date("2026-05-02T00:00:00.000Z");
+		const operations = [{ op: "replace", path: "/summary/content", value: "<p>Focused operator.</p>" }];
+		const insertValues: unknown[] = [];
+
+		dbMock.select
+			.mockImplementationOnce(() => selectLimitResult([activeThread]))
+			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: -1 }]))
+			.mockImplementationOnce(() => selectWhereResult([{ total: 1 }]))
+			.mockImplementationOnce(() => selectOrderByResult([persistedUserMessage]))
+			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: 0 }]));
+		dbMock.insert.mockImplementation(() => ({
+			values: vi.fn((value) => {
+				insertValues.push(value);
+				if (value.kind === "resume_patch") {
+					return {
+						returning: vi.fn(async () => [
+							{
+								id: "action-1",
+								...value,
+								appliedUpdatedAt: patchedUpdatedAt,
+								createdAt: patchedUpdatedAt,
+								updatedAt: patchedUpdatedAt,
+							},
+						]),
+					};
+				}
+
+				return {
+					returning: vi.fn(async () =>
+						value.role === "assistant" ? [persistedAssistantMessage] : [persistedUserMessage],
+					),
+				};
+			}),
+		}));
+		dbMock.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
+
+		claimActiveAgentRunMock.mockResolvedValue(true);
+		aiProvidersServiceMock.getRunnableById.mockResolvedValue({
+			id: "provider-1",
+			provider: "ollama",
+			model: "llama3.2",
+			apiKey: "",
+			baseURL: "http://localhost:11434/api",
+		});
+		aiProvidersServiceMock.markUsed.mockResolvedValue(undefined);
+		resumeServiceMock.getById.mockResolvedValue({
+			id: "resume-1",
+			name: "Resume",
+			data: { summary: { content: "<p>Old.</p>" } },
+			updatedAt: beforeUpdatedAt,
+		});
+		resumeServiceMock.patchInTransaction.mockResolvedValue({ id: "resume-1", updatedAt: patchedUpdatedAt });
+		resumeServiceMock.notifyResumePatched.mockResolvedValue(undefined);
+
+		const [{ convertToModelMessages, generateText, ToolLoopAgent }, { agentStreamLifecycle }, { streamToEventIterator }] =
+			await Promise.all([import("ai"), import("./streams"), import("@orpc/server")]);
+		vi.mocked(generateText).mockResolvedValue({
+			text: JSON.stringify({
+				title: "Rewrite summary",
+				response: "I rewrote the summary.",
+				operations,
+			}),
+		} as never);
+		vi.mocked(agentStreamLifecycle.create).mockResolvedValue(new ReadableStream());
+		vi.mocked(streamToEventIterator).mockReturnValue("iterator" as never);
+
+		const { agentService } = await import("./service");
+
+		await agentService.messages.send({
+			threadId: "thread-1",
+			userId: "user-1",
+			message: {
+				id: "ui-message-1",
+				role: "user",
+				parts: [{ type: "text", text: "Rewrite my summary" }],
+				// biome-ignore lint/suspicious/noExplicitAny: minimal fixture for unit test
+			} as any,
+		});
+
+		expect(generateText).toHaveBeenCalled();
+		expect(convertToModelMessages).not.toHaveBeenCalled();
+		expect(ToolLoopAgent).not.toHaveBeenCalled();
+		expect(resumeServiceMock.patchInTransaction).toHaveBeenCalledWith(dbMock, {
+			id: "resume-1",
+			userId: "user-1",
+			operations,
+		});
+		expect(insertValues).toContainEqual(expect.objectContaining({ role: "assistant" }));
+		expect(clearActiveAgentRunIfCurrentMock).toHaveBeenCalledWith({
+			threadId: "thread-1",
+			userId: "user-1",
+			runId: "test-id",
+			streamId: "test-id",
+		});
 	});
 
 	it("stores snapshotData and applies a valid JSON Patch without a timestamp conflict guard", async () => {

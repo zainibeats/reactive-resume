@@ -1,12 +1,14 @@
 import type { JsonPatchOperation } from "@reactive-resume/resume/patch";
-import type { FilePart, ImagePart, ModelMessage, TextPart, UIMessage } from "ai";
+import type { FilePart, ImagePart, ModelMessage, TextPart, UIMessage, UIMessageChunk } from "ai";
 import type { getModel } from "../ai/service";
 import { ORPCError } from "@orpc/client";
 import { streamToEventIterator } from "@orpc/server";
-import { convertToModelMessages, stepCountIs, ToolLoopAgent } from "ai";
+import { convertToModelMessages, generateText, stepCountIs, ToolLoopAgent } from "ai";
 import { and, asc, count, desc, eq, gte, inArray, isNull, max, sql } from "drizzle-orm";
+import { z } from "zod";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
+import { jsonPatchOperationSchema } from "@reactive-resume/resume/patch";
 import { generateId } from "@reactive-resume/utils/string";
 import { assertAgentEnvironment } from "../ai/credentials";
 import { getAgentModel, getAiRequestTimeout } from "../ai/service";
@@ -34,6 +36,13 @@ const AGENT_ATTACHMENT_URL_PREFIX = "agent-attachment:";
 const MAX_ATTACHMENT_TEXT_CHARS = 40_000;
 const ROLLBACK_CONFLICT_MESSAGE = "The resume changed after this action was applied.";
 const ROLLED_BACK_MESSAGE = "This patch was rolled back when the resume was restored to an earlier state.";
+
+const ollamaPatchResponseSchema = z.object({
+	title: z.string().trim().min(1),
+	summary: z.string().trim().optional(),
+	response: z.string().trim().min(1),
+	operations: z.array(jsonPatchOperationSchema).default([]),
+});
 
 const activeRunControllers = new Map<string, AbortController>();
 const canceledRunsWithPersistedPartial = new Set<string>();
@@ -780,6 +789,117 @@ function createAgent(input: {
 	});
 }
 
+function extractJsonObject(text: string) {
+	const first = text.indexOf("{");
+	const last = text.lastIndexOf("}");
+	if (first === -1 || last === -1 || last < first) throw new Error("AI returned no JSON object.");
+
+	return JSON.parse(text.slice(first, last + 1));
+}
+
+function textMessageStream(text: string): ReadableStream<UIMessageChunk> {
+	return new ReadableStream({
+		start(controller) {
+			const id = generateId();
+			controller.enqueue({ type: "text-start", id });
+			controller.enqueue({ type: "text-delta", id, delta: text });
+			controller.enqueue({ type: "text-end", id });
+			controller.close();
+		},
+	});
+}
+
+async function runOllamaPatchAgent(input: {
+	userId: string;
+	threadId: string;
+	resumeId: string;
+	runId: string;
+	streamId: string;
+	message: UIMessage;
+	provider: {
+		provider: Parameters<typeof getModel>[0]["provider"];
+		model: string;
+		apiKey: string;
+		baseURL?: string;
+	};
+}) {
+	const resume = await resumeService.getById({ id: input.resumeId, userId: input.userId });
+	const request = messageText(input.message);
+	if (!request) throw new ORPCError("BAD_REQUEST", { message: "Agent message is empty." });
+
+	const timeout = getAiRequestTimeout({
+		provider: input.provider.provider,
+		baseURL: input.provider.baseURL ?? "",
+	});
+	const result = await generateText({
+		model: getAgentModel(input.provider),
+		...(timeout ? { timeout } : {}),
+		messages: [
+			{
+				role: "system",
+				content:
+					"You are an expert resume editor inside Reactive Resume. Return only a raw JSON object with this shape: {\"title\":\"short action title\",\"summary\":\"optional concise summary\",\"response\":\"brief user-facing message\",\"operations\":[JSON Patch operations]}. JSON Patch paths are rooted at the resume data object, so use paths like /summary/content and /basics/name. Do not prefix paths with /data. Use valid HTML for HTML content fields such as /summary/content. Batch requested edits into one cohesive operations array. If no resume edit is needed, return an empty operations array and answer in response.",
+			},
+			{
+				role: "user",
+				content: `Current resume data:\n${JSON.stringify(resume.data, null, 2)}\n\nUser request:\n${request}`,
+			},
+		],
+	});
+
+	const patch = ollamaPatchResponseSchema.parse(extractJsonObject(result.text));
+	const patchResult =
+		patch.operations.length > 0
+			? await applyResumePatch({
+					userId: input.userId,
+					threadId: input.threadId,
+					resumeId: input.resumeId,
+					title: patch.title,
+					...(patch.summary !== undefined ? { summary: patch.summary } : {}),
+					operations: patch.operations,
+				})
+			: null;
+
+	const responseMessage: UIMessage = {
+		id: generateId(),
+		role: "assistant",
+		parts: [
+			{ type: "text", text: patch.response },
+			...(patchResult
+				? [
+						{
+							type: "tool-apply_resume_patch",
+							toolCallId: generateId(),
+							state: "output-available",
+							input: {
+								title: patch.title,
+								...(patch.summary !== undefined ? { summary: patch.summary } : {}),
+								operations: patch.operations,
+							},
+							output: patchResult,
+						} as UIMessage["parts"][number],
+					]
+				: []),
+		],
+	};
+
+	await persistMessage({
+		userId: input.userId,
+		threadId: input.threadId,
+		message: responseMessage,
+		status: "completed",
+	});
+
+	await cleanupActiveRun({
+		threadId: input.threadId,
+		userId: input.userId,
+		runId: input.runId,
+		streamId: input.streamId,
+	});
+
+	return streamToEventIterator(await agentStreamLifecycle.create(input.streamId, () => textMessageStream(patch.response)));
+}
+
 export const agentService = {
 	threads: {
 		list: async (input: { userId: string }) => {
@@ -1035,6 +1155,24 @@ export const agentService = {
 					{ threadId: input.threadId, userId: input.userId },
 				);
 				const messages = messageRows.map(toMessage);
+
+				if (runnableProvider.provider === "ollama" && input.message.role === "user") {
+					return runOllamaPatchAgent({
+						userId: input.userId,
+						threadId: input.threadId,
+						resumeId: thread.workingResumeId,
+						runId,
+						streamId,
+						message: input.message,
+						provider: {
+							provider: runnableProvider.provider,
+							model: runnableProvider.model,
+							apiKey: runnableProvider.apiKey,
+							baseURL: runnableProvider.baseURL ?? "",
+						},
+					});
+				}
+
 				const modelMessages = await convertToModelMessages(messages.map(toModelInputMessage));
 				const attachmentModelParts = buildAttachmentModelParts(await readAttachmentModelInputs(attachmentsForModel));
 				const agent = createAgent({

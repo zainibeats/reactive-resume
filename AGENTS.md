@@ -8,12 +8,6 @@ Reactive Resume is a pnpm monorepo (Turborepo) with two deployable apps: `apps/w
 
 Internal packages are source-consumed through `package.json` export maps that point at `src` files. Do not assume package-local `dist` output exists unless a package explicitly adds it.
 
-### Prerequisites
-
-- **Node.js 24** (matches Dockerfile `ARG NODE_VERSION=24`). Use `nvm install 24 && nvm use 24` if needed.
-- **Docker** is required to run PostgreSQL. Start it with `sudo dockerd &` if the daemon isn't running.
-- **pnpm 11.1.2** is managed via corepack (`corepack enable`).
-
 ### Codebase map
 
 - `apps/web` owns TanStack Start routes, Vite config, PWA setup, oRPC browser client wiring, web features, and the resume builder UI.
