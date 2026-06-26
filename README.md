@@ -27,9 +27,9 @@
 
 ---
 
-Reactive Resume makes building resumes straightforward. Pick a template, fill in your details, and export to PDF—no account required for basic use. For those who want more control, the entire application can be self-hosted on your own infrastructure.
+Reactive Resume makes building resumes straightforward for an individual person. Pick a template, fill in your details, and export to PDF. An account can be used to save and manage your own resumes, but the core product is a personal resume builder rather than a company workspace.
 
-Built with privacy as a core principle, Reactive Resume gives you complete ownership of your data. The codebase is fully open-source under the MIT license, with no tracking, no ads, and no hidden costs.
+Built with privacy as a core principle, Reactive Resume gives you complete ownership of your data. The application can also be self-hosted when you want to run your own single-owner instance. The codebase is fully open-source under the MIT license, with no tracking, no ads, and no hidden costs.
 
 ## Sponsors
 
@@ -64,7 +64,7 @@ If your company would like to sponsor Reactive Resume, email [hello@amruthpillai
 
 **Privacy & Control**
 
-- Self-host on your own infrastructure
+- Self-host a personal instance on your own infrastructure
 - No tracking or analytics by default
 - Full data export at any time
 - Delete your data permanently with one click

@@ -6,7 +6,7 @@ Simplify the product around one workflow: creating and editing great resumes. Th
 
 ## Direction
 
-- Keep the hosted multi-user model for now.
+- Move toward a personal, single-owner resume builder model. Single-user authentication is fine, but do not add teams, organization management, tenant administration, or collaboration workflows as part of this simplification.
 - Keep MCP support for now.
 - Remove the separate agent workspace UX once the builder assistant is available.
 - Do not create separate AI draft resumes for normal assistant edits.

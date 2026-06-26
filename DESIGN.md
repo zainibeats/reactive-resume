@@ -148,13 +148,19 @@ components:
     padding: 10px
 ---
 
+## Product Direction
+
+Reactive Resume is moving toward a personal resume builder for an individual owner. The product should feel like a focused writing and layout tool, not a company software suite. Single-user authentication is acceptable, but teams, organizations, tenant administration, billing, and collaboration should not shape the default design.
+
+The first screen should help a person start, import, or continue a resume quickly. Avoid marketing-first first visits, enterprise-oriented onboarding, and decorative pages that delay the core builder workflow. Public-facing pages can explain the project, but the primary experience is the resume editor and its export/share flow.
+
 ## Overview
 
 Reactive Resume is a monochrome, content-first design system built for a resume builder used by tens of thousands of people worldwide. The visual identity prioritizes readability and unobtrusiveness — the user's resume content is always the hero, never the chrome around it.
 
 The system defaults to dark mode with a warm near-black backdrop that makes the resume preview "float" as the visual anchor. Light mode is supported as a full alternative. The authenticated app shell (dashboard, builder, settings) uses an entirely achromatic grayscale palette — the sole chromatic exception is destructive red for dangerous actions. The landing page introduces subtle chromatic accents: blue-tinted spotlight gradients on the hero, a multicolor text-mask animation on hover, and social auth provider brand colors (Google blue, LinkedIn blue) on the login page.
 
-The overall aesthetic is a professional tool UI: clean grid lines, subtle borders, generous whitespace, and typography that steps back to let the content shine. Think "VS Code meets Figma" — a productivity workspace, not a marketing site.
+The overall aesthetic is a professional personal tool UI: clean grid lines, subtle borders, generous whitespace, and typography that steps back to let the content shine. Think "focused document editor" — a productivity workspace, not a marketing site or enterprise console.
 
 One deliberate counterpoint to the serious UI: all resume templates are named after Pokemon (Azurill, Bronzor, Chikorita, Ditgar, Gengar, Pikachu, etc.). This is an intentional brand choice — playful naming for templates injects personality into an otherwise utilitarian interface, making templates feel collectible and memorable rather than generic ("Template 1", "Modern", "Classic").
 
@@ -206,15 +212,16 @@ Panel sizes persist in cookies. On mobile (< 768px), sidebars collapse to 0% wid
 
 Standard sidebar navigation layout using the `Sidebar` component system. The sidebar contains: logo, resume list link, agent link, settings subnavigation (profile, preferences, authentication, API keys, integrations, danger zone), and a footer with user avatar. Content area shows a responsive grid of resume cards.
 
-### Landing Page
+### First Visit
 
-Full-width single-column marketing layout:
-1. **Floating builder preview** — A non-interactive screenshot of the builder as a hero visual, creating an immediate "this is what you get" impression.
-2. **Hero** — Centered headline, subheadline, and two CTAs (primary "Get Started" with arrow, ghost "Learn More" with icon).
-3. **Features grid** — 4-column responsive grid with icon + title + description cards, separated by thin border lines.
-4. **Template carousel** — Horizontally scrolling row of template preview thumbnails with Pokemon-themed names.
-5. **Testimonials** — Tiled user quotes in a masonry-style grid.
-6. **Support / FAQ / Footer** — Accordion FAQ, community section, and a 4-column footer with logo, resource links, community links, and license info.
+The first visit should be utility-first, not a fancy marketing front end. Prioritize:
+
+1. **Resume start/continue actions** — Create a resume, import an existing resume, or continue the most recent resume when signed in.
+2. **Template visibility** — Show enough template previews to make a choice without turning the page into a promotional carousel.
+3. **Auth only when useful** — Present sign-in as a way to save and sync the owner's work, not as organization onboarding.
+4. **Compact project context** — Keep links to docs, self-hosting, source code, and privacy information available but secondary.
+
+Avoid testimonials, enterprise value propositions, company dashboards, team-oriented language, and long promotional sections unless explicitly requested.
 
 ### Responsive Breakpoints
 

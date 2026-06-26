@@ -8,6 +8,16 @@ Reactive Resume is a pnpm monorepo (Turborepo) with two deployable apps: `apps/w
 
 Internal packages are source-consumed through `package.json` export maps that point at `src` files. Do not assume package-local `dist` output exists unless a package explicitly adds it.
 
+### Product direction
+
+Reactive Resume should move toward a personal resume builder for an individual owner, not a broad company software platform. Prefer the simplest workflow that helps one person create, edit, export, and share resumes.
+
+- Treat single-user authentication as acceptable. Do not introduce teams, organizations, roles, admin dashboards, tenant isolation, billing, or collaboration workflows unless explicitly requested.
+- The first visit should prioritize starting or editing a resume. Avoid fancy marketing-first landing pages, large promotional funnels, or enterprise-oriented onboarding.
+- Prefer local/self-hosted simplicity over operational breadth. Optional services such as SSO, S3-compatible storage, MCP, API keys, and AI integrations should remain behind existing boundaries and should not drive the core UX.
+- When simplifying existing features, keep resume creation, editing, import/export, PDF/DOCX generation, templates, privacy, and ownership as the central product surface.
+- If a requested change could be implemented as either a personal workflow or a multi-user/business workflow, choose the personal workflow by default and document any tradeoff.
+
 ### Codebase map
 
 - `apps/web` owns TanStack Start routes, Vite config, PWA setup, oRPC browser client wiring, web features, and the resume builder UI.
