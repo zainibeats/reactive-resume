@@ -21,7 +21,6 @@ export const env = createEnv({
 
 		// Authentication
 		AUTH_SECRET: z.string().min(1),
-		BETTER_AUTH_API_KEY: z.string().min(1).optional(),
 
 		// Social Auth (Google)
 		GOOGLE_CLIENT_ID: z.string().min(1).optional(),
@@ -75,7 +74,6 @@ export const env = createEnv({
 		FLAG_DISABLE_EMAIL_AUTH: z.stringbool().default(false),
 		FLAG_DISABLE_IMAGE_PROCESSING: z.stringbool().default(false),
 		FLAG_DISABLE_API_RATE_LIMIT: z.stringbool().default(false),
-		FLAG_SHOW_SPONSORS: z.stringbool().default(false),
 		FLAG_ALLOW_UNSAFE_AI_BASE_URL: z.stringbool().default(false),
 		FLAG_ALLOW_UNSAFE_OAUTH_REDIRECT_URI: z.stringbool().default(false),
 

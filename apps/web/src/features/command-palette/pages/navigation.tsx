@@ -3,7 +3,6 @@ import { Trans } from "@lingui/react/macro";
 import {
 	GearIcon,
 	HouseSimpleIcon,
-	KeyIcon,
 	OpenAiLogoIcon,
 	ReadCvLogoIcon,
 	ShieldCheckIcon,
@@ -81,15 +80,6 @@ export function NavigationCommandGroup() {
 				>
 					<ShieldCheckIcon />
 					<Trans>Authentication</Trans>
-				</CommandItem>
-
-				<CommandItem
-					keywords={[t`API Keys`]}
-					value="navigation.settings.api-keys"
-					onSelect={() => onNavigate("/dashboard/settings/api-keys")}
-				>
-					<KeyIcon />
-					<Trans>API Keys</Trans>
 				</CommandItem>
 
 				<CommandItem

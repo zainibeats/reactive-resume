@@ -2,14 +2,13 @@ import type { GenericOAuthConfig } from "better-auth/plugins";
 import type { JWTPayload } from "jose";
 import { apiKey } from "@better-auth/api-key";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { dash } from "@better-auth/infra";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { compare, hash } from "bcrypt";
 import { APIError, betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { verifyAccessToken } from "better-auth/oauth2";
-import { admin, jwt } from "better-auth/plugins";
+import { jwt } from "better-auth/plugins";
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { twoFactor } from "better-auth/plugins/two-factor";
 import { username } from "better-auth/plugins/username";
@@ -231,7 +230,6 @@ const getAuthConfig = () => {
 
 		plugins: [
 			jwt(),
-			admin(),
 			passkey(),
 			genericOAuth({ config: authConfigs }),
 			twoFactor({ issuer: "Reactive Resume" }),
@@ -261,9 +259,6 @@ const getAuthConfig = () => {
 				usernameValidator: (username) => /^[a-z0-9._-]+$/.test(username),
 				validationOrder: { username: "post-normalization", displayUsername: "post-normalization" },
 			}),
-			...(env.BETTER_AUTH_API_KEY
-				? [dash({ apiKey: env.BETTER_AUTH_API_KEY, activityTracking: { enabled: true } })]
-				: []),
 		],
 	});
 };

@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 const envMock = vi.hoisted(() => ({
 	FLAG_DISABLE_SIGNUPS: false,
 	FLAG_DISABLE_EMAIL_AUTH: false,
-	FLAG_SHOW_SPONSORS: false,
 }));
 
 vi.mock("@reactive-resume/env/server", () => ({ env: envMock }));
@@ -17,7 +16,6 @@ describe("flagsService.getFlags", () => {
 		expect(flagsService.getFlags()).toEqual({
 			disableSignups: false,
 			disableEmailAuth: false,
-			showSponsors: false,
 		});
 	});
 
@@ -27,7 +25,6 @@ describe("flagsService.getFlags", () => {
 		expect(flagsService.getFlags()).toEqual({
 			disableSignups: true,
 			disableEmailAuth: false,
-			showSponsors: false,
 		});
 	});
 
@@ -37,32 +34,16 @@ describe("flagsService.getFlags", () => {
 		expect(flagsService.getFlags()).toEqual({
 			disableSignups: false,
 			disableEmailAuth: true,
-			showSponsors: false,
-		});
-	});
-
-	it("returns showSponsors=true when env flag is set", () => {
-		envMock.FLAG_DISABLE_SIGNUPS = false;
-		envMock.FLAG_DISABLE_EMAIL_AUTH = false;
-		envMock.FLAG_SHOW_SPONSORS = true;
-		expect(flagsService.getFlags()).toEqual({
-			disableSignups: false,
-			disableEmailAuth: false,
-			showSponsors: true,
 		});
 	});
 
 	it("reads the latest env values on every call (no stale cache)", () => {
 		envMock.FLAG_DISABLE_SIGNUPS = false;
-		envMock.FLAG_SHOW_SPONSORS = false;
 		const before = flagsService.getFlags();
 		envMock.FLAG_DISABLE_SIGNUPS = true;
-		envMock.FLAG_SHOW_SPONSORS = true;
 		const after = flagsService.getFlags();
 
 		expect(before.disableSignups).toBe(false);
 		expect(after.disableSignups).toBe(true);
-		expect(before.showSponsors).toBe(false);
-		expect(after.showSponsors).toBe(true);
 	});
 });

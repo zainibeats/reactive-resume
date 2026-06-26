@@ -49,27 +49,27 @@ export const styleSlotComboboxOptions: ComboboxOption<StyleSlot>[] = styleSlotOp
 }));
 
 export const fontWeightOptions = ["100", "200", "300", "400", "500", "600", "700", "800", "900"] as const;
-export const fontStyleOptions = [
+const fontStyleOptions = [
 	{ value: "normal", label: "Normal" },
 	{ value: "italic", label: "Italic" },
 ] as const satisfies readonly { value: NonNullable<StyleIntent["fontStyle"]>; label: string }[];
-export const textDecorationOptions = [
+const textDecorationOptions = [
 	{ value: "none", label: "None" },
 	{ value: "underline", label: "Underline" },
 	{ value: "line-through", label: "Line through" },
 ] as const satisfies readonly { value: NonNullable<StyleIntent["textDecoration"]>; label: string }[];
-export const textDecorationStyleOptions = [
+const textDecorationStyleOptions = [
 	{ value: "solid", label: "Solid" },
 	{ value: "dashed", label: "Dashed" },
 	{ value: "dotted", label: "Dotted" },
 ] as const satisfies readonly { value: NonNullable<StyleIntent["textDecorationStyle"]>; label: string }[];
-export const textAlignOptions = [
+const textAlignOptions = [
 	{ value: "left", label: "Left" },
 	{ value: "center", label: "Center" },
 	{ value: "right", label: "Right" },
 	{ value: "justify", label: "Justify" },
 ] as const satisfies readonly { value: NonNullable<StyleIntent["textAlign"]>; label: string }[];
-export const textTransformOptions = [
+const textTransformOptions = [
 	{ value: "none", label: "None" },
 	{ value: "uppercase", label: "Uppercase" },
 	{ value: "lowercase", label: "Lowercase" },

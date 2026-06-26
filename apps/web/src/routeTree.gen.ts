@@ -29,7 +29,6 @@ import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/re
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as DashboardSettingsProfileRouteImport } from "./routes/dashboard/settings/profile";
 import { Route as DashboardSettingsPreferencesRouteImport } from "./routes/dashboard/settings/preferences";
-import { Route as DashboardSettingsJobSearchRouteImport } from "./routes/dashboard/settings/job-search";
 import { Route as DashboardSettingsDangerZoneRouteImport } from "./routes/dashboard/settings/danger-zone";
 import { Route as DashboardSettingsApiKeysRouteImport } from "./routes/dashboard/settings/api-keys";
 import { Route as DashboardSettingsIntegrationsRouteRouteImport } from "./routes/dashboard/settings/integrations/route";
@@ -136,12 +135,6 @@ const DashboardSettingsPreferencesRoute =
     path: "/settings/preferences",
     getParentRoute: () => DashboardRouteRoute,
   } as any);
-const DashboardSettingsJobSearchRoute =
-  DashboardSettingsJobSearchRouteImport.update({
-    id: "/settings/job-search",
-    path: "/settings/job-search",
-    getParentRoute: () => DashboardRouteRoute,
-  } as any);
 const DashboardSettingsDangerZoneRoute =
   DashboardSettingsDangerZoneRouteImport.update({
     id: "/settings/danger-zone",
@@ -186,7 +179,6 @@ export interface FileRoutesByFullPath {
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/danger-zone": typeof DashboardSettingsDangerZoneRoute;
-  "/dashboard/settings/job-search": typeof DashboardSettingsJobSearchRoute;
   "/dashboard/settings/preferences": typeof DashboardSettingsPreferencesRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
@@ -209,7 +201,6 @@ export interface FileRoutesByTo {
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/danger-zone": typeof DashboardSettingsDangerZoneRoute;
-  "/dashboard/settings/job-search": typeof DashboardSettingsJobSearchRoute;
   "/dashboard/settings/preferences": typeof DashboardSettingsPreferencesRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/builder/$resumeId": typeof BuilderResumeIdIndexRoute;
@@ -237,7 +228,6 @@ export interface FileRoutesById {
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/danger-zone": typeof DashboardSettingsDangerZoneRoute;
-  "/dashboard/settings/job-search": typeof DashboardSettingsJobSearchRoute;
   "/dashboard/settings/preferences": typeof DashboardSettingsPreferencesRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
@@ -265,7 +255,6 @@ export interface FileRouteTypes {
     | "/dashboard/settings/integrations"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/danger-zone"
-    | "/dashboard/settings/job-search"
     | "/dashboard/settings/preferences"
     | "/dashboard/settings/profile"
     | "/builder/$resumeId/"
@@ -288,7 +277,6 @@ export interface FileRouteTypes {
     | "/dashboard/settings/integrations"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/danger-zone"
-    | "/dashboard/settings/job-search"
     | "/dashboard/settings/preferences"
     | "/dashboard/settings/profile"
     | "/builder/$resumeId"
@@ -315,7 +303,6 @@ export interface FileRouteTypes {
     | "/dashboard/settings/integrations"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/danger-zone"
-    | "/dashboard/settings/job-search"
     | "/dashboard/settings/preferences"
     | "/dashboard/settings/profile"
     | "/builder/$resumeId/"
@@ -474,13 +461,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardSettingsPreferencesRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
-    "/dashboard/settings/job-search": {
-      id: "/dashboard/settings/job-search";
-      path: "/settings/job-search";
-      fullPath: "/dashboard/settings/job-search";
-      preLoaderRoute: typeof DashboardSettingsJobSearchRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
     "/dashboard/settings/danger-zone": {
       id: "/dashboard/settings/danger-zone";
       path: "/settings/danger-zone";
@@ -555,7 +535,6 @@ interface DashboardRouteRouteChildren {
   DashboardSettingsIntegrationsRouteRoute: typeof DashboardSettingsIntegrationsRouteRoute;
   DashboardSettingsApiKeysRoute: typeof DashboardSettingsApiKeysRoute;
   DashboardSettingsDangerZoneRoute: typeof DashboardSettingsDangerZoneRoute;
-  DashboardSettingsJobSearchRoute: typeof DashboardSettingsJobSearchRoute;
   DashboardSettingsPreferencesRoute: typeof DashboardSettingsPreferencesRoute;
   DashboardSettingsProfileRoute: typeof DashboardSettingsProfileRoute;
   DashboardResumesIndexRoute: typeof DashboardResumesIndexRoute;
@@ -568,7 +547,6 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
     DashboardSettingsIntegrationsRouteRoute,
   DashboardSettingsApiKeysRoute: DashboardSettingsApiKeysRoute,
   DashboardSettingsDangerZoneRoute: DashboardSettingsDangerZoneRoute,
-  DashboardSettingsJobSearchRoute: DashboardSettingsJobSearchRoute,
   DashboardSettingsPreferencesRoute: DashboardSettingsPreferencesRoute,
   DashboardSettingsProfileRoute: DashboardSettingsProfileRoute,
   DashboardResumesIndexRoute: DashboardResumesIndexRoute,

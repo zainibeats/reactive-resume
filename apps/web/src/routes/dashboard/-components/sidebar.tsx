@@ -5,7 +5,6 @@ import { Trans } from "@lingui/react/macro";
 import {
 	BrainIcon,
 	GearSixIcon,
-	KeyIcon,
 	ReadCvLogoIcon,
 	ShieldCheckIcon,
 	UserCircleIcon,
@@ -63,11 +62,6 @@ const settingsSidebarItems = [
 		icon: <ShieldCheckIcon />,
 		label: msg`Authentication`,
 		href: "/dashboard/settings/authentication",
-	},
-	{
-		icon: <KeyIcon />,
-		label: msg`API Keys`,
-		href: "/dashboard/settings/api-keys",
 	},
 	{
 		icon: <BrainIcon />,
