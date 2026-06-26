@@ -17,11 +17,12 @@ import {
 } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
 import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Checkbox } from "@reactive-resume/ui/components/checkbox";
 import {
 	Dialog,
 	DialogClose,
@@ -78,10 +79,23 @@ function getDiffOperationVariant(op: SyncDiff["op"]): "default" | "secondary" | 
 	}
 }
 
-function ParentChangeDiff({ diff }: { diff: SyncDiff }) {
+type ParentChangeDiffProps = {
+	diff: SyncDiff;
+	checked?: boolean;
+	onCheckedChange?: (checked: boolean) => void;
+};
+
+function ParentChangeDiff({ diff, checked, onCheckedChange }: ParentChangeDiffProps) {
 	return (
 		<li className="overflow-hidden rounded-lg border bg-background">
 			<div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-3 py-2">
+				{onCheckedChange && (
+					<Checkbox
+						aria-label={`Select parent change ${formatDiffPath(diff.path)}`}
+						checked={checked}
+						onCheckedChange={(value) => onCheckedChange(value === true)}
+					/>
+				)}
 				<Badge variant={getDiffOperationVariant(diff.op)}>{getDiffOperationLabel(diff.op)}</Badge>
 				{diff.hasConflict && (
 					<Badge variant="destructive">
@@ -176,6 +190,7 @@ export function BuilderHeader() {
 
 function ChildResumeSyncAlert() {
 	const [isReviewOpen, setIsReviewOpen] = useState(false);
+	const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
 	const queryClient = useQueryClient();
 	const resume = useCurrentResume();
 	const patchResume = usePatchResume();
@@ -194,6 +209,12 @@ function ChildResumeSyncAlert() {
 		orpc.resume.dismissParentUpdates.mutationOptions(),
 	);
 
+	useEffect(() => {
+		if (!isReviewOpen || !syncStatus) return;
+
+		setSelectedPaths(Array.from(new Set(syncStatus.diffs.map((diff) => diff.path))));
+	}, [isReviewOpen, syncStatus]);
+
 	if (!parentId || !syncStatus?.isBehind) return null;
 
 	const refreshSyncStatus = () => {
@@ -201,11 +222,33 @@ function ChildResumeSyncAlert() {
 		void queryClient.invalidateQueries({ queryKey: orpc.resume.getById.queryKey({ input: { id } }) });
 	};
 
+	const selectedPathSet = new Set(selectedPaths);
+	const selectablePaths = Array.from(new Set(syncStatus.diffs.map((diff) => diff.path)));
+	const selectedCount = selectablePaths.filter((path) => selectedPathSet.has(path)).length;
+	const hasSelectedChanges = syncStatus.operations.length === 0 || selectedCount > 0;
+	const hasSelectedConflicts = syncStatus.diffs.some((diff) => selectedPathSet.has(diff.path) && diff.hasConflict);
+	const areAllChangesSelected =
+		selectablePaths.length > 0 && selectablePaths.every((path) => selectedPathSet.has(path));
+
+	const togglePath = (path: string, checked: boolean) => {
+		setSelectedPaths((current) => {
+			const next = new Set(current);
+			if (checked) next.add(path);
+			else next.delete(path);
+
+			return Array.from(next);
+		});
+	};
+
+	const toggleAllPaths = (checked: boolean) => {
+		setSelectedPaths(checked ? selectablePaths : []);
+	};
+
 	const applyUpdates = (force = false) => {
 		const toastId = toast.loading(t`Applying parent updates...`);
 
 		applyParentUpdates(
-			{ id, force },
+			{ id, force, ...(syncStatus.operations.length > 0 ? { paths: selectedPaths } : {}) },
 			{
 				onSuccess: (updated) => {
 					patchResume((draft) => {
@@ -313,11 +356,31 @@ function ChildResumeSyncAlert() {
 								<Trans>Parent changes</Trans>
 							</div>
 							{syncStatus.operations.length > 0 ? (
-								<ul className="mt-2 max-h-[min(60svh,36rem)] space-y-3 overflow-auto pe-1 text-sm">
-									{syncStatus.diffs.map((diff, index) => (
-										<ParentChangeDiff key={`${diff.op}-${diff.path}-${index}`} diff={diff} />
-									))}
-								</ul>
+								<>
+									<div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+										<div className="flex items-center gap-2 text-sm">
+											<Checkbox
+												aria-label="Select all changes"
+												checked={areAllChangesSelected}
+												onCheckedChange={(value) => toggleAllPaths(value === true)}
+											/>
+											<span>Select all changes</span>
+										</div>
+										<span className="text-muted-foreground text-xs">
+											{selectedCount} of {selectablePaths.length} selected
+										</span>
+									</div>
+									<ul className="mt-2 max-h-[min(60svh,36rem)] space-y-3 overflow-auto pe-1 text-sm">
+										{syncStatus.diffs.map((diff, index) => (
+											<ParentChangeDiff
+												key={`${diff.op}-${diff.path}-${index}`}
+												diff={diff}
+												checked={selectedPathSet.has(diff.path)}
+												onCheckedChange={(checked) => togglePath(diff.path, checked)}
+											/>
+										))}
+									</ul>
+								</>
 							) : (
 								<p className="mt-2 text-muted-foreground text-sm">
 									<Trans>No content changes were detected, but the parent revision is newer.</Trans>
@@ -335,11 +398,11 @@ function ChildResumeSyncAlert() {
 							<Trans>Dismiss</Trans>
 						</Button>
 						<Button
-							disabled={isLocked || isPending || (syncStatus.hasConflicts && syncStatus.operations.length === 0)}
-							onClick={() => applyUpdates(syncStatus.hasConflicts)}
+							disabled={isLocked || isPending || !hasSelectedChanges}
+							onClick={() => applyUpdates(hasSelectedConflicts)}
 						>
 							<ArrowsClockwiseIcon />
-							{syncStatus.hasConflicts ? <Trans>Apply anyway</Trans> : <Trans>Apply updates</Trans>}
+							{hasSelectedConflicts ? <Trans>Apply anyway</Trans> : <Trans>Apply updates</Trans>}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

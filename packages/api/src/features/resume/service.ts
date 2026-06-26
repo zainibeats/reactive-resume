@@ -37,6 +37,11 @@ type ResumeSyncDiff = {
 	hasConflict: boolean;
 };
 
+type ResumeSyncPlanEntry = {
+	baseOperation: JsonPatchOperation;
+	operation: JsonPatchOperation;
+};
+
 function resumeVersionConflict(updatedAt: Date) {
 	return new ORPCError("RESUME_VERSION_CONFLICT", {
 		status: 409,
@@ -261,6 +266,7 @@ function getSyncPlan(input: { parentData: ResumeData; parentSnapshot: ResumeData
 		target: input.childData,
 		operations: parentOperations,
 	});
+	const entries = rebasedOperations.map(({ baseOperation, operation }) => ({ baseOperation, operation }));
 	const operations = rebasedOperations.map(({ operation }) => operation);
 	const conflicts = findRebasedResumePatchConflicts({
 		base: input.parentSnapshot,
@@ -269,10 +275,11 @@ function getSyncPlan(input: { parentData: ResumeData; parentSnapshot: ResumeData
 	});
 
 	return {
+		entries,
 		operations,
 		conflicts,
 		diffs: createResumeSyncDiffs({
-			operations: parentOperations,
+			entries,
 			conflicts,
 			previousData: input.parentSnapshot,
 			nextData: input.parentData,
@@ -302,23 +309,23 @@ function getValueAtJsonPointer(document: unknown, path: string): unknown {
 }
 
 function createResumeSyncDiffs(input: {
-	operations: JsonPatchOperation[];
+	entries: ResumeSyncPlanEntry[];
 	conflicts: string[];
 	previousData: ResumeData;
 	nextData: ResumeData;
 }): ResumeSyncDiff[] {
-	return input.operations.map((operation) => {
-		const previous = getValueAtJsonPointer(input.previousData, operation.path);
-		const next = getValueAtJsonPointer(input.nextData, operation.path);
+	return input.entries.map(({ baseOperation, operation }) => {
+		const previous = getValueAtJsonPointer(input.previousData, baseOperation.path);
+		const next = getValueAtJsonPointer(input.nextData, baseOperation.path);
 
 		return {
-			op: operation.op,
-			path: operation.path,
-			from: "from" in operation ? operation.from : null,
-			hasPrevious: operation.op !== "add" && previous !== undefined,
-			hasNext: operation.op !== "remove" && next !== undefined,
-			previous: operation.op !== "add" && previous !== undefined ? previous : null,
-			next: operation.op !== "remove" && next !== undefined ? next : null,
+			op: baseOperation.op,
+			path: baseOperation.path,
+			from: "from" in baseOperation ? baseOperation.from : null,
+			hasPrevious: baseOperation.op !== "add" && previous !== undefined,
+			hasNext: baseOperation.op !== "remove" && next !== undefined,
+			previous: baseOperation.op !== "add" && previous !== undefined ? previous : null,
+			next: baseOperation.op !== "remove" && next !== undefined ? next : null,
 			hasConflict: input.conflicts.some(
 				(conflict) => operation.path === conflict || operation.path.startsWith(`${conflict}/`),
 			),
@@ -596,7 +603,7 @@ export const resumeService = {
 		};
 	},
 
-	applyParentUpdates: async (input: { id: string; userId: string; force?: boolean }) => {
+	applyParentUpdates: async (input: { id: string; userId: string; force?: boolean; paths?: string[] }) => {
 		const resume = await db.transaction(async (tx) => {
 			const [child] = await tx
 				.select({
@@ -630,7 +637,15 @@ export const resumeService = {
 				childData: child.data,
 			});
 
-			if (plan.hasConflicts && !input.force) {
+			const selectedPaths = input.paths ? new Set(input.paths) : null;
+			const selectedEntries = selectedPaths
+				? plan.entries.filter(({ baseOperation }) => selectedPaths.has(baseOperation.path))
+				: plan.entries;
+			const hasSelectedConflicts = selectedEntries.some(({ operation }) =>
+				plan.conflicts.some((conflict) => operation.path === conflict || operation.path.startsWith(`${conflict}/`)),
+			);
+
+			if (hasSelectedConflicts && !input.force) {
 				throw new ORPCError("RESUME_SYNC_CONFLICT", {
 					status: 409,
 					message: "The child resume has changes that overlap with parent updates.",
@@ -638,19 +653,26 @@ export const resumeService = {
 				});
 			}
 
+			const selectedBaseOperations = selectedEntries.map(({ baseOperation }) => baseOperation);
+			const selectedOperations = selectedEntries.map(({ operation }) => operation);
+			const parentData =
+				selectedPaths && selectedBaseOperations.length < plan.entries.length
+					? applyResumePatches(child.parentData, selectedBaseOperations)
+					: parent.data;
+			const parentRevision = selectedBaseOperations.length === plan.entries.length ? parent.revision : undefined;
 			let data = child.data;
 
-			if (plan.operations.length > 0) {
-				data = applyResumePatches(child.data, plan.operations);
+			if (selectedOperations.length > 0) {
+				data = applyResumePatches(child.data, selectedOperations);
 			}
 
 			const [resume] = await tx
 				.update(schema.resume)
 				.set({
 					data,
-					parentData: parent.data,
-					parentRevision: parent.revision,
-					revision: plan.operations.length > 0 ? sql`${schema.resume.revision} + 1` : sql`${schema.resume.revision}`,
+					parentData,
+					...(parentRevision !== undefined ? { parentRevision } : {}),
+					revision: selectedOperations.length > 0 ? sql`${schema.resume.revision} + 1` : sql`${schema.resume.revision}`,
 				})
 				.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
 				.returning({

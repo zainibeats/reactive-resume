@@ -166,7 +166,10 @@ export const resumeDto = {
 	},
 
 	applyParentUpdates: {
-		input: resumeSchema.pick({ id: true }).extend({ force: z.boolean().optional().default(false) }),
+		input: resumeSchema.pick({ id: true }).extend({
+			force: z.boolean().optional().default(false),
+			paths: z.array(z.string()).optional(),
+		}),
 		output: resumeOutputSchema,
 	},
 

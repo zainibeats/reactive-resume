@@ -307,6 +307,7 @@ export const crudRouter = {
 				id: input.id,
 				userId: context.user.id,
 				force: input.force,
+				...(input.paths ? { paths: input.paths } : {}),
 			});
 		}),
 
