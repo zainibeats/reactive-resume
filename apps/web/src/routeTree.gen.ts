@@ -11,11 +11,9 @@
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as DashboardRouteRouteImport } from "./routes/dashboard/route";
 import { Route as AuthRouteRouteImport } from "./routes/auth/route";
-import { Route as AgentRouteRouteImport } from "./routes/agent/route";
 import { Route as HomeRouteRouteImport } from "./routes/_home/route";
 import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
 import { Route as AuthIndexRouteImport } from "./routes/auth/index";
-import { Route as AgentIndexRouteImport } from "./routes/agent/index";
 import { Route as HomeIndexRouteImport } from "./routes/_home/index";
 import { Route as TemplatesSplatRouteImport } from "./routes/templates/$";
 import { Route as AuthVerify2faBackupRouteImport } from "./routes/auth/verify-2fa-backup";
@@ -25,8 +23,6 @@ import { Route as AuthResetPasswordRouteImport } from "./routes/auth/reset-passw
 import { Route as AuthRegisterRouteImport } from "./routes/auth/register";
 import { Route as AuthLoginRouteImport } from "./routes/auth/login";
 import { Route as AuthForgotPasswordRouteImport } from "./routes/auth/forgot-password";
-import { Route as AgentNewRouteImport } from "./routes/agent/new";
-import { Route as AgentThreadIdRouteImport } from "./routes/agent/$threadId";
 import { Route as UsernameSlugRouteImport } from "./routes/$username/$slug";
 import { Route as BuilderResumeIdRouteRouteImport } from "./routes/builder/$resumeId/route";
 import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
@@ -49,11 +45,6 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
   path: "/auth",
   getParentRoute: () => rootRouteImport,
 } as any);
-const AgentRouteRoute = AgentRouteRouteImport.update({
-  id: "/agent",
-  path: "/agent",
-  getParentRoute: () => rootRouteImport,
-} as any);
 const HomeRouteRoute = HomeRouteRouteImport.update({
   id: "/_home",
   getParentRoute: () => rootRouteImport,
@@ -67,11 +58,6 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => AuthRouteRoute,
-} as any);
-const AgentIndexRoute = AgentIndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => AgentRouteRoute,
 } as any);
 const HomeIndexRoute = HomeIndexRouteImport.update({
   id: "/",
@@ -117,16 +103,6 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   id: "/forgot-password",
   path: "/forgot-password",
   getParentRoute: () => AuthRouteRoute,
-} as any);
-const AgentNewRoute = AgentNewRouteImport.update({
-  id: "/new",
-  path: "/new",
-  getParentRoute: () => AgentRouteRoute,
-} as any);
-const AgentThreadIdRoute = AgentThreadIdRouteImport.update({
-  id: "/$threadId",
-  path: "/$threadId",
-  getParentRoute: () => AgentRouteRoute,
 } as any);
 const UsernameSlugRoute = UsernameSlugRouteImport.update({
   id: "/$username/$slug",
@@ -193,13 +169,10 @@ const DashboardSettingsAuthenticationIndexRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof HomeIndexRoute;
-  "/agent": typeof AgentRouteRouteWithChildren;
   "/auth": typeof AuthRouteRouteWithChildren;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
   "/builder/$resumeId": typeof BuilderResumeIdRouteRouteWithChildren;
   "/$username/$slug": typeof UsernameSlugRoute;
-  "/agent/$threadId": typeof AgentThreadIdRoute;
-  "/agent/new": typeof AgentNewRoute;
   "/auth/forgot-password": typeof AuthForgotPasswordRoute;
   "/auth/login": typeof AuthLoginRoute;
   "/auth/register": typeof AuthRegisterRoute;
@@ -208,7 +181,6 @@ export interface FileRoutesByFullPath {
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
   "/templates/$": typeof TemplatesSplatRoute;
-  "/agent/": typeof AgentIndexRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
@@ -223,8 +195,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/$username/$slug": typeof UsernameSlugRoute;
-  "/agent/$threadId": typeof AgentThreadIdRoute;
-  "/agent/new": typeof AgentNewRoute;
   "/auth/forgot-password": typeof AuthForgotPasswordRoute;
   "/auth/login": typeof AuthLoginRoute;
   "/auth/register": typeof AuthRegisterRoute;
@@ -234,7 +204,6 @@ export interface FileRoutesByTo {
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
   "/templates/$": typeof TemplatesSplatRoute;
   "/": typeof HomeIndexRoute;
-  "/agent": typeof AgentIndexRoute;
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
@@ -250,13 +219,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/_home": typeof HomeRouteRouteWithChildren;
-  "/agent": typeof AgentRouteRouteWithChildren;
   "/auth": typeof AuthRouteRouteWithChildren;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
   "/builder/$resumeId": typeof BuilderResumeIdRouteRouteWithChildren;
   "/$username/$slug": typeof UsernameSlugRoute;
-  "/agent/$threadId": typeof AgentThreadIdRoute;
-  "/agent/new": typeof AgentNewRoute;
   "/auth/forgot-password": typeof AuthForgotPasswordRoute;
   "/auth/login": typeof AuthLoginRoute;
   "/auth/register": typeof AuthRegisterRoute;
@@ -266,7 +232,6 @@ export interface FileRoutesById {
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
   "/templates/$": typeof TemplatesSplatRoute;
   "/_home/": typeof HomeIndexRoute;
-  "/agent/": typeof AgentIndexRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
@@ -283,13 +248,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
-    | "/agent"
     | "/auth"
     | "/dashboard"
     | "/builder/$resumeId"
     | "/$username/$slug"
-    | "/agent/$threadId"
-    | "/agent/new"
     | "/auth/forgot-password"
     | "/auth/login"
     | "/auth/register"
@@ -298,7 +260,6 @@ export interface FileRouteTypes {
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
     | "/templates/$"
-    | "/agent/"
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
@@ -313,8 +274,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/$username/$slug"
-    | "/agent/$threadId"
-    | "/agent/new"
     | "/auth/forgot-password"
     | "/auth/login"
     | "/auth/register"
@@ -324,7 +283,6 @@ export interface FileRouteTypes {
     | "/auth/verify-2fa-backup"
     | "/templates/$"
     | "/"
-    | "/agent"
     | "/auth"
     | "/dashboard"
     | "/dashboard/settings/integrations"
@@ -339,13 +297,10 @@ export interface FileRouteTypes {
   id:
     | "__root__"
     | "/_home"
-    | "/agent"
     | "/auth"
     | "/dashboard"
     | "/builder/$resumeId"
     | "/$username/$slug"
-    | "/agent/$threadId"
-    | "/agent/new"
     | "/auth/forgot-password"
     | "/auth/login"
     | "/auth/register"
@@ -355,7 +310,6 @@ export interface FileRouteTypes {
     | "/auth/verify-2fa-backup"
     | "/templates/$"
     | "/_home/"
-    | "/agent/"
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
@@ -371,7 +325,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   HomeRouteRoute: typeof HomeRouteRouteWithChildren;
-  AgentRouteRoute: typeof AgentRouteRouteWithChildren;
   AuthRouteRoute: typeof AuthRouteRouteWithChildren;
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
   BuilderResumeIdRouteRoute: typeof BuilderResumeIdRouteRouteWithChildren;
@@ -395,13 +348,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/agent": {
-      id: "/agent";
-      path: "/agent";
-      fullPath: "/agent";
-      preLoaderRoute: typeof AgentRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
     "/_home": {
       id: "/_home";
       path: "";
@@ -422,13 +368,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/auth/";
       preLoaderRoute: typeof AuthIndexRouteImport;
       parentRoute: typeof AuthRouteRoute;
-    };
-    "/agent/": {
-      id: "/agent/";
-      path: "/";
-      fullPath: "/agent/";
-      preLoaderRoute: typeof AgentIndexRouteImport;
-      parentRoute: typeof AgentRouteRoute;
     };
     "/_home/": {
       id: "/_home/";
@@ -492,20 +431,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/auth/forgot-password";
       preLoaderRoute: typeof AuthForgotPasswordRouteImport;
       parentRoute: typeof AuthRouteRoute;
-    };
-    "/agent/new": {
-      id: "/agent/new";
-      path: "/new";
-      fullPath: "/agent/new";
-      preLoaderRoute: typeof AgentNewRouteImport;
-      parentRoute: typeof AgentRouteRoute;
-    };
-    "/agent/$threadId": {
-      id: "/agent/$threadId";
-      path: "/$threadId";
-      fullPath: "/agent/$threadId";
-      preLoaderRoute: typeof AgentThreadIdRouteImport;
-      parentRoute: typeof AgentRouteRoute;
     };
     "/$username/$slug": {
       id: "/$username/$slug";
@@ -599,22 +524,6 @@ const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(
   HomeRouteRouteChildren,
 );
 
-interface AgentRouteRouteChildren {
-  AgentThreadIdRoute: typeof AgentThreadIdRoute;
-  AgentNewRoute: typeof AgentNewRoute;
-  AgentIndexRoute: typeof AgentIndexRoute;
-}
-
-const AgentRouteRouteChildren: AgentRouteRouteChildren = {
-  AgentThreadIdRoute: AgentThreadIdRoute,
-  AgentNewRoute: AgentNewRoute,
-  AgentIndexRoute: AgentIndexRoute,
-};
-
-const AgentRouteRouteWithChildren = AgentRouteRoute._addFileChildren(
-  AgentRouteRouteChildren,
-);
-
 interface AuthRouteRouteChildren {
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute;
   AuthLoginRoute: typeof AuthLoginRoute;
@@ -684,7 +593,6 @@ const BuilderResumeIdRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   HomeRouteRoute: HomeRouteRouteWithChildren,
-  AgentRouteRoute: AgentRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   BuilderResumeIdRouteRoute: BuilderResumeIdRouteRouteWithChildren,

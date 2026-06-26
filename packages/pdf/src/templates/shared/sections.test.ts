@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-const source = readFileSync(fileURLToPath(new URL("./sections.tsx", import.meta.url)), "utf8");
+const source = readFileSync(fileURLToPath(new URL("./section-renderers.tsx", import.meta.url)), "utf8");
+const layoutSource = readFileSync(fileURLToPath(new URL("./section-layout.tsx", import.meta.url)), "utf8");
+const itemContentSource = readFileSync(fileURLToPath(new URL("./section-item-content.tsx", import.meta.url)), "utf8");
 
 describe("ExperienceSection", () => {
 	it("does not hide the item position header when role progression is present", () => {
@@ -16,7 +18,7 @@ describe("ExperienceSection", () => {
 
 describe("ItemTitle", () => {
 	it("does not make inline title links bold unless mainEntryBold is enabled", () => {
-		const itemTitleBlock = source.match(/const ItemTitle = \([\s\S]*?\n};/)?.[0] ?? "";
+		const itemTitleBlock = itemContentSource.match(/const ItemTitle = \([\s\S]*?\n};/)?.[0] ?? "";
 
 		expect(itemTitleBlock).toContain("if (!bold) return <Link src={inlineWebsiteUrl}>{children}</Link>;");
 		expect(itemTitleBlock).not.toContain("{title}");
@@ -34,23 +36,23 @@ describe("CertificationsSection", () => {
 
 describe("SectionShell", () => {
 	it("keeps section and heading style rules when section heading icons are hidden", () => {
-		expect(source).toContain("<View style={composeStyles(sectionStyle, sectionRuleStyle)}>");
-		expect(source).toContain("<Heading style={composeStyles(sectionHeadingStyle, sectionHeadingRuleStyle)}>");
+		expect(layoutSource).toContain("<View style={composeStyles(sectionStyle, sectionRuleStyle)}>");
+		expect(layoutSource).toContain("<Heading style={composeStyles(sectionHeadingStyle, sectionHeadingRuleStyle)}>");
 	});
 
 	it("wires the section heading container style slot into the icon row", () => {
-		expect(source).toContain('useTemplateStyle("sectionHeadingContainer")');
-		expect(source).toContain("sectionHeadingContainerStyle");
+		expect(layoutSource).toContain('useTemplateStyle("sectionHeadingContainer")');
+		expect(layoutSource).toContain("sectionHeadingContainerStyle");
 	});
 
 	it("top-aligns heading icon rows and does not use unsupported auto width resets", () => {
-		const headingContainerBlock = source.match(
+		const headingContainerBlock = layoutSource.match(
 			/const defaultSectionHeadingContainerStyle = {(?<body>[\s\S]*?)} satisfies Style;/,
 		);
 
 		expect(headingContainerBlock?.groups?.body).toContain('alignItems: "flex-start"');
-		expect(source).toContain("getSectionHeadingTextStyle(sectionHeadingStyle, sectionHeadingRuleStyle)");
-		expect(source).toContain("width: _width");
-		expect(source).not.toContain('width: "auto"');
+		expect(layoutSource).toContain("getSectionHeadingTextStyle(sectionHeadingStyle, sectionHeadingRuleStyle)");
+		expect(layoutSource).toContain("width: _width");
+		expect(layoutSource).not.toContain('width: "auto"');
 	});
 });

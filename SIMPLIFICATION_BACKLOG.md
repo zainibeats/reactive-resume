@@ -56,7 +56,7 @@ References:
 
 - `apps/web/src/components/input/rich-input.tsx:209`
 
-### Simplify custom style editor controls - Partially done
+### Simplify custom style editor controls - Done
 
 `CustomStylesSectionBuilder` hand-writes each style intent control. The same field shapes repeat across color, text, spacing, and border groups.
 
@@ -65,10 +65,11 @@ Completed change:
 - Define grouped field config for style intent properties.
 - Render fields through existing `ColorField`, `NumberInput`, and `IntentSelectField`.
 - Extract shared rule deletion/filtering used by reset and delete paths.
+- Extract style-rule options, field descriptors, target/slot helpers, spacing patch helpers, and applied-rule summary helpers into a focused sibling module.
 
-Remaining follow-up:
+Decision:
 
-- Consider whether spacing controls and applied-rule summaries should also move to descriptor config, or leave them explicit because their value merging and display logic are more specialized.
+- Leave spacing controls explicit because their per-side value merging and compact input layout are more specialized than the table-driven color/text/border fields.
 
 References:
 
@@ -77,7 +78,21 @@ References:
 
 ## Larger Refactors
 
-### Split shared PDF section rendering
+### Remove standalone agent routes - Done
+
+The builder assistant is now the product surface for AI-assisted resume editing. The old standalone agent workspace route files only redirected to the resumes dashboard, but they still kept `/agent`, `/agent/new`, and `/agent/$threadId` in the generated web route tree.
+
+Completed change:
+
+- Deleted the standalone agent route files under `apps/web/src/routes/agent`.
+- Regenerated `apps/web/src/routeTree.gen.ts` so `/agent/*` routes are no longer part of the web route graph.
+- Kept the builder assistant panel and agent API services because they support editing the active resume directly.
+
+References:
+
+- `docs/superpowers/plans/2026-06-04-builder-integrated-assistant-simplification.md:27`
+
+### Split shared PDF section rendering - Done
 
 `packages/pdf/src/templates/shared/sections.tsx` owns too many responsibilities:
 
@@ -94,11 +109,18 @@ Candidate change:
 - Move built-in section renderers into `sections/`.
 - Keep behavior-specific section JSX explicit rather than over-generalizing.
 
+Completed change:
+
+- Extracted section shell, item grid/timeline layout, item wrapper, and item header primitives into `packages/pdf/src/templates/shared/section-layout.tsx`.
+- Extracted item header, title, website-link, and split-row helpers into `packages/pdf/src/templates/shared/section-item-content.tsx`.
+- Moved built-in section renderers and custom section dispatch into `packages/pdf/src/templates/shared/section-renderers.tsx`.
+- Kept `packages/pdf/src/templates/shared/sections.tsx` as the small public `Section` routing facade used by template pages.
+
 References:
 
 - `packages/pdf/src/templates/shared/sections.tsx:392`
 
-### Split agent service by capability
+### Split agent service by capability - Done
 
 `packages/api/src/features/agent/service.ts` combines thread CRUD, message streaming, attachments, rollback actions, model input shaping, and legacy repair.
 
@@ -110,6 +132,15 @@ Candidate change:
   - `attachments-service.ts`
   - `actions-service.ts`
 - Keep `service.ts` as the public facade if that matches existing API imports.
+
+Completed change:
+
+- Extracted pure row-to-response mappers into `packages/api/src/features/agent/serializers.ts`.
+- Extracted attachment create/delete behavior into `packages/api/src/features/agent/attachment-service.ts`.
+- Extracted action rollback behavior into `packages/api/src/features/agent/action-service.ts`.
+- Extracted thread list/create/get/archive/delete behavior into `packages/api/src/features/agent/thread-service.ts` and wired `service.ts` to use it.
+- Extracted message persistence, stop/resume, active-run cleanup, attachment-to-model shaping, and streaming implementation into `packages/api/src/features/agent/message-service.ts`.
+- Kept `packages/api/src/features/agent/service.ts` as the small public facade used by existing routers and tests.
 
 References:
 

@@ -27,21 +27,15 @@ const renderInfo = () =>
 	);
 
 describe("InformationSectionBuilder", () => {
-	it("renders the donation prompt and CTA", () => {
+	it("renders the project resources summary", () => {
 		renderInfo();
-		expect(screen.getByText("Support the app by doing what you can!")).toBeInTheDocument();
-		expect(screen.getByText("Donate to Reactive Resume")).toBeInTheDocument();
+		expect(screen.getByText("Project resources")).toBeInTheDocument();
+		expect(screen.getByText(/self-hostable resume builder/)).toBeInTheDocument();
 	});
 
-	it("links to the OpenCollective donation page", () => {
+	it("includes external resource links", () => {
 		renderInfo();
-		const donateLink = screen.getByText("Donate to Reactive Resume").closest("a");
-		expect(donateLink?.getAttribute("href")).toBe("http://opencollective.com/reactive-resume");
-	});
-
-	it("includes external resource links (docs, source, bugs, translations, sponsors)", () => {
-		renderInfo();
-		const labels = ["Documentation", "Source Code", "Report a Bug", "Translations", "Sponsors"];
+		const labels = ["Documentation", "Source Code", "Report a Bug", "Translations"];
 		for (const label of labels) {
 			expect(screen.getByText(label).closest("a"), label).not.toBeNull();
 		}

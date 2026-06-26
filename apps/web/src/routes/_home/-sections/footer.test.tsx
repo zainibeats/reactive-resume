@@ -22,34 +22,26 @@ const renderFooter = () =>
 	);
 
 describe("Footer", () => {
-	it("renders Resources and Community link group headings", () => {
+	it("renders Resources and Support link group headings", () => {
 		renderFooter();
 		expect(screen.getByText("Resources")).toBeInTheDocument();
-		expect(screen.getByText("Community")).toBeInTheDocument();
+		expect(screen.getByText("Support")).toBeInTheDocument();
 	});
 
 	it("renders the documented resource links", () => {
 		const { container } = renderFooter();
 		const text = container.textContent ?? "";
-		for (const label of ["Documentation", "Sponsorships", "Source Code", "Changelog"]) {
+		for (const label of ["Documentation", "Self-hosting", "Source Code", "Changelog"]) {
 			expect(text, label).toContain(label);
 		}
 	});
 
-	it("renders the documented community links", () => {
+	it("renders the documented support links", () => {
 		const { container } = renderFooter();
 		const text = container.textContent ?? "";
-		for (const label of ["Report an issue", "Translations", "Subreddit", "Discord"]) {
+		for (const label of ["Report an issue", "Translations"]) {
 			expect(text, label).toContain(label);
 		}
-	});
-
-	it("renders social media icon links to GitHub, LinkedIn, and X", () => {
-		const { container } = renderFooter();
-		const hrefs = Array.from(container.querySelectorAll<HTMLAnchorElement>("a")).map((a) => a.href);
-		expect(hrefs.some((h) => h.includes("github.com/amruthpillai/reactive-resume"))).toBe(true);
-		expect(hrefs.some((h) => h.includes("linkedin.com/in/amruthpillai"))).toBe(true);
-		expect(hrefs.some((h) => h.includes("x.com/KingOKings"))).toBe(true);
 	});
 
 	it("includes Reactive Resume version copy via Copyright", () => {
