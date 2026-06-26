@@ -475,12 +475,15 @@ function buildAnalyzeResumeSystemPrompt(resumeData: ResumeData): string {
 	return `${analyzeResumeSystemPromptTemplate}\n\n## Resume Data\n\n${JSON.stringify(resumeData, null, 2)}`;
 }
 
+/** Sends resume data to the AI provider and returns a structured analysis, parsing raw JSON from the response text. */
 function extractJsonObject(resultText: string) {
-	const first = resultText.indexOf("{");
-	const last = resultText.lastIndexOf("}");
+	const fenceMatch = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+	const candidate = fenceMatch?.[1] ?? resultText;
+	const first = candidate.indexOf("{");
+	const last = candidate.lastIndexOf("}");
 	if (first === -1 || last === -1 || last < first) throw new Error("AI returned no JSON object.");
 
-	return JSON.parse(resultText.substring(first, last + 1));
+	return JSON.parse(candidate.substring(first, last + 1));
 }
 
 async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis> {
@@ -516,16 +519,26 @@ async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis>
 			{
 				role: "user",
 				content:
-					"Analyze this resume and return a structured report with scorecard, overall score, strengths, and actionable suggestions.",
+					"Analyze this resume and return a structured report with scorecard, overall score, strengths, and actionable suggestions. Return ONLY raw JSON, no markdown fences or explanations.",
 			},
 		],
 	});
 
-	if (result.output == null) {
+	const text = result.text;
+	const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+	const candidate = fenceMatch?.[1] ?? text;
+
+	const firstBrace = candidate.indexOf("{");
+	const lastBrace = candidate.lastIndexOf("}");
+
+	if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
 		throw new Error("AI returned no structured analysis output.");
 	}
 
-	return resumeAnalysisSchema.parse(result.output);
+	const jsonString = candidate.substring(firstBrace, lastBrace + 1);
+	const parsed = JSON.parse(jsonString);
+
+	return resumeAnalysisSchema.parse(parsed);
 }
 
 export const aiService = {

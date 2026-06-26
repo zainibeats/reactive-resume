@@ -23,8 +23,9 @@ function isCredentialEncryptionUnavailable(error: unknown): boolean {
 	return error instanceof Error && error.message === "AI_CREDENTIAL_ENCRYPTION_UNAVAILABLE";
 }
 
-function throwAiProviderGatewayError(): never {
-	throw new ORPCError("BAD_GATEWAY", { message: "Could not reach the AI provider." });
+/** Throws a BAD_GATEWAY ORPCError, preserving the original cause for upstream error reporters. */
+function throwAiProviderGatewayError(cause?: unknown): never {
+	throw new ORPCError("BAD_GATEWAY", { message: "Could not reach the AI provider.", cause });
 }
 
 function throwAiProviderConfigError(): never {
@@ -92,7 +93,7 @@ export const aiRouter = {
 			} catch (error) {
 				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
-				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError();
+				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
 				if (error instanceof ZodError) throwResumeStructureError(error);
 				throw error;
 			}
@@ -138,7 +139,7 @@ export const aiRouter = {
 			} catch (error) {
 				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
-				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError();
+				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
 				if (error instanceof ZodError) throwResumeStructureError(error);
 				throw error;
 			}
@@ -181,7 +182,7 @@ export const aiRouter = {
 			} catch (error) {
 				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
-				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError();
+				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
 				throw error;
 			}
 		}),
@@ -235,7 +236,7 @@ export const aiRouter = {
 			} catch (error) {
 				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
-				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError();
+				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
 				if (error instanceof ZodError || error instanceof SyntaxError) throwInvalidAiOutputError(error);
 				throw error;
 			}
