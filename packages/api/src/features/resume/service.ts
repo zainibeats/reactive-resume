@@ -13,8 +13,9 @@ import * as schema from "@reactive-resume/db/schema";
 import {
 	applyResumePatches,
 	createResumePatches,
-	findResumePatchConflicts,
+	findRebasedResumePatchConflicts,
 	ResumePatchError,
+	rebaseResumePatchOperations,
 } from "@reactive-resume/resume/patch";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
@@ -254,18 +255,24 @@ async function notifyResumeUpdated(event: ResumeUpdatedEvent) {
 }
 
 function getSyncPlan(input: { parentData: ResumeData; parentSnapshot: ResumeData; childData: ResumeData }) {
-	const operations = createResumePatches(input.parentSnapshot, input.parentData);
-	const conflicts = findResumePatchConflicts({
+	const parentOperations = createResumePatches(input.parentSnapshot, input.parentData);
+	const rebasedOperations = rebaseResumePatchOperations({
 		base: input.parentSnapshot,
 		target: input.childData,
-		operations,
+		operations: parentOperations,
+	});
+	const operations = rebasedOperations.map(({ operation }) => operation);
+	const conflicts = findRebasedResumePatchConflicts({
+		base: input.parentSnapshot,
+		target: input.childData,
+		operations: rebasedOperations,
 	});
 
 	return {
 		operations,
 		conflicts,
 		diffs: createResumeSyncDiffs({
-			operations,
+			operations: parentOperations,
 			conflicts,
 			previousData: input.parentSnapshot,
 			nextData: input.parentData,

@@ -3,9 +3,11 @@ import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import {
 	applyResumePatches,
 	createResumePatches,
+	findRebasedResumePatchConflicts,
 	findResumePatchConflicts,
 	jsonPatchOperationSchema,
 	ResumePatchError,
+	rebaseResumePatchOperations,
 } from "./patch";
 
 describe("jsonPatchOperationSchema", () => {
@@ -268,6 +270,115 @@ describe("findResumePatchConflicts", () => {
 
 		expect(findResumePatchConflicts({ base: defaultResumeData, target, operations })).toEqual([
 			"/sections/skills/items",
+		]);
+	});
+});
+
+describe("rebaseResumePatchOperations", () => {
+	it("targets a reordered child section item by id", () => {
+		const projectA = {
+			id: "project-a",
+			hidden: false,
+			name: "Project A",
+			period: "",
+			website: { url: "", label: "", inlineLink: false },
+			description: "Original",
+		};
+		const parentSnapshot = {
+			...defaultResumeData,
+			sections: {
+				...defaultResumeData.sections,
+				projects: {
+					...defaultResumeData.sections.projects,
+					items: [projectA],
+				},
+			},
+		};
+		const childData = {
+			...parentSnapshot,
+			sections: {
+				...parentSnapshot.sections,
+				projects: {
+					...parentSnapshot.sections.projects,
+					items: [
+						{
+							id: "project-b",
+							hidden: false,
+							name: "Project B",
+							period: "",
+							website: { url: "", label: "", inlineLink: false },
+							description: "Child only",
+						},
+						projectA,
+					],
+				},
+			},
+		};
+		const operations = rebaseResumePatchOperations({
+			base: parentSnapshot,
+			target: childData,
+			operations: [{ op: "replace", path: "/sections/projects/items/0/description", value: "Updated" }],
+		}).map(({ operation }) => operation);
+
+		const patched = applyResumePatches(childData, operations);
+
+		expect(operations).toEqual([{ op: "replace", path: "/sections/projects/items/1/description", value: "Updated" }]);
+		expect(patched.sections.projects.items).toMatchObject([
+			{ id: "project-b", description: "Child only" },
+			{ id: "project-a", description: "Updated" },
+		]);
+	});
+
+	it("checks conflicts against the matching reordered child item", () => {
+		const projectA = {
+			id: "project-a",
+			hidden: false,
+			name: "Project A",
+			period: "",
+			website: { url: "", label: "", inlineLink: false },
+			description: "Original",
+		};
+		const parentSnapshot = {
+			...defaultResumeData,
+			sections: {
+				...defaultResumeData.sections,
+				projects: {
+					...defaultResumeData.sections.projects,
+					items: [projectA],
+				},
+			},
+		};
+		const childData = {
+			...parentSnapshot,
+			sections: {
+				...parentSnapshot.sections,
+				projects: {
+					...parentSnapshot.sections.projects,
+					items: [
+						{
+							id: "project-b",
+							hidden: false,
+							name: "Project B",
+							period: "",
+							website: { url: "", label: "", inlineLink: false },
+							description: "Child only",
+						},
+						{
+							...projectA,
+							description: "Child edited A",
+						},
+					],
+				},
+			},
+		};
+		const operations = rebaseResumePatchOperations({
+			base: parentSnapshot,
+			target: childData,
+			operations: [{ op: "replace", path: "/sections/projects/items/0/description", value: "Parent edited A" }],
+		});
+
+		expect(findRebasedResumePatchConflicts({ base: parentSnapshot, target: childData, operations })).toEqual([
+			"/sections/projects/items/1/description",
 		]);
 	});
 });

@@ -19,6 +19,11 @@ export const jsonPatchOperationSchema = z.discriminatedUnion("op", [
 
 export type JsonPatchOperation = z.infer<typeof jsonPatchOperationSchema>;
 
+type RebasedResumePatchOperation = {
+	baseOperation: JsonPatchOperation;
+	operation: JsonPatchOperation;
+};
+
 export function createResumePatches(previous: ResumeData, next: ResumeData): JsonPatchOperation[] {
 	return z.array(jsonPatchOperationSchema).parse(jsonpatch.compare(previous, next));
 }
@@ -32,6 +37,10 @@ function getJsonPointerParent(path: string): string {
 
 	const index = path.lastIndexOf("/");
 	return index <= 0 ? "" : path.slice(0, index);
+}
+
+function encodeJsonPointerSegment(segment: string): string {
+	return segment.replaceAll("~", "~0").replaceAll("/", "~1");
 }
 
 function getValueAtJsonPointer(document: unknown, path: string): unknown {
@@ -52,6 +61,104 @@ function getValueAtJsonPointer(document: unknown, path: string): unknown {
 
 function valuesEqual(left: unknown, right: unknown): boolean {
 	return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+function findItemIndexById(items: unknown, id: unknown): number | null {
+	if (!Array.isArray(items) || typeof id !== "string") return null;
+
+	const index = items.findIndex((item) => isRecord(item) && item.id === id);
+	return index === -1 ? null : index;
+}
+
+function rebaseStandardSectionItemPath(input: {
+	base: ResumeData;
+	target: ResumeData;
+	segments: string[];
+}): string | null {
+	const [, section, itemsKey, itemIndex, ...rest] = input.segments;
+	if (section === undefined || itemsKey !== "items" || itemIndex === undefined) return null;
+
+	const baseItems = getValueAtJsonPointer(input.base, `/sections/${encodeJsonPointerSegment(section)}/items`);
+	const targetItems = getValueAtJsonPointer(input.target, `/sections/${encodeJsonPointerSegment(section)}/items`);
+	const baseItem = Array.isArray(baseItems) ? baseItems[Number(itemIndex)] : undefined;
+	const targetIndex = findItemIndexById(targetItems, isRecord(baseItem) ? baseItem.id : undefined);
+
+	if (targetIndex === null) return null;
+
+	return ["", "sections", section, "items", String(targetIndex), ...rest]
+		.map((segment, index) => (index === 0 ? segment : encodeJsonPointerSegment(segment)))
+		.join("/");
+}
+
+function rebaseCustomSectionItemPath(input: {
+	base: ResumeData;
+	target: ResumeData;
+	segments: string[];
+}): string | null {
+	const [, sectionIndex, itemsKey, itemIndex, ...rest] = input.segments;
+	if (sectionIndex === undefined || itemsKey !== "items" || itemIndex === undefined) return null;
+
+	const baseSection = input.base.customSections[Number(sectionIndex)];
+	if (!baseSection) return null;
+
+	const targetSectionIndex = input.target.customSections.findIndex((section) => section.id === baseSection.id);
+	if (targetSectionIndex === -1) return null;
+
+	const baseItem = baseSection.items[Number(itemIndex)];
+	const targetIndex = findItemIndexById(input.target.customSections[targetSectionIndex]?.items, baseItem?.id);
+	if (targetIndex === null) return null;
+
+	return ["", "customSections", String(targetSectionIndex), "items", String(targetIndex), ...rest]
+		.map((segment, index) => (index === 0 ? segment : encodeJsonPointerSegment(segment)))
+		.join("/");
+}
+
+function rebaseResumeItemPath(input: { base: ResumeData; target: ResumeData; path: string }): string {
+	if (!input.path.startsWith("/")) return input.path;
+
+	const segments = input.path.slice(1).split("/").map(decodeJsonPointerSegment);
+	const [root] = segments;
+	const rebased =
+		root === "sections"
+			? rebaseStandardSectionItemPath({ base: input.base, target: input.target, segments })
+			: root === "customSections"
+				? rebaseCustomSectionItemPath({ base: input.base, target: input.target, segments })
+				: null;
+
+	return rebased ?? input.path;
+}
+
+function rebaseResumePatchOperation(input: {
+	base: ResumeData;
+	target: ResumeData;
+	operation: JsonPatchOperation;
+}): JsonPatchOperation {
+	const path = rebaseResumeItemPath({ base: input.base, target: input.target, path: input.operation.path });
+
+	if (input.operation.op === "copy" || input.operation.op === "move") {
+		return {
+			...input.operation,
+			path,
+			from: rebaseResumeItemPath({ base: input.base, target: input.target, path: input.operation.from }),
+		};
+	}
+
+	return { ...input.operation, path };
+}
+
+export function rebaseResumePatchOperations(input: {
+	base: ResumeData;
+	target: ResumeData;
+	operations: JsonPatchOperation[];
+}): RebasedResumePatchOperation[] {
+	return input.operations.map((operation) => ({
+		baseOperation: operation,
+		operation: rebaseResumePatchOperation({ base: input.base, target: input.target, operation }),
+	}));
 }
 
 function conflictPathForOperation(operation: JsonPatchOperation): string {
@@ -81,6 +188,25 @@ export function findResumePatchConflicts(input: {
 		const targetValue = getValueAtJsonPointer(input.target, conflictPath);
 
 		if (!valuesEqual(baseValue, targetValue)) conflictPaths.add(conflictPath);
+	}
+
+	return Array.from(conflictPaths).sort((a, b) => a.localeCompare(b));
+}
+
+export function findRebasedResumePatchConflicts(input: {
+	base: ResumeData;
+	target: ResumeData;
+	operations: RebasedResumePatchOperation[];
+}): string[] {
+	const conflictPaths = new Set<string>();
+
+	for (const { baseOperation, operation } of input.operations) {
+		const baseConflictPath = conflictPathForOperation(baseOperation);
+		const targetConflictPath = conflictPathForOperation(operation);
+		const baseValue = getValueAtJsonPointer(input.base, baseConflictPath);
+		const targetValue = getValueAtJsonPointer(input.target, targetConflictPath);
+
+		if (!valuesEqual(baseValue, targetValue)) conflictPaths.add(targetConflictPath);
 	}
 
 	return Array.from(conflictPaths).sort((a, b) => a.localeCompare(b));
