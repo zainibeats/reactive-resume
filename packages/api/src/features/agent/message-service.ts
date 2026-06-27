@@ -22,6 +22,8 @@ import { getAgentThread } from "./thread-service";
 import { buildAgentInstructions, buildAgentTools } from "./tools";
 
 const MAX_AGENT_STEPS = 10;
+const OLLAMA_AGENT_CONTEXT_SIZE = 16_384;
+const OLLAMA_AGENT_MAX_OUTPUT_TOKENS = 4_096;
 const MAX_ATTACHMENTS_PER_MESSAGE = 10;
 const READABLE_ATTACHMENT_TYPES = new Set(["text/plain", "text/markdown", "application/json"]);
 const DIRECT_MODEL_FILE_ATTACHMENT_TYPES = new Set([
@@ -736,17 +738,17 @@ async function runOllamaPatchAgent(input: {
 	const result = await generateText({
 		model: getAgentModel(input.provider),
 		...(timeout ? { timeout } : {}),
-		messages: [
-			{
-				role: "system",
-				content:
-					'You are an expert resume editor inside Reactive Resume. Return only a raw JSON object with this shape: {"title":"short action title","summary":"optional concise summary","response":"brief user-facing message","operations":[JSON Patch operations]}. JSON Patch paths are rooted at the resume data object, so use paths like /summary/content and /basics/name. Do not prefix paths with /data. Use valid HTML for HTML content fields such as /summary/content. Batch requested edits into one cohesive operations array. If no resume edit is needed, return an empty operations array and answer in response.',
+		system:
+			'You are an expert resume editor inside Reactive Resume. Return only a raw JSON object with this shape: {"title":"short action title","summary":"optional concise summary","response":"brief user-facing message","operations":[JSON Patch operations]}. JSON Patch paths are rooted at the resume data object, so use paths like /summary/content and /basics/name. Do not prefix paths with /data. Use valid HTML for HTML content fields such as /summary/content. Batch requested edits into one cohesive operations array. If no resume edit is needed, return an empty operations array and answer in response.',
+		prompt: `Current resume data:\n${JSON.stringify(resume.data)}\n\nUser request:\n${request}`,
+		maxOutputTokens: OLLAMA_AGENT_MAX_OUTPUT_TOKENS,
+		providerOptions: {
+			ollama: {
+				options: {
+					num_ctx: OLLAMA_AGENT_CONTEXT_SIZE,
+				},
 			},
-			{
-				role: "user",
-				content: `Current resume data:\n${JSON.stringify(resume.data, null, 2)}\n\nUser request:\n${request}`,
-			},
-		],
+		},
 	});
 
 	const patch = ollamaPatchResponseSchema.parse(extractJsonObject(result.text));

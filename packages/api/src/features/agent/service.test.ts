@@ -647,8 +647,11 @@ describe("agentService.messages.send", () => {
 		resumeServiceMock.patchInTransaction.mockResolvedValue({ id: "resume-1", updatedAt: patchedUpdatedAt });
 		resumeServiceMock.notifyResumePatched.mockResolvedValue(undefined);
 
-		const [{ convertToModelMessages, generateText, ToolLoopAgent }, { agentStreamLifecycle }, { streamToEventIterator }] =
-			await Promise.all([import("ai"), import("./streams"), import("@orpc/server")]);
+		const [
+			{ convertToModelMessages, generateText, ToolLoopAgent },
+			{ agentStreamLifecycle },
+			{ streamToEventIterator },
+		] = await Promise.all([import("ai"), import("./streams"), import("@orpc/server")]);
 		vi.mocked(generateText).mockResolvedValue({
 			text: JSON.stringify({
 				title: "Rewrite summary",
@@ -672,7 +675,15 @@ describe("agentService.messages.send", () => {
 			} as any,
 		});
 
-		expect(generateText).toHaveBeenCalled();
+		expect(generateText).toHaveBeenCalledWith(
+			expect.objectContaining({
+				maxOutputTokens: 4096,
+				prompt: expect.stringContaining('Current resume data:\n{"summary":{"content":"<p>Old.</p>"}}'),
+				providerOptions: { ollama: { options: { num_ctx: 16_384 } } },
+				system: expect.stringContaining("You are an expert resume editor"),
+			}),
+		);
+		expect(vi.mocked(generateText).mock.calls[0]?.[0]).not.toHaveProperty("messages");
 		expect(convertToModelMessages).not.toHaveBeenCalled();
 		expect(ToolLoopAgent).not.toHaveBeenCalled();
 		expect(resumeServiceMock.patchInTransaction).toHaveBeenCalledWith(dbMock, {
