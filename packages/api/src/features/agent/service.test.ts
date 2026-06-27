@@ -700,6 +700,86 @@ describe("agentService.messages.send", () => {
 		});
 	});
 
+	it("clears the active run when an Ollama patch fails", async () => {
+		const activeThread = buildActiveThread();
+		const persistedUserMessage = {
+			id: "message-1",
+			userId: "user-1",
+			threadId: "thread-1",
+			role: "user",
+			status: "completed",
+			sequence: 0,
+			uiMessage: {
+				id: "ui-message-1",
+				role: "user",
+				parts: [{ type: "text", text: "Mess up my resume" }],
+			},
+		};
+
+		dbMock.select
+			.mockImplementationOnce(() => selectLimitResult([activeThread]))
+			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: -1 }]))
+			.mockImplementationOnce(() => selectWhereResult([{ total: 1 }]))
+			.mockImplementationOnce(() => selectOrderByResult([persistedUserMessage]));
+		dbMock.insert.mockReturnValue({
+			values: vi.fn(() => ({ returning: vi.fn(async () => [persistedUserMessage]) })),
+		});
+		dbMock.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
+
+		claimActiveAgentRunMock.mockResolvedValue(true);
+		aiProvidersServiceMock.getRunnableById.mockResolvedValue({
+			id: "provider-1",
+			provider: "ollama",
+			model: "llama3.2",
+			apiKey: "",
+			baseURL: "http://localhost:11434/api",
+		});
+		aiProvidersServiceMock.markUsed.mockResolvedValue(undefined);
+		resumeServiceMock.getById.mockResolvedValue({
+			id: "resume-1",
+			name: "Resume",
+			data: { summary: { content: "<p>Old.</p>" } },
+			updatedAt: new Date("2026-05-01T00:00:00.000Z"),
+		});
+		const patchError = new ORPCError("INVALID_PATCH_OPERATIONS", {
+			status: 400,
+			message: "Patch produced invalid resume data",
+		});
+		resumeServiceMock.patchInTransaction.mockRejectedValue(patchError);
+
+		const { generateText } = await import("ai");
+		vi.mocked(generateText).mockResolvedValue({
+			text: JSON.stringify({
+				title: "Mess up resume",
+				response: "I changed the resume.",
+				operations: [{ op: "remove", path: "/picture" }],
+			}),
+		} as never);
+
+		const { agentService } = await import("./service");
+
+		await expect(
+			agentService.messages.send({
+				threadId: "thread-1",
+				userId: "user-1",
+				message: {
+					id: "ui-message-1",
+					role: "user",
+					parts: [{ type: "text", text: "Mess up my resume" }],
+					// biome-ignore lint/suspicious/noExplicitAny: minimal fixture for unit test
+				} as any,
+			}),
+		).rejects.toBe(patchError);
+
+		expect(clearActiveAgentRunIfCurrentMock).toHaveBeenCalledWith({
+			threadId: "thread-1",
+			userId: "user-1",
+			runId: "test-id",
+			streamId: "test-id",
+			primaryError: patchError,
+		});
+	});
+
 	it("stores snapshotData and applies a valid JSON Patch without a timestamp conflict guard", async () => {
 		const activeThread = buildActiveThread();
 		const persistedMessage = {

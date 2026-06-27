@@ -903,7 +903,7 @@ export function createAgentMessagesService() {
 				const messages = messageRows.map(toMessage);
 
 				if (runnableProvider.provider === "ollama" && input.message.role === "user") {
-					return runOllamaPatchAgent({
+					return await runOllamaPatchAgent({
 						userId: input.userId,
 						threadId: input.threadId,
 						resumeId: thread.workingResumeId,
