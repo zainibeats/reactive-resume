@@ -11,7 +11,6 @@ import {
 	WarningIcon,
 } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { AnimatePresence, m } from "motion/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/components/avatar";
 import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import {
@@ -27,10 +26,8 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 	SidebarSeparator,
-	useSidebarState,
 } from "@reactive-resume/ui/components/sidebar";
 import { getInitials } from "@reactive-resume/utils/string";
-import { Copyright } from "@/components/ui/copyright";
 import { UserDropdownMenu } from "@/features/user/dropdown-menu";
 
 type SidebarItem = {
@@ -104,8 +101,6 @@ function SidebarItemList({ items }: SidebarItemListProps) {
 }
 
 export function DashboardSidebar() {
-	const { state } = useSidebarState();
-
 	return (
 		<Sidebar variant="floating" collapsible="icon">
 			<SidebarHeader>
@@ -148,7 +143,7 @@ export function DashboardSidebar() {
 
 			<SidebarSeparator />
 
-			<SidebarFooter className="gap-y-0">
+			<SidebarFooter>
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<UserDropdownMenu>
@@ -170,21 +165,6 @@ export function DashboardSidebar() {
 						</UserDropdownMenu>
 					</SidebarMenuItem>
 				</SidebarMenu>
-
-				<AnimatePresence>
-					{state === "expanded" && (
-						<m.div
-							key="copyright"
-							className="will-change-[transform,opacity]"
-							initial={{ y: 12, opacity: 0 }}
-							animate={{ y: 0, opacity: 1 }}
-							exit={{ y: 12, opacity: 0 }}
-							transition={{ duration: 0.2, ease: "easeOut" }}
-						>
-							<Copyright className="wrap-break-word shrink-0 whitespace-normal p-2" />
-						</m.div>
-					)}
-				</AnimatePresence>
 			</SidebarFooter>
 
 			<SidebarRail />

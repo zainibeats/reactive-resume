@@ -4,6 +4,20 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Remove decorative dashboard footer chrome - Done
+
+The authenticated sidebar animated a copyright notice below the owner menu. It occupied persistent workspace space and added
+motion without helping create, edit, export, or share a resume.
+
+Completed change:
+
+- Removed the animated copyright footer from the dashboard sidebar.
+- Kept the owner account menu as the sole sidebar footer action.
+
+References:
+
+- `apps/web/src/routes/dashboard/-components/sidebar.tsx`
+
 ### Focus the project overview on the personal product - Done
 
 The README opened with hosted-service links and platform-oriented messaging before explaining the self-hosted personal workflow.
