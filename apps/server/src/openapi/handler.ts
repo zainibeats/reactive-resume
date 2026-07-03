@@ -48,10 +48,8 @@ export async function handleOpenApi(request: Request) {
 				version: appVersion,
 				description: "Reactive Resume API",
 				license: { name: "MIT", url: "https://github.com/amruthpillai/reactive-resume/blob/main/LICENSE" },
-				contact: { name: "Amruth Pillai", email: "hello@amruthpillai.com", url: "https://amruthpillai.com" },
 			},
 			servers: [{ url: `${env.APP_URL}/api/openapi` }],
-			externalDocs: { url: "https://docs.rxresu.me", description: "Reactive Resume Documentation" },
 			commonSchemas: {
 				ResumeData: { schema: resumeDataSchema },
 			},

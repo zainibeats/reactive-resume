@@ -2,12 +2,9 @@ import {
 	Body,
 	Button,
 	Container,
-	Font,
-	Head,
 	Heading,
 	Hr,
 	Html,
-	Img,
 	Link,
 	Preview,
 	pixelBasedPreset,
@@ -17,7 +14,6 @@ import {
 } from "react-email";
 
 const appName = "Reactive Resume";
-const logoUrl = "https://rxresu.me/icon/dark.svg";
 
 interface AuthEmailLayoutProps {
 	preview: string;
@@ -32,49 +28,13 @@ interface AuthEmailLayoutProps {
 function AuthEmailLayout({ preview, heading, intro, details, actionLabel, actionUrl, outro }: AuthEmailLayoutProps) {
 	return (
 		<Html lang="en">
-			<Tailwind
-				config={{
-					presets: [pixelBasedPreset],
-					theme: {
-						fontFamily: {
-							body: ["IBM Plex Sans", "sans-serif"],
-							heading: ["IBM Plex Sans Condensed", "sans-serif"],
-						},
-					},
-				}}
-			>
-				<Head>
-					<Font
-						fontFamily="IBM Plex Sans Condensed"
-						fallbackFontFamily="sans-serif"
-						fontWeight={500}
-						fontStyle="normal"
-						webFont={{
-							url: "https://fonts.gstatic.com/s/ibmplexsans/v23/zYXGKVElMYYaJe8bpLHnCwDKr932-G7dytD-DmvrswZSAXcomDVmadSD2FlDB6g4tIOm6_De.woff2",
-							format: "woff2",
-						}}
-					/>
-					<Font
-						fontFamily="IBM Plex Sans"
-						fallbackFontFamily="sans-serif"
-						fontWeight={400}
-						fontStyle="normal"
-						webFont={{
-							url: "https://fonts.gstatic.com/s/ibmplexsans/v23/zYXGKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1swZSAXcomDVmadSD6llDB6g4tIOm6_De.woff2",
-							format: "woff2",
-						}}
-					/>
-				</Head>
-
-				<Body className="m-0 bg-zinc-950 p-0 font-body text-sm text-zinc-50">
+			<Tailwind config={{ presets: [pixelBasedPreset] }}>
+				<Body className="m-0 bg-zinc-950 p-0 font-sans text-sm text-zinc-50">
 					<Preview>{preview}</Preview>
 					<Container className="mx-auto w-full max-w-xl bg-zinc-900 p-6 text-zinc-50">
 						<Section>
-							<Img src={logoUrl} alt={appName} width="48" height="48" className="block" />
-						</Section>
-
-						<Section className="mt-6">
-							<Heading className="whitespace-break-spaces font-heading font-medium text-2xl leading-0 tracking-tighter md:text-5xl">
+							<Text className="font-medium text-base">{appName}</Text>
+							<Heading className="mt-6 whitespace-break-spaces font-medium text-2xl leading-0 tracking-tighter md:text-5xl">
 								{heading}
 							</Heading>
 
@@ -107,21 +67,7 @@ function AuthEmailLayout({ preview, heading, intro, details, actionLabel, action
 
 							<Hr className="my-10 border-zinc-700" />
 
-							<Text className="mt-8 text-xs leading-1 opacity-40">By the community, for the community.</Text>
-							<Text className="text-xs leading-1 opacity-40">
-								A passion project by{" "}
-								<Link
-									target="_blank"
-									rel="noopener noreferrer"
-									href="https://amruthpillai.com"
-									className="text-inherit underline underline-offset-2"
-								>
-									Amruth Pillai
-								</Link>
-								.
-							</Text>
-
-							<Text className="mt-8 font-heading font-medium text-base tracking-tight opacity-80">Reactive Resume</Text>
+							<Text className="mt-8 text-xs opacity-40">Sent by your Reactive Resume instance.</Text>
 						</Section>
 					</Container>
 				</Body>

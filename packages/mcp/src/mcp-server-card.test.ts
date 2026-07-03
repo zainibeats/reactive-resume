@@ -3,7 +3,7 @@ import { buildMcpServerCard } from "./mcp-server-card";
 import { MCP_TOOL_NAME } from "./mcp-tool-names";
 
 describe("buildMcpServerCard", () => {
-	const card = buildMcpServerCard("1.2.3");
+	const card = buildMcpServerCard("1.2.3", "https://resume.example.com/base");
 
 	it("includes the provided app version in serverInfo", () => {
 		expect(card.serverInfo.version).toBe("1.2.3");
@@ -12,12 +12,16 @@ describe("buildMcpServerCard", () => {
 	it("identifies the server as reactive-resume", () => {
 		expect(card.serverInfo.name).toBe("reactive-resume");
 		expect(card.serverInfo.title).toBe("Reactive Resume");
-		expect(card.serverInfo.websiteUrl).toBe("https://rxresu.me");
+		expect(card.serverInfo.websiteUrl).toBe("https://resume.example.com/base");
 	});
 
 	it("exposes light + dark theme icons", () => {
 		const themes = card.serverInfo.icons.map((icon) => icon.theme).sort();
 		expect(themes).toEqual(["dark", "light"]);
+		expect(card.serverInfo.icons.map((icon) => icon.src)).toEqual([
+			"https://resume.example.com/icon/light.svg",
+			"https://resume.example.com/icon/dark.svg",
+		]);
 	});
 
 	it("requires authentication with oauth2 + bearer schemes", () => {

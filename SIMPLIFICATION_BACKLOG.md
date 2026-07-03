@@ -4,6 +4,23 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Keep runtime identity local to the instance - Done
+
+Authentication emails loaded logos and fonts from public third-party hosts and included project promotion. MCP metadata also
+advertised the public hosted service even when returned by a self-hosted instance.
+
+Completed change:
+
+- Simplified authentication emails to self-contained system-font markup without promotional links or remote images/fonts.
+- Built live and static MCP server identity from the configured `APP_URL` through one shared helper.
+- Removed hosted-service social preview URLs and project contact promotion from self-hosted runtime metadata.
+
+References:
+
+- `packages/email/src/templates/auth.tsx`
+- `packages/mcp/src/mcp-server-card.ts`
+- `apps/server/src/mcp/server.ts`
+
 ### Remove hosted-service structured marketing data - Done
 
 The focused first-visit screen still emitted hidden FAQ, pricing, project, and software marketing schemas. The FAQ was not

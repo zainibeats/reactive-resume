@@ -13,7 +13,7 @@ const resumeId = z.string().min(1).describe("Resume ID.");
  * Some registries only surface the `resources` array in their UI, not `resourceTemplates`.
  * The parameterized resume URI is therefore duplicated here so discovery matches the live template.
  */
-export function buildMcpServerCard(appVersion: string) {
+export function buildMcpServerCard(appVersion: string, appUrl: string) {
 	const tools = [
 		{
 			name: T.listResumes,
@@ -329,18 +329,7 @@ export function buildMcpServerCard(appVersion: string) {
 				},
 			},
 		},
-		serverInfo: {
-			name: "reactive-resume",
-			version: appVersion,
-			title: "Reactive Resume",
-			websiteUrl: "https://rxresu.me",
-			description:
-				"Reactive Resume is a free and open-source resume builder. Use this MCP server to interact with your resume using an LLM of your choice.",
-			icons: [
-				{ src: "https://rxresu.me/icon/light.svg", mimeType: "image/svg+xml", theme: "light" as const },
-				{ src: "https://rxresu.me/icon/dark.svg", mimeType: "image/svg+xml", theme: "dark" as const },
-			],
-		},
+		serverInfo: buildMcpServerInfo(appVersion, appUrl),
 		tools,
 		prompts,
 		resources,
@@ -349,5 +338,22 @@ export function buildMcpServerCard(appVersion: string) {
 			required: true,
 			schemes: ["oauth2", "bearer"],
 		},
+	};
+}
+
+export function buildMcpServerInfo(appVersion: string, appUrl: string) {
+	const websiteUrl = new URL(appUrl);
+
+	return {
+		name: "reactive-resume",
+		version: appVersion,
+		title: "Reactive Resume",
+		websiteUrl: websiteUrl.toString().replace(/\/$/, ""),
+		description:
+			"Reactive Resume is a free and open-source resume builder. Use this MCP server to interact with your resume using an LLM of your choice.",
+		icons: [
+			{ src: new URL("/icon/light.svg", websiteUrl).toString(), mimeType: "image/svg+xml", theme: "light" as const },
+			{ src: new URL("/icon/dark.svg", websiteUrl).toString(), mimeType: "image/svg+xml", theme: "dark" as const },
+		],
 	};
 }
