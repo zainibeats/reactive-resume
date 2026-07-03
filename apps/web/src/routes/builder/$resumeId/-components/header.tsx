@@ -4,6 +4,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	ArrowsClockwiseIcon,
 	CaretDownIcon,
+	CodeIcon,
 	CopySimpleIcon,
 	GitBranchIcon,
 	HouseSimpleIcon,
@@ -45,6 +46,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { getResumeErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useBuilderSidebar } from "../-store/sidebar";
+import { EditJsonDialog } from "./edit-json-dialog";
 import { formatDiffPath, formatDiffValue } from "./sync-diff";
 
 function getDiffOperationLabel(op: SyncDiff["op"]) {
@@ -418,6 +420,7 @@ function BuilderHeaderDropdown() {
 
 	const resume = useCurrentResume();
 	const patchResume = usePatchResume();
+	const [isJsonEditorOpen, setIsJsonEditorOpen] = useState(false);
 	const id = resume.id;
 	const name = resume.name;
 	const slug = resume.slug;
@@ -493,43 +496,51 @@ function BuilderHeaderDropdown() {
 	};
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger
-				render={
-					<Button size="icon" variant="ghost">
-						<CaretDownIcon />
-					</Button>
-				}
-			/>
+		<>
+			<DropdownMenu>
+				<DropdownMenuTrigger
+					render={
+						<Button size="icon" variant="ghost">
+							<CaretDownIcon />
+						</Button>
+					}
+				/>
 
-			<DropdownMenuContent>
-				<DropdownMenuItem disabled={isLocked} onClick={handleUpdate}>
-					<PencilSimpleLineIcon className="me-2" />
-					<Trans>Update</Trans>
-				</DropdownMenuItem>
+				<DropdownMenuContent>
+					<DropdownMenuItem disabled={isLocked} onClick={handleUpdate}>
+						<PencilSimpleLineIcon className="me-2" />
+						<Trans>Update</Trans>
+					</DropdownMenuItem>
 
-				<DropdownMenuItem onClick={handleDuplicate}>
-					<CopySimpleIcon className="me-2" />
-					<Trans>Duplicate</Trans>
-				</DropdownMenuItem>
+					<DropdownMenuItem disabled={isLocked} onClick={() => setIsJsonEditorOpen(true)}>
+						<CodeIcon className="me-2" />
+						Edit JSON
+					</DropdownMenuItem>
 
-				<DropdownMenuItem onClick={handleDerive}>
-					<GitBranchIcon className="me-2" />
-					<Trans>Create child resume</Trans>
-				</DropdownMenuItem>
+					<DropdownMenuItem onClick={handleDuplicate}>
+						<CopySimpleIcon className="me-2" />
+						<Trans>Duplicate</Trans>
+					</DropdownMenuItem>
 
-				<DropdownMenuItem onClick={handleToggleLock}>
-					{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}
-					{isLocked ? <Trans>Unlock</Trans> : <Trans>Lock</Trans>}
-				</DropdownMenuItem>
+					<DropdownMenuItem onClick={handleDerive}>
+						<GitBranchIcon className="me-2" />
+						<Trans>Create child resume</Trans>
+					</DropdownMenuItem>
 
-				<DropdownMenuSeparator />
+					<DropdownMenuItem onClick={handleToggleLock}>
+						{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}
+						{isLocked ? <Trans>Unlock</Trans> : <Trans>Lock</Trans>}
+					</DropdownMenuItem>
 
-				<DropdownMenuItem variant="destructive" disabled={isLocked} onClick={handleDelete}>
-					<TrashSimpleIcon className="me-2" />
-					<Trans>Delete</Trans>
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+					<DropdownMenuSeparator />
+
+					<DropdownMenuItem variant="destructive" disabled={isLocked} onClick={handleDelete}>
+						<TrashSimpleIcon className="me-2" />
+						<Trans>Delete</Trans>
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+			<EditJsonDialog data={resume.data} open={isJsonEditorOpen} onOpenChange={setIsJsonEditorOpen} />
+		</>
 	);
 }
