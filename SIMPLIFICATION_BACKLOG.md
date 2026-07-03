@@ -264,6 +264,23 @@ References:
 
 ## Larger Refactors
 
+### Remove the unused dynamic template route - Done
+
+The web app exposed a client-rendered `/templates/*` PDF viewer that was not linked from the product. Template selection uses
+static JPG previews, and static PDF previews are served directly from the public directory, so the route added a second
+rendering path without supporting the personal resume workflow.
+
+Completed change:
+
+- Removed the dynamic template route and regenerated the TanStack route tree.
+- Stopped treating missing `/templates/*` paths as application-shell routes; missing template assets now return a real 404.
+- Kept `templates` reserved from public resume usernames so removed paths cannot be mistaken for shared resumes.
+
+References:
+
+- `apps/web/src/routes/templates/$.tsx`
+- `apps/server/src/static/web.ts`
+
 ### Remove standalone agent routes - Done
 
 The builder assistant is now the product surface for AI-assisted resume editing. The old standalone agent workspace route files only redirected to the resumes dashboard, but they still kept `/agent`, `/agent/new`, and `/agent/$threadId` in the generated web route tree.

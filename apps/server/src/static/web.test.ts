@@ -36,8 +36,6 @@ describe("web app fallback classification", () => {
 		"/auth/login",
 		"/dashboard",
 		"/builder/resume-1",
-		"/templates",
-		"/templates/azurill.pdf",
 	])("serves noindex shell for known app prefix %s", async (pathname) => {
 		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
 
@@ -47,11 +45,19 @@ describe("web app fallback classification", () => {
 		expect(await response.text()).toBe("<html>app</html>");
 	});
 
-	it.each(["/agent", "/agent/thread-1"])("returns a 404 for removed agent route %s", async (pathname) => {
+	it.each(["/agent", "/agent/thread-1", "/templates"])("returns a 404 for removed app route %s", async (pathname) => {
 		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
 
 		expect(response.status).toBe(404);
 		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
+		expect(fs.readFile).not.toHaveBeenCalled();
+	});
+
+	it("returns a plain 404 for a missing static template asset", async () => {
+		const response = await handleWebApp(new Request("https://example.com/templates/missing.pdf"));
+
+		expect(response.status).toBe(404);
+		expect(response.headers.get("X-Robots-Tag")).toBeNull();
 		expect(fs.readFile).not.toHaveBeenCalled();
 	});
 

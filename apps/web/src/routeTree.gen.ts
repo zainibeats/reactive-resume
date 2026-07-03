@@ -15,7 +15,6 @@ import { Route as HomeRouteRouteImport } from "./routes/_home/route";
 import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
 import { Route as AuthIndexRouteImport } from "./routes/auth/index";
 import { Route as HomeIndexRouteImport } from "./routes/_home/index";
-import { Route as TemplatesSplatRouteImport } from "./routes/templates/$";
 import { Route as AuthVerify2faBackupRouteImport } from "./routes/auth/verify-2fa-backup";
 import { Route as AuthVerify2faRouteImport } from "./routes/auth/verify-2fa";
 import { Route as AuthResumePasswordRouteImport } from "./routes/auth/resume-password";
@@ -62,11 +61,6 @@ const HomeIndexRoute = HomeIndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => HomeRouteRoute,
-} as any);
-const TemplatesSplatRoute = TemplatesSplatRouteImport.update({
-  id: "/templates/$",
-  path: "/templates/$",
-  getParentRoute: () => rootRouteImport,
 } as any);
 const AuthVerify2faBackupRoute = AuthVerify2faBackupRouteImport.update({
   id: "/verify-2fa-backup",
@@ -173,7 +167,6 @@ export interface FileRoutesByFullPath {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
-  "/templates/$": typeof TemplatesSplatRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
@@ -194,7 +187,6 @@ export interface FileRoutesByTo {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
-  "/templates/$": typeof TemplatesSplatRoute;
   "/": typeof HomeIndexRoute;
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
@@ -221,7 +213,6 @@ export interface FileRoutesById {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
-  "/templates/$": typeof TemplatesSplatRoute;
   "/_home/": typeof HomeIndexRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
@@ -249,7 +240,6 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
-    | "/templates/$"
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
@@ -270,7 +260,6 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
-    | "/templates/$"
     | "/"
     | "/auth"
     | "/dashboard"
@@ -296,7 +285,6 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
-    | "/templates/$"
     | "/_home/"
     | "/auth/"
     | "/dashboard/"
@@ -316,7 +304,6 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
   BuilderResumeIdRouteRoute: typeof BuilderResumeIdRouteRouteWithChildren;
   UsernameSlugRoute: typeof UsernameSlugRoute;
-  TemplatesSplatRoute: typeof TemplatesSplatRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -362,13 +349,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/";
       preLoaderRoute: typeof HomeIndexRouteImport;
       parentRoute: typeof HomeRouteRoute;
-    };
-    "/templates/$": {
-      id: "/templates/$";
-      path: "/templates/$";
-      fullPath: "/templates/$";
-      preLoaderRoute: typeof TemplatesSplatRouteImport;
-      parentRoute: typeof rootRouteImport;
     };
     "/auth/verify-2fa-backup": {
       id: "/auth/verify-2fa-backup";
@@ -575,7 +555,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   BuilderResumeIdRouteRoute: BuilderResumeIdRouteRouteWithChildren,
   UsernameSlugRoute: UsernameSlugRoute,
-  TemplatesSplatRoute: TemplatesSplatRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

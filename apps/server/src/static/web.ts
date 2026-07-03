@@ -18,7 +18,7 @@ function resolveWebDistPath() {
 
 const staticRoot = resolveWebDistPath();
 const indexHtmlPath = `${staticRoot}/index.html`;
-const noindexShellPrefixes = ["/auth", "/dashboard", "/builder", "/templates"];
+const noindexShellPrefixes = ["/auth", "/dashboard", "/builder"];
 const reservedPublicResumeSegments = new Set([
 	"api",
 	"mcp",
