@@ -4,6 +4,22 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Focus the first visit on resume actions - Done
+
+The home page repeated template previews in both the hero and a full gallery, while decorative entrance and scroll animations added code without improving the resume workflow.
+
+Completed change:
+
+- Kept create, import, sign-in, and four template previews as the complete first-visit surface.
+- Removed the duplicated full template gallery.
+- Removed home-only entrance animations and the JavaScript-driven hiding header.
+
+References:
+
+- `apps/web/src/routes/_home/index.tsx`
+- `apps/web/src/routes/_home/-sections/hero.tsx`
+- `apps/web/src/routes/_home/-sections/header.tsx`
+
 ### Remove unused `react-markdown` - Done
 
 - `pnpm -s knip` reports `react-markdown` as unused.

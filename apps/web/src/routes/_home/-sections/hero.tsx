@@ -1,20 +1,13 @@
-import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ArrowRightIcon, DownloadSimpleIcon, PlusIcon, SignInIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { m } from "motion/react";
 import { Button } from "@reactive-resume/ui/components/button";
 
 export function Hero() {
 	return (
-		<section id="hero" className="relative flex min-h-svh w-full items-center overflow-hidden border-b py-24">
+		<section id="hero" className="flex min-h-svh w-full items-center py-24">
 			<div className="container mx-auto grid items-center gap-10 px-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] lg:px-12">
-				<m.div
-					className="will-change-[transform,opacity]"
-					initial={{ opacity: 0, y: 24 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.45, ease: "easeOut" }}
-				>
+				<div>
 					<div className="max-w-2xl space-y-6">
 						<div className="space-y-3">
 							<h1 className="font-semibold text-4xl tracking-tight md:text-5xl lg:text-6xl">
@@ -69,20 +62,17 @@ export function Hero() {
 							/>
 						</div>
 					</div>
-				</m.div>
+				</div>
 
-				<m.div
-					className="grid grid-cols-2 gap-3 will-change-[transform,opacity] sm:grid-cols-3 md:grid-cols-2"
-					initial={{ opacity: 0, y: 24 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.45, delay: 0.12, ease: "easeOut" }}
-					aria-label={t`Templates`}
-				>
+				<figure className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-2">
+					<figcaption className="sr-only">
+						<Trans>Templates</Trans>
+					</figcaption>
 					<TemplatePreview name="Azurill" src="/templates/jpg/azurill.jpg" />
 					<TemplatePreview name="Bronzor" src="/templates/jpg/bronzor.jpg" />
 					<TemplatePreview name="Chikorita" src="/templates/jpg/chikorita.jpg" />
 					<TemplatePreview name="Ditto" src="/templates/jpg/ditto.jpg" />
-				</m.div>
+				</figure>
 			</div>
 		</section>
 	);

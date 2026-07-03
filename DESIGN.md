@@ -158,7 +158,7 @@ The first screen should help a person start, import, or continue a resume quickl
 
 Reactive Resume is a monochrome, content-first design system built for a resume builder used by tens of thousands of people worldwide. The visual identity prioritizes readability and unobtrusiveness — the user's resume content is always the hero, never the chrome around it.
 
-The system defaults to dark mode with a warm near-black backdrop that makes the resume preview "float" as the visual anchor. Light mode is supported as a full alternative. The authenticated app shell (dashboard, builder, settings) uses an entirely achromatic grayscale palette — the sole chromatic exception is destructive red for dangerous actions. The landing page introduces subtle chromatic accents: blue-tinted spotlight gradients on the hero, a multicolor text-mask animation on hover, and social auth provider brand colors (Google blue, LinkedIn blue) on the login page.
+The system defaults to dark mode with a warm near-black backdrop that makes the resume preview "float" as the visual anchor. Light mode is supported as a full alternative. The authenticated app shell (dashboard, builder, settings) uses an entirely achromatic grayscale palette — the sole chromatic exception is destructive red for dangerous actions. Social authentication controls may use their provider brand colors, while the first-visit page stays visually quiet and focused on starting or importing a resume.
 
 The overall aesthetic is a professional personal tool UI: clean grid lines, subtle borders, generous whitespace, and typography that steps back to let the content shine. Think "focused document editor" — a productivity workspace, not a marketing site or enterprise console.
 
@@ -186,7 +186,7 @@ Resume templates have their own independent color system — users pick primary,
 
 The entire application uses a single typeface: **IBM Plex Sans Variable**. This is a humanist sans-serif with an extensive weight range (100–900) and excellent readability at small sizes, both on screen and in PDFs.
 
-- **Hero heading (responsive: 2.25rem mobile / 3rem tablet / 3.75rem desktop, weight 700, tracking-tight):** Landing page headline only. Large, bold, and commanding. Scales across three breakpoints.
+- **Hero heading (responsive: 2.25rem mobile / 3rem tablet / 3.75rem desktop, weight 600, tracking-tight):** First-visit headline only. Large enough to establish the task without overpowering the resume actions.
 - **Section heading (1rem / 16px, weight 500):** Used for section titles in the builder sidebar, settings panels, and dashboard cards. Medium weight provides hierarchy without shouting.
 - **Body (0.875rem / 14px, weight 400):** The workhorse. All form labels, descriptions, card content, and general UI text.
 - **Small body (0.75rem / 12px, weight 400):** Captions, helper text, timestamps, and metadata.
@@ -217,7 +217,7 @@ Standard sidebar navigation layout using the `Sidebar` component system. The sid
 The first visit should be utility-first, not a fancy marketing front end. Prioritize:
 
 1. **Resume start/continue actions** — Create a resume, import an existing resume, or continue the most recent resume when signed in.
-2. **Template visibility** — Show enough template previews to make a choice without turning the page into a promotional carousel.
+2. **Template visibility** — Show a small representative set of previews without adding a separate catalog to the first visit.
 3. **Auth only when useful** — Present sign-in as a way to save and sync the owner's work, not as organization onboarding.
 4. **Compact project context** — Keep links to docs, self-hosting, source code, and privacy information available but secondary.
 
