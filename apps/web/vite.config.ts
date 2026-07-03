@@ -1,5 +1,4 @@
 import type { ProxyOptions } from "vite";
-import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { lingui, linguiTransformerBabelPreset } from "@lingui/vite-plugin";
 import babel from "@rolldown/plugin-babel";
@@ -8,9 +7,6 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const rootPackageJsonPath = new URL("../../package.json", import.meta.url);
-const rootPackageJson = JSON.parse(readFileSync(rootPackageJsonPath, "utf-8")) as { version: string | undefined };
-const appVersion = JSON.stringify(rootPackageJson.version ?? "0.0.0");
 const workspaceRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 const serverPaths = ["/api", "/mcp", "/uploads", "/.well-known", "/schema.json"] as const;
@@ -31,10 +27,6 @@ export default defineConfig({
 
 	resolve: {
 		tsconfigPaths: true,
-	},
-
-	define: {
-		__APP_VERSION__: appVersion,
 	},
 
 	build: {

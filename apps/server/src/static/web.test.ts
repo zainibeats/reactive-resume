@@ -36,7 +36,6 @@ describe("web app fallback classification", () => {
 		"/auth/login",
 		"/dashboard",
 		"/builder/resume-1",
-		"/agent",
 		"/templates",
 		"/templates/azurill.pdf",
 	])("serves noindex shell for known app prefix %s", async (pathname) => {
@@ -46,6 +45,14 @@ describe("web app fallback classification", () => {
 		expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
 		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, follow");
 		expect(await response.text()).toBe("<html>app</html>");
+	});
+
+	it.each(["/agent", "/agent/thread-1"])("returns a 404 for removed agent route %s", async (pathname) => {
+		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
+
+		expect(response.status).toBe(404);
+		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
+		expect(fs.readFile).not.toHaveBeenCalled();
 	});
 
 	it("serves noindex shell for public resume shaped routes", async () => {

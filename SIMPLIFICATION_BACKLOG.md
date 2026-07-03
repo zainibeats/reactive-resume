@@ -4,6 +4,27 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Remove promotional and legacy workspace chrome - Done
+
+The builder still ended with a project-attribution footer, the README included social/funding metrics and a star-history chart,
+and the server continued serving the removed standalone `/agent` route as an application shell.
+
+Completed change:
+
+- Removed the builder attribution footer and its now-unused component and tests.
+- Removed promotional badges, funding calls to action, star history, and the hosted-project funding manifest.
+- Return a real 404 for removed standalone agent web routes while retaining the internal agent API/storage namespace used by
+  the builder assistant.
+- Renamed environment and API messages from “agent workspace” to “AI assistant.”
+- Removed the unused `react-markdown` dependency and Better Auth dashboard/analytics plugin from all package manifests.
+
+References:
+
+- `apps/web/src/routes/builder/$resumeId/-sidebar/right/index.tsx`
+- `apps/server/src/static/web.ts`
+- `README.md`
+- `packages/api/src/features/agent/routing.ts`
+
 ### Enforce a single instance owner - Done
 
 Signup was controlled only by an optional environment flag, so a default self-hosted instance could accumulate multiple user

@@ -4,7 +4,6 @@ import { match } from "ts-pattern";
 import { Button } from "@reactive-resume/ui/components/button";
 import { ScrollArea } from "@reactive-resume/ui/components/scroll-area";
 import { Separator } from "@reactive-resume/ui/components/separator";
-import { Copyright } from "@/components/ui/copyright";
 import { getSectionIcon, getSectionTitle, rightSidebarSections } from "@/libs/resume/section";
 import { BuilderSidebarEdge } from "../../-components/edge";
 import { useBuilderSidebar } from "../../-store/sidebar";
@@ -56,8 +55,6 @@ export function BuilderSidebarRight() {
 							<Separator />
 						</Fragment>
 					))}
-
-					<Copyright className="mx-auto py-2 text-center" />
 				</div>
 			</ScrollArea>
 		</>
