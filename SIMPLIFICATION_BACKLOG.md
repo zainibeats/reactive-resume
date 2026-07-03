@@ -76,6 +76,22 @@ References:
 - `README.md`
 - `packages/api/src/features/agent/routing.ts`
 
+### Remove project resources from the resume editor - Done
+
+The builder's design sidebar ended with an Information section containing only links to hosted documentation, source code,
+issue tracking, and translation contribution. It occupied core editor navigation without helping create or manage a resume.
+
+Completed change:
+
+- Removed the project-resources section and its dedicated tests.
+- Removed the Information entry from right-sidebar types, ordering, titles, icons, and component dispatch.
+- Kept the builder sidebar focused on template, layout, design, sharing, analysis, and export actions.
+
+References:
+
+- `apps/web/src/routes/builder/$resumeId/-sidebar/right/index.tsx`
+- `apps/web/src/libs/resume/section.tsx`
+
 ### Enforce a single instance owner - Done
 
 Signup was controlled only by an optional environment flag, so a default self-hosted instance could accumulate multiple user
@@ -111,6 +127,41 @@ References:
 
 - `apps/web/src/routes/dashboard/-components/sidebar.tsx`
 
+### Remove decorative settings chrome - Done
+
+The owner settings pages animated their entire contents into view, and Preferences included a project-contribution link that
+did not help configure the personal instance.
+
+Completed change:
+
+- Removed page-load animation wrappers from profile, preferences, authentication, integrations, and danger-zone settings.
+- Removed hover/tap animation from the destructive account deletion action.
+- Removed the external translation-contribution call to action from owner preferences.
+- Reduced the optional API-key page to key management by removing its hosted documentation promo and decorative motion.
+- Kept state-transition animation where it communicates an actual authentication or profile state change.
+
+References:
+
+- `apps/web/src/features/settings`
+
+### Remove decorative resume dashboard motion - Done
+
+The primary resume list animated every create, import, and resume card on entry, exit, sorting, and interaction. These effects
+added wrapper elements and timing logic to the core navigation surface without improving the personal resume workflow.
+
+Completed change:
+
+- Render create, import, grid, and list entries directly without staggered entrance or exit animations.
+- Removed hover/tap transforms from resume cards.
+- Render the locked-resume indicator directly while preserving its visual state.
+- Kept lazy thumbnail generation so large personal resume collections do not render every PDF eagerly.
+
+References:
+
+- `apps/web/src/routes/dashboard/resumes/-components/grid-view.tsx`
+- `apps/web/src/routes/dashboard/resumes/-components/list-view.tsx`
+- `apps/web/src/routes/dashboard/resumes/-components/cards/resume-card.tsx`
+
 ### Focus the project overview on the personal product - Done
 
 The README opened with hosted-service links and platform-oriented messaging before explaining the self-hosted personal workflow.
@@ -125,6 +176,22 @@ References:
 
 - `README.md`
 - `DESIGN.md`
+
+### Make the README a self-hosting guide - Done
+
+The project overview still contained a promotional banner, a full visual template gallery, hosted-documentation funnels,
+registry promotion, a broad technology showcase, and contribution marketing before explaining the actual personal deployment.
+
+Completed change:
+
+- Replaced the landing-page-style README with a concise description of the single-owner resume workflow.
+- Made the Docker Compose setup, required secrets, persistent data, first-owner initialization, and AI configuration explicit.
+- Kept focused development and architecture notes in the repository instead of depending on hosted documentation.
+- Removed the promotional template gallery, registry commands, hosted guide tables, and contribution funnel.
+
+References:
+
+- `README.md`
 
 ### Preserve first-visit resume actions through sign-in - Done
 
@@ -194,6 +261,22 @@ Completed change:
 - Removed the checked-in static `robots.txt` and `sitemap.xml` files.
 - Kept the server-generated endpoints, which expose only the configured instance root and exclude API/auth/MCP paths from
   crawling.
+
+References:
+
+- `apps/server/src/static/seo.ts`
+- `apps/server/src/static/seo.test.ts`
+
+### Keep discovery metadata local to the instance - Done
+
+Generated `robots.txt` and `llms.txt` still advertised the public hosted documentation, its sitemap, and its AI index from
+every self-hosted deployment.
+
+Completed change:
+
+- Removed the hosted documentation sitemap from generated robots metadata.
+- Reduced the generated AI index to the configured instance URL, local resume schema, and local OpenAPI specification.
+- Described the runtime as a single-owner resume builder instead of advertising the broader open-source project.
 
 References:
 

@@ -10,7 +10,6 @@ import { useBuilderSidebar } from "../../-store/sidebar";
 import { CustomStylesSectionBuilder } from "./sections/custom-styles";
 import { DesignSectionBuilder } from "./sections/design";
 import { ExportSectionBuilder } from "./sections/export";
-import { InformationSectionBuilder } from "./sections/information";
 import { LayoutSectionBuilder } from "./sections/layout";
 import { NotesSectionBuilder } from "./sections/notes";
 import { PageSectionBuilder } from "./sections/page";
@@ -33,7 +32,6 @@ function getSectionComponent(type: RightSidebarSection) {
 		.with("statistics", () => <StatisticsSectionBuilder />)
 		.with("analysis", () => <ResumeAnalysisSectionBuilder />)
 		.with("export", () => <ExportSectionBuilder />)
-		.with("information", () => <InformationSectionBuilder />)
 		.exhaustive();
 }
 

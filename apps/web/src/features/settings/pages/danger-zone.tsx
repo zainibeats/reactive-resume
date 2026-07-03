@@ -3,7 +3,6 @@ import { Trans } from "@lingui/react/macro";
 import { TrashSimpleIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { m } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -62,12 +61,7 @@ export function DangerZoneSettingsPage() {
 	};
 
 	return (
-		<m.div
-			initial={{ opacity: 0, y: -20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.25, ease: "easeOut" }}
-			className="grid max-w-xl gap-6 will-change-[transform,opacity]"
-		>
+		<div className="grid max-w-xl gap-6">
 			<p className="leading-relaxed">
 				<Trans>To delete your account, you need to enter the confirmation text and click the button below.</Trans>
 			</p>
@@ -79,17 +73,12 @@ export function DangerZoneSettingsPage() {
 				placeholder={t`Type "${CONFIRMATION_TEXT}" to confirm`}
 			/>
 
-			<m.div
-				className="justify-self-end will-change-transform"
-				whileHover={!isConfirmationValid ? undefined : { y: -1, scale: 1.01 }}
-				whileTap={!isConfirmationValid ? undefined : { scale: 0.98 }}
-				transition={{ duration: 0.14, ease: "easeOut" }}
-			>
+			<div className="justify-self-end">
 				<Button variant="destructive" onClick={handleDeleteAccount} disabled={!isConfirmationValid}>
 					<TrashSimpleIcon />
 					<Trans>Delete Account</Trans>
 				</Button>
-			</m.div>
-		</m.div>
+			</div>
+		</div>
 	);
 }

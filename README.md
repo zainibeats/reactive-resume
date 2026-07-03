@@ -1,207 +1,96 @@
-<div align="center">
-  <img src="apps/web/public/opengraph/banner.jpg" alt="Reactive Resume" />
+# Reactive Resume
 
-  <h1>Reactive Resume</h1>
+Reactive Resume is a self-hostable resume builder for one owner. Create, import, edit, export, and share resumes from a
+focused web interface. The builder includes an optional AI assistant for improving the resume currently being edited.
 
-  <p>A focused, self-hostable resume builder for creating, editing, exporting, and sharing your own resumes.</p>
-</div>
+## What it does
 
----
+- Builds resumes with live PDF previews and configurable templates.
+- Imports resume data and exports PDF, DOCX, and JSON.
+- Supports rich text, custom sections, page layout, fonts, colors, and spacing.
+- Shares resumes through public links with optional password protection.
+- Integrates AI providers including OpenAI, Anthropic, Google Gemini, and compatible custom endpoints.
+- Stores uploads on the local filesystem by default; S3-compatible storage is optional.
 
-Reactive Resume makes building resumes straightforward for an individual person. Pick a template, fill in your details, and export to PDF, DOCX, or JSON. The built-in AI assistant can help improve the resume you are editing.
+The first account created on an instance becomes its owner. Registration then closes automatically. The application does not
+provide teams, organizations, billing, tenant administration, or collaboration workflows.
 
-Built with privacy as a core principle, Reactive Resume gives you complete ownership of your data. The application can also be self-hosted when you want to run your own single-owner instance. The codebase is fully open-source under the MIT license, with no tracking, no ads, and no hidden costs.
+## Self-host with Docker
 
-## Features
-
-**Resume Building**
-
-- Real-time preview as you type
-- Multiple export formats (PDF, JSON, DOCX)
-- Drag-and-drop section ordering
-- Custom sections for any content type
-- Rich text editor with formatting support
-
-**Templates**
-
-- Professionally designed templates
-- A4 and Letter size support
-- Customizable colors, fonts, and spacing
-- Custom CSS for advanced styling
-
-**Privacy & Control**
-
-- Self-host a personal instance on your own infrastructure
-- No tracking or analytics by default
-- Full data export at any time
-- Delete your data permanently with one click
-
-**Extras**
-
-- AI integration (OpenAI, Google Gemini, Anthropic Claude)
-- Multi-language support
-- Share resumes via unique links
-- Import from JSON Resume format
-- Dark mode support
-- Passkey and two-factor authentication
-
-## Templates
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/azurill.jpg" alt="Azurill" width="150" />
-      <br /><sub><b>Azurill</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/bronzor.jpg" alt="Bronzor" width="150" />
-      <br /><sub><b>Bronzor</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/chikorita.jpg" alt="Chikorita" width="150" />
-      <br /><sub><b>Chikorita</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/ditto.jpg" alt="Ditto" width="150" />
-      <br /><sub><b>Ditto</b></sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/gengar.jpg" alt="Gengar" width="150" />
-      <br /><sub><b>Gengar</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/glalie.jpg" alt="Glalie" width="150" />
-      <br /><sub><b>Glalie</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/kakuna.jpg" alt="Kakuna" width="150" />
-      <br /><sub><b>Kakuna</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/lapras.jpg" alt="Lapras" width="150" />
-      <br /><sub><b>Lapras</b></sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/leafish.jpg" alt="Leafish" width="150" />
-      <br /><sub><b>Leafish</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/onyx.jpg" alt="Onyx" width="150" />
-      <br /><sub><b>Onyx</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/pikachu.jpg" alt="Pikachu" width="150" />
-      <br /><sub><b>Pikachu</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/rhyhorn.jpg" alt="Rhyhorn" width="150" />
-      <br /><sub><b>Rhyhorn</b></sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/ditgar.jpg" alt="Ditgar" width="150" />
-      <br /><sub><b>Ditgar</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/meowth.jpg" alt="Meowth" width="150" />
-      <br /><sub><b>Meowth</b></sub>
-    </td>
-    <td align="center">
-      <img src="apps/web/public/templates/jpg/scizor.jpg" alt="Scizor" width="150" />
-      <br /><sub><b>Scizor</b></sub>
-    </td>
-  </tr>
-</table>
-
-## Quick Start
-
-The quickest way to run Reactive Resume locally:
+Requirements: Docker with Compose support.
 
 ```bash
-# Clone the repository
 git clone --depth=1 https://github.com/amruthpillai/reactive-resume.git
 cd reactive-resume
-
-# Create your local configuration and replace the example secrets
 cp .env.example .env
-
-# Start all services
-docker compose up -d
-
-# Access the app
-open http://localhost:3000
 ```
 
-For detailed setup instructions, environment configuration, and self-hosting guides, see the [documentation](https://docs.rxresu.me).
+Before starting, edit `.env` and set at least:
 
-## Tech Stack
+```dotenv
+APP_URL="https://resume.example.com"
+AUTH_SECRET="replace-with-a-random-secret"
+ENCRYPTION_SECRET="replace-with-another-random-secret"
+```
 
-| Category         | Technology                      |
-| ---------------- | ------------------------------- |
-| Framework        | TanStack Start (React 19, Vite) |
-| Runtime          | Node.js                         |
-| Language         | TypeScript                      |
-| Database         | PostgreSQL with Drizzle ORM     |
-| API              | ORPC (Type-safe RPC)            |
-| Auth             | Better Auth                     |
-| Styling          | Tailwind CSS                    |
-| UI Components    | Base UI + shadcn-style package  |
-| State Management | Zustand + TanStack Query        |
+Generate secrets with `openssl rand -hex 32`. For local-only use, the default `APP_URL` is sufficient.
 
-## Documentation
-
-Comprehensive guides are available at [docs.rxresu.me](https://docs.rxresu.me):
-
-| Guide                                                                        | Description                      |
-| ---------------------------------------------------------------------------- | -------------------------------- |
-| [Getting Started](https://docs.rxresu.me/getting-started)                    | First-time setup and basic usage |
-| [Self-Hosting](https://docs.rxresu.me/self-hosting/docker)                   | Deploy on your own server        |
-| [Development Setup](https://docs.rxresu.me/contributing/development)         | Local development environment    |
-| [Project Architecture](https://docs.rxresu.me/contributing/architecture)     | Codebase structure and patterns  |
-| [Exporting Your Resume](https://docs.rxresu.me/guides/exporting-your-resume) | PDF and JSON export options      |
-
-## Self-Hosting
-
-Reactive Resume can be self-hosted using Docker. The stack includes:
-
-- **PostgreSQL** — Database for storing user data and resumes
-- **Redis** — Runtime coordination for the AI assistant
-- **Local filesystem storage** — File uploads persisted in the mounted `./data` directory
-
-S3-compatible storage remains available through the optional `S3_*` environment variables, but is not required for a
-personal instance.
-
-> **From v5.1.0 onwards** — PDF generation now runs entirely client-side via `@react-pdf/renderer`. New deployments no longer require Browserless, Chromium, or any external print service as a dependency. The `PRINTER_*` and `BROWSERLESS_*` environment variables are no longer read and can be removed from your `.env`.
-
-Pull the latest image from Docker Hub or GitHub Container Registry:
+Start the application:
 
 ```bash
-# Docker Hub
-docker pull amruthpillai/reactive-resume:latest
-
-# GitHub Container Registry
-docker pull ghcr.io/amruthpillai/reactive-resume:latest
+docker compose up -d --build
 ```
 
-See the [self-hosting guide](https://docs.rxresu.me/self-hosting/docker) for complete instructions.
+Open `APP_URL` and create the owner account. The default stack runs:
 
-## Contributing
+- the application on port 3000;
+- PostgreSQL for account and resume data;
+- Redis for AI assistant coordination;
+- local upload storage in `./data`.
 
-Contributions make open-source thrive. Whether fixing a typo or adding a feature, all contributions are welcome.
+PostgreSQL and Redis data are kept in Docker volumes. Back up those volumes and `./data` together. SMTP, social login,
+S3-compatible storage, and custom OAuth are optional and documented inline in `.env.example`.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## AI assistant
 
-See the [development setup guide](https://docs.rxresu.me/contributing/development) for detailed instructions on how to set up the project locally.
+After signing in, open **Settings → Integrations** and add an AI provider. Provider credentials are encrypted using
+`ENCRYPTION_SECRET`. The assistant is available inside the resume builder and works on the active resume.
+
+No AI provider is required for the core resume workflow.
+
+## Local development
+
+Requirements: Node.js, pnpm, Docker, and dotenvx.
+
+```bash
+pnpm install
+cp .env.example .env.local
+sudo docker compose -f compose.dev.yml up -d postgres
+dotenvx run -f .env.local -- pnpm dev
+```
+
+The application is available at `http://localhost:3000`. To use the AI assistant during local development, also start Redis
+with `sudo docker compose -f compose.dev.yml up -d redis` and set `REDIS_URL="redis://localhost:6379"` in `.env.local`.
+
+Common checks:
+
+```bash
+pnpm --filter web typecheck
+pnpm --filter server typecheck
+pnpm test
+pnpm exec turbo boundaries
+```
+
+## Architecture
+
+This pnpm/Turborepo workspace has two deployable apps:
+
+- `apps/web`: TanStack Start and React resume interface.
+- `apps/server`: Hono server for auth, RPC, MCP, static files, and startup migrations.
+
+Shared domain, rendering, and infrastructure code lives in `packages/`. See `AGENTS.md` for package boundaries and development
+conventions.
 
 ## License
 
-[MIT](./LICENSE) — do whatever you want with it.
+[MIT](./LICENSE)

@@ -17,7 +17,6 @@ import {
 	GraduationCapIcon,
 	HandHeartIcon,
 	ImageIcon,
-	InfoIcon,
 	LayoutIcon,
 	MessengerLogoIcon,
 	NotepadIcon,
@@ -53,8 +52,7 @@ export type RightSidebarSection =
 	| "sharing"
 	| "statistics"
 	| "analysis"
-	| "export"
-	| "information";
+	| "export";
 
 export type SidebarSection = LeftSidebarSection | RightSidebarSection;
 
@@ -89,7 +87,6 @@ export const rightSidebarSections: RightSidebarSection[] = [
 	"statistics",
 	"analysis",
 	"export",
-	"information",
 ] as const;
 
 export const getSectionTitle = (type: SidebarSection | CustomOnlyType): string => {
@@ -128,7 +125,6 @@ export const getSectionTitle = (type: SidebarSection | CustomOnlyType): string =
 			.with("statistics", () => t`Statistics`)
 			.with("analysis", () => t`Resume Analysis`)
 			.with("export", () => t`Export`)
-			.with("information", () => t`Information`)
 
 			.exhaustive()
 	);
@@ -172,7 +168,6 @@ export const getSectionIcon = (type: SidebarSection | CustomOnlyType, props?: Ic
 			.with("statistics", () => <ChartLineIcon {...iconProps} />)
 			.with("analysis", () => <BrainIcon {...iconProps} />)
 			.with("export", () => <DownloadIcon {...iconProps} />)
-			.with("information", () => <InfoIcon {...iconProps} />)
 
 			.exhaustive()
 	);
