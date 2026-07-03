@@ -4,13 +4,15 @@ import { Trans } from "@lingui/react/macro";
 import { GridFourIcon, ListIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import z from "zod";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { Tabs, TabsList, TabsTrigger } from "@reactive-resume/ui/components/tabs";
 import { cn } from "@reactive-resume/utils/style";
 import { Combobox } from "@/components/ui/combobox";
+import { useDialogStore } from "@/dialogs/store";
+import { takeResumeStartIntent } from "@/features/resume/start-intent";
 import { orpc } from "@/libs/orpc/client";
 import { DashboardHeader } from "../-components/header";
 import { GridView } from "./-components/grid-view";
@@ -40,9 +42,16 @@ function RouteComponent() {
 	const { i18n } = useLingui();
 	const { tags, sort, view } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
+	const { openDialog } = useDialogStore();
 
 	const { data: allTags } = useQuery(orpc.resume.tags.list.queryOptions());
 	const { data: resumes } = useQuery(orpc.resume.list.queryOptions({ input: { tags, sort } }));
+
+	useEffect(() => {
+		const intent = takeResumeStartIntent();
+		if (intent === "create") openDialog("resume.create", undefined);
+		if (intent === "import") openDialog("resume.import", undefined);
+	}, [openDialog]);
 
 	const tagOptions = useMemo(() => {
 		if (!allTags) return [];

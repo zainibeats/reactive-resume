@@ -4,6 +4,22 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Preserve first-visit resume actions through sign-in - Done
+
+The first-visit create and import cards both linked to the dashboard without preserving the selected workflow. A separate Get Started button duplicated the same navigation.
+
+Completed change:
+
+- Remember the selected create or import action for the current browser tab while authentication completes.
+- Open the matching resume dialog on the resumes dashboard and consume the pending action once.
+- Removed the redundant Get Started button.
+
+References:
+
+- `apps/web/src/features/resume/start-intent.ts`
+- `apps/web/src/routes/_home/-sections/hero.tsx`
+- `apps/web/src/routes/dashboard/resumes/index.tsx`
+
 ### Remove platform-wide statistics endpoints - Done
 
 The public user-count, resume-count, and GitHub-star endpoints supported marketing and platform-scale messaging rather than the personal resume workflow. They also added filesystem caching, outbound GitHub requests, and hard-coded hosted-instance fallback counts to self-hosted deployments.

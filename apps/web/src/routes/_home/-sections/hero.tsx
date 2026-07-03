@@ -1,7 +1,9 @@
+import type { ResumeStartIntent } from "@/features/resume/start-intent";
 import { Trans } from "@lingui/react/macro";
-import { ArrowRightIcon, DownloadSimpleIcon, PlusIcon, SignInIcon } from "@phosphor-icons/react";
+import { DownloadSimpleIcon, PlusIcon, SignInIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@reactive-resume/ui/components/button";
+import { saveResumeStartIntent } from "@/features/resume/start-intent";
 
 export function Hero() {
 	return (
@@ -27,28 +29,19 @@ export function Hero() {
 								icon={<PlusIcon />}
 								title={<Trans>Create a new resume</Trans>}
 								description={<Trans>Start building your resume from scratch</Trans>}
+								intent="create"
 								to="/dashboard"
 							/>
 							<HomeAction
 								icon={<DownloadSimpleIcon />}
 								title={<Trans>Import an existing resume</Trans>}
 								description={<Trans>Continue where you left off</Trans>}
+								intent="import"
 								to="/dashboard"
 							/>
 						</div>
 
 						<div className="flex flex-col gap-3 sm:flex-row">
-							<Button
-								nativeButton={false}
-								className="gap-2"
-								render={
-									<Link to="/dashboard">
-										<Trans>Get Started</Trans>
-										<ArrowRightIcon aria-hidden="true" />
-									</Link>
-								}
-							/>
-
 							<Button
 								variant="outline"
 								nativeButton={false}
@@ -82,13 +75,15 @@ type HomeActionProps = {
 	icon: React.ReactNode;
 	title: React.ReactNode;
 	description: React.ReactNode;
+	intent: ResumeStartIntent;
 	to: React.ComponentProps<typeof Link>["to"];
 };
 
-function HomeAction({ icon, title, description, to }: HomeActionProps) {
+function HomeAction({ icon, title, description, intent, to }: HomeActionProps) {
 	return (
 		<Link
 			to={to}
+			onClick={() => saveResumeStartIntent(intent)}
 			className="group rounded-lg border bg-card p-4 text-start transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 		>
 			<div className="mb-3 text-foreground transition-transform group-hover:translate-x-0.5">{icon}</div>
