@@ -38,7 +38,11 @@ export const user = pg.pgTable(
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date()),
 	},
-	(t) => [pg.index().on(t.createdAt.asc()), pg.uniqueIndex("user_email_lower_unique_idx").on(lower(t.email))],
+	(t) => [
+		pg.index().on(t.createdAt.asc()),
+		pg.uniqueIndex("user_email_lower_unique_idx").on(lower(t.email)),
+		pg.uniqueIndex("user_single_owner_idx").on(sql`(true)`),
+	],
 );
 
 export const session = pg.pgTable(

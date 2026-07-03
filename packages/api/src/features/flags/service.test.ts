@@ -1,49 +1,51 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const envMock = vi.hoisted(() => ({
 	FLAG_DISABLE_SIGNUPS: false,
 	FLAG_DISABLE_EMAIL_AUTH: false,
 }));
+const limitMock = vi.hoisted(() => vi.fn());
+const fromMock = vi.hoisted(() => vi.fn(() => ({ limit: limitMock })));
+const selectMock = vi.hoisted(() => vi.fn(() => ({ from: fromMock })));
 
+vi.mock("@reactive-resume/db/client", () => ({ db: { select: selectMock } }));
+vi.mock("@reactive-resume/db/schema", () => ({ user: { id: "user.id" } }));
 vi.mock("@reactive-resume/env/server", () => ({ env: envMock }));
 
 const { flagsService } = await import("./service");
 
 describe("flagsService.getFlags", () => {
-	it("reads disableSignups + disableEmailAuth from env", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
 		envMock.FLAG_DISABLE_SIGNUPS = false;
 		envMock.FLAG_DISABLE_EMAIL_AUTH = false;
-		expect(flagsService.getFlags()).toEqual({
+		limitMock.mockResolvedValue([]);
+	});
+
+	it("allows signup while the instance has no owner", async () => {
+		await expect(flagsService.getFlags()).resolves.toEqual({
 			disableSignups: false,
 			disableEmailAuth: false,
 		});
+		expect(limitMock).toHaveBeenCalledWith(1);
 	});
 
-	it("returns disableSignups=true when env flag is set", () => {
-		envMock.FLAG_DISABLE_SIGNUPS = true;
-		envMock.FLAG_DISABLE_EMAIL_AUTH = false;
-		expect(flagsService.getFlags()).toEqual({
+	it("disables signup after the owner exists", async () => {
+		limitMock.mockResolvedValueOnce([{ id: "owner" }]);
+
+		await expect(flagsService.getFlags()).resolves.toEqual({
 			disableSignups: true,
 			disableEmailAuth: false,
 		});
 	});
 
-	it("returns disableEmailAuth=true when env flag is set", () => {
-		envMock.FLAG_DISABLE_SIGNUPS = false;
+	it("honors explicit authentication flags before owner setup", async () => {
+		envMock.FLAG_DISABLE_SIGNUPS = true;
 		envMock.FLAG_DISABLE_EMAIL_AUTH = true;
-		expect(flagsService.getFlags()).toEqual({
-			disableSignups: false,
+
+		await expect(flagsService.getFlags()).resolves.toEqual({
+			disableSignups: true,
 			disableEmailAuth: true,
 		});
-	});
-
-	it("reads the latest env values on every call (no stale cache)", () => {
-		envMock.FLAG_DISABLE_SIGNUPS = false;
-		const before = flagsService.getFlags();
-		envMock.FLAG_DISABLE_SIGNUPS = true;
-		const after = flagsService.getFlags();
-
-		expect(before.disableSignups).toBe(false);
-		expect(after.disableSignups).toBe(true);
 	});
 });

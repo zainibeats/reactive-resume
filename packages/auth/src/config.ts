@@ -22,6 +22,7 @@ import { rateLimitConfig, TRUSTED_IP_HEADERS } from "@reactive-resume/utils/rate
 import { generateId, toUsername } from "@reactive-resume/utils/string";
 import { isAllowedOAuthRedirectUri } from "@reactive-resume/utils/url-security.node";
 import { createGithubProfileMapper, createProfileMapper } from "./oauth-profile";
+import { ensureOwnerSlotAvailable } from "./single-owner";
 import { getTrustedOrigins } from "./trusted-origins";
 
 const authBaseUrl = env.APP_URL;
@@ -95,6 +96,11 @@ const getAuthConfig = () => {
 		secret: env.AUTH_SECRET,
 
 		database: drizzleAdapter(db, { schema, provider: "pg" }),
+		databaseHooks: {
+			user: {
+				create: { before: ensureOwnerSlotAvailable },
+			},
+		},
 
 		telemetry: { enabled: false },
 		trustedOrigins: TRUSTED_ORIGINS,

@@ -4,6 +4,27 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Enforce a single instance owner - Done
+
+Signup was controlled only by an optional environment flag, so a default self-hosted instance could accumulate multiple user
+accounts even though the product is intended for one owner.
+
+Completed change:
+
+- Allow user creation only while the instance has no owner, regardless of whether signup uses email or OAuth.
+- Disable the registration UI automatically after the owner account exists.
+- Added a database uniqueness constraint to prevent concurrent requests from creating multiple owners.
+- Kept first-run signup available so a fresh self-hosted instance can be initialized without manual database work.
+- Existing multi-user databases must be reduced to one account before migration; the migration fails explicitly rather than
+  deleting resume data automatically.
+
+References:
+
+- `packages/auth/src/single-owner.ts`
+- `packages/api/src/features/flags/service.ts`
+- `packages/db/src/schema/auth.ts`
+- `migrations/20260703092347_rare_scarlet_spider/migration.sql`
+
 ### Remove decorative dashboard footer chrome - Done
 
 The authenticated sidebar animated a copyright notice below the owner menu. It occupied persistent workspace space and added
