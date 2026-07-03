@@ -4,6 +4,21 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Remove platform-wide statistics endpoints - Done
+
+The public user-count, resume-count, and GitHub-star endpoints supported marketing and platform-scale messaging rather than the personal resume workflow. They also added filesystem caching, outbound GitHub requests, and hard-coded hosted-instance fallback counts to self-hosted deployments.
+
+Completed change:
+
+- Removed the global statistics router and service from the API.
+- Removed the endpoints from the checked-in OpenAPI specification.
+- Kept owner-facing statistics for individual shared resumes; those directly support the share workflow.
+
+References:
+
+- `packages/api/src/routers/index.ts`
+- `packages/api/src/features/resume/statistics.ts`
+
 ### Focus the first visit on resume actions - Done
 
 The home page repeated template previews in both the hero and a full gallery, while decorative entrance and scroll animations added code without improving the resume workflow.

@@ -3145,58 +3145,6 @@
 					}
 				}
 			}
-		},
-		"/statistics/users": {
-			"get": {
-				"operationId": "getUserCount",
-				"summary": "Get total number of users",
-				"description": "Returns the total number of registered users on this Reactive Resume instance. The count is cached for up to 6 hours for performance. No authentication required.",
-				"tags": ["Platform Statistics"],
-				"responses": {
-					"200": {
-						"description": "The total number of registered users.",
-						"content": {
-							"application/json": {
-								"schema": { "type": "number", "description": "The total number of registered users." }
-							}
-						}
-					}
-				}
-			}
-		},
-		"/statistics/resumes": {
-			"get": {
-				"operationId": "getResumeCount",
-				"summary": "Get total number of resumes",
-				"description": "Returns the total number of resumes created on this Reactive Resume instance. The count is cached for up to 6 hours for performance. No authentication required.",
-				"tags": ["Platform Statistics"],
-				"responses": {
-					"200": {
-						"description": "The total number of resumes created.",
-						"content": {
-							"application/json": {
-								"schema": { "type": "number", "description": "The total number of resumes created." }
-							}
-						}
-					}
-				}
-			}
-		},
-		"/statistics/github/stars": {
-			"get": {
-				"operationId": "getGitHubStarCount",
-				"summary": "Get GitHub star count",
-				"description": "Returns the number of GitHub stars for the Reactive Resume repository. The count is cached for up to 6 hours and falls back to a last-known value if the GitHub API is unavailable. No authentication required.",
-				"tags": ["Platform Statistics"],
-				"responses": {
-					"200": {
-						"description": "The number of GitHub stars for the Reactive Resume repository.",
-						"content": {
-							"application/json": { "schema": { "type": "number", "description": "The number of GitHub stars." } }
-						}
-					}
-				}
-			}
 		}
 	}
 }
