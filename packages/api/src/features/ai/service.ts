@@ -1,7 +1,7 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
 import type { ResumeAnalysis } from "@reactive-resume/schema/resume/analysis";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { ModelMessage, TimeoutConfiguration, UIMessage } from "ai";
+import type { ModelMessage, UIMessage } from "ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -33,6 +33,11 @@ import { supportsProviderNativeWebSearch } from "./capabilities";
 import { resolveAiBaseUrl } from "./url-policy";
 
 const aiExtractionTemplate = buildAiExtractionTemplate();
+
+type AiRequestTimeout = {
+	stepMs: number;
+	chunkMs: number;
+};
 
 function logAndRethrow(context: string, error: unknown): never {
 	if (error instanceof Error) {
@@ -223,9 +228,7 @@ function isLocalAiProvider(input: Pick<GetModelInput, "provider" | "baseURL">) {
 	}
 }
 
-export function getAiRequestTimeout(
-	input: Pick<GetModelInput, "provider" | "baseURL">,
-): TimeoutConfiguration | undefined {
+export function getAiRequestTimeout(input: Pick<GetModelInput, "provider" | "baseURL">): AiRequestTimeout | undefined {
 	if (!isLocalAiProvider(input)) return undefined;
 
 	return {
