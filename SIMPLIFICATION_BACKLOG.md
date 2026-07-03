@@ -76,6 +76,23 @@ References:
 
 - `apps/web/package.json:75`
 
+### Remove stale static SEO files - Done
+
+The web public directory contained hosted-service copies of `robots.txt` and `sitemap.xml`. The sitemap advertised private
+authentication and dashboard routes, external documentation pages, and removed API surfaces. The production server already
+generates both responses from the configured `APP_URL`, so the static files were dead and misleading for self-hosted instances.
+
+Completed change:
+
+- Removed the checked-in static `robots.txt` and `sitemap.xml` files.
+- Kept the server-generated endpoints, which expose only the configured instance root and exclude API/auth/MCP paths from
+  crawling.
+
+References:
+
+- `apps/server/src/static/seo.ts`
+- `apps/server/src/static/seo.test.ts`
+
 ### Deduplicate resume menu behavior - Done
 
 `ResumeDropdownMenu` and `ResumeContextMenu` repeat the same resume actions:
