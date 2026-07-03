@@ -38,13 +38,12 @@ This guide walks you through setting up Reactive Resume for local development. W
     If you want to run the app directly on your machine with `pnpm dev`, start only the infrastructure services:
     
     ```bash
-    docker compose -f compose.dev.yml up -d postgres redis seaweedfs seaweedfs_create_bucket
+    docker compose -f compose.dev.yml up -d postgres redis
     ```
     
     This starts the following infrastructure services:
     - **PostgreSQL** — Database (port 5432)
     - **Redis** — AI assistant streams/state (port 6379)
-    - **SeaweedFS** — S3-compatible storage (port 8333)
 
     <Info>
       **From v5.1.0 onwards** — PDF generation now runs entirely in the browser via `@react-pdf/renderer`, so no Browserless or Chromium container is required for development.
@@ -61,40 +60,15 @@ This guide walks you through setting up Reactive Resume for local development. W
   </Step>
   
   <Step title="Configure Environment Variables">
-    Create a `.env` file in the project root:
+    Copy the example file to `.env.local`, then use local hostnames for services started through Compose:
     
     ```bash
-    # Application
-    PORT=3000
-    SERVER_PORT=3001
-    APP_URL=http://localhost:3000
-
-    # Database
-    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
-
-    # Authentication
-    AUTH_SECRET=development-secret-change-in-production
-
-    # Storage (SeaweedFS)
-    S3_ACCESS_KEY_ID=seaweedfs
-    S3_SECRET_ACCESS_KEY=seaweedfs
-    S3_ENDPOINT=http://localhost:8333
-    S3_BUCKET=reactive-resume
-    S3_FORCE_PATH_STYLE=true
-
-    # Email (Mailpit for local development)
-    SMTP_HOST=localhost
-    SMTP_PORT=1025
-    SMTP_FROM="Reactive Resume <noreply@rxresu.me>"
-
-    # AI assistant and saved AI providers
-    REDIS_URL=redis://localhost:6379
-    ENCRYPTION_SECRET=change-me-to-a-secure-agent-secret-in-production
+    cp .env.example .env.local
     ```
 
-    <Tip>
-      **Email Testing**: The development stack includes [Mailpit](https://mailpit.axllent.org/), an email testing tool. All emails sent by the application will be captured and viewable at [http://localhost:8025](http://localhost:8025). No emails will actually be sent to real addresses during development.
-    </Tip>
+    In `.env.local`, change `DATABASE_URL` to use `localhost`, keep `REDIS_URL=redis://localhost:6379`, and replace the
+    example secrets. Leave the `S3_*` credentials unset to use the local `./data` directory. Without SMTP configuration,
+    development emails are written to the server log.
 
   </Step>
   
@@ -103,13 +77,13 @@ This guide walks you through setting up Reactive Resume for local development. W
     export `DATABASE_URL` because Drizzle Kit reads directly from `process.env`:
     
     ```bash
-    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" pnpm run db:migrate
+    dotenvx run -f .env.local -- pnpm db:migrate
     ```
   </Step>
   
   <Step title="Start the Development Server">
     ```bash
-    pnpm run dev
+    dotenvx run -f .env.local -- pnpm dev
     ```
     
     Your local Reactive Resume instance will be available at [http://localhost:3000](http://localhost:3000).
@@ -278,10 +252,9 @@ pnpm run typecheck
     	up -d ``` Check that PostgreSQL is healthy and accessible on port 5432.
     </Accordion>
 
-    <Accordion title="S3/Storage errors">
-    	Verify SeaweedFS is running and the bucket exists: ```bash docker compose -f compose.dev.yml logs seaweedfs docker
-    	compose -f compose.dev.yml logs seaweedfs_create_bucket ``` If the bucket wasn't created, restart the bucket
-    	creation service: ```bash docker compose -f compose.dev.yml restart seaweedfs_create_bucket ```
+    <Accordion title="Local storage errors">
+	Verify the repository's `data` directory is writable by the process running the server. Set `LOCAL_STORAGE_PATH` to an
+	absolute writable directory only when the default location is unsuitable.
     </Accordion>
 
     <Accordion title="Type errors after pulling changes">

@@ -39,44 +39,6 @@ services:
       timeout: 10s
       retries: 3
 
-  seaweedfs:
-    image: chrislusf/seaweedfs:latest
-    container_name: reactive-resume-seaweedfs
-    restart: unless-stopped
-    command: server -s3 -filer -dir=/data -ip=0.0.0.0
-    networks:
-      - storage_network
-    environment:
-      - AWS_ACCESS_KEY_ID=seaweedfs
-      - AWS_SECRET_ACCESS_KEY=seaweedfs
-    ports:
-      - "8333:8333"
-    volumes:
-      - seaweedfs_data:/data
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8888"]
-      start_period: 10s
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  seaweedfs_create_bucket:
-    image: quay.io/minio/mc:latest
-    container_name: reactive-resume-sw-mc
-    restart: on-failure
-    entrypoint: >
-      /bin/sh -c "
-        sleep 5;
-        mc alias set seaweedfs http://seaweedfs:8333 seaweedfs seaweedfs;
-        mc mb seaweedfs/reactive-resume;
-        exit 0;
-      "
-    networks:
-      - storage_network
-    depends_on:
-      seaweedfs:
-        condition: service_healthy
-
   reactive_resume:
     # image: ghcr.io/amruthpillai/reactive-resume:latest
     build:
@@ -85,12 +47,11 @@ services:
     container_name: reactive-resume-ui
     network_mode: host
     env_file:
-      - path: .env.example
-        required: false
+      - path: .env
+        required: true
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
       - REDIS_URL=redis://localhost:6379
-      - S3_ENDPOINT=http://localhost:8333
     volumes:
       - ./data:/app/data
     depends_on:
@@ -98,10 +59,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      seaweedfs:
-        condition: service_healthy
-      seaweedfs_create_bucket:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r) => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1));"]
       start_period: 10s
@@ -112,8 +69,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  seaweedfs_data:
 
 networks:
   data_network:
-  storage_network:

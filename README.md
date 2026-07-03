@@ -124,8 +124,11 @@ The quickest way to run Reactive Resume locally:
 
 ```bash
 # Clone the repository
-git clone --depth=1  https://github.com/amruthpillai/reactive-resume.git
+git clone --depth=1 https://github.com/amruthpillai/reactive-resume.git
 cd reactive-resume
+
+# Create your local configuration and replace the example secrets
+cp .env.example .env
 
 # Start all services
 docker compose up -d
@@ -133,8 +136,6 @@ docker compose up -d
 # Access the app
 open http://localhost:3000
 ```
-
-[![Build with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/amruthpillai/reactive-resume)
 
 For detailed setup instructions, environment configuration, and self-hosting guides, see the [documentation](https://docs.rxresu.me).
 
@@ -169,7 +170,11 @@ Comprehensive guides are available at [docs.rxresu.me](https://docs.rxresu.me):
 Reactive Resume can be self-hosted using Docker. The stack includes:
 
 - **PostgreSQL** — Database for storing user data and resumes
-- **SeaweedFS** (optional) — S3-compatible storage for file uploads
+- **Redis** — Runtime coordination for the AI assistant
+- **Local filesystem storage** — File uploads persisted in the mounted `./data` directory
+
+S3-compatible storage remains available through the optional `S3_*` environment variables, but is not required for a
+personal instance.
 
 > **From v5.1.0 onwards** — PDF generation now runs entirely client-side via `@react-pdf/renderer`. New deployments no longer require Browserless, Chromium, or any external print service as a dependency. The `PRINTER_*` and `BROWSERLESS_*` environment variables are no longer read and can be removed from your `.env`.
 

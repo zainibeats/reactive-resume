@@ -4,6 +4,25 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Default to local file storage - Done
+
+The default production and development Compose stacks started SeaweedFS and a separate bucket initializer even though local
+filesystem storage is already supported and volume-mounted. This made an optional object store part of the basic self-hosted
+deployment.
+
+Completed change:
+
+- Reduced the default stack to the app, PostgreSQL, and Redis.
+- Made local filesystem storage the default in `.env.example`; S3-compatible storage remains available through optional
+  environment variables.
+- Made the production Compose stack read the owner's `.env` file instead of running with example secrets.
+
+References:
+
+- `compose.yml`
+- `compose.dev.yml`
+- `.env.example`
+
 ### Remove promotional and legacy workspace chrome - Done
 
 The builder still ended with a project-attribution footer, the README included social/funding metrics and a star-history chart,

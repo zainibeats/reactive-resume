@@ -118,7 +118,7 @@ Copy `.env.example` to `.env`. The three required variables are:
 - `DATABASE_URL` (default `postgresql://postgres:postgres@localhost:5432/postgres`)
 - `AUTH_SECRET` (any non-empty string)
 
-S3/SeaweedFS is optional. If `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, and `S3_BUCKET` are all set, the app uses S3-compatible storage. The checked-in `.env.example` sets SeaweedFS defaults, so either start the `seaweedfs` compose service too or comment out those S3 vars to use local filesystem storage under `<workspace>/data`. `LOCAL_STORAGE_PATH` must be absolute when set.
+S3-compatible storage is optional. If `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, and `S3_BUCKET` are all set, the app uses S3-compatible storage. The default configuration leaves them unset and uses local filesystem storage under `<workspace>/data`. `LOCAL_STORAGE_PATH` must be absolute when set.
 
 When running dev servers or migration commands, prefix the command with `dotenvx run -f .env.local --`. For example: `dotenvx run -f .env.local -- pnpm dev`. Tests, typechecks, linters, boundary checks, and `pnpm build` do not need this prefix by default. If one of those commands fails because a specific environment variable is required, rerun it with the `dotenvx run -f .env.local --` prefix.
 
@@ -128,7 +128,6 @@ When running dev servers or migration commands, prefix the command with `dotenvx
 |------|---------|
 | Install deps | `pnpm install` |
 | Start Postgres only | `sudo docker compose -f compose.dev.yml up -d postgres` |
-| Start Postgres + SeaweedFS | `sudo docker compose -f compose.dev.yml up -d postgres seaweedfs seaweedfs_create_bucket` |
 | Generate migrations | `dotenvx run -f .env.local -- pnpm db:generate` |
 | Run migrations | `dotenvx run -f .env.local -- pnpm db:migrate` |
 | Dev server | `dotenvx run -f .env.local -- pnpm dev` (starts on port 3000) |
