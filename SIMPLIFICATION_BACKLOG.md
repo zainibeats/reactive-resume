@@ -4,6 +4,21 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Remove hosted-service structured marketing data - Done
+
+The focused first-visit screen still emitted hidden FAQ, pricing, project, and software marketing schemas. The FAQ was not
+visible on the page, and server rendering assigned self-hosted instances a canonical URL for the public hosted service.
+
+Completed change:
+
+- Removed the home-only JSON-LD marketing graph and hosted-service canonical fallback.
+- Kept the small `noindex` helper used by authenticated and private routes.
+
+References:
+
+- `apps/web/src/routes/_home/index.tsx`
+- `apps/web/src/libs/seo.ts`
+
 ### Default to local file storage - Done
 
 The default production and development Compose stacks started SeaweedFS and a separate bucket initializer even though local
