@@ -156,7 +156,7 @@ The first screen should help a person start, import, or continue a resume quickl
 
 ## Overview
 
-Reactive Resume is a monochrome, content-first design system built for a resume builder used by tens of thousands of people worldwide. The visual identity prioritizes readability and unobtrusiveness — the user's resume content is always the hero, never the chrome around it.
+Reactive Resume is a monochrome, content-first design system for a personal resume builder. The visual identity prioritizes readability and unobtrusiveness — the user's resume content is always the hero, never the chrome around it.
 
 The system defaults to dark mode with a warm near-black backdrop that makes the resume preview "float" as the visual anchor. Light mode is supported as a full alternative. The authenticated app shell (dashboard, builder, settings) uses an entirely achromatic grayscale palette — the sole chromatic exception is destructive red for dangerous actions. Social authentication controls may use their provider brand colors, while the first-visit page stays visually quiet and focused on starting or importing a resume.
 
@@ -210,7 +210,7 @@ Panel sizes persist in cookies. On mobile (< 768px), sidebars collapse to 0% wid
 
 ### Dashboard
 
-Standard sidebar navigation layout using the `Sidebar` component system. The sidebar contains: logo, resume list link, agent link, settings subnavigation (profile, preferences, authentication, API keys, integrations, danger zone), and a footer with user avatar. Content area shows a responsive grid of resume cards.
+Standard sidebar navigation layout using the `Sidebar` component system. The sidebar contains the logo, resume list link, focused account settings, AI integrations, and a footer with the owner's avatar. AI-assisted editing lives inside the resume builder rather than in a separate workspace. Content area shows a responsive grid of resume cards.
 
 ### First Visit
 

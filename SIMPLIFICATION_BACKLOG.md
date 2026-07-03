@@ -4,6 +4,21 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Focus the project overview on the personal product - Done
+
+The README opened with hosted-service links and platform-oriented messaging before explaining the self-hosted personal workflow.
+
+Completed change:
+
+- Replaced the promotional header with a concise product description.
+- Made the existing builder-integrated AI assistant explicit in the core description.
+- Corrected stale design guidance that still described the removed standalone agent navigation.
+
+References:
+
+- `README.md`
+- `DESIGN.md`
+
 ### Preserve first-visit resume actions through sign-in - Done
 
 The first-visit create and import cards both linked to the dashboard without preserving the selected workflow. A separate Get Started button duplicated the same navigation.

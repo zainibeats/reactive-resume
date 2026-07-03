@@ -1,17 +1,9 @@
 <div align="center">
-  <a href="https://rxresu.me">
-    <img src="apps/web/public/opengraph/banner.jpg" alt="Reactive Resume" />
-  </a>
+  <img src="apps/web/public/opengraph/banner.jpg" alt="Reactive Resume" />
 
   <h1>Reactive Resume</h1>
 
-  <p>Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume.</p>
-
-  <p>
-    <a href="https://rxresu.me"><strong>Get Started</strong></a>
-    ·
-    <a href="https://docs.rxresu.me"><strong>Learn More</strong></a>
-  </p>
+  <p>A focused, self-hostable resume builder for creating, editing, exporting, and sharing your own resumes.</p>
 
   <p>
     <img src="https://img.shields.io/github/package-json/v/amruthpillai/reactive-resume?style=flat-square" alt="Reactive Resume Version">
@@ -27,23 +19,9 @@
 
 ---
 
-Reactive Resume makes building resumes straightforward for an individual person. Pick a template, fill in your details, and export to PDF. An account can be used to save and manage your own resumes, but the core product is a personal resume builder rather than a company workspace.
+Reactive Resume makes building resumes straightforward for an individual person. Pick a template, fill in your details, and export to PDF, DOCX, or JSON. The built-in AI assistant can help improve the resume you are editing.
 
 Built with privacy as a core principle, Reactive Resume gives you complete ownership of your data. The application can also be self-hosted when you want to run your own single-owner instance. The codebase is fully open-source under the MIT license, with no tracking, no ads, and no hidden costs.
-
-## Sponsors
-
-Reactive Resume stays free, open-source, and independent because companies choose to support the work behind it. Thank you to every sponsor who helps fund hosting, maintenance, and continued development for the community.
-
-<p>
-  <a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=reactive-resume">
-    <img src="apps/web/public/sponsors/atlas-cloud-logo-white.svg" alt="Atlas Cloud" width="320" />
-  </a>
-</p>
-
-[Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=reactive-resume) supports Reactive Resume as a project sponsor. Atlas Cloud provides a unified AI platform for developers, with access to hundreds of models for chat, image generation, video generation, media processing, and GPU cloud workloads through one API key, one endpoint, and one billing account.
-
-If your company would like to sponsor Reactive Resume, email [hello@amruthpillai.com](mailto:hello@amruthpillai.com).
 
 ## Features
 
