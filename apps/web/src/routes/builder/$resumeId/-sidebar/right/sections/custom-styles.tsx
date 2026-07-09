@@ -1,49 +1,99 @@
-import type { ResumeData, StyleIntent, StyleRule, StyleSlot } from "@reactive-resume/schema/resume/data";
+import type {
+	ResumeData,
+	StyleIntent,
+	StyleRule,
+	StyleRuleTarget,
+	StyleSlot,
+} from "@reactive-resume/schema/resume/data";
 import type { ReactNode } from "react";
 import type { ComboboxOption } from "@/components/ui/combobox";
-import type { TargetScope } from "./custom-styles-options";
 import { Trans } from "@lingui/react/macro";
 import { EyeIcon, EyeSlashIcon, PencilSimpleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
+import { sectionTypeSchema } from "@reactive-resume/schema/resume/data";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Separator } from "@reactive-resume/ui/components/separator";
+import { slugify } from "@reactive-resume/utils/string";
 import { cn } from "@reactive-resume/utils/style";
 import { ColorPicker } from "@/components/input/color-picker";
 import { Combobox } from "@/components/ui/combobox";
 import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
+import { getSectionTitle } from "@/libs/resume/section";
 import { SectionBase } from "../shared/section-base";
-import {
-	borderColorIntentField,
-	borderNumberIntentFields,
-	borderStyleOptions,
-	colorIntentFields,
-	compactIntent,
-	createMarginSidePatch,
-	createNumberIntentPatch,
-	createPaddingSidePatch,
-	createStringIntentPatch,
-	createTarget,
-	fontWeightOptions,
-	getConfiguredSlots,
-	getGapSummary,
-	getMarginSummary,
-	getPaddingSideValue,
-	getPaddingSummary,
-	getRuleFallbackLabel,
-	getSectionIdOptions,
-	getSectionTypeOptions,
-	getSlotLabel,
-	getStyleRuleId,
-	getTargetLabel,
-	marginSideOptions,
-	paddingSideOptions,
-	styleSlotComboboxOptions,
-	targetScopeOptions,
-	textNumberIntentFields,
-	textSelectIntentFields,
-} from "./custom-styles-options";
+
+type TargetScope = StyleRuleTarget["scope"];
+
+type StyleSlotOption = {
+	value: StyleSlot;
+	label: string;
+	group: "Section" | "Rich text";
+};
+
+const targetScopeOptions: ComboboxOption<TargetScope>[] = [
+	{ value: "global", label: "All sections" },
+	{ value: "sectionType", label: "Section type" },
+	{ value: "sectionId", label: "Specific section" },
+];
+
+const styleSlotOptions: StyleSlotOption[] = [
+	{ value: "section", label: "Section container", group: "Section" },
+	{ value: "heading", label: "Section heading", group: "Section" },
+	{ value: "item", label: "Item container", group: "Section" },
+	{ value: "text", label: "Primary text", group: "Section" },
+	{ value: "secondaryText", label: "Secondary text", group: "Section" },
+	{ value: "link", label: "Link", group: "Section" },
+	{ value: "icon", label: "Icon", group: "Section" },
+	{ value: "level", label: "Level indicator", group: "Section" },
+	{ value: "richParagraph", label: "Paragraph", group: "Rich text" },
+	{ value: "richList", label: "List", group: "Rich text" },
+	{ value: "richListItemRow", label: "List item row", group: "Rich text" },
+	{ value: "richListItemContent", label: "List item content", group: "Rich text" },
+	{ value: "richLink", label: "Inline link", group: "Rich text" },
+	{ value: "richBold", label: "Bold text", group: "Rich text" },
+	{ value: "richMark", label: "Highlight", group: "Rich text" },
+];
+
+const styleSlotComboboxOptions: ComboboxOption<StyleSlot>[] = styleSlotOptions.map((option) => ({
+	value: option.value,
+	label: option.label,
+	group: option.group,
+	keywords: [option.group],
+}));
+
+const fontWeightOptions = ["100", "200", "300", "400", "500", "600", "700", "800", "900"] as const;
+const fontStyleOptions = [
+	{ value: "normal", label: "Normal" },
+	{ value: "italic", label: "Italic" },
+] as const satisfies readonly { value: NonNullable<StyleIntent["fontStyle"]>; label: string }[];
+const textDecorationOptions = [
+	{ value: "none", label: "None" },
+	{ value: "underline", label: "Underline" },
+	{ value: "line-through", label: "Line through" },
+] as const satisfies readonly { value: NonNullable<StyleIntent["textDecoration"]>; label: string }[];
+const textDecorationStyleOptions = [
+	{ value: "solid", label: "Solid" },
+	{ value: "dashed", label: "Dashed" },
+	{ value: "dotted", label: "Dotted" },
+] as const satisfies readonly { value: NonNullable<StyleIntent["textDecorationStyle"]>; label: string }[];
+const textAlignOptions = [
+	{ value: "left", label: "Left" },
+	{ value: "center", label: "Center" },
+	{ value: "right", label: "Right" },
+	{ value: "justify", label: "Justify" },
+] as const satisfies readonly { value: NonNullable<StyleIntent["textAlign"]>; label: string }[];
+const textTransformOptions = [
+	{ value: "none", label: "None" },
+	{ value: "uppercase", label: "Uppercase" },
+	{ value: "lowercase", label: "Lowercase" },
+	{ value: "capitalize", label: "Capitalize" },
+] as const satisfies readonly { value: NonNullable<StyleIntent["textTransform"]>; label: string }[];
+const borderStyleOptions = [
+	{ value: "solid", label: "Solid" },
+	{ value: "dashed", label: "Dashed" },
+	{ value: "dotted", label: "Dotted" },
+] as const satisfies readonly { value: NonNullable<StyleIntent["borderStyle"]>; label: string }[];
 
 const controlGridClassName = "grid grid-cols-[repeat(auto-fit,minmax(8rem,1fr))] gap-3";
 const exactFourControlGridClassName = "grid grid-cols-1 gap-3 @min-[20rem]:grid-cols-2 @min-[35rem]:grid-cols-4";
@@ -63,7 +113,10 @@ function CustomStylesSectionForm() {
 	const data = resume.data;
 	const updateResumeData = useUpdateResumeData();
 	const sectionOptions = useMemo<ComboboxOption<string>[]>(() => getSectionIdOptions(data), [data]);
-	const sectionTypeOptions = useMemo<ComboboxOption<string>[]>(() => getSectionTypeOptions(), []);
+	const sectionTypeOptions = useMemo<ComboboxOption<string>[]>(
+		() => sectionTypeSchema.options.map((type) => ({ value: type, label: getSectionTitle(type) })),
+		[],
+	);
 	const styleRules = data.metadata.styleRules ?? [];
 
 	const [targetScope, setTargetScope] = useState<TargetScope>("global");
@@ -78,17 +131,13 @@ function CustomStylesSectionForm() {
 	const targetLabel = getTargetLabel(data, target);
 	const slotLabel = getSlotLabel(slot);
 
-	const removeRule = (ruleId: string) => {
-		updateResumeData((draft) => {
-			draft.metadata.styleRules = (draft.metadata.styleRules ?? []).filter((rule) => rule.id !== ruleId);
-		});
-	};
-
 	const upsertIntent = (patch: Partial<StyleIntent>) => {
 		const nextIntent = compactIntent({ ...currentIntent, ...patch });
 
 		updateResumeData((draft) => {
-			draft.metadata.styleRules ??= [];
+			// Plain `?? ` assignment (not `??=`) so React Compiler can memoize this component;
+			// the compiler bails on logical-assignment operators today. Behavior is identical.
+			draft.metadata.styleRules = draft.metadata.styleRules ?? [];
 			const rules = draft.metadata.styleRules;
 			const existingIndex = rules.findIndex((rule) => rule.id === ruleId);
 			const existingRule = rules[existingIndex];
@@ -112,7 +161,9 @@ function CustomStylesSectionForm() {
 	};
 
 	const resetRule = () => {
-		removeRule(ruleId);
+		updateResumeData((draft) => {
+			draft.metadata.styleRules = (draft.metadata.styleRules ?? []).filter((rule) => rule.id !== ruleId);
+		});
 	};
 
 	const updateRuleEnabled = (ruleId: string, enabled: boolean) => {
@@ -133,7 +184,9 @@ function CustomStylesSectionForm() {
 	};
 
 	const deleteRule = (ruleId: string) => {
-		removeRule(ruleId);
+		updateResumeData((draft) => {
+			draft.metadata.styleRules = (draft.metadata.styleRules ?? []).filter((rule) => rule.id !== ruleId);
+		});
 	};
 
 	return (
@@ -421,30 +474,40 @@ function RuleScopePill({ target, slot }: RuleScopePillProps) {
 type RuleIntentEditorProps = {
 	idPrefix: string;
 	intent: StyleIntent;
-	labelPrefix?: string;
 	onChange: (patch: Partial<StyleIntent>) => void;
 };
 
-function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleIntentEditorProps) {
-	const labelStart = labelPrefix ? `${labelPrefix} ` : "";
-
+function RuleIntentEditor({ idPrefix, intent, onChange }: RuleIntentEditorProps) {
 	return (
 		<div className="space-y-3">
 			<ControlPanel title="Color">
 				<div className={exactFourControlGridClassName}>
-					{colorIntentFields.map((field) => (
-						<ColorField
-							key={field.property}
-							label={`${labelStart}${field.label}`}
-							id={`${idPrefix}-${field.idSuffix}`}
-							value={intent[field.property]}
-							placeholder={field.placeholder}
-							fallback={field.fallback}
-							onChange={(value) => onChange(createStringIntentPatch(field.property, value))}
-						/>
-					))}
+					<ColorField
+						label={"Text Color"}
+						id={`${idPrefix}-color`}
+						value={intent.color}
+						placeholder="rgba(0, 0, 0, 1)"
+						fallback="rgba(0, 0, 0, 1)"
+						onChange={(color) => onChange({ color })}
+					/>
+					<ColorField
+						label={"Background"}
+						id={`${idPrefix}-background`}
+						value={intent.backgroundColor}
+						placeholder="rgba(255, 255, 255, 1)"
+						fallback="rgba(255, 255, 255, 1)"
+						onChange={(backgroundColor) => onChange({ backgroundColor })}
+					/>
+					<ColorField
+						label={"Text Decoration Color"}
+						id={`${idPrefix}-text-decoration-color`}
+						value={intent.textDecorationColor}
+						placeholder="rgba(0, 0, 0, 1)"
+						fallback="rgba(0, 0, 0, 1)"
+						onChange={(textDecorationColor) => onChange({ textDecorationColor })}
+					/>
 					<NumberInput
-						label={`${labelStart}Opacity`}
+						label={"Opacity"}
 						id={`${idPrefix}-opacity`}
 						value={intent.opacity}
 						min={0}
@@ -457,44 +520,83 @@ function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleInten
 
 			<ControlPanel title="Text">
 				<div className={controlGridClassName}>
-					{textNumberIntentFields.map((field) => (
-						<NumberInput
-							key={field.property}
-							label={`${labelStart}${field.label}`}
-							id={`${idPrefix}-${field.idSuffix}`}
-							value={intent[field.property]}
-							min={field.min}
-							max={field.max}
-							step={field.step}
-							onChange={(value) => onChange(createNumberIntentPatch(field.property, value))}
-						/>
-					))}
+					<NumberInput
+						label={"Font Size"}
+						id={`${idPrefix}-font-size`}
+						value={intent.fontSize}
+						min={6}
+						max={48}
+						onChange={(fontSize) => onChange({ fontSize })}
+					/>
 					<FontWeightField
-						label={`${labelStart}Font Weight`}
+						label={"Font Weight"}
 						id={`${idPrefix}-font-weight`}
 						value={intent.fontWeight}
 						onChange={(fontWeight) => onChange({ fontWeight })}
 					/>
-					{textSelectIntentFields.map((field) => (
-						<IntentSelectField
-							key={field.property}
-							label={`${labelStart}${field.label}`}
-							id={`${idPrefix}-${field.idSuffix}`}
-							value={intent[field.property]}
-							options={field.options}
-							onChange={(value) => onChange(createStringIntentPatch(field.property, value))}
-						/>
-					))}
+					<IntentSelectField
+						label={"Font Style"}
+						id={`${idPrefix}-font-style`}
+						value={intent.fontStyle}
+						options={fontStyleOptions}
+						onChange={(fontStyle) => onChange({ fontStyle })}
+					/>
+					<NumberInput
+						label={"Line Height"}
+						id={`${idPrefix}-line-height`}
+						value={intent.lineHeight}
+						min={0.5}
+						max={4}
+						step={0.05}
+						onChange={(lineHeight) => onChange({ lineHeight })}
+					/>
+					<NumberInput
+						label={"Letter Spacing"}
+						id={`${idPrefix}-letter-spacing`}
+						value={intent.letterSpacing}
+						min={-16}
+						max={16}
+						step={0.1}
+						onChange={(letterSpacing) => onChange({ letterSpacing })}
+					/>
+					<IntentSelectField
+						label={"Text Decoration"}
+						id={`${idPrefix}-text-decoration`}
+						value={intent.textDecoration}
+						options={textDecorationOptions}
+						onChange={(textDecoration) => onChange({ textDecoration })}
+					/>
+					<IntentSelectField
+						label={"Decoration Style"}
+						id={`${idPrefix}-text-decoration-style`}
+						value={intent.textDecorationStyle}
+						options={textDecorationStyleOptions}
+						onChange={(textDecorationStyle) => onChange({ textDecorationStyle })}
+					/>
+					<IntentSelectField
+						label={"Text Align"}
+						id={`${idPrefix}-text-align`}
+						value={intent.textAlign}
+						options={textAlignOptions}
+						onChange={(textAlign) => onChange({ textAlign })}
+					/>
+					<IntentSelectField
+						label={"Text Transform"}
+						id={`${idPrefix}-text-transform`}
+						value={intent.textTransform}
+						options={textTransformOptions}
+						onChange={(textTransform) => onChange({ textTransform })}
+					/>
 				</div>
 			</ControlPanel>
 
 			<ControlPanel title="Spacing">
 				<div className="space-y-3">
-					<PaddingSideInputs idPrefix={idPrefix} intent={intent} labelPrefix={labelPrefix} onChange={onChange} />
-					<MarginSideInputs idPrefix={idPrefix} intent={intent} labelPrefix={labelPrefix} onChange={onChange} />
+					<PaddingSideInputs idPrefix={idPrefix} intent={intent} onChange={onChange} />
+					<MarginSideInputs idPrefix={idPrefix} intent={intent} onChange={onChange} />
 					<SpacingInputGroup label="Gap">
 						<CompactNumberInput
-							ariaLabel={`${labelStart}Row Gap`}
+							ariaLabel={"Row Gap"}
 							id={`${idPrefix}-row-gap`}
 							placeholder="row"
 							value={intent.rowGap}
@@ -503,7 +605,7 @@ function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleInten
 							onChange={(rowGap) => onChange({ rowGap })}
 						/>
 						<CompactNumberInput
-							ariaLabel={`${labelStart}Column Gap`}
+							ariaLabel={"Column Gap"}
 							id={`${idPrefix}-column-gap`}
 							placeholder="column"
 							value={intent.columnGap}
@@ -518,31 +620,35 @@ function RuleIntentEditor({ idPrefix, intent, labelPrefix, onChange }: RuleInten
 			<ControlPanel title="Border">
 				<div className={exactFourControlGridClassName}>
 					<IntentSelectField
-						label={`${labelStart}Border Style`}
+						label={"Border Style"}
 						id={`${idPrefix}-border-style`}
 						value={intent.borderStyle}
 						options={borderStyleOptions}
 						onChange={(borderStyle) => onChange({ borderStyle })}
 					/>
-					{borderNumberIntentFields.map((field) => (
-						<NumberInput
-							key={field.property}
-							label={`${labelStart}${field.label}`}
-							id={`${idPrefix}-${field.idSuffix}`}
-							value={intent[field.property]}
-							min={field.min}
-							max={field.max}
-							step={field.step}
-							onChange={(value) => onChange(createNumberIntentPatch(field.property, value))}
-						/>
-					))}
+					<NumberInput
+						label={"Border Width"}
+						id={`${idPrefix}-border-width`}
+						value={intent.borderWidth}
+						min={0}
+						max={24}
+						onChange={(borderWidth) => onChange({ borderWidth })}
+					/>
+					<NumberInput
+						label={"Border Radius"}
+						id={`${idPrefix}-border-radius`}
+						value={intent.borderRadius}
+						min={0}
+						max={72}
+						onChange={(borderRadius) => onChange({ borderRadius })}
+					/>
 					<ColorField
-						label={`${labelStart}${borderColorIntentField.label}`}
-						id={`${idPrefix}-${borderColorIntentField.idSuffix}`}
-						value={intent[borderColorIntentField.property]}
-						placeholder={borderColorIntentField.placeholder}
-						fallback={borderColorIntentField.fallback}
-						onChange={(value) => onChange(createStringIntentPatch(borderColorIntentField.property, value))}
+						label={"Border Color"}
+						id={`${idPrefix}-border-color`}
+						value={intent.borderColor}
+						placeholder="rgba(0, 0, 0, 1)"
+						fallback="rgba(0, 0, 0, 1)"
+						onChange={(borderColor) => onChange({ borderColor })}
 					/>
 				</div>
 			</ControlPanel>
@@ -624,22 +730,37 @@ function FontWeightField({ label, id, value, onChange }: FontWeightFieldProps) {
 	);
 }
 
+const paddingSideOptions = [
+	{ property: "paddingTop", label: "Top" },
+	{ property: "paddingRight", label: "Right" },
+	{ property: "paddingBottom", label: "Bottom" },
+	{ property: "paddingLeft", label: "Left" },
+] as const;
+
+type PaddingSideProperty = (typeof paddingSideOptions)[number]["property"];
+
+const marginSideOptions = [
+	{ property: "marginTop", label: "Top" },
+	{ property: "marginRight", label: "Right" },
+	{ property: "marginBottom", label: "Bottom" },
+	{ property: "marginLeft", label: "Left" },
+] as const;
+
+type MarginSideProperty = (typeof marginSideOptions)[number]["property"];
+
 type PaddingSideInputsProps = {
 	idPrefix: string;
 	intent: StyleIntent;
-	labelPrefix?: string;
 	onChange: (patch: Partial<StyleIntent>) => void;
 };
 
-function PaddingSideInputs({ idPrefix, intent, labelPrefix, onChange }: PaddingSideInputsProps) {
-	const labelStart = labelPrefix ? `${labelPrefix} ` : "";
-
+function PaddingSideInputs({ idPrefix, intent, onChange }: PaddingSideInputsProps) {
 	return (
 		<SpacingInputGroup label="Padding">
 			{paddingSideOptions.map((side) => (
 				<CompactNumberInput
 					key={side.property}
-					ariaLabel={`${labelStart}Padding ${side.label}`}
+					ariaLabel={`Padding ${side.label}`}
 					id={`${idPrefix}-${side.property}`}
 					placeholder={side.label.toLowerCase()}
 					value={getPaddingSideValue(intent, side.property)}
@@ -655,19 +776,16 @@ function PaddingSideInputs({ idPrefix, intent, labelPrefix, onChange }: PaddingS
 type MarginSideInputsProps = {
 	idPrefix: string;
 	intent: StyleIntent;
-	labelPrefix?: string;
 	onChange: (patch: Partial<StyleIntent>) => void;
 };
 
-function MarginSideInputs({ idPrefix, intent, labelPrefix, onChange }: MarginSideInputsProps) {
-	const labelStart = labelPrefix ? `${labelPrefix} ` : "";
-
+function MarginSideInputs({ idPrefix, intent, onChange }: MarginSideInputsProps) {
 	return (
 		<SpacingInputGroup label="Margin">
 			{marginSideOptions.map((side) => (
 				<CompactNumberInput
 					key={side.property}
-					ariaLabel={`${labelStart}Margin ${side.label}`}
+					ariaLabel={`Margin ${side.label}`}
 					id={`${idPrefix}-${side.property}`}
 					placeholder={side.label.toLowerCase()}
 					value={intent[side.property]}
@@ -734,6 +852,32 @@ function CompactNumberInput({
 	);
 }
 
+function getPaddingSideValue(intent: StyleIntent, property: PaddingSideProperty) {
+	return intent[property] ?? intent.padding;
+}
+
+function createPaddingSidePatch(
+	intent: StyleIntent,
+	property: PaddingSideProperty,
+	value: number | undefined,
+): Partial<StyleIntent> {
+	if (intent.padding === undefined) return { [property]: value };
+
+	const patch: Partial<StyleIntent> = { padding: undefined };
+
+	for (const side of paddingSideOptions) {
+		patch[side.property] = intent[side.property] ?? intent.padding;
+	}
+
+	patch[property] = value;
+
+	return patch;
+}
+
+function createMarginSidePatch(property: MarginSideProperty, value: number | undefined): Partial<StyleIntent> {
+	return { [property]: value };
+}
+
 type RulePropertySummaryProps = {
 	intent: StyleIntent;
 };
@@ -787,4 +931,113 @@ function RulePropertySummary({ intent }: RulePropertySummaryProps) {
 			))}
 		</div>
 	);
+}
+
+function getPaddingSummary(intent: StyleIntent) {
+	if (intent.padding !== undefined) return `All ${intent.padding}`;
+
+	const sideValues = paddingSideOptions.flatMap((side) => {
+		const value = intent[side.property];
+		if (value === undefined) return [];
+
+		return [`${side.label.at(0)} ${value}`];
+	});
+
+	return sideValues.length > 0 ? sideValues.join(" / ") : undefined;
+}
+
+function getMarginSummary(intent: StyleIntent) {
+	const sideValues = marginSideOptions.flatMap((side) => {
+		const value = intent[side.property];
+		if (value === undefined) return [];
+
+		return [`${side.label.at(0)} ${value}`];
+	});
+
+	return sideValues.length > 0 ? sideValues.join(" / ") : undefined;
+}
+
+function getGapSummary(intent: StyleIntent) {
+	const values = [
+		intent.rowGap !== undefined && `Row ${intent.rowGap}`,
+		intent.columnGap !== undefined && `Column ${intent.columnGap}`,
+	].filter(Boolean);
+
+	return values.length > 0 ? values.join(" / ") : undefined;
+}
+
+type CreateTargetParams = {
+	targetScope: TargetScope;
+	sectionType: string;
+	sectionId: string;
+};
+
+function createTarget({ targetScope, sectionType, sectionId }: CreateTargetParams): StyleRuleTarget {
+	if (targetScope === "sectionType") {
+		return {
+			scope: "sectionType",
+			sectionType: sectionType as Extract<StyleRuleTarget, { scope: "sectionType" }>["sectionType"],
+		};
+	}
+	if (targetScope === "sectionId") return { scope: "sectionId", sectionId };
+
+	return { scope: "global" };
+}
+
+function getStyleRuleId(target: StyleRuleTarget, slot: StyleSlot) {
+	if (target.scope === "global") return `style-global-${slot}`;
+	if (target.scope === "sectionType") return `style-section-type-${target.sectionType}-${slot}`;
+
+	return `style-section-id-${slugify(target.sectionId)}-${slot}`;
+}
+
+function getSlotLabel(slot: StyleSlot) {
+	return styleSlotOptions.find((option) => option.value === slot)?.label ?? slot;
+}
+
+function getTargetLabel(data: ResumeData, target: StyleRuleTarget) {
+	if (target.scope === "global") return "All sections";
+	if (target.scope === "sectionType") return getSectionTitle(target.sectionType);
+
+	return getSectionIdOptions(data).find((option) => option.value === target.sectionId)?.label ?? target.sectionId;
+}
+
+function getRuleFallbackLabel(data: ResumeData, rule: StyleRule) {
+	const slots = getConfiguredSlots(rule);
+	const slot = slots[0];
+	return `${getTargetLabel(data, rule.target)}${slot ? `: ${getSlotLabel(slot)}` : ""}`;
+}
+
+function getConfiguredSlots(rule: StyleRule): StyleSlot[] {
+	const slots: StyleSlot[] = [];
+
+	for (const option of styleSlotOptions) {
+		if (hasIntent(rule.slots[option.value])) slots.push(option.value);
+	}
+
+	return slots;
+}
+
+function getSectionIdOptions(data: ResumeData) {
+	return [
+		{ value: "summary", label: data.summary?.title || getSectionTitle("summary") },
+		...Object.entries(data.sections).map(([section, value]) => ({
+			value: section,
+			label: value.title || getSectionTitle(section as keyof ResumeData["sections"]),
+		})),
+		...data.customSections.map((section) => ({
+			value: section.id,
+			label: section.title || getSectionTitle(section.type),
+		})),
+	];
+}
+
+function compactIntent(intent: Partial<StyleIntent>): StyleIntent {
+	return Object.fromEntries(
+		Object.entries(intent).filter(([, value]) => value !== undefined && value !== ""),
+	) as StyleIntent;
+}
+
+function hasIntent(intent: StyleIntent | undefined) {
+	return Boolean(intent && Object.keys(intent).length > 0);
 }

@@ -15,6 +15,7 @@ import {
 	WidthType,
 } from "docx";
 import { parseColorString } from "@reactive-resume/utils/color";
+import { shouldShowResumeHeader } from "./cover-letter";
 import { toSafeDocxLink } from "./link-utils";
 import { renderBuiltInSection, renderCustomSection, renderSummary, setRenderConfig } from "./section-renderers";
 
@@ -122,37 +123,36 @@ function blendWithWhite(hex: string, opacity: number): string {
 
 // --- Section rendering dispatch ---
 
-const BUILT_IN_SECTIONS = new Set<string>([
-	"profiles",
-	"experience",
-	"education",
-	"projects",
-	"skills",
-	"languages",
-	"interests",
-	"awards",
-	"certifications",
-	"publications",
-	"volunteer",
-	"references",
-]);
+/** Resolves a section's (usually empty) stored title from its id — locale-aware, supplied by the caller. */
+export type SectionTitleResolver = (sectionId: string) => string | undefined;
 
-function renderSection(sectionId: string, data: ResumeData, colorHex: string): Paragraph[] {
+function renderSection(
+	sectionId: string,
+	data: ResumeData,
+	colorHex: string,
+	resolveTitle?: SectionTitleResolver,
+): Paragraph[] {
+	const titled = <T extends { title: string }>(section: T): T => ({
+		...section,
+		title: resolveTitle?.(sectionId)?.trim() || section.title,
+	});
+
 	if (sectionId === "summary") {
-		return renderSummary(data.summary, colorHex);
+		return renderSummary(titled(data.summary), colorHex);
 	}
 
-	if (BUILT_IN_SECTIONS.has(sectionId)) {
+	// ponytail: data.sections keys are the source of truth; no need to maintain a parallel Set
+	if (sectionId in data.sections) {
 		const section = data.sections[sectionId as SectionType];
 		if (section) {
-			return renderBuiltInSection(sectionId as SectionType, section, colorHex);
+			return renderBuiltInSection(sectionId as SectionType, titled(section), colorHex);
 		}
 		return [];
 	}
 
 	const customSection = data.customSections.find((cs) => cs.id === sectionId);
 	if (customSection) {
-		return renderCustomSection(customSection, colorHex);
+		return renderCustomSection(titled(customSection), colorHex);
 	}
 
 	return [];
@@ -366,7 +366,7 @@ function buildTwoColumnTable(
  * - Page margins and fixed DOCX page format from `metadata.page`; free-form exports as A4
  * - Primary, text, and background colors from `metadata.design.colors`
  */
-export function buildDocument(data: ResumeData): Document {
+export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResolver): Document {
 	const colorHex = getColorHex(data.metadata.design.colors.primary, "DC2626");
 	const textColorHex = getColorHex(data.metadata.design.colors.text, "000000");
 	const bgColorHex = getColorHex(data.metadata.design.colors.background, "FFFFFF");
@@ -405,17 +405,20 @@ export function buildDocument(data: ResumeData): Document {
 
 	const documentChildren: (Paragraph | Table)[] = [];
 
+	// ponytail: hoisted once; sidebar call spreads only the two differing color keys
+	const mainConfig = {
+		headingFont,
+		headingSizeHalfPt: headingSize,
+		bodyFont,
+		bodySizeHalfPt: bodySize,
+		textColorHex,
+		primaryColorHex: colorHex,
+	};
+	const showHeader = shouldShowResumeHeader(data);
+
 	// Header placement depends on template
-	if (templateConfig.headerPosition === "full-width") {
-		// Configure colors for main content
-		setRenderConfig({
-			headingFont,
-			headingSizeHalfPt: headingSize,
-			bodyFont,
-			bodySizeHalfPt: bodySize,
-			textColorHex,
-			primaryColorHex: colorHex,
-		});
+	if (templateConfig.headerPosition === "full-width" && showHeader) {
+		setRenderConfig(mainConfig);
 		documentChildren.push(...buildHeader(data, colorHex, textColorHex));
 	}
 
@@ -424,52 +427,31 @@ export function buildDocument(data: ResumeData): Document {
 		const isFullWidth = layoutPage.fullWidth || layoutPage.sidebar.length === 0;
 
 		if (isFullWidth) {
-			setRenderConfig({
-				headingFont,
-				headingSizeHalfPt: headingSize,
-				bodyFont,
-				bodySizeHalfPt: bodySize,
-				textColorHex,
-				primaryColorHex: colorHex,
-			});
+			setRenderConfig(mainConfig);
 			for (const sectionId of [...layoutPage.main, ...layoutPage.sidebar]) {
-				documentChildren.push(...renderSection(sectionId, data, colorHex));
+				documentChildren.push(...renderSection(sectionId, data, colorHex, resolveTitle));
 			}
 		} else {
 			// Render main sections with normal colors
-			setRenderConfig({
-				headingFont,
-				headingSizeHalfPt: headingSize,
-				bodyFont,
-				bodySizeHalfPt: bodySize,
-				textColorHex,
-				primaryColorHex: colorHex,
-			});
+			setRenderConfig(mainConfig);
 
 			const mainParagraphs: Paragraph[] = [];
-			if (templateConfig.headerPosition === "main-only") {
+			if (templateConfig.headerPosition === "main-only" && showHeader) {
 				mainParagraphs.push(...buildHeader(data, colorHex, textColorHex));
 			}
 			for (const sectionId of layoutPage.main) {
-				mainParagraphs.push(...renderSection(sectionId, data, colorHex));
+				mainParagraphs.push(...renderSection(sectionId, data, colorHex, resolveTitle));
 			}
 
 			// Render sidebar sections with potentially inverted colors
-			setRenderConfig({
-				headingFont,
-				headingSizeHalfPt: headingSize,
-				bodyFont,
-				bodySizeHalfPt: bodySize,
-				textColorHex: sidebarTextColorHex,
-				primaryColorHex: sidebarHeadingColorHex,
-			});
+			setRenderConfig({ ...mainConfig, textColorHex: sidebarTextColorHex, primaryColorHex: sidebarHeadingColorHex });
 
 			const sidebarParagraphs: Paragraph[] = [];
-			if (templateConfig.headerPosition === "sidebar-only") {
+			if (templateConfig.headerPosition === "sidebar-only" && showHeader) {
 				sidebarParagraphs.push(...buildHeader(data, sidebarHeadingColorHex, sidebarTextColorHex));
 			}
 			for (const sectionId of layoutPage.sidebar) {
-				sidebarParagraphs.push(...renderSection(sectionId, data, sidebarHeadingColorHex));
+				sidebarParagraphs.push(...renderSection(sectionId, data, sidebarHeadingColorHex, resolveTitle));
 			}
 
 			if (mainParagraphs.length > 0 || sidebarParagraphs.length > 0) {

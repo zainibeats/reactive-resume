@@ -91,6 +91,12 @@ describe("agent tools", () => {
 		);
 		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("Batch related JSON Patch operations");
 		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("/basics/name");
+		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain(
+			"/sections/experience/items/0/description",
+		);
+		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain(
+			"/customSections/0/items/0/description",
+		);
 		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("never /data/basics/name or /name");
 		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("clean Markdown");
 	});

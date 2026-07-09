@@ -1,8 +1,8 @@
 import type { Style } from "@react-pdf/types";
 import type { IconName } from "phosphor-icons-react-pdf/dynamic";
 import { resolveLevelDisplaySizes } from "@reactive-resume/schema/resume/level-display-sizes";
+import { View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
-import { View } from "../../renderer";
 import { useSectionStyleRule, useTemplateIconSlot, useTemplateStyle } from "./context";
 import { resolveStyleFontSize } from "./icon-size";
 import { getTemplateMetrics } from "./metrics";

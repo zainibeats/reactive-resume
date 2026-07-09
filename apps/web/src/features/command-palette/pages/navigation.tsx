@@ -1,9 +1,12 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
+	BriefcaseIcon,
 	GearIcon,
 	HouseSimpleIcon,
+	KeyIcon,
 	OpenAiLogoIcon,
+	PlusIcon,
 	ReadCvLogoIcon,
 	ShieldCheckIcon,
 	UserCircleIcon,
@@ -45,6 +48,29 @@ export function NavigationCommandGroup() {
 
 				<CommandItem
 					disabled={!session}
+					keywords={[t`Applications`, t`Jobs`]}
+					value="navigation.applications"
+					onSelect={() => onNavigate("/dashboard/applications")}
+				>
+					<BriefcaseIcon />
+					<Trans>Applications</Trans>
+				</CommandItem>
+
+				<CommandItem
+					disabled={!session}
+					keywords={[t`New Application`, t`Add application`, t`Job`]}
+					value="navigation.applications.new"
+					onSelect={async () => {
+						await navigate({ to: "/dashboard/applications", search: { create: true } });
+						reset();
+					}}
+				>
+					<PlusIcon />
+					<Trans>New Application</Trans>
+				</CommandItem>
+
+				<CommandItem
+					disabled={!session}
 					keywords={[t`Settings`]}
 					value="navigation.settings"
 					onSelect={() => pushPage("settings")}
@@ -80,6 +106,15 @@ export function NavigationCommandGroup() {
 				>
 					<ShieldCheckIcon />
 					<Trans>Authentication</Trans>
+				</CommandItem>
+
+				<CommandItem
+					keywords={[t`API Keys`]}
+					value="navigation.settings.api-keys"
+					onSelect={() => onNavigate("/dashboard/settings/api-keys")}
+				>
+					<KeyIcon />
+					<Trans>API Keys</Trans>
 				</CommandItem>
 
 				<CommandItem

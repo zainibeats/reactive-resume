@@ -2,12 +2,22 @@ import type { AIProvider } from "@reactive-resume/ai/types";
 import type { ResumeAnalysis } from "@reactive-resume/schema/resume/analysis";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { ModelMessage, UIMessage } from "ai";
+import { inflateRawSync } from "node:zlib";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createCerebras } from "@ai-sdk/cerebras";
+import { createCohere } from "@ai-sdk/cohere";
+import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createFireworks } from "@ai-sdk/fireworks";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGroq } from "@ai-sdk/groq";
+import { createMistral } from "@ai-sdk/mistral";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createPerplexity } from "@ai-sdk/perplexity";
+import { createTogetherAI } from "@ai-sdk/togetherai";
+import { createXai } from "@ai-sdk/xai";
 import { streamToEventIterator } from "@orpc/server";
-import { convertToModelMessages, createGateway, generateText, Output, stepCountIs, streamText, tool } from "ai";
+import { convertToModelMessages, createGateway, generateText, stepCountIs, streamText, tool } from "ai";
 import { createOllama } from "ollama-ai-provider-v2";
 import { match } from "ts-pattern";
 import { z } from "zod";
@@ -28,16 +38,11 @@ import {
 } from "@reactive-resume/ai/tools/patch-proposal";
 import { aiProviderSchema } from "@reactive-resume/ai/types";
 import { applyResumePatches } from "@reactive-resume/resume/patch";
-import { resumeAnalysisOutputSchema, resumeAnalysisSchema } from "@reactive-resume/schema/resume/analysis";
+import { resumeAnalysisSchema } from "@reactive-resume/schema/resume/analysis";
 import { supportsProviderNativeWebSearch } from "./capabilities";
 import { resolveAiBaseUrl } from "./url-policy";
 
 const aiExtractionTemplate = buildAiExtractionTemplate();
-
-type AiRequestTimeout = {
-	stepMs: number;
-	chunkMs: number;
-};
 
 function logAndRethrow(context: string, error: unknown): never {
 	if (error instanceof Error) {
@@ -77,110 +82,17 @@ type GetModelInput = {
 
 const MAX_AI_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_AI_FILE_BASE64_CHARS = Math.ceil((MAX_AI_FILE_BYTES * 4) / 3) + 4;
-const LOCAL_AI_STEP_TIMEOUT_MS = 10 * 60 * 1000;
-const LOCAL_AI_CHUNK_TIMEOUT_MS = 10 * 60 * 1000;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isOllamaChatStreamObject(value: Record<string, unknown>) {
-	return (
-		"message" in value ||
-		"done" in value ||
-		"done_reason" in value ||
-		"tool_calls" in value ||
-		"eval_count" in value ||
-		"prompt_eval_count" in value ||
-		"total_duration" in value
-	);
-}
-
-export function normalizeOllamaChatStreamLine(line: string, model: string, now = () => new Date()) {
-	const trimmedLine = line.trim();
-	if (!trimmedLine) return line;
-
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(trimmedLine);
-	} catch {
-		return line;
-	}
-
-	if (!isRecord(parsed) || "error" in parsed || !isOllamaChatStreamObject(parsed)) return line;
-
-	const normalized = { ...parsed };
-	const message = isRecord(normalized.message) ? { ...normalized.message } : {};
-
-	if (Array.isArray(normalized.tool_calls) && !("tool_calls" in message)) {
-		message.tool_calls = normalized.tool_calls;
-		delete normalized.tool_calls;
-	}
-
-	if (typeof message.role !== "string") message.role = "assistant";
-	if (typeof message.content !== "string") message.content = "";
-
-	if (typeof normalized.model !== "string") normalized.model = model;
-	if (typeof normalized.created_at !== "string") normalized.created_at = now().toISOString();
-	if (typeof normalized.done !== "boolean") normalized.done = false;
-	normalized.message = message;
-
-	return JSON.stringify(normalized);
-}
-
-function shouldNormalizeOllamaChatStream(input: RequestInfo | URL, init?: RequestInit) {
-	const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-	if (!url.endsWith("/chat")) return false;
-	if (typeof init?.body !== "string") return false;
-
-	try {
-		const body = JSON.parse(init.body) as { stream?: unknown };
-		return body.stream === true;
-	} catch {
-		return false;
-	}
-}
-
-function createOllamaChatStreamTransform(model: string) {
-	const decoder = new TextDecoder();
-	const encoder = new TextEncoder();
-	let buffer = "";
-
-	return new TransformStream<Uint8Array, Uint8Array>({
-		transform(chunk, controller) {
-			buffer += decoder.decode(chunk, { stream: true });
-			const lines = buffer.split("\n");
-			buffer = lines.pop() ?? "";
-
-			for (const line of lines) {
-				controller.enqueue(encoder.encode(`${normalizeOllamaChatStreamLine(line, model)}\n`));
-			}
-		},
-		flush(controller) {
-			const finalText = decoder.decode();
-			if (finalText) buffer += finalText;
-			if (buffer) controller.enqueue(encoder.encode(normalizeOllamaChatStreamLine(buffer, model)));
-		},
-	});
-}
-
-function createOllamaFetch(model: string): typeof fetch {
-	return async (input, init) => {
-		const response = await fetch(input, init);
-		if (!response.body || !shouldNormalizeOllamaChatStream(input, init)) return response;
-
-		return new Response(response.body.pipeThrough(createOllamaChatStreamTransform(model)), {
-			headers: response.headers,
-			status: response.status,
-			statusText: response.statusText,
-		});
-	};
-}
+const TEST_CONNECTION_MAX_OUTPUT_TOKENS = 128;
+const DOCX_DOCUMENT_XML_PATH = "word/document.xml";
+const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
+const ZIP_CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50;
+const ZIP_END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054b50;
+const ZIP_STORED_METHOD = 0;
+const ZIP_DEFLATED_METHOD = 8;
 
 export function getModel(input: GetModelInput) {
 	const { provider, model, apiKey } = input;
 	const baseURL = resolveAiBaseUrl(input);
-	const apiKeyConfig = apiKey.trim() ? { apiKey } : {};
 
 	return match(provider)
 		.with("openai", () => createOpenAI({ apiKey, baseURL }).chat(model))
@@ -188,15 +100,22 @@ export function getModel(input: GetModelInput) {
 		.with("gemini", () => createGoogleGenerativeAI({ apiKey, baseURL }).languageModel(model))
 		.with("vercel-ai-gateway", () => createGateway({ apiKey, baseURL }).languageModel(model))
 		.with("openrouter", () => createOpenAICompatible({ name: "openrouter", apiKey, baseURL }).languageModel(model))
+		.with("mistral", () => createMistral({ apiKey, baseURL }).languageModel(model))
+		.with("cohere", () => createCohere({ apiKey, baseURL }).languageModel(model))
+		.with("xai", () => createXai({ apiKey, baseURL }).languageModel(model))
+		.with("groq", () => createGroq({ apiKey, baseURL }).languageModel(model))
+		.with("deepseek", () => createDeepSeek({ apiKey, baseURL }).languageModel(model))
+		.with("togetherai", () => createTogetherAI({ apiKey, baseURL }).languageModel(model))
+		.with("fireworks", () => createFireworks({ apiKey, baseURL }).languageModel(model))
+		.with("cerebras", () => createCerebras({ apiKey, baseURL }).languageModel(model))
+		.with("perplexity", () => createPerplexity({ apiKey, baseURL }).languageModel(model))
 		.with("openai-compatible", () =>
-			createOpenAICompatible({ name: "openai-compatible", baseURL, ...apiKeyConfig }).languageModel(model),
+			createOpenAICompatible({ name: "openai-compatible", apiKey, baseURL }).languageModel(model),
 		)
-		.with("lmstudio", () => createOpenAICompatible({ name: "lmstudio", baseURL, ...apiKeyConfig }).languageModel(model))
 		.with("ollama", () => {
 			const ollama = createOllama({
 				name: "ollama",
 				baseURL,
-				fetch: createOllamaFetch(model),
 				...(apiKey ? { headers: { Authorization: `Bearer ${apiKey}` } } : {}),
 			});
 
@@ -211,41 +130,10 @@ export function getAgentModel(input: GetModelInput) {
 	return createOpenAI({ apiKey: input.apiKey, baseURL: resolveAiBaseUrl(input) }).responses(input.model);
 }
 
-function isLocalAiProvider(input: Pick<GetModelInput, "provider" | "baseURL">) {
-	if (input.provider === "ollama" || input.provider === "lmstudio") return true;
-	if (input.provider !== "openai-compatible") return false;
-
-	try {
-		const baseURL = new URL(resolveAiBaseUrl({ provider: input.provider, baseURL: input.baseURL ?? null }));
-		return (
-			baseURL.hostname === "localhost" ||
-			baseURL.hostname === "127.0.0.1" ||
-			baseURL.hostname === "::1" ||
-			baseURL.hostname.endsWith(".local")
-		);
-	} catch {
-		return false;
-	}
-}
-
-export function getAiRequestTimeout(input: Pick<GetModelInput, "provider" | "baseURL">): AiRequestTimeout | undefined {
-	if (!isLocalAiProvider(input)) return undefined;
-
-	return {
-		stepMs: LOCAL_AI_STEP_TIMEOUT_MS,
-		chunkMs: LOCAL_AI_CHUNK_TIMEOUT_MS,
-	};
-}
-
-function getAiRequestTimeoutOption(input: Pick<GetModelInput, "provider" | "baseURL">) {
-	const timeout = getAiRequestTimeout(input);
-	return timeout ? { timeout } : {};
-}
-
 const aiCredentialsSchema = z.object({
 	provider: aiProviderSchema,
 	model: z.string().trim().min(1),
-	apiKey: z.string().trim().default(""),
+	apiKey: z.string().trim().min(1),
 	baseURL: z.string().optional().default(""),
 });
 
@@ -256,41 +144,20 @@ export const fileInputSchema = z.object({
 
 type TestConnectionInput = z.infer<typeof aiCredentialsSchema>;
 
-function isLmStudioEndpoint(input: TestConnectionInput) {
-	if (input.provider === "lmstudio") return true;
-
-	if (input.provider !== "openai-compatible") return false;
-
-	try {
-		const baseURL = new URL(resolveAiBaseUrl(input));
-		return baseURL.hostname === "localhost" && baseURL.port === "1234";
-	} catch {
-		return false;
-	}
-}
-
-async function testLmStudioConnection(input: TestConnectionInput) {
-	const baseURL = new URL(resolveAiBaseUrl(input));
-	const modelsURL = new URL(`${baseURL.pathname.replace(/\/+$/, "")}/models`, baseURL);
-	const apiKey = input.apiKey.trim();
-	const response = await fetch(modelsURL, apiKey ? { headers: { Authorization: `Bearer ${apiKey}` } } : undefined);
-
-	return response.ok;
-}
-
 export async function testConnection(input: TestConnectionInput): Promise<boolean> {
-	if (isLmStudioEndpoint(input)) return testLmStudioConnection(input);
-
 	const RESPONSE_OK = "1";
 
 	const result = await generateText({
 		model: getModel(input),
-		...getAiRequestTimeoutOption(input),
-		output: Output.choice({ options: [RESPONSE_OK] }),
-		messages: [{ role: "user", content: `Respond only with JSON Object: { "result": "${RESPONSE_OK}" }` }],
+		maxOutputTokens: TEST_CONNECTION_MAX_OUTPUT_TOKENS,
+		temperature: 0,
+		messages: [{ role: "user", content: `Respond only with the single character: ${RESPONSE_OK}` }],
 	});
 
-	return result.output === RESPONSE_OK;
+	if (result.text.trim() === RESPONSE_OK) return true;
+	if (result.finishReason === "length") throw new Error("The model returned too much text during the provider test.");
+
+	return false;
 }
 
 type ParsePdfInput = z.infer<typeof aiCredentialsSchema> & {
@@ -298,23 +165,17 @@ type ParsePdfInput = z.infer<typeof aiCredentialsSchema> & {
 };
 
 type BuildResumeParsingMessagesInput = {
-	systemPrompt: string;
 	userPrompt: string;
 	file: z.infer<typeof fileInputSchema>;
 	mediaType: string;
 };
 
-function buildResumeParsingMessages({
-	systemPrompt,
-	userPrompt,
-	file,
-	mediaType,
-}: BuildResumeParsingMessagesInput): ModelMessage[] {
+function buildResumeParsingSystemPrompt(systemPrompt: string): string {
+	return `${systemPrompt}\n\nIMPORTANT: You must return ONLY raw valid JSON. Do not return markdown, do not return explanations. Just the JSON object. Use the following JSON as a template and fill in the extracted values. For arrays, you MUST use the exact key names shown in the template (e.g. use 'description' instead of 'summary', 'website' instead of 'url'):\n\n${JSON.stringify(aiExtractionTemplate, null, 2)}`;
+}
+
+function buildResumeParsingMessages({ userPrompt, file, mediaType }: BuildResumeParsingMessagesInput): ModelMessage[] {
 	return [
-		{
-			role: "system",
-			content: `${systemPrompt}\n\nIMPORTANT: You must return ONLY raw valid JSON. Do not return markdown, do not return explanations. Just the JSON object. Use the following JSON as a template and fill in the extracted values. For arrays, you MUST use the exact key names shown in the template (e.g. use 'description' instead of 'summary', 'website' instead of 'url'):\n\n${JSON.stringify(aiExtractionTemplate, null, 2)}`,
-		},
 		{
 			role: "user",
 			content: [
@@ -325,14 +186,27 @@ function buildResumeParsingMessages({
 	];
 }
 
+function buildResumeParsingTextMessages({ userPrompt, text }: { userPrompt: string; text: string }): ModelMessage[] {
+	return [
+		{
+			role: "user",
+			content: [
+				{
+					type: "text",
+					text: `${userPrompt}\n\nThe Microsoft Word file has been converted to plain text below.\n\n${text}`,
+				},
+			],
+		},
+	];
+}
+
 async function parsePdf(input: ParsePdfInput): Promise<ResumeData> {
 	const model = getModel(input);
 
 	const result = await generateText({
 		model,
-		...getAiRequestTimeoutOption(input),
+		system: buildResumeParsingSystemPrompt(pdfParserSystemPrompt),
 		messages: buildResumeParsingMessages({
-			systemPrompt: pdfParserSystemPrompt,
 			userPrompt: pdfParserUserPrompt,
 			file: input.file,
 			mediaType: "application/pdf",
@@ -347,18 +221,117 @@ type ParseDocxInput = z.infer<typeof aiCredentialsSchema> & {
 	mediaType: "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 };
 
+function assertZipRange(buffer: Buffer, offset: number, length: number) {
+	if (offset < 0 || length < 0 || offset + length > buffer.length) throw new Error("Invalid DOCX archive.");
+}
+
+function findEndOfCentralDirectory(buffer: Buffer): number {
+	const minOffset = Math.max(0, buffer.length - 0xffff - 22);
+
+	for (let offset = buffer.length - 22; offset >= minOffset; offset--) {
+		if (buffer.readUInt32LE(offset) === ZIP_END_OF_CENTRAL_DIRECTORY_SIGNATURE) return offset;
+	}
+
+	throw new Error("Invalid DOCX archive.");
+}
+
+function readZipEntry(buffer: Buffer, entryName: string): Buffer {
+	const eocdOffset = findEndOfCentralDirectory(buffer);
+	assertZipRange(buffer, eocdOffset, 22);
+
+	const centralDirectorySize = buffer.readUInt32LE(eocdOffset + 12);
+	const centralDirectoryOffset = buffer.readUInt32LE(eocdOffset + 16);
+	assertZipRange(buffer, centralDirectoryOffset, centralDirectorySize);
+
+	let offset = centralDirectoryOffset;
+	const endOffset = centralDirectoryOffset + centralDirectorySize;
+
+	while (offset < endOffset) {
+		assertZipRange(buffer, offset, 46);
+		if (buffer.readUInt32LE(offset) !== ZIP_CENTRAL_DIRECTORY_SIGNATURE) throw new Error("Invalid DOCX archive.");
+
+		const compressionMethod = buffer.readUInt16LE(offset + 10);
+		const compressedSize = buffer.readUInt32LE(offset + 20);
+		const fileNameLength = buffer.readUInt16LE(offset + 28);
+		const extraFieldLength = buffer.readUInt16LE(offset + 30);
+		const commentLength = buffer.readUInt16LE(offset + 32);
+		const localHeaderOffset = buffer.readUInt32LE(offset + 42);
+		const fileNameOffset = offset + 46;
+		assertZipRange(buffer, fileNameOffset, fileNameLength);
+
+		const fileName = buffer.toString("utf8", fileNameOffset, fileNameOffset + fileNameLength);
+
+		if (fileName === entryName) {
+			assertZipRange(buffer, localHeaderOffset, 30);
+			if (buffer.readUInt32LE(localHeaderOffset) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
+				throw new Error("Invalid DOCX archive.");
+			}
+
+			const localFileNameLength = buffer.readUInt16LE(localHeaderOffset + 26);
+			const localExtraFieldLength = buffer.readUInt16LE(localHeaderOffset + 28);
+			const dataOffset = localHeaderOffset + 30 + localFileNameLength + localExtraFieldLength;
+			assertZipRange(buffer, dataOffset, compressedSize);
+
+			const compressed = buffer.subarray(dataOffset, dataOffset + compressedSize);
+			if (compressionMethod === ZIP_STORED_METHOD) return compressed;
+			if (compressionMethod === ZIP_DEFLATED_METHOD) return inflateRawSync(compressed);
+
+			throw new Error("Unsupported DOCX archive compression.");
+		}
+
+		offset = fileNameOffset + fileNameLength + extraFieldLength + commentLength;
+	}
+
+	throw new Error("DOCX document content not found.");
+}
+
+function decodeXmlEntities(value: string): string {
+	return value.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (entity, token: string) => {
+		if (token === "amp") return "&";
+		if (token === "lt") return "<";
+		if (token === "gt") return ">";
+		if (token === "quot") return '"';
+		if (token === "apos") return "'";
+		if (token.toLowerCase().startsWith("#x")) return String.fromCodePoint(Number.parseInt(token.slice(2), 16));
+		if (token.startsWith("#")) return String.fromCodePoint(Number.parseInt(token.slice(1), 10));
+		return entity;
+	});
+}
+
+function extractDocxText(file: z.infer<typeof fileInputSchema>): string {
+	const documentXml = readZipEntry(Buffer.from(file.data, "base64"), DOCX_DOCUMENT_XML_PATH).toString("utf8");
+	// ponytail: minimal OOXML body-text extraction; add a DOCX parser dependency if tracked changes matter.
+	const text = decodeXmlEntities(
+		documentXml
+			.replace(/<w:tab\b[^>]*\/>/g, "\t")
+			.replace(/<w:br\b[^>]*\/>/g, "\n")
+			.replace(/<\/w:p>/g, "\n")
+			.replace(/<[^>]+>/g, ""),
+	)
+		.replace(/\r/g, "")
+		.replace(/[ \t]+\n/g, "\n")
+		.replace(/\n{3,}/g, "\n\n")
+		.trim();
+
+	if (!text) throw new Error("DOCX document content is empty.");
+	return text;
+}
+
 async function parseDocx(input: ParseDocxInput): Promise<ResumeData> {
 	const model = getModel(input);
+	const messages =
+		input.mediaType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+			? buildResumeParsingTextMessages({ userPrompt: docxParserUserPrompt, text: extractDocxText(input.file) })
+			: buildResumeParsingMessages({
+					userPrompt: docxParserUserPrompt,
+					file: input.file,
+					mediaType: input.mediaType,
+				});
 
 	const result = await generateText({
 		model,
-		...getAiRequestTimeoutOption(input),
-		messages: buildResumeParsingMessages({
-			systemPrompt: docxParserSystemPrompt,
-			userPrompt: docxParserUserPrompt,
-			file: input.file,
-			mediaType: input.mediaType,
-		}),
+		system: buildResumeParsingSystemPrompt(docxParserSystemPrompt),
+		messages,
 	}).catch((error: unknown) => logAndRethrow("Failed to generate the text with the model", error));
 
 	return parseAndValidateResumeJson(result.text);
@@ -374,79 +347,14 @@ type ChatInput = z.infer<typeof aiCredentialsSchema> & {
 	resumeUpdatedAt: Date;
 };
 
-type ProposalToolPart = UIMessage["parts"][number] & {
-	input?: unknown;
-	output?: unknown;
-};
-
-function isProposalToolPart(part: UIMessage["parts"][number]): part is ProposalToolPart {
-	return part.type === "tool-propose_resume_patches";
-}
-
-function summarizeProposalToolPart(part: ProposalToolPart) {
-	const result = resumePatchProposalToolOutputSchema.safeParse(part.output);
-	const input = resumePatchProposalToolInputSchema.safeParse(part.input);
-	const proposals = result.success ? result.data.proposals : input.success ? input.data.proposals : [];
-
-	if (proposals.length === 0) return undefined;
-
-	return [
-		"Prepared resume patch proposal:",
-		...proposals.map((proposal) => {
-			const operations = proposal.operations.map((operation) => `${operation.op} ${operation.path}`).join(", ");
-			return `- ${proposal.title}${operations ? ` (${operations})` : ""}`;
-		}),
-	].join("\n");
-}
-
-function getMessageText(message: UIMessage) {
-	return message.parts
-		.filter((part) => part.type === "text")
-		.map((part) => part.text.trim())
-		.filter(Boolean)
-		.join("\n");
-}
-
-export function convertToOllamaChatMessages(messages: UIMessage[]): ModelMessage[] {
-	const modelMessages: ModelMessage[] = [];
-
-	for (const message of messages) {
-		const text = getMessageText(message);
-
-		if (message.role === "user") {
-			if (text) modelMessages.push({ role: "user", content: text });
-			continue;
-		}
-
-		if (message.role !== "assistant") continue;
-
-		const proposalSummaries = message.parts
-			.filter(isProposalToolPart)
-			.map(summarizeProposalToolPart)
-			.filter((summary): summary is string => Boolean(summary));
-		const content = [text, ...proposalSummaries].filter(Boolean).join("\n\n");
-
-		if (content) modelMessages.push({ role: "assistant", content });
-	}
-
-	return modelMessages;
-}
-
-async function getChatModelMessages(input: Pick<ChatInput, "provider" | "messages">) {
-	if (input.provider === "ollama") return convertToOllamaChatMessages(input.messages);
-
-	return convertToModelMessages(input.messages);
-}
-
 async function chat(input: ChatInput) {
 	const model = getModel(input);
 	const systemPrompt = buildChatSystemPrompt(input.resumeData);
 
 	const result = streamText({
 		model,
-		...getAiRequestTimeoutOption(input),
 		system: systemPrompt,
-		messages: await getChatModelMessages(input),
+		messages: await convertToModelMessages(input.messages),
 		tools: {
 			propose_resume_patches: tool({
 				description:
@@ -464,7 +372,7 @@ async function chat(input: ChatInput) {
 				},
 			}),
 		},
-		...(input.provider === "ollama" ? {} : { stopWhen: stepCountIs(3) }),
+		stopWhen: stepCountIs(3),
 	});
 
 	return streamToEventIterator(result.toUIMessageStream());
@@ -479,46 +387,14 @@ function buildAnalyzeResumeSystemPrompt(resumeData: ResumeData): string {
 }
 
 /** Sends resume data to the AI provider and returns a structured analysis, parsing raw JSON from the response text. */
-function extractJsonObject(resultText: string) {
-	const fenceMatch = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-	const candidate = fenceMatch?.[1] ?? resultText;
-	const first = candidate.indexOf("{");
-	const last = candidate.lastIndexOf("}");
-	if (first === -1 || last === -1 || last < first) throw new Error("AI returned no JSON object.");
-
-	return JSON.parse(candidate.substring(first, last + 1));
-}
-
 async function analyzeResume(input: AnalyzeResumeInput): Promise<ResumeAnalysis> {
 	const model = getModel(input);
 	const systemPrompt = buildAnalyzeResumeSystemPrompt(input.resumeData);
 
-	if (input.provider === "ollama" || isLmStudioEndpoint(input)) {
-		const result = await generateText({
-			model,
-			...getAiRequestTimeoutOption(input),
-			messages: [
-				{
-					role: "system",
-					content: `${systemPrompt}\n\nReturn ONLY a raw JSON object. Do not return markdown, code fences, or explanations. The JSON object must match this schema:\n\n${JSON.stringify(z.toJSONSchema(resumeAnalysisOutputSchema), null, 2)}`,
-				},
-				{
-					role: "user",
-					content:
-						"Analyze this resume and return a structured report with scorecard, overall score, strengths, and actionable suggestions.",
-				},
-			],
-		});
-
-		return resumeAnalysisSchema.parse(resumeAnalysisOutputSchema.parse(extractJsonObject(result.text)));
-	}
-
 	const result = await generateText({
 		model,
-		...getAiRequestTimeoutOption(input),
-		output: Output.object({ schema: resumeAnalysisOutputSchema }),
+		system: systemPrompt,
 		messages: [
-			{ role: "system", content: systemPrompt },
 			{
 				role: "user",
 				content:

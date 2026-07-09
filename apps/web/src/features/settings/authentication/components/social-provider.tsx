@@ -2,11 +2,24 @@ import type { AuthProvider } from "@reactive-resume/auth/types";
 import { Trans } from "@lingui/react/macro";
 import { LinkBreakIcon, LinkIcon } from "@phosphor-icons/react";
 import { m } from "motion/react";
-import { useCallback, useMemo } from "react";
-import { match } from "ts-pattern";
+import { useCallback } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { getProviderIcon, getProviderName, useAuthAccounts, useAuthProviderActions } from "./hooks";
+
+// ponytail: shared hover/tap wrapper — identical in both branches, match(boolean) removed
+function ActionButton({ children }: { children: React.ReactNode }) {
+	return (
+		<m.div
+			className="will-change-transform"
+			whileHover={{ y: -1, scale: 1.01 }}
+			whileTap={{ scale: 0.99 }}
+			transition={{ duration: 0.14, ease: "easeOut" }}
+		>
+			{children}
+		</m.div>
+	);
+}
 
 type SocialProviderSectionProps = {
 	provider: AuthProvider;
@@ -18,11 +31,11 @@ export function SocialProviderSection({ provider, name, animationDelay = 0 }: So
 	const { link, unlink } = useAuthProviderActions();
 	const { hasAccount, getAccountByProviderId } = useAuthAccounts();
 
-	const providerName = useMemo(() => name ?? getProviderName(provider), [name, provider]);
-	const providerIcon = useMemo(() => getProviderIcon(provider), [provider]);
+	const providerName = name ?? getProviderName(provider);
+	const providerIcon = getProviderIcon(provider);
 
-	const account = useMemo(() => getAccountByProviderId(provider), [getAccountByProviderId, provider]);
-	const isConnected = useMemo(() => hasAccount(provider), [hasAccount, provider]);
+	const account = getAccountByProviderId(provider);
+	const isConnected = hasAccount(provider);
 
 	const handleLink = useCallback(async () => {
 		await link(provider);
@@ -36,7 +49,7 @@ export function SocialProviderSection({ provider, name, animationDelay = 0 }: So
 	return (
 		<m.div
 			className="will-change-[transform,opacity]"
-			initial={{ opacity: 0, y: -20 }}
+			initial={{ y: -20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2, delay: animationDelay, ease: "easeOut" }}
 		>
@@ -48,36 +61,21 @@ export function SocialProviderSection({ provider, name, animationDelay = 0 }: So
 					{providerName}
 				</h2>
 
-				{match(isConnected)
-					.with(true, () => (
-						<m.div
-							className="will-change-transform"
-							whileHover={{ y: -1, scale: 1.01 }}
-							whileTap={{ scale: 0.99 }}
-							transition={{ duration: 0.14, ease: "easeOut" }}
-						>
-							<Button variant="outline" onClick={handleUnlink}>
-								<LinkBreakIcon />
-								<Trans comment="Authentication settings action to unlink a connected social login provider">
-									Disconnect
-								</Trans>
-							</Button>
-						</m.div>
-					))
-					.with(false, () => (
-						<m.div
-							className="will-change-transform"
-							whileHover={{ y: -1, scale: 1.01 }}
-							whileTap={{ scale: 0.99 }}
-							transition={{ duration: 0.14, ease: "easeOut" }}
-						>
-							<Button variant="outline" onClick={handleLink}>
-								<LinkIcon />
-								<Trans comment="Authentication settings action to link a social login provider">Connect</Trans>
-							</Button>
-						</m.div>
-					))
-					.exhaustive()}
+				<ActionButton>
+					{isConnected ? (
+						<Button variant="outline" onClick={handleUnlink}>
+							<LinkBreakIcon />
+							<Trans comment="Authentication settings action to unlink a connected social login provider">
+								Disconnect
+							</Trans>
+						</Button>
+					) : (
+						<Button variant="outline" onClick={handleLink}>
+							<LinkIcon />
+							<Trans comment="Authentication settings action to link a social login provider">Connect</Trans>
+						</Button>
+					)}
+				</ActionButton>
 			</div>
 		</m.div>
 	);

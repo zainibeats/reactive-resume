@@ -60,7 +60,9 @@ function IconCellComponent({ columnIndex, rowIndex, style, icons, onChange }: Ic
 			title={icon}
 			style={style}
 			tabIndex={-1}
-			onClick={() => onChange(icon)}
+			onClick={() => {
+				if (icon) onChange(icon);
+			}}
 			className="flex size-full items-center justify-center hover:bg-accent"
 		>
 			{icon ? <i className={cn("ph text-base", `ph-${icon}`)} /> : <ProhibitIcon />}
@@ -100,7 +102,7 @@ export function IconPicker({ value, onChange, popoverProps, ...props }: IconPick
 		<Popover {...popoverProps}>
 			<PopoverTrigger
 				render={
-					<Button size="icon" variant="outline" {...props}>
+					<Button size="icon" variant="outline" aria-label={t`Pick an icon`} {...props}>
 						<i className={cn("ph size-4 text-base", `ph-${value}`)} />
 					</Button>
 				}

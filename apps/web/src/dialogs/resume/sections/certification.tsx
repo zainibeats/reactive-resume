@@ -4,14 +4,6 @@ import { Trans } from "@lingui/react/macro";
 import { PencilSimpleLineIcon, PlusIcon } from "@phosphor-icons/react";
 import { useStore } from "@tanstack/react-form";
 import { certificationItemSchema } from "@reactive-resume/schema/resume/data";
-import { Button } from "@reactive-resume/ui/components/button";
-import {
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@reactive-resume/ui/components/dialog";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Switch } from "@reactive-resume/ui/components/switch";
 import { RichInput } from "@/components/input/rich-input";
@@ -22,6 +14,7 @@ import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { makeSectionItem } from "@/libs/resume/make-section-item";
 import { createSectionItem, updateSectionItem } from "@/libs/resume/section-actions";
 import { useAppForm, withForm } from "@/libs/tanstack-form";
+import { SectionItemDialog } from "./section-item-dialog";
 
 const formSchema = certificationItemSchema;
 
@@ -57,36 +50,16 @@ export function CreateCertificationDialog({ data }: DialogProps<"resume.sections
 	const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
 	return (
-		<DialogContent>
-			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
-					<PlusIcon />
-					<Trans>Create a new certification</Trans>
-				</DialogTitle>
-				<DialogDescription />
-			</DialogHeader>
-
-			<form
-				className="grid gap-4 sm:grid-cols-2"
-				onSubmit={(event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					void form.handleSubmit();
-				}}
-			>
-				<CertificationForm form={form} />
-
-				<DialogFooter className="sm:col-span-full">
-					<Button variant="ghost" onClick={requestClose}>
-						<Trans>Cancel</Trans>
-					</Button>
-
-					<Button type="submit" disabled={isSubmitting}>
-						<Trans>Create</Trans>
-					</Button>
-				</DialogFooter>
-			</form>
-		</DialogContent>
+		<SectionItemDialog
+			title={<Trans>Create a new certification</Trans>}
+			icon={<PlusIcon />}
+			onSubmit={() => void form.handleSubmit()}
+			onCancel={requestClose}
+			isSubmitting={isSubmitting}
+			submitLabel={<Trans>Create</Trans>}
+		>
+			<CertificationForm form={form} />
+		</SectionItemDialog>
 	);
 }
 
@@ -109,36 +82,16 @@ export function UpdateCertificationDialog({ data }: DialogProps<"resume.sections
 	const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
 	return (
-		<DialogContent>
-			<DialogHeader>
-				<DialogTitle className="flex items-center gap-x-2">
-					<PencilSimpleLineIcon />
-					<Trans>Update an existing certification</Trans>
-				</DialogTitle>
-				<DialogDescription />
-			</DialogHeader>
-
-			<form
-				className="grid gap-4 sm:grid-cols-2"
-				onSubmit={(event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					void form.handleSubmit();
-				}}
-			>
-				<CertificationForm form={form} />
-
-				<DialogFooter className="sm:col-span-full">
-					<Button variant="ghost" onClick={requestClose}>
-						<Trans>Cancel</Trans>
-					</Button>
-
-					<Button type="submit" disabled={isSubmitting}>
-						<Trans>Save Changes</Trans>
-					</Button>
-				</DialogFooter>
-			</form>
-		</DialogContent>
+		<SectionItemDialog
+			title={<Trans>Update an existing certification</Trans>}
+			icon={<PencilSimpleLineIcon />}
+			onSubmit={() => void form.handleSubmit()}
+			onCancel={requestClose}
+			isSubmitting={isSubmitting}
+			submitLabel={<Trans>Save Changes</Trans>}
+		>
+			<CertificationForm form={form} />
+		</SectionItemDialog>
 	);
 }
 

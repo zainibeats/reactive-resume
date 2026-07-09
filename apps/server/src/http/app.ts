@@ -12,7 +12,7 @@ import { handleRpc } from "../rpc/handler";
 import { handleSchemaJson } from "../static/schema";
 import { handleLlms, handleRobots, handleSitemap } from "../static/seo";
 import { handleUpload } from "../static/uploads";
-import { handleWebApp, handleWebAppHead, serveWebDistStatic } from "../static/web";
+import { handleWebApp, serveWebDistStatic } from "../static/web";
 import { handleAuth, handleOAuth } from "./auth";
 import { handleHealth } from "./health";
 import { handleResumePdfDownload } from "./resume-pdf";
@@ -47,8 +47,7 @@ export function createApp() {
 	app.on(["GET", "HEAD"], "/llms.txt", (c) => handleLlms({ head: c.req.method === "HEAD" }));
 
 	app.use("/*", serveWebDistStatic);
-	app.on(["GET"], "/*", (c) => handleWebApp(c.req.raw));
-	app.on(["HEAD"], "/*", (c) => handleWebAppHead(c.req.raw));
+	app.on(["GET", "HEAD"], "/*", (c) => handleWebApp(c.req.raw));
 
 	return app;
 }

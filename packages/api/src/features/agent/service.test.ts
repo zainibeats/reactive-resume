@@ -98,18 +98,22 @@ vi.mock("drizzle-orm", () => ({
 
 vi.mock("ai", () => ({
 	convertToModelMessages: vi.fn(),
-	generateText: vi.fn(),
 	stepCountIs: vi.fn(),
 	ToolLoopAgent: vi.fn(),
 }));
 
-vi.mock("../ai/service", () => ({ getAgentModel: vi.fn(), getAiRequestTimeout: vi.fn() }));
+vi.mock("../ai/service", () => ({ getAgentModel: vi.fn() }));
 vi.mock("../ai/credentials", () => ({ assertAgentEnvironment: vi.fn() }));
 vi.mock("../ai-providers/service", () => ({ aiProvidersService: aiProvidersServiceMock }));
 vi.mock("../resume/service", () => ({ resumeService: resumeServiceMock }));
 vi.mock("../storage/service", () => ({
 	getStorageService: vi.fn(() => storageServiceMock),
 	inferContentType: vi.fn(),
+}));
+vi.mock("./resume", () => ({
+	buildAgentDraftResumeName: vi.fn(),
+	buildUniqueAgentDraftSlug: vi.fn(),
+	normalizeAgentResumePatchOperations: vi.fn((_data, operations) => operations),
 }));
 vi.mock("./runs", () => ({
 	claimActiveAgentRun: claimActiveAgentRunMock,
@@ -122,11 +126,11 @@ vi.mock("./tools", () => ({
 	buildAgentInstructions: vi.fn(),
 	buildAgentTools: vi.fn(() => ({})),
 }));
+vi.mock("@reactive-resume/schema/resume/default", () => ({ defaultResumeData: {} }));
 vi.mock("@reactive-resume/utils/string", () => ({ generateId: () => "test-id" }));
 vi.mock("@orpc/server", () => ({ streamToEventIterator: vi.fn() }));
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	for (const mock of Object.values(dbMock)) mock.mockReset();
 	dbMock.transaction.mockImplementation(async <T>(callback: (tx: typeof dbMock) => Promise<T>) => callback(dbMock));
 	clearActiveAgentRunIfCurrentMock.mockReset();
@@ -211,76 +215,6 @@ function selectWhereOrderByLimitResult(rows: unknown[]) {
 	return { from };
 }
 
-describe("agentService.threads.create", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("targets an existing resume directly when targetResumeId is provided", async () => {
-		const insertedValues: unknown[] = [];
-		const createdAt = new Date("2026-06-04T00:00:00.000Z");
-		const updatedAt = new Date("2026-06-04T00:00:00.000Z");
-
-		aiProvidersServiceMock.getDefaultRunnable.mockResolvedValue({
-			id: "provider-1",
-			label: "Provider",
-			provider: "openai",
-			model: "gpt-5",
-			apiKey: "secret",
-			baseURL: null,
-		});
-		resumeServiceMock.getById.mockResolvedValue({
-			id: "resume-1",
-			name: "Active Resume",
-			data: {},
-			updatedAt,
-		});
-		dbMock.insert.mockReturnValue({
-			values: vi.fn((value) => {
-				insertedValues.push(value);
-				return {
-					returning: vi.fn(async () => [
-						{
-							id: "thread-1",
-							userId: "user-1",
-							aiProviderId: "provider-1",
-							sourceResumeId: null,
-							workingResumeId: "resume-1",
-							title: "New thread",
-							status: "active",
-							activeRunId: null,
-							activeStreamId: null,
-							activeRunStartedAt: null,
-							lastMessageAt: updatedAt,
-							archivedAt: null,
-							deletedAt: null,
-							createdAt,
-							updatedAt,
-						},
-					]),
-				};
-			}),
-		});
-
-		const { agentService } = await import("./service");
-
-		const result = await agentService.threads.create({
-			userId: "user-1",
-			targetResumeId: "resume-1",
-		});
-
-		expect(resumeServiceMock.getById).toHaveBeenCalledWith({ id: "resume-1", userId: "user-1" });
-		expect("create" in resumeServiceMock).toBe(false);
-		expect(insertedValues).toEqual([
-			expect.objectContaining({
-				sourceResumeId: null,
-				workingResumeId: "resume-1",
-			}),
-		]);
-		expect(result).toEqual(expect.objectContaining({ id: "thread-1", workingResumeId: "resume-1" }));
-	});
-});
-
 describe("agentService.threads.get", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -323,34 +257,6 @@ describe("agentService.threads.get", () => {
 		expect(result.isReadOnly).toBe(true);
 		expect(result.thread.status).toBe("archived");
 		expect(result.resume).toEqual(expect.objectContaining({ id: "resume-1" }));
-	});
-
-	it("returns isReadOnly: true when the stored provider is no longer runnable", async () => {
-		const activeThread = buildActiveThread();
-
-		dbMock.select
-			.mockImplementationOnce(() => selectLimitResult([activeThread]))
-			.mockImplementationOnce(() => selectOrderByResult([]))
-			.mockImplementationOnce(() => selectOrderByResult([]))
-			.mockImplementationOnce(() => selectOrderByResult([]));
-
-		resumeServiceMock.getById.mockResolvedValue({
-			id: "resume-1",
-			name: "Resume",
-			data: {},
-			updatedAt: new Date(),
-		});
-		aiProvidersServiceMock.getRunnableById.mockRejectedValue(
-			new ORPCError("BAD_REQUEST", { message: "AI provider must be tested and enabled before use." }),
-		);
-
-		const { agentService } = await import("./service");
-
-		const result = await agentService.threads.get({ id: "thread-1", userId: "user-1" });
-
-		expect(aiProvidersServiceMock.getRunnableById).toHaveBeenCalledWith({ id: "provider-1", userId: "user-1" });
-		expect(aiProvidersServiceMock.getDefaultRunnable).not.toHaveBeenCalled();
-		expect(result.isReadOnly).toBe(true);
 	});
 });
 
@@ -490,294 +396,6 @@ describe("agentService.messages.send", () => {
 				}),
 			}),
 		]);
-	});
-
-	it("passes local provider request timeout through to the agent stream", async () => {
-		const activeThread = buildActiveThread();
-		const persistedMessage = {
-			id: "message-1",
-			userId: "user-1",
-			threadId: "thread-1",
-			role: "user",
-			status: "completed",
-			sequence: 0,
-			uiMessage: {
-				id: "ui-message-1",
-				role: "user",
-				parts: [{ type: "text", text: "Rewrite my bullets" }],
-			},
-		};
-		const timeout = { stepMs: 600_000, chunkMs: 600_000 };
-
-		dbMock.select
-			.mockImplementationOnce(() => selectLimitResult([activeThread]))
-			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: -1 }]))
-			.mockImplementationOnce(() => selectWhereResult([{ total: 1 }]))
-			.mockImplementationOnce(() => selectOrderByResult([persistedMessage]));
-
-		dbMock.insert.mockReturnValue({
-			values: vi.fn(() => ({ returning: vi.fn(async () => [persistedMessage]) })),
-		});
-		dbMock.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
-
-		claimActiveAgentRunMock.mockResolvedValue(true);
-		aiProvidersServiceMock.getRunnableById.mockResolvedValue({
-			id: "provider-1",
-			provider: "lmstudio",
-			model: "local-model",
-			apiKey: "",
-			baseURL: "http://localhost:1234/v1",
-		});
-		aiProvidersServiceMock.markUsed.mockResolvedValue(undefined);
-
-		const [{ convertToModelMessages, ToolLoopAgent }, { agentStreamLifecycle }, { streamToEventIterator }, aiService] =
-			await Promise.all([import("ai"), import("./streams"), import("@orpc/server"), import("../ai/service")]);
-		const streamMock = vi.fn(async () => ({ toUIMessageStream: vi.fn(() => new ReadableStream()) }));
-		vi.mocked(aiService.getAiRequestTimeout).mockReturnValue(timeout);
-		vi.mocked(convertToModelMessages).mockResolvedValue([
-			{ role: "user", content: [{ type: "text", text: "Rewrite my bullets" }] },
-		]);
-		class MockToolLoopAgent {
-			stream = streamMock;
-		}
-		vi.mocked(ToolLoopAgent).mockImplementation(MockToolLoopAgent as never);
-		vi.mocked(agentStreamLifecycle.create).mockResolvedValue(new ReadableStream());
-		vi.mocked(streamToEventIterator).mockReturnValue("iterator" as never);
-
-		const { agentService } = await import("./service");
-
-		await agentService.messages.send({
-			threadId: "thread-1",
-			userId: "user-1",
-			message: {
-				id: "ui-message-1",
-				role: "user",
-				parts: [{ type: "text", text: "Rewrite my bullets" }],
-				// biome-ignore lint/suspicious/noExplicitAny: minimal fixture for unit test
-			} as any,
-		});
-
-		expect(aiService.getAiRequestTimeout).toHaveBeenCalledWith({
-			provider: "lmstudio",
-			baseURL: "http://localhost:1234/v1",
-		});
-		expect(streamMock).toHaveBeenCalledWith(expect.objectContaining({ timeout }));
-	});
-
-	it("uses a direct JSON Patch flow for Ollama edits instead of the tool loop", async () => {
-		const activeThread = buildActiveThread();
-		const persistedUserMessage = {
-			id: "message-1",
-			userId: "user-1",
-			threadId: "thread-1",
-			role: "user",
-			status: "completed",
-			sequence: 0,
-			uiMessage: {
-				id: "ui-message-1",
-				role: "user",
-				parts: [{ type: "text", text: "Rewrite my summary" }],
-			},
-		};
-		const persistedAssistantMessage = {
-			id: "message-2",
-			userId: "user-1",
-			threadId: "thread-1",
-			role: "assistant",
-			status: "completed",
-			sequence: 1,
-			uiMessage: {
-				id: "assistant-message-1",
-				role: "assistant",
-				parts: [{ type: "text", text: "I rewrote the summary." }],
-			},
-		};
-		const beforeUpdatedAt = new Date("2026-05-01T00:00:00.000Z");
-		const patchedUpdatedAt = new Date("2026-05-02T00:00:00.000Z");
-		const operations = [{ op: "replace", path: "/summary/content", value: "<p>Focused operator.</p>" }];
-		const insertValues: unknown[] = [];
-
-		dbMock.select
-			.mockImplementationOnce(() => selectLimitResult([activeThread]))
-			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: -1 }]))
-			.mockImplementationOnce(() => selectWhereResult([{ total: 1 }]))
-			.mockImplementationOnce(() => selectOrderByResult([persistedUserMessage]))
-			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: 0 }]));
-		dbMock.insert.mockImplementation(() => ({
-			values: vi.fn((value) => {
-				insertValues.push(value);
-				if (value.kind === "resume_patch") {
-					return {
-						returning: vi.fn(async () => [
-							{
-								id: "action-1",
-								...value,
-								appliedUpdatedAt: patchedUpdatedAt,
-								createdAt: patchedUpdatedAt,
-								updatedAt: patchedUpdatedAt,
-							},
-						]),
-					};
-				}
-
-				return {
-					returning: vi.fn(async () =>
-						value.role === "assistant" ? [persistedAssistantMessage] : [persistedUserMessage],
-					),
-				};
-			}),
-		}));
-		dbMock.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
-
-		claimActiveAgentRunMock.mockResolvedValue(true);
-		aiProvidersServiceMock.getRunnableById.mockResolvedValue({
-			id: "provider-1",
-			provider: "ollama",
-			model: "llama3.2",
-			apiKey: "",
-			baseURL: "http://localhost:11434/api",
-		});
-		aiProvidersServiceMock.markUsed.mockResolvedValue(undefined);
-		resumeServiceMock.getById.mockResolvedValue({
-			id: "resume-1",
-			name: "Resume",
-			data: { summary: { content: "<p>Old.</p>" } },
-			updatedAt: beforeUpdatedAt,
-		});
-		resumeServiceMock.patchInTransaction.mockResolvedValue({ id: "resume-1", updatedAt: patchedUpdatedAt });
-		resumeServiceMock.notifyResumePatched.mockResolvedValue(undefined);
-
-		const [
-			{ convertToModelMessages, generateText, ToolLoopAgent },
-			{ agentStreamLifecycle },
-			{ streamToEventIterator },
-		] = await Promise.all([import("ai"), import("./streams"), import("@orpc/server")]);
-		vi.mocked(generateText).mockResolvedValue({
-			text: JSON.stringify({
-				title: "Rewrite summary",
-				response: "I rewrote the summary.",
-				operations,
-			}),
-		} as never);
-		vi.mocked(agentStreamLifecycle.create).mockResolvedValue(new ReadableStream());
-		vi.mocked(streamToEventIterator).mockReturnValue("iterator" as never);
-
-		const { agentService } = await import("./service");
-
-		await agentService.messages.send({
-			threadId: "thread-1",
-			userId: "user-1",
-			message: {
-				id: "ui-message-1",
-				role: "user",
-				parts: [{ type: "text", text: "Rewrite my summary" }],
-				// biome-ignore lint/suspicious/noExplicitAny: minimal fixture for unit test
-			} as any,
-		});
-
-		expect(generateText).toHaveBeenCalledWith(
-			expect.objectContaining({
-				maxOutputTokens: 4096,
-				prompt: expect.stringContaining('Current resume data:\n{"summary":{"content":"<p>Old.</p>"}}'),
-				providerOptions: { ollama: { options: { num_ctx: 16_384 } } },
-				system: expect.stringContaining("You are an expert resume editor"),
-			}),
-		);
-		expect(vi.mocked(generateText).mock.calls[0]?.[0]).not.toHaveProperty("messages");
-		expect(convertToModelMessages).not.toHaveBeenCalled();
-		expect(ToolLoopAgent).not.toHaveBeenCalled();
-		expect(resumeServiceMock.patchInTransaction).toHaveBeenCalledWith(dbMock, {
-			id: "resume-1",
-			userId: "user-1",
-			operations,
-		});
-		expect(insertValues).toContainEqual(expect.objectContaining({ role: "assistant" }));
-		expect(clearActiveAgentRunIfCurrentMock).toHaveBeenCalledWith({
-			threadId: "thread-1",
-			userId: "user-1",
-			runId: "test-id",
-			streamId: "test-id",
-		});
-	});
-
-	it("clears the active run when an Ollama patch fails", async () => {
-		const activeThread = buildActiveThread();
-		const persistedUserMessage = {
-			id: "message-1",
-			userId: "user-1",
-			threadId: "thread-1",
-			role: "user",
-			status: "completed",
-			sequence: 0,
-			uiMessage: {
-				id: "ui-message-1",
-				role: "user",
-				parts: [{ type: "text", text: "Mess up my resume" }],
-			},
-		};
-
-		dbMock.select
-			.mockImplementationOnce(() => selectLimitResult([activeThread]))
-			.mockImplementationOnce(() => selectWhereResult([{ maxSequence: -1 }]))
-			.mockImplementationOnce(() => selectWhereResult([{ total: 1 }]))
-			.mockImplementationOnce(() => selectOrderByResult([persistedUserMessage]));
-		dbMock.insert.mockReturnValue({
-			values: vi.fn(() => ({ returning: vi.fn(async () => [persistedUserMessage]) })),
-		});
-		dbMock.update.mockReturnValue({ set: vi.fn(() => ({ where: vi.fn(async () => undefined) })) });
-
-		claimActiveAgentRunMock.mockResolvedValue(true);
-		aiProvidersServiceMock.getRunnableById.mockResolvedValue({
-			id: "provider-1",
-			provider: "ollama",
-			model: "llama3.2",
-			apiKey: "",
-			baseURL: "http://localhost:11434/api",
-		});
-		aiProvidersServiceMock.markUsed.mockResolvedValue(undefined);
-		resumeServiceMock.getById.mockResolvedValue({
-			id: "resume-1",
-			name: "Resume",
-			data: { summary: { content: "<p>Old.</p>" } },
-			updatedAt: new Date("2026-05-01T00:00:00.000Z"),
-		});
-		const patchError = new ORPCError("INVALID_PATCH_OPERATIONS", {
-			status: 400,
-			message: "Patch produced invalid resume data",
-		});
-		resumeServiceMock.patchInTransaction.mockRejectedValue(patchError);
-
-		const { generateText } = await import("ai");
-		vi.mocked(generateText).mockResolvedValue({
-			text: JSON.stringify({
-				title: "Mess up resume",
-				response: "I changed the resume.",
-				operations: [{ op: "remove", path: "/picture" }],
-			}),
-		} as never);
-
-		const { agentService } = await import("./service");
-
-		await expect(
-			agentService.messages.send({
-				threadId: "thread-1",
-				userId: "user-1",
-				message: {
-					id: "ui-message-1",
-					role: "user",
-					parts: [{ type: "text", text: "Mess up my resume" }],
-					// biome-ignore lint/suspicious/noExplicitAny: minimal fixture for unit test
-				} as any,
-			}),
-		).rejects.toBe(patchError);
-
-		expect(clearActiveAgentRunIfCurrentMock).toHaveBeenCalledWith({
-			threadId: "thread-1",
-			userId: "user-1",
-			runId: "test-id",
-			streamId: "test-id",
-			primaryError: patchError,
-		});
 	});
 
 	it("stores snapshotData and applies a valid JSON Patch without a timestamp conflict guard", async () => {
@@ -1329,6 +947,7 @@ describe("agentService.messages.send", () => {
 					}),
 				],
 			}),
+			legacyAnswerMessage.uiMessage,
 			retryMessage.uiMessage,
 		]);
 	});

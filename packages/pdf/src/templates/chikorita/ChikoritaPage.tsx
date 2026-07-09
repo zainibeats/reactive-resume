@@ -3,15 +3,23 @@ import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { Fragment, useMemo } from "react";
 import { rgbaStringToHex } from "@reactive-resume/utils/color";
+import { Image, Page, StyleSheet, View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
-import { Image, Page, StyleSheet, View } from "../../renderer";
-import { CustomFieldContactItem, WebsiteContactItem } from "../shared/contact-item";
+import { createBaseTemplateStyles } from "../shared/base-template-styles";
+import {
+	CustomFieldContactItem,
+	EmailContactItem,
+	LocationContactItem,
+	PhoneContactItem,
+	WebsiteContactItem,
+} from "../shared/contact-item";
 import { TemplateProvider } from "../shared/context";
+import { shouldShowResumeHeader } from "../shared/cover-letter";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "../shared/page-size";
 import { hasTemplatePicture } from "../shared/picture";
-import { Heading, Icon, Link, Text } from "../shared/primitives";
+import { Heading, Text } from "../shared/primitives";
 import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
@@ -47,7 +55,7 @@ export const ChikoritaPage = ({ page, pageIndex }: TemplatePageProps) => {
 	const pageSize = getTemplatePageSize(metadata.page.format);
 	const pageMinHeightStyle = getTemplatePageMinHeightStyle(metadata.page.format);
 	const hasPicture = hasTemplatePicture(picture);
-	const showHeader = pageIndex === 0;
+	const showHeader = shouldShowResumeHeader(data, pageIndex);
 	const sidebarSections = filterSections(page.sidebar, data);
 	const mainSections = filterSections(page.main, data);
 
@@ -111,24 +119,9 @@ const Header = ({ styles }: ChikoritaHeaderProps) => {
 
 				<View style={styles.headerContactList}>
 					<View style={styles.headerContactRow}>
-						{basics.email && (
-							<Link src={`mailto:${basics.email}`} style={styles.headerContactItem}>
-								<Icon name="envelope" />
-								<Text>{basics.email}</Text>
-							</Link>
-						)}
-						{basics.phone && (
-							<Link src={`tel:${basics.phone}`} style={styles.headerContactItem}>
-								<Icon name="phone" />
-								<Text>{basics.phone}</Text>
-							</Link>
-						)}
-						{basics.location && (
-							<View style={styles.headerContactItem}>
-								<Icon name="map-pin" />
-								<Text>{basics.location}</Text>
-							</View>
-						)}
+						<EmailContactItem email={basics.email} style={styles.headerContactItem} />
+						<PhoneContactItem phone={basics.phone} style={styles.headerContactItem} />
+						<LocationContactItem location={basics.location} style={styles.headerContactItem} />
 					</View>
 
 					<View style={styles.headerContactRow}>
@@ -160,16 +153,11 @@ const useChikoritaTemplate = (): ChikoritaTemplate => {
 		};
 		const metrics = getTemplateMetrics(metadata.page);
 
-		const bodyText = {
-			fontFamily: metadata.typography.body.fontFamily,
-			fontSize: metadata.typography.body.fontSize,
-			fontWeight: metadata.typography.body.fontWeights[0] ?? "400",
-			lineHeight: metadata.typography.body.lineHeight,
-			color: foreground,
-			...r.text,
-		} satisfies Style;
+		const base = createBaseTemplateStyles({ metadata, foreground, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
+			...base,
+			inline: { ...base.inline, columnGap: metrics.gapX(0.25) },
 			page: {
 				flexDirection: r.row,
 				color: foreground,
@@ -178,62 +166,6 @@ const useChikoritaTemplate = (): ChikoritaTemplate => {
 				fontSize: metadata.typography.body.fontSize,
 				lineHeight: metadata.typography.body.lineHeight,
 				direction: r.pageDirection,
-			},
-			text: bodyText,
-			heading: {
-				fontFamily: metadata.typography.heading.fontFamily,
-				fontSize: metadata.typography.heading.fontSize,
-				fontWeight: metadata.typography.heading.fontWeights.at(-1) ?? "600",
-				lineHeight: metadata.typography.heading.lineHeight,
-				color: foreground,
-				...r.text,
-			},
-			div: {
-				rowGap: metrics.gapY(0.125),
-				columnGap: metrics.gapX(1 / 3),
-			},
-			inline: {
-				flexDirection: r.row,
-				alignItems: "center",
-				columnGap: metrics.gapX(0.25),
-			},
-			link: {
-				textDecoration: "none",
-				color: foreground,
-			},
-			small: {
-				fontSize: metadata.typography.body.fontSize * 0.875,
-			},
-			bold: {
-				fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600",
-			},
-			richParagraph: {
-				margin: 0,
-				...bodyText,
-			},
-			richListItemRow: {
-				flexDirection: "row",
-				columnGap: metrics.gapX(1 / 3),
-				alignItems: "flex-start",
-			},
-			richListItemMarker: {
-				...bodyText,
-				width: metadata.typography.body.fontSize,
-				textAlign: r.listMarkerTextAlign,
-			},
-			richListItemContent: {
-				...bodyText,
-				flex: 1,
-			},
-			splitRow: {
-				flexDirection: r.row,
-				flexWrap: "wrap",
-				alignItems: "flex-start",
-				justifyContent: "space-between",
-				columnGap: metrics.gapX(2 / 3),
-			},
-			alignEnd: {
-				...r.alignEnd,
 			},
 			section: {
 				flexDirection: "column",
@@ -265,18 +197,6 @@ const useChikoritaTemplate = (): ChikoritaTemplate => {
 				flexDirection: r.row,
 				alignItems: "flex-start",
 				columnGap: metrics.gapX(0.5),
-			},
-			picture: {
-				width: picture.size,
-				height: picture.size,
-				objectFit: "cover",
-				aspectRatio: picture.aspectRatio,
-				borderRadius: picture.borderRadius,
-				borderColor: rgbaStringToHex(picture.borderColor),
-				borderWidth: picture.borderWidth,
-				shadowColor: rgbaStringToHex(picture.shadowColor),
-				shadowWidth: picture.shadowWidth,
-				transform: `rotate(${picture.rotation}deg)`,
 			},
 			headerTitle: {
 				flex: 1,

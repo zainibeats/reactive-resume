@@ -19,7 +19,6 @@ const mocks = vi.hoisted(() => ({
 	handleLlms: vi.fn(),
 	serveWebDistStatic: vi.fn(),
 	handleWebApp: vi.fn(),
-	handleWebAppHead: vi.fn(),
 }));
 
 vi.mock("./auth", () => ({
@@ -60,7 +59,6 @@ vi.mock("../static/seo", () => ({
 vi.mock("../static/web", () => ({
 	serveWebDistStatic: mocks.serveWebDistStatic,
 	handleWebApp: mocks.handleWebApp,
-	handleWebAppHead: mocks.handleWebAppHead,
 }));
 
 vi.mock("../mcp/handler", () => ({
@@ -91,7 +89,6 @@ beforeEach(() => {
 	mocks.handleLlms.mockReturnValue(new Response("llms"));
 	mocks.serveWebDistStatic.mockResolvedValue(undefined);
 	mocks.handleWebApp.mockResolvedValue(new Response("web"));
-	mocks.handleWebAppHead.mockReturnValue(new Response(null));
 });
 
 describe("createApp", () => {
@@ -138,6 +135,5 @@ describe("createApp", () => {
 		expect(handler).toHaveBeenCalledWith({ head: method === "HEAD" });
 		expect(mocks.serveWebDistStatic).not.toHaveBeenCalled();
 		expect(mocks.handleWebApp).not.toHaveBeenCalled();
-		expect(mocks.handleWebAppHead).not.toHaveBeenCalled();
 	});
 });

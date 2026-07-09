@@ -13,7 +13,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect, useMemo } from "react";
-import { DirectionProvider } from "@reactive-resume/ui/components/direction";
 import { Toaster } from "@reactive-resume/ui/components/sonner";
 import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
 import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
@@ -106,21 +105,19 @@ function RootComponent() {
 							<IconContext.Provider value={iconContextValue}>
 								<ThemeProvider theme={theme}>
 									<HotkeysProvider>
-										<DirectionProvider>
-											<TooltipProvider>
-												<ConfirmDialogProvider>
-													<PromptDialogProvider>
-														<Outlet />
+										<TooltipProvider>
+											<ConfirmDialogProvider>
+												<PromptDialogProvider>
+													<Outlet />
 
-														<DialogManager />
-														<CommandPalette />
-														<Toaster richColors position="bottom-right" />
+													<DialogManager />
+													<CommandPalette />
+													<Toaster richColors position="bottom-right" />
 
-														{import.meta.env.DEV && <BreakpointIndicator />}
-													</PromptDialogProvider>
-												</ConfirmDialogProvider>
-											</TooltipProvider>
-										</DirectionProvider>
+													{import.meta.env.DEV && <BreakpointIndicator />}
+												</PromptDialogProvider>
+											</ConfirmDialogProvider>
+										</TooltipProvider>
 									</HotkeysProvider>
 								</ThemeProvider>
 							</IconContext.Provider>

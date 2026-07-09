@@ -19,8 +19,6 @@ describe("Badge", () => {
 		["secondary"],
 		["destructive"],
 		["outline"],
-		["ghost"],
-		["link"],
 	] as const)("renders variant=%s without throwing", (variant) => {
 		render(<Badge variant={variant}>{variant}</Badge>);
 		expect(screen.getByText(variant)).toBeInTheDocument();

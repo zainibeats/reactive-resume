@@ -33,7 +33,7 @@ export const mergeLinkStyles = (options: LinkStyleOptions = {}, ...styles: Style
 
 export const headerNameLineHeight = 1.3;
 
-export type ResolvePlacementColorOptions = {
+type ResolvePlacementColorOptions = {
 	placement: TemplatePlacement;
 	defaultForeground: string;
 	sidebarForeground?: string | undefined;

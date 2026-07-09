@@ -8,7 +8,7 @@ msgstr ""
 "Language: tr\n"
 "Project-Id-Version: reactive-resume\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-06-18 16:58\n"
+"PO-Revision-Date: 2026-07-08 23:18\n"
 "Last-Translator: \n"
 "Language-Team: Turkish\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -18,20 +18,14 @@ msgstr ""
 "X-Crowdin-File: /apps/web/locales/en-US.po\n"
 "X-Crowdin-File-ID: 545\n"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Last Updated"
-msgstr "Son Güncelleme"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Created"
-msgstr "Oluşturuldu"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Name"
-msgstr "İsim"
+#. placeholder {0}: application.role
+#. placeholder {0}: current.role
+#. placeholder {1}: application.company
+#. placeholder {1}: current.company
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "\"{0} · {1}\" and its full timeline will be permanently deleted. This can't be undone."
+msgstr "\"{0} · {1}\" ve tüm zaman çizelgesi kalıcı olarak silinecek. Bu işlem geri alınamaz."
 
 #: src/routes/_home/-sections/footer.tsx
 #: src/routes/_home/-sections/hero.tsx
@@ -48,33 +42,53 @@ msgstr "{0, plural, one {# öğe} other {# öğe}}"
 msgid "{0, plural, one {# role} other {# roles}}"
 msgstr "{0, plural, one {# rol} other {# rol}}"
 
+#. placeholder {0}: insights.total
+#: src/features/applications/components/insights-view.tsx
+msgid "{0} applications tracked"
+msgstr "{0} başvuru takip ediliyor"
+
+#. Character count readout for the rich-text editor
+#. placeholder {0}: state.characterCount
+#: src/components/input/rich-input.tsx
+msgid "{0} characters"
+msgstr "{0} karakter"
+
+#. placeholder {0}: importable.length
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "{0} ready to import"
+msgstr "{0} içe aktarmaya hazır"
+
+#. placeholder {0}: insights.rejected
+#: src/features/applications/components/insights-view.tsx
+msgid "{0} rejected"
+msgstr "{0} reddedildi"
+
+#. placeholder {0}: parsed.skipped
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "{0} skipped (missing company/role)"
+msgstr "{0} atlandı (şirket/rol eksik)"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "{column, plural, one {# Column} other {# Columns}}"
 msgstr "{column, plural, one {# Sütun} other {# Sütunlar}}"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
+msgid "{label} over the last 30 days"
+msgstr "{label} son 30 gün içinde"
 
 #: src/routes/_home/-sections/hero.tsx
 msgid "<0>Finally,</0><1>A free and open-source resume builder</1>"
 msgstr "<0>Sonunda,</0><1>Ücretsiz ve açık kaynaklı bir özgeçmiş oluşturucu</1>"
 
 #: src/routes/_home/-sections/faq.tsx
-msgctxt "Home page FAQ section heading with each word visually separated into "
-"individual spans"
+msgctxt "Home page FAQ section heading with each word visually separated into individual spans"
 msgid "<0>Frequently</0><1>Asked</1><2>Questions</2>"
 msgstr "<0>Sıkça</0><1>Sorulan</1><2>Sorular</2>"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "<0>Thank you for using Reactive Resume! This app is a labor of love, "
-"created mostly in my spare time, with wonderful support from open-source "
-"contributors around the world.</0><1>If Reactive Resume has been helpful "
-"to you, and you'd like to help keep it free and open for everyone, "
-"please consider making a donation. Every little bit is appreciated!</1>"
-msgstr "<0>Reactive Resume'yi kullandığınız için teşekkürler! Bu uygulama, "
-"dünyanın dört bir yanındaki açık kaynak katkıcılarının harika "
-"desteğiyle çoğunlukla boş zamanlarımda, sevgiyle "
-"oluşturuldu.</0><1>Eğer Reactive Resume sizin için faydalı olduysa ve "
-"herkes için ücretsiz ve açık kalmasını desteklemek isterseniz, lütfen "
-"bağış yapmayı düşünün. Küçük bir destek bile çok değerli!</1>"
+msgid "<0>Thank you for using Reactive Resume! This app is a labor of love, created mostly in my spare time, with wonderful support from open-source contributors around the world.</0><1>If Reactive Resume has been helpful to you, and you'd like to help keep it free and open for everyone, please consider making a donation. Every little bit is appreciated!</1>"
+msgstr "<0>Reactive Resume'yi kullandığınız için teşekkürler! Bu uygulama, dünyanın dört bir yanındaki açık kaynak katkıcılarının harika desteğiyle çoğunlukla boş zamanlarımda, sevgiyle oluşturuldu.</0><1>Eğer Reactive Resume sizin için faydalı olduysa ve herkes için ücretsiz ve açık kalmasını desteklemek isterseniz, lütfen bağış yapmayı düşünün. Küçük bir destek bile çok değerli!</1>"
 
 #: src/dialogs/api-key/create.tsx
 msgid "1 month"
@@ -97,16 +111,16 @@ msgid "6 months"
 msgstr "6 ay"
 
 #: src/features/settings/pages/profile.tsx
-msgid "A confirmation link has been sent to your current email address. Please "
-"check your inbox to confirm the change."
-msgstr "Onaylama bağlantısı mevcut e-posta adresinize gönderildi. Lütfen "
-"değişikliği onaylamak için gelen kutunuzu kontrol edin."
+msgid "A confirmation link has been sent to your current email address. Please check your inbox to confirm the change."
+msgstr "Onaylama bağlantısı mevcut e-posta adresinize gönderildi. Lütfen değişikliği onaylamak için gelen kutunuzu kontrol edin."
 
 #: src/routes/_home/-sections/footer.tsx
-msgid "A free and open-source resume builder that simplifies the process of "
-"creating, updating, and sharing your resume."
-msgstr "Özgeçmişinizi oluşturma, güncelleme ve paylaşma süreçlerini "
-"kolaylaştıran ücretsiz ve açık kaynaklı bir özgeçmiş oluşturucu."
+msgid "A free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
+msgstr "Özgeçmişinizi oluşturma, güncelleme ve paylaşma süreçlerini kolaylaştıran ücretsiz ve açık kaynaklı bir özgeçmiş oluşturucu."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "A friendly nudge for the recruiter"
+msgstr "İşe alımcı için dostça bir hatırlatma"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -114,48 +128,57 @@ msgid "A link to your resume has been copied to clipboard."
 msgstr "Özgeçmişinize ait bir bağlantı panoya kopyalandı."
 
 #: src/routes/_home/-sections/testimonials.tsx
-msgid "A lot of people have written to me over the years to share their "
-"experiences with Reactive Resume and how it has helped them, and I never "
-"get tired of reading them. If you have a story to share, let me know by "
-"sending me an email at <0>{email}</0>."
-msgstr "Yıllar boyunca birçok kişi bana Reactive Özgeçmiş hakkında "
-"deneyimlerini ve bunun onlara nasıl yardımcı olduğunu paylaşmak için "
-"yazdı, ve bunları okumaktan hiç bıkmıyorum. Sizin de paylaşmak "
-"istediğiniz bir hikayeniz varsa, bana <0>{email}</0> adresine e-posta "
-"göndererek bildirin."
+msgid "A lot of people have written to me over the years to share their experiences with Reactive Resume and how it has helped them, and I never get tired of reading them. If you have a story to share, let me know by sending me an email at <0>{email}</0>."
+msgstr "Yıllar boyunca birçok kişi bana Reactive Özgeçmiş hakkında deneyimlerini ve bunun onlara nasıl yardımcı olduğunu paylaşmak için yazdı, ve bunları okumaktan hiç bıkmıyorum. Sizin de paylaşmak istediğiniz bir hikayeniz varsa, bana <0>{email}</0> adresine e-posta göndererek bildirin."
 
 #: src/features/settings/pages/profile.tsx
-msgid "A new verification link has been sent to your email address. Please "
-"check your inbox to verify your account."
-msgstr "Yeni bir doğrulama bağlantısı e-posta adresinize gönderildi. Lütfen "
-"hesabınızı doğrulamak için gelen kutunuzu kontrol edin."
+msgid "A new verification link has been sent to your email address. Please check your inbox to verify your account."
+msgstr "Yeni bir doğrulama bağlantısı e-posta adresinize gönderildi. Lütfen hesabınızı doğrulamak için gelen kutunuzu kontrol edin."
 
 #: src/components/ui/copyright.tsx
 msgid "A passion project by <0>Amruth Pillai</0>."
 msgstr "<0>Amruth Pillai</0>'nin bir tutku projesi."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "A stretch"
+msgstr "Zorlayıcı"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "A4"
 msgstr "A4"
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Absolutely! You can export your resume to PDF with a single click. The "
-"exported PDF maintains all your formatting and styling perfectly."
-msgstr "Kesinlikle! Özgeçmişinizi tek tıkla PDF'ye aktarabilirsiniz. Aktarılan "
-"PDF tüm biçim ve stillerinizi mükemmel bir şekilde korur."
+msgid "Absolutely! You can export your resume to PDF with a single click. The exported PDF maintains all your formatting and styling perfectly."
+msgstr "Kesinlikle! Özgeçmişinizi tek tıkla PDF'ye aktarabilirsiniz. Aktarılan PDF tüm biçim ve stillerinizi mükemmel bir şekilde korur."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Access your resumes and data programmatically using the API."
-msgstr "Özgeçmişlerinize ve verilerinize API aracılığıyla programlı olarak "
-"erişin."
+msgstr "Özgeçmişlerinize ve verilerinize API aracılığıyla programlı olarak erişin."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Active provider"
-msgstr ""
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "Account menu"
+msgstr "Hesap menüsü"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Actions"
+msgstr "Eylemler"
+
+#: src/routes/builder/$resumeId/-components/dock.tsx
+msgid "Actual size (100%)"
+msgstr "Gerçek boyut (%100)"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Add"
+msgstr "Ekle"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "Özel alan ekle"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Add a job you're applying to, link the resume you sent, and move it through your pipeline as things progress."
+msgstr "Başvurduğunuz işi ekleyin, gönderdiğiniz özgeçmişi bağlayın ve süreç ilerledikçe hattınızda taşıyın."
 
 #: src/components/input/chip-input.tsx
 msgid "Add a keyword..."
@@ -223,27 +246,40 @@ msgstr "Yeni bir yetenek ekle"
 msgid "Add a new volunteer experience"
 msgstr "Yeni bir gönüllülük deneyimi ekle"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Add a note…"
+msgstr "Not ekleyin…"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Add a tag and press Enter…"
+msgstr "Bir etiket ekleyin ve Enter'a basın…"
+
 #: src/features/settings/integrations/components/ai-section.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Add and test a provider before using the builder assistant."
-msgstr ""
+msgid "Add and test a provider before starting an agent thread."
+msgstr "Aracı iş parçacığını başlatmadan önce bir sağlayıcı ekleyin ve test edin."
 
-#: src/components/input/rich-input.tsx
-msgid "Add Column After"
-msgstr "Sonra Sütun Ekle"
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Add application"
+msgstr "Başvuru ekle"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Column Before"
-msgstr "Önce Sütun Ekle"
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Add contact"
+msgstr "Kişi ekle"
 
 #: src/components/input/chip-input.tsx
 msgid "Add keyword"
 msgstr "Anahtar kelime ekle"
 
+#: src/components/input/rich-input.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
+msgid "Add link"
+msgstr "Bağlantı ekle"
+
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Add multiple roles to show career progression at the same company."
-msgstr "Aynı şirketteki kariyer gelişimini göstermek için birden fazla rol "
-"ekleyin."
+msgstr "Aynı şirketteki kariyer gelişimini göstermek için birden fazla rol ekleyin."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
@@ -257,35 +293,62 @@ msgstr "Sağlayıcı Ekle"
 msgid "Add Role"
 msgstr "Rol Ekle"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Row After"
-msgstr "Sonra Satır Ekle"
+#: src/features/applications/components/table-view.tsx
+msgid "Add tag"
+msgstr "Etiket ekle"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Row Before"
-msgstr "Önce Satır Ekle"
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Add to pipeline"
+msgstr "Hatta ekle"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Adjust the resume for a remote-first role that values async communication and ownership."
+msgstr "Uzaktan çalışma odaklı, eş zamanlı olmayan iletişimi ve sorumluluk üstlenmeyi önemseyen bir pozisyon için özgeçmişinizi düzenleyin."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Advanced"
+msgstr "Gelişmiş"
 
 #: src/libs/locale.ts
 msgid "Afrikaans"
 msgstr "Afrikaans"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "Agent"
+msgstr "Ajan"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Agent ready"
+msgstr "Ajan hazır"
+
+#: src/routes/dashboard/-components/sidebar.tsx
+msgid "Agents"
+msgstr "Ajanlar"
+
 #: src/dialogs/resume/import.tsx
 msgid "AI"
 msgstr "Yapay Zeka"
 
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "AI agent setup is unavailable right now. Please try again in a moment."
+msgstr "Yapay zeka ajanı kurulumu şu anda mümkün değil. Lütfen biraz sonra tekrar deneyin."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "AI agent setup is unavailable until REDIS_URL and ENCRYPTION_SECRET are configured."
+msgstr "REDIS_URL ve ENCRYPTION_SECRET yapılandırılana kadar yapay zeka ajanı kurulumu yapılamaz."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "AI assistant"
+msgstr "Yapay zeka asistanı"
+
 #: src/features/settings/integrations/components/ai-section.tsx
-msgid "AI provider management is unavailable until REDIS_URL and "
-"ENCRYPTION_SECRET are configured."
-msgstr "REDIS_URL ve ENCRYPTION_SECRET yapılandırılana kadar yapay zeka "
-"sağlayıcı yönetimi kullanılamaz."
+msgid "AI provider management is unavailable until REDIS_URL and ENCRYPTION_SECRET are configured."
+msgstr "REDIS_URL ve ENCRYPTION_SECRET yapılandırılana kadar yapay zeka sağlayıcı yönetimi kullanılamaz."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "AI provider management is unavailable. Please try again."
 msgstr "Yapay zeka sağlayıcı yönetimi kullanılamıyor. Lütfen tekrar deneyin."
-
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "AI provider saved. Test it before use."
-msgstr "Yapay zeka sağlayıcısı kaydedildi. Kullanmadan önce test edin."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "AI Providers"
@@ -293,8 +356,7 @@ msgstr "Yapay Zeka Sağlayıcıları"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
-msgstr "Yapay zeka sağlayıcılarının REDIS_URL ve ENCRYPTION_SECRET'in "
-"yapılandırılmasını gerektirir."
+msgstr "Yapay zeka sağlayıcılarının REDIS_URL ve ENCRYPTION_SECRET'in yapılandırılmasını gerektirir."
 
 #: src/libs/locale.ts
 msgid "Albanian"
@@ -313,9 +375,8 @@ msgid "Amharic"
 msgstr "Amharca"
 
 #: src/components/layout/error-screen.tsx
-#: src/components/layout/not-found-screen.tsx
-msgid "An error occurred while loading the page."
-msgstr "Sayfa yüklenirken bir hata oluştu."
+msgid "An unexpected error stopped this page from loading. You can try again or head back."
+msgstr "Beklenmeyen bir hata nedeniyle bu sayfa yüklenemedi. Tekrar deneyebilir veya geri dönebilirsiniz."
 
 #. Fallback toast when importing a resume fails for an unknown reason
 #: src/dialogs/resume/import.tsx
@@ -334,17 +395,21 @@ msgstr "… analiz ediliyor"
 msgid "And many more..."
 msgstr "Ve daha fazlası..."
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Anyone visiting the resume's public URL must enter this password to "
-"access it."
-msgstr "Özgeçmişin herkese açık URL'sini ziyaret eden herkes bu özgeçmişe "
-"erişmek için bu parolayı girmek zorunda."
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Anthropic Claude"
+msgstr "Antropik Claude"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Any tag"
+msgstr "Herhangi bir etiket"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Anyone who has the resume's public URL will be able to view and download "
-"your resume without entering a password."
-msgstr "Özgeçmişin herkese açık URL'sine sahip olan herkes parola girmeden "
-"özgeçmişinizi görüntüleyebilir ve indirebilir."
+msgid "Anyone visiting the resume's public URL must enter this password to access it."
+msgstr "Özgeçmişin herkese açık URL'sini ziyaret eden herkes bu özgeçmişe erişmek için bu parolayı girmek zorunda."
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+msgid "Anyone who has the resume's public URL will be able to view and download your resume without entering a password."
+msgstr "Özgeçmişin herkese açık URL'sine sahip olan herkes parola girmeden özgeçmişinizi görüntüleyebilir ve indirebilir."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Anyone with the link can view and download the resume."
@@ -366,8 +431,7 @@ msgstr "API Anahtarları"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "API keys are encrypted on the server and never shown again after saving."
-msgstr "API anahtarları sunucuda şifrelenir ve kaydedildikten sonra bir daha "
-"asla gösterilmez."
+msgstr "API anahtarları sunucuda şifrelenir ve kaydedildikten sonra bir daha asla gösterilmez."
 
 #: src/features/settings/pages/api-keys.tsx
 msgid "API Reference"
@@ -377,29 +441,73 @@ msgstr "API Referansı"
 msgid "App"
 msgstr "Uygulama"
 
+#: src/features/applications/components/application-actions-menu.tsx
+msgid "Application actions"
+msgstr "Başvuru işlemleri"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Application added to your pipeline."
+msgstr "Başvuru hattınıza eklendi."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Application Copilot"
+msgstr "Başvuru Copilot'u"
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Application deleted."
+msgstr "Başvuru silindi."
+
 #: src/routes/_home/-sections/statistics.tsx
 msgid "Application Statistics"
 msgstr "Uygulama İstatistikleri"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Application updated."
+msgstr "Başvuru güncellendi."
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Applications"
+msgstr "Başvurular"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Applications over time"
+msgstr "Zamana göre başvurular"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Applications sent per week (last 8 weeks)"
+msgstr "Haftalık gönderilen başvurular (son 8 hafta)"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Applied"
+msgstr "Başvuruldu"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Applied on"
+msgstr "Başvuru tarihi"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
 msgid "Applied Rules"
 msgstr "Uygulanan Kurallar"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Apply anyway"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Apply updates"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Applying parent updates..."
-msgstr ""
-
 #: src/libs/locale.ts
 msgid "Arabic"
 msgstr "Arapça"
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Archive"
+msgstr "Arşiv"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Archived"
+msgstr "Arşivlendi"
 
 #: src/hooks/use-form-blocker.tsx
 msgid "Are you sure you want to close this dialog?"
@@ -449,37 +557,38 @@ msgstr "Çalışma alanı"
 msgid "Artificial Intelligence"
 msgstr "Yapay Zekâ"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Ask anything about this resume"
 msgstr "Bu özgeçmişle ilgili her şeyi sorabilirsiniz."
-
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
-msgid "Ask for targeted edits, keyword cleanup, bullet rewrites, or a "
-"role-specific review."
-msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Aspect Ratio"
 msgstr "En/Boy Oranı"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Assistant"
-msgstr ""
 #: src/routes/_home/-sections/sponsors.tsx
 msgid "Atlas Cloud supports Reactive Resume as a project sponsor. If your company would like to sponsor the project, email <0>{sponsorshipEmail}</0>."
 msgstr "Atlas Cloud, Reactive Resume'yi proje sponsoru olarak desteklemektedir. Şirketiniz projeye sponsor olmak isterse, lütfen <0>{sponsorshipEmail}adresine e-posta gönderin.</0> ."
 
-#: src/routes/agent/$threadId.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Attach a cover letter (PDF)"
+msgstr "Ön yazı ekle (PDF)"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Attach a resume file (PDF)"
+msgstr "Özgeçmiş dosyası ekle (PDF)"
+
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Attach files"
 msgstr "Dosyaları ekleyin"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Assistant ready"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Attachment"
+msgstr "EK"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Assistant setup is unavailable until AI providers are configured."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Attachment uploaded."
+msgstr "Ek dosya yüklendi."
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -487,11 +596,17 @@ msgstr ""
 msgid "Authentication"
 msgstr "Kimlik Doğrulama"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Auto-fill"
+msgstr "Otomatik doldur"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Auto-fill failed. Paste the description instead."
+msgstr "Otomatik doldurma başarısız oldu. Bunun yerine açıklamayı yapıştırın."
+
 #: src/routes/_home/-sections/features.tsx
-msgid "Available in multiple languages. If you would like to contribute, check "
-"out Crowdin."
-msgstr "Birden fazla dilde mevcut. Katkıda bulunmak isterseniz Crowdin'e göz "
-"atın."
+msgid "Available in multiple languages. If you would like to contribute, check out Crowdin."
+msgstr "Birden fazla dilde mevcut. Katkıda bulunmak isterseniz Crowdin'e göz atın."
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -512,6 +627,10 @@ msgstr "Azerice"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to Login"
 msgstr "Girişe Dön"
+
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Back to resumes"
+msgstr "Özgeçmişlere geri dön"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Background Color"
@@ -537,17 +656,24 @@ msgstr "Seçebileceğiniz güzel şablonlar, daha fazlası yolda."
 msgid "Bengali"
 msgstr "Bengalce"
 
+#: src/features/resume/export/download-dialog.tsx
+msgid "Best for applications, sharing, and printing."
+msgstr "Başvurular, paylaşım ve yazdırma için en iyisi."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Blank draft"
+msgstr "Boş taslak"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Board"
+msgstr "Pano"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
 msgstr "Gövde"
 
 #: src/components/input/rich-input.tsx
-#: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/project.tsx
-#: src/dialogs/resume/sections/skill.tsx
 msgid "Bold"
 msgstr "Kalın"
 
@@ -559,6 +685,10 @@ msgstr "Kenar Ovalliği"
 msgid "Border Width"
 msgstr "Kenar Kalınlığı"
 
+#: src/features/resume/public/public-resume.tsx
+msgid "Build your own resume"
+msgstr "Kendi özgeçmişinizi oluşturun"
+
 #. Screen-reader dialog title for the command palette in the resume builder
 #: src/features/command-palette/index.tsx
 msgid "Builder Command Palette"
@@ -567,6 +697,14 @@ msgstr "Oluşturucu Komut Paleti"
 #: src/libs/locale.ts
 msgid "Bulgarian"
 msgstr "Bulgarca"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Bulk delete failed. Please try again."
+msgstr "Toplu silme başarısız oldu. Lütfen tekrar deneyin."
+
+#: src/features/applications/components/table-view.tsx
+msgid "Bulk update failed. Please try again."
+msgstr "Toplu güncelleme başarısız oldu. Lütfen tekrar deneyin."
 
 #: src/components/input/rich-input.tsx
 msgid "Bullet List"
@@ -591,31 +729,26 @@ msgstr "Özgeçmişimi PDF olarak dışa aktarabilir miyim?"
 #. Profile settings form action to discard unsaved edits
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
-#: src/dialogs/resume/sections/award.tsx
-#: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/cover-letter.tsx
 #: src/dialogs/resume/sections/custom.tsx
-#: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
-#: src/dialogs/resume/sections/profile.tsx
-#: src/dialogs/resume/sections/project.tsx
-#: src/dialogs/resume/sections/publication.tsx
-#: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
-#: src/dialogs/resume/sections/summary-item.tsx
-#: src/dialogs/resume/sections/volunteer.tsx
+#: src/dialogs/resume/sections/section-item-dialog.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/import-applications-sheet.tsx
 #: src/features/settings/pages/api-keys.tsx
 #: src/features/settings/pages/danger-zone.tsx
 #: src/features/settings/pages/profile.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Cancel"
 msgstr "İptal Et"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Cannot restore; the resume has changed since this edit was applied."
+msgstr "Geri yüklenemiyor; bu düzenleme uygulandıktan sonra özgeçmiş değişti."
 
 #: src/libs/locale.ts
 msgid "Catalan"
@@ -625,9 +758,9 @@ msgstr "Katalanca"
 msgid "Center Align"
 msgstr "Ortala"
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Center view"
-msgstr "Görünümü ortala"
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Cerebras"
+msgstr "Beyinler"
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -649,12 +782,16 @@ msgstr "Temayı… olarak değiştir"
 
 #: src/dialogs/resume/index.tsx
 msgid "Changed your mind? Rename your resume to something more descriptive."
-msgstr "Fikrinizi mi değiştirdiniz? Özgeçmişinizin adını daha açıklayıcı bir "
-"isimle değiştirin."
+msgstr "Fikrinizi mi değiştirdiniz? Özgeçmişinizin adını daha açıklayıcı bir isimle değiştirin."
 
 #: src/routes/_home/-sections/footer.tsx
 msgid "Changelog"
 msgstr "Değişiklik Günlüğü"
+
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/$threadId.tsx
+msgid "Chat"
+msgstr "Sohbet"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Check your email for a link to reset your password."
@@ -664,10 +801,6 @@ msgstr "Şifrenizi sıfırlamak için bağlantı içeren e-postanızı kontrol e
 msgid "Check your email for a link to verify your account."
 msgstr "Hesabınızı doğrulamak için bağlantı içeren e-postanızı kontrol edin."
 
-#: src/dialogs/resume/index.tsx
-msgid "Child resume created successfully."
-msgstr ""
-
 #: src/libs/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "Çince (Basitleştirilmiş)"
@@ -676,11 +809,27 @@ msgstr "Çince (Basitleştirilmiş)"
 msgid "Chinese (Traditional)"
 msgstr "Çince (Geleneksel)"
 
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Choose a model and resume draft."
+msgstr "Bir model ve özgeçmiş taslağı seçin."
+
 #. Preset or custom shade refer to the color picker
 #. Preset or custom shade refer to the color picker
 #: src/components/input/rich-input.tsx
 msgid "Choose a preset or custom shade."
 msgstr "Önceden ayarlanmış veya özel bir gölge seçin."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Choose a resume"
+msgstr "Bir özgeçmiş seçin"
+
+#: src/routes/agent/index.tsx
+msgid "Choose an existing conversation from the sidebar, or start a new draft-focused thread."
+msgstr "Yan menüden mevcut bir konuşmayı seçin veya taslak odaklı yeni bir konu başlatın."
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
+msgstr "PDF, DOCX, Markdown veya JSON formatlarından birini seçin. Mümkünse özgeçmişinizi ve motivasyon mektubunuzu ayrı ayrı dışa aktarın."
 
 #: src/components/level/combobox.tsx
 msgid "Circle"
@@ -689,33 +838,29 @@ msgstr "Daire"
 #. Clear the highlight color
 #. Clear the text color
 #: src/components/input/rich-input.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
+#: src/features/applications/components/table-view.tsx
 msgid "Clear"
 msgstr "Temiz"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Clear chat"
-msgstr ""
+#: src/routes/dashboard/applications/index.tsx
+msgid "Clear filters"
+msgstr "Filtreleri temizle"
 
 #: src/components/ui/combobox.tsx
 msgid "Clear selection"
 msgstr "Seçimi temizle"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Clear this assistant chat?"
-msgstr ""
-
 #: src/dialogs/resume/import.tsx
 msgid "Click here to select a file to import"
 msgstr "İçe aktarmak için bir dosya seçmek üzere buraya tıklayın"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Close"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Close AI assistant"
+msgstr "Yapay zeka asistanını kapat"
 
-#: src/components/input/rich-input.tsx
-msgid "Code Block"
-msgstr "Kod Bloğu"
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Cohere"
+msgstr "Uyum"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
@@ -738,8 +883,21 @@ msgid "Community"
 msgstr "Topluluk"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/features/applications/components/application-form-sheet.tsx
 msgid "Company"
 msgstr "Şirket"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Company / Role"
+msgstr "Şirket / Rol"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Company A–Z"
+msgstr "Şirket A–Z"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Compare this resume against this role URL and update keywords while keeping the voice concise and credible."
+msgstr "Bu özgeçmişi bu iş ilanının URL'siyle karşılaştırın ve üslubunuzu özlü ve güvenilir tutarak anahtar kelimeleri güncelleyin."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Completely free, forever, no hidden costs."
@@ -754,14 +912,26 @@ msgstr "Tamamen ücretsiz, sonsuza kadar, gizli maliyetler yok."
 msgid "Confirm"
 msgstr "Onayla"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Conflicting child edits"
-msgstr ""
-
 #. Authentication settings action to link a social login provider
 #: src/features/settings/authentication/components/social-provider.tsx
 msgid "Connect"
 msgstr "Bağlan"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Connected"
+msgstr "Bağlı"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Connection failed"
+msgstr "Bağlantı başarısız oldu."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Connection verified — provider is ready to use."
+msgstr "Bağlantı doğrulandı — sağlayıcı kullanıma hazır."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Contacts"
+msgstr "Kişiler"
 
 #: src/dialogs/resume/sections/cover-letter.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -782,42 +952,50 @@ msgid "Continue where you left off"
 msgstr "Kaldığın yerden devam et"
 
 #: src/dialogs/resume/import.tsx
-msgid "Continue where you left off by importing an existing resume you created "
-"using Reactive Resume or any another resume builder. Supported formats "
-"include PDF, Microsoft Word, as well as JSON files from Reactive Resume."
-msgstr "Kaldığınız yerden devam edin, Reactive Resume veya başka bir özgeçmiş "
-"oluşturucu ile oluşturduğunuz mevcut bir özgeçmişi içe aktararak. "
-"Desteklenen formatlar arasında PDF, Microsoft Word ve Reactive "
-"Resume'den alınan JSON dosyaları bulunur."
+msgid "Continue where you left off by importing an existing resume you created using Reactive Resume or any another resume builder. Supported formats include PDF, Microsoft Word, as well as JSON files from Reactive Resume."
+msgstr "Kaldığınız yerden devam edin, Reactive Resume veya başka bir özgeçmiş oluşturucu ile oluşturduğunuz mevcut bir özgeçmişi içe aktararak. Desteklenen formatlar arasında PDF, Microsoft Word ve Reactive Resume'den alınan JSON dosyaları bulunur."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Contributions fund bug fixes, security updates, and continuous "
-"improvements to keep the app running smoothly."
-msgstr "Katkılar, hata düzeltmelerini, güvenlik güncellemelerini ve uygulamanın "
-"sorunsuz çalışmasını sağlamak için sürekli iyileştirmeleri finanse "
-"eder."
+msgid "Contributions fund bug fixes, security updates, and continuous improvements to keep the app running smoothly."
+msgstr "Katkılar, hata düzeltmelerini, güvenlik güncellemelerini ve uygulamanın sorunsuz çalışmasını sağlamak için sürekli iyileştirmeleri finanse eder."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Conversation copied."
+msgstr "Konuşma kopyalandı."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Conversation JSON copied."
+msgstr "Konuşma JSON'u kopyalandı."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Copied to clipboard."
+msgstr "Panoya kopyalandı."
 
 #. Action button to copy two-factor backup codes to clipboard
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Copy"
 msgstr "Kopyala"
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Copy and store these backup codes in case you lose your device."
-msgstr "Cihazınızı kaybederseniz kullanmak üzere bu yedekleme kodlarını "
-"kopyalayıp saklayın."
+msgstr "Cihazınızı kaybederseniz kullanmak üzere bu yedekleme kodlarını kopyalayıp saklayın."
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Copy Backup Codes"
 msgstr "Yedekleme Kodlarını Kopyala"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Copy JSON"
+msgstr "JSON'u kopyala"
+
 #: src/dialogs/api-key/create.tsx
-msgid "Copy this secret key and use it in your applications to access your "
-"data."
-msgstr "Bu gizli anahtarı kopyalayıp uygulamalarınızda verilerinize erişmek "
-"için kullanın."
+msgid "Copy this secret key and use it in your applications to access your data."
+msgstr "Bu gizli anahtarı kopyalayıp uygulamalarınızda verilerinize erişmek için kullanın."
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Copy URL"
 msgstr "URL'yi Kopyala"
 
@@ -828,9 +1006,64 @@ msgstr "URL'yi Kopyala"
 msgid "Could not reach the AI provider. Please try again."
 msgstr "AI sağlayıcısına ulaşılamadı. Lütfen tekrar deneyin."
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Could not restore this patch."
+msgstr "Bu yama geri yüklenemedi."
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
 msgstr "Servis sağlayıcı bağlantısı doğrulanamadı."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Could not verify the connection. Check the API key, model, and base URL."
+msgstr "Bağlantı doğrulanamadı. Lütfen API anahtarını, modeli ve temel URL'yi kontrol edin."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Couldn't add the application. Please try again."
+msgstr "Başvuru eklenemedi. Lütfen tekrar deneyin."
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't delete the application."
+msgstr "Başvuru silinemedi."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't delete the timeline entry."
+msgstr "Zaman çizelgesi girdisi silinemedi."
+
+#: src/features/applications/components/board.tsx
+msgid "Couldn't move the application. Please try again."
+msgstr "Başvuru taşınamadı. Lütfen tekrar deneyin."
+
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Couldn't save"
+msgstr "Kaydedilemedi"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't save the note."
+msgstr "Not kaydedilemedi."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Couldn't save your changes. Please try again."
+msgstr "Değişiklikleriniz kaydedilemedi. Lütfen tekrar deneyin."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't update the timeline entry."
+msgstr "Zaman çizelgesi girdisi güncellenemedi."
+
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Couldn't upload the file. Please try again."
+msgstr "Dosya yüklenemedi. Lütfen tekrar deneyin."
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Count by source"
+msgstr "Kaynağa göre sayı"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/resume/export/download-dialog.tsx
+msgid "Cover letter"
+msgstr "Ön yazı"
 
 #. Fallback title for a custom cover letter item in resume builder when recipient is empty
 #. Fallback title for a custom cover letter item in resume builder when recipient is unavailable
@@ -840,6 +1073,10 @@ msgstr "Servis sağlayıcı bağlantısı doğrulanamadı."
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Cover Letter"
 msgstr "Ön Yazı"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Cover letter draft"
+msgstr "Ön yazı taslağı"
 
 #. Create API key dialog submit action
 #: src/dialogs/api-key/create.tsx
@@ -859,13 +1096,13 @@ msgstr "Ön Yazı"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "Oluştur"
 
-#: src/dialogs/resume/index.tsx
-msgid "Create a linked child resume that can review and merge future updates "
-"from this parent."
-msgstr ""
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Create a copy tuned to this job"
+msgstr "Bu işe göre uyarlanmış bir kopya oluştur"
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -951,14 +1188,9 @@ msgstr "Örnek özgeçmiş oluştur"
 msgid "Create as many resumes as you want, without limits."
 msgstr "İstediğiniz kadar özgeçmiş oluşturun, sınırsız."
 
-#. Resume card context menu action to create a linked child resume
-#. Resume card dropdown action to create a linked child resume
-#: src/dialogs/resume/index.tsx
-#: src/routes/builder/$resumeId/-components/header.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
-msgid "Create child resume"
-msgstr ""
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Create from scratch"
+msgstr "Sıfırdan oluşturun"
 
 #. Call-to-action link from login page to account registration page
 #: src/features/auth/pages/login.tsx
@@ -970,9 +1202,14 @@ msgstr "Şimdi bir tane oluşturun"
 msgid "Create resume with options"
 msgstr "Seçeneklerle özgeçmiş oluşturma"
 
-#: src/dialogs/resume/index.tsx
-msgid "Creating child resume..."
-msgstr ""
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Created"
+msgstr "Oluşturuldu"
+
+#. placeholder {0}: result.name
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Created \"{0}\" and linked it to this application."
+msgstr "\"{0}\" oluşturuldu ve bu başvuruya bağlandı."
 
 #: src/dialogs/api-key/create.tsx
 msgid "Creating your API key..."
@@ -982,9 +1219,21 @@ msgstr "API anahtarınız oluşturuluyor..."
 msgid "Creating your resume..."
 msgstr "Özgeçmişiniz oluşturuluyor..."
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Crop picture"
+msgstr "Kırpılmış resim"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "CSV data"
+msgstr "CSV verileri"
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Current Password"
 msgstr "Geçerli Parola"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Current stage"
+msgstr "Geçerli aşama"
 
 #: src/components/input/color-picker.tsx
 msgid "Custom"
@@ -1027,6 +1276,10 @@ msgstr "Karanlık"
 msgid "Dark theme"
 msgstr "Karanlık tema"
 
+#: src/routes/dashboard/-components/sidebar.tsx
+msgid "Dashboard"
+msgstr "Kontrol Paneli"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Data Security"
 msgstr "Veri Güvenliği"
@@ -1036,6 +1289,22 @@ msgstr "Veri Güvenliği"
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Date"
 msgstr "Tarih"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Date applied"
+msgstr "Başvuru tarihi"
+
+#: src/components/input/rich-input.tsx
+msgid "Decrease indent"
+msgstr "Girintiyi azalt"
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Decrease zoom"
+msgstr "Yakınlaştırmayı azalt"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "DeepSeek"
+msgstr "DeepSeek"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Degree"
@@ -1047,8 +1316,13 @@ msgstr "Derece"
 #. Passkey row action to remove the selected passkey
 #. Resume card context menu destructive action to remove a resume
 #. Resume card dropdown destructive action to remove a resume
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
 #: src/features/settings/pages/api-keys.tsx
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
@@ -1060,10 +1334,6 @@ msgstr "Sil"
 #: src/features/settings/pages/danger-zone.tsx
 msgid "Delete Account"
 msgstr "Hesabı Sil"
-
-#: src/components/input/rich-input.tsx
-msgid "Delete Column"
-msgstr "Sütunu Sil"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Delete Page"
@@ -1077,13 +1347,28 @@ msgstr "Resmi sil"
 msgid "Delete provider"
 msgstr "Sağlayıcıyı sil"
 
-#: src/components/input/rich-input.tsx
-msgid "Delete Row"
-msgstr "Satırı Sil"
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Delete this agent thread?"
+msgstr "Bu temsilci ileti dizisini silmek ister misiniz?"
 
-#: src/components/input/rich-input.tsx
-msgid "Delete Table"
-msgstr "Tabloyu Sil"
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete this application?"
+msgstr "Bu başvuru silinsin mi?"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete this timeline entry?"
+msgstr "Bu zaman çizelgesi girdisi silinsin mi?"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete timeline entry"
+msgstr "Zaman çizelgesi girdisini sil"
+
+#. placeholder {0}: result.deleted
+#: src/features/applications/components/table-view.tsx
+msgid "Deleted {0} application(s)."
+msgstr "{0} başvuru silindi."
 
 #: src/features/settings/pages/danger-zone.tsx
 msgid "Deleting your account..."
@@ -1111,6 +1396,7 @@ msgid "Description"
 msgstr "Açıklama"
 
 #: src/libs/resume/section.tsx
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Design"
 msgstr "Tasarım"
 
@@ -1138,18 +1424,18 @@ msgid "Discord"
 msgstr "Discord"
 
 #: src/components/ui/donation-toast.tsx
-#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/features/applications/components/application-ai-copilot.tsx
 msgid "Dismiss"
 msgstr "Azletmek"
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Dismissing parent updates..."
-msgstr ""
 
 #: src/routes/_home/-sections/footer.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Documentation"
 msgstr "Dökümantasyon"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Documents sent"
+msgstr "Gönderilen belgeler"
 
 #: src/features/auth/pages/login.tsx
 msgid "Don't have an account? <0/>"
@@ -1164,42 +1450,25 @@ msgid "Donate to Reactive Resume"
 msgstr "Reaktif Özgeçmiş'e Bağış Yapın"
 
 #. Action button to download two-factor backup codes as a text file
+#. Primary action in the builder header to open resume download options
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/features/resume/export/download-dialog.tsx
+#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download"
 msgstr "İndir"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume as a Word document. Use this file to "
-"further customize your resume in Microsoft Word or Google Docs."
-msgstr "Özgeçmişinizin bir kopyasını Word belgesi olarak indirin. Özgeçmişinizi "
-"Microsoft Word veya Google Docs'ta daha da özelleştirmek için bu "
-"dosyayı kullanın."
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Download a copy of all your data, including your profile and every resume, as a JSON file."
+msgstr "Profiliniz ve tüm özgeçmişleriniz de dahil olmak üzere tüm verilerinizin bir kopyasını JSON dosyası olarak indirin."
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume in JSON format. Use this file for backup "
-"or to import your resume into other applications, including AI "
-"assistants."
-msgstr "Özgeçmişinizin bir kopyasını JSON formatında indirin. Bu dosyayı "
-"yedeklemek veya özgeçmişinizi diğer uygulamalara, AI asistanları dahil "
-"olmak üzere, aktarmak için kullanabilirsiniz."
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume in PDF format. Use this file for printing "
-"or to easily share your resume with recruiters."
-msgstr "Özgeçmişinizin bir kopyasını PDF formatında indirin. Bu dosyayı "
-"yazdırmak veya özgeçmişinizi işverenlerle kolayca paylaşmak için "
-"kullanın."
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Download DOCX"
-msgstr "İndir DOCX"
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Download JSON"
-msgstr "JSON indir"
+#. Primary action in the builder header to open resume download options
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Download options"
+msgstr "İndirme seçenekleri"
 
 #: src/features/resume/public/public-resume.tsx
-#: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/agent/-components/resume-pane.tsx
 msgid "Download PDF"
 msgstr "PDF indir"
 
@@ -1207,9 +1476,25 @@ msgstr "PDF indir"
 msgid "Downloads"
 msgstr "İndirmeler"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Draft a cover letter"
+msgstr "Ön yazı taslağı hazırla"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Draft a follow-up"
+msgstr "Takip mesajı taslağı hazırla"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Drafting failed."
+msgstr "Taslak oluşturma başarısız oldu."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
 msgstr "Bölümleri sütunlar arasında taşımak için buraya sürükleyip bırakın"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Drag to reposition and use the slider to zoom before uploading."
+msgstr "Yüklemeden önce sürükleyerek yeniden konumlandırın ve kaydırıcıyı kullanarak yakınlaştırın."
 
 #. Resume card context menu action to create a copy
 #. Resume card dropdown action to create a copy
@@ -1221,6 +1506,10 @@ msgstr "Bölümleri sütunlar arasında taşımak için buraya sürükleyip bır
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Duplicate"
 msgstr "Çoğalt"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Duplicate as AI Draft"
+msgstr "Yapay Zeka Taslağı Olarak Kopyala"
 
 #: src/dialogs/resume/index.tsx
 msgid "Duplicate Resume"
@@ -1238,7 +1527,14 @@ msgstr "Özgeçmişiniz çoğaltılıyor..."
 msgid "Dutch"
 msgstr "Felemenkçe"
 
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Earlier versions are kept; the builder's undo history is reset."
+msgstr "Önceki sürümler saklanır; oluşturucunun geri alma geçmişi sıfırlanır."
+
 #: src/components/input/chip-input.tsx
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Edit"
 msgstr "Düzenlemek"
 
@@ -1247,23 +1543,46 @@ msgstr "Düzenlemek"
 msgid "Edit {chip}"
 msgstr "Düzenle {chip}"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Edit application"
+msgstr "Başvuruyu düzenle"
+
 #. Screen reader description for the fullscreen rich-text editor dialog
 #: src/components/input/rich-input.tsx
 msgid "Edit content in fullscreen mode"
 msgstr "İçeriği tam ekran modunda düzenleme"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Edit date"
+msgstr "Tarihi düzenle"
+
+#. Resume card context menu action to edit resume metadata
+#. Resume card dropdown action to edit resume metadata
+#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+msgid "Edit details"
+msgstr "Düzenleme detayları"
+
 #: src/components/input/chip-input.tsx
 msgid "Edit keyword"
 msgstr "Anahtar kelimeyi düzenle"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Edit note"
+msgstr "Notu düzenle"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Editable in Word, Google Docs, and Pages."
+msgstr "Word, Google Docs ve Pages'te düzenlenebilir."
+
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "Editing is disabled until you unlock it."
+msgstr "Kilidi açana kadar düzenleme devre dışı bırakılmıştır."
+
 #: src/components/input/chip-input.tsx
 msgid "Editing keyword..."
 msgstr "Anahtar kelime düzenleme..."
-
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Edits are applied to this resume and can be undone from the builder "
-"dock."
-msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -1285,9 +1604,17 @@ msgstr "E-Posta"
 msgid "Email Address"
 msgstr "E-Posta Adresi"
 
+#: src/features/settings/pages/profile.tsx
+msgid "Email delivery isn't configured on this instance, so verification is disabled."
+msgstr "Bu örnekte e-posta gönderimi yapılandırılmadığı için doğrulama devre dışı bırakılmıştır."
+
 #: src/features/settings/authentication/components/two-factor.tsx
 msgid "Enable 2FA"
 msgstr "2FA'yı etkinleştir"
+
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "Enable editing"
+msgstr "Düzenlemeyi etkinleştir"
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Enable Two-Factor Authentication"
@@ -1314,8 +1641,7 @@ msgid "English (United Kingdom)"
 msgstr "İngilizce (Birleşik Krallık)"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Enhance the security of your account with additional layers of "
-"protection."
+msgid "Enhance the security of your account with additional layers of protection."
 msgstr "Hesabınızın güvenliğini ek koruma katmanlarıyla artırın."
 
 #: src/features/settings/authentication/components/passkeys.tsx
@@ -1339,32 +1665,20 @@ msgid "Enter your current password and a new password to update your account."
 msgstr "Hesabınızı güncellemek için mevcut şifrenizi ve yeni şifrenizi girin."
 
 #: src/dialogs/auth/enable-two-factor.tsx
-msgid "Enter your password to confirm setting up two-factor authentication. "
-"When enabled, you'll need to enter a code from your authenticator app "
-"every time you log in."
-msgstr "İki faktörlü kimlik doğrulamayı kurmayı onaylamak için şifrenizi girin. "
-"Etkinleştirildiğinde, her oturum açtığınızda doğrulayıcı uygulamanızdan "
-"bir kod girmeniz gerekecek."
+msgid "Enter your password to confirm setting up two-factor authentication. When enabled, you'll need to enter a code from your authenticator app every time you log in."
+msgstr "İki faktörlü kimlik doğrulamayı kurmayı onaylamak için şifrenizi girin. Etkinleştirildiğinde, her oturum açtığınızda doğrulayıcı uygulamanızdan bir kod girmeniz gerekecek."
 
 #: src/dialogs/auth/disable-two-factor.tsx
-msgid "Enter your password to disable two-factor authentication. Your account "
-"will be less secure without 2FA enabled."
-msgstr "İki faktörlü kimlik doğrulamayı devre dışı bırakmak için şifrenizi "
-"girin. 2FA etkin olmadığında hesabınız daha az güvenli olur."
+msgid "Enter your password to disable two-factor authentication. Your account will be less secure without 2FA enabled."
+msgstr "İki faktörlü kimlik doğrulamayı devre dışı bırakmak için şifrenizi girin. 2FA etkin olmadığında hesabınız daha az güvenli olur."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Every contribution, big or small, makes a huge difference to the "
-"project.<0/>Thank you for your support!"
-msgstr "Her katkı, büyük ya da küçük, projeye önemli bir katkı "
-"sağlar.<0/>Desteğiniz için teşekkürler!"
+msgid "Every contribution, big or small, makes a huge difference to the project.<0/>Thank you for your support!"
+msgstr "Her katkı, büyük ya da küçük, projeye önemli bir katkı sağlar.<0/>Desteğiniz için teşekkürler!"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Everything you need to create, customize, and share professional "
-"resumes. Built with privacy in mind, powered by open source, and "
-"completely free forever."
-msgstr "Profesyonel özgeçmişler oluşturmak, özelleştirmek ve paylaşmak için "
-"ihtiyacınız olan her şey. Gizlilik odaklı, açık kaynaklı ve sonsuza dek "
-"tamamen ücretsiz."
+msgid "Everything you need to create, customize, and share professional resumes. Built with privacy in mind, powered by open source, and completely free forever."
+msgstr "Profesyonel özgeçmişler oluşturmak, özelleştirmek ve paylaşmak için ihtiyacınız olan her şey. Gizlilik odaklı, açık kaynaklı ve sonsuza dek tamamen ücretsiz."
 
 #: src/components/input/rich-input.tsx
 msgid "Exit Fullscreen"
@@ -1386,41 +1700,45 @@ msgid "Expires on {0}"
 msgstr "Bitiş tarihi {0}"
 
 #: src/routes/_home/-sections/templates.tsx
-msgid "Explore our diverse selection of templates, each designed to fit "
-"different styles, professions, and personalities. Reactive Resume "
-"currently offers 12 templates, with more on the way."
-msgstr "Farklı stiller, meslekler ve kişiliklere uygun şekilde tasarlanmış "
-"çeşitli şablonlarımızı keşfedin. Reaktif Özgeçmiş şu anda 12 şablon "
-"sunuyor ve daha fazlası yolda."
+msgid "Explore our diverse selection of templates, each designed to fit different styles, professions, and personalities. Reactive Resume currently offers 12 templates, with more on the way."
+msgstr "Farklı stiller, meslekler ve kişiliklere uygun şekilde tasarlanmış çeşitli şablonlarımızı keşfedin. Reaktif Özgeçmiş şu anda 12 şablon sunuyor ve daha fazlası yolda."
 
 #: src/features/settings/pages/api-keys.tsx
-msgid "Explore the API documentation to learn how to integrate Reactive Resume "
-"with your applications. Find detailed endpoints, request examples, and "
-"authentication methods."
-msgstr "Uygulamalarınızla Reaktif Özgeçmiş'i entegre etmeyi öğrenmek için API "
-"dökümantasyonunu inceleyin. Ayrıntılı uç noktalar, istek örnekleri ve "
-"kimlik doğrulama yöntemlerini bulun."
+msgid "Explore the API documentation to learn how to integrate Reactive Resume with your applications. Find detailed endpoints, request examples, and authentication methods."
+msgstr "Uygulamalarınızla Reaktif Özgeçmiş'i entegre etmeyi öğrenmek için API dökümantasyonunu inceleyin. Ayrıntılı uç noktalar, istek örnekleri ve kimlik doğrulama yöntemlerini bulun."
 
 #: src/libs/resume/section.tsx
 msgid "Export"
 msgstr "Dışa aktar"
 
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Export my data"
+msgstr "Verilerimi dışa aktar"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Export PNG"
+msgstr "PNG dışa aktar"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Export your resume or cover letter in the format you need."
+msgstr "Özgeçmişinizi veya ön yazınızı ihtiyacınız olan biçimde dışa aktarın."
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Export your resume to PDF instantly, without any waiting or delays."
-msgstr "Özgeçmişinizi herhangi bir bekleme veya gecikme olmadan anında PDF'ye "
-"aktarın."
+msgstr "Özgeçmişinizi herhangi bir bekleme veya gecikme olmadan anında PDF'ye aktarın."
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Failed"
-msgstr "Arızalı"
+#: src/features/applications/components/insights-view.tsx
+msgid "Exported pipeline-flow.png"
+msgstr "pipeline-flow.png dışa aktarıldı"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Failed to analyze resume."
 msgstr "Özgeçmiş analiz edilemedi."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Failed to clear assistant chat."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Failed to archive thread."
+msgstr "Konu arşivlenemedi."
 
 #. Fallback toast when creating an API key fails
 #: src/dialogs/api-key/create.tsx
@@ -1446,6 +1764,11 @@ msgstr "Sağlayıcıyı silme işlemi başarısız oldu."
 msgid "Failed to delete the API key. Please try again."
 msgstr "API anahtarı silinemedi. Lütfen tekrar deneyin."
 
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Failed to delete thread."
+msgstr "Konu silinemedi."
+
 #. Fallback toast when account deletion fails
 #: src/features/settings/pages/danger-zone.tsx
 msgid "Failed to delete your account. Please try again."
@@ -1454,14 +1777,17 @@ msgstr "Hesabınız silinemedi. Lütfen tekrar deneyin."
 #. Fallback toast when disabling two-factor authentication fails
 #: src/dialogs/auth/disable-two-factor.tsx
 msgid "Failed to disable two-factor authentication. Please try again."
-msgstr "İki faktörlü kimlik doğrulama devre dışı bırakılamadı. Lütfen tekrar "
-"deneyin."
+msgstr "İki faktörlü kimlik doğrulama devre dışı bırakılamadı. Lütfen tekrar deneyin."
 
 #. Fallback toast when enabling two-factor authentication fails
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Failed to enable two-factor authentication. Please try again."
-msgstr "İki faktörlü kimlik doğrulama etkinleştirilemedi. Lütfen tekrar "
-"deneyin."
+msgstr "İki faktörlü kimlik doğrulama etkinleştirilemedi. Lütfen tekrar deneyin."
+
+#. Fallback toast when data export fails
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Failed to export your data. Please try again."
+msgstr "Verilerinizin dışa aktarılması başarısız oldu. Lütfen tekrar deneyin."
 
 #. Fallback toast when linking a social authentication provider fails
 #: src/features/settings/authentication/components/hooks.tsx
@@ -1506,10 +1832,8 @@ msgstr "Şifre sıfırlama e-postası gönderilemedi. Lütfen tekrar deneyin."
 msgid "Failed to setup two-factor authentication."
 msgstr "İki faktörlü kimlik doğrulama kurulamadı."
 
-#. Fallback toast when custom OAuth sign-in fails without a provider error message
-#. Fallback toast when passkey sign-in fails without an error message
 #. Fallback toast when sign-in fails and no server error message is available
-#. Fallback toast when social sign-in fails without a provider error message
+#. Fallback toast when sign-in fails without an error message
 #: src/features/auth/components/social-auth.tsx
 #: src/features/auth/pages/login.tsx
 msgid "Failed to sign in. Please try again."
@@ -1520,9 +1844,13 @@ msgstr "Oturum açma başarısız oldu. Lütfen tekrar deneyin."
 msgid "Failed to sign out. Please try again."
 msgstr "Çıkış yapılamadı. Lütfen tekrar deneyin."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Failed to start assistant thread."
-msgstr ""
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Failed to start agent thread."
+msgstr "Aracı iş parçacığı başlatılamadı."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Failed to start the AI assistant."
+msgstr "Yapay zeka asistanı başlatılamadı."
 
 #. Fallback toast when unlinking a social authentication provider fails
 #: src/features/settings/authentication/components/hooks.tsx
@@ -1542,6 +1870,10 @@ msgstr "Şifrenizi güncelleyemediniz. Lütfen tekrar deneyin."
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to update your profile. Please try again."
 msgstr "Profiliniz güncellenemedi. Lütfen tekrar deneyin."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Failed to upload attachment."
+msgstr "Ek dosya yüklenemedi."
 
 #. Fallback toast when uploading profile picture for resume fails
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
@@ -1569,13 +1901,37 @@ msgstr "Kodunuz doğrulanamadı. Lütfen tekrar deneyin."
 msgid "Features"
 msgstr "Özellikler"
 
+#: src/dialogs/resume/import.tsx
+msgid "File"
+msgstr "Dosya"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Filled in what we could from the posting."
+msgstr "İlandan doldurabildiğimiz alanları doldurduk."
+
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Filter by"
 msgstr "Filtrele"
 
+#: src/routes/dashboard/applications/index.tsx
+msgid "Filter by tags"
+msgstr "Etiketlere göre filtrele"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Find weak bullets and rewrite them with stronger outcomes, numbers, scope, and sharper verbs."
+msgstr "Zayıf madde işaretlerini bulun ve daha güçlü sonuçlar, sayılar, kapsam ve daha etkili fiillerle yeniden yazın."
+
 #: src/libs/locale.ts
 msgid "Finnish"
 msgstr "Fince"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Fireworks"
+msgstr "Havai fişekler"
+
+#: src/routes/builder/$resumeId/-components/dock.tsx
+msgid "Fit to view"
+msgstr "Görüntülemeye uygun"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Flexibility"
@@ -1584,6 +1940,22 @@ msgstr "Esneklik"
 #: src/dialogs/resume/sections/language.tsx
 msgid "Fluency"
 msgstr "Akıcılık"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Follow-up"
+msgstr "Takip"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Follow-up date"
+msgstr "Takip tarihi"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Follow-up draft"
+msgstr "Takip taslağı"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Follow-up note"
+msgstr "Takip notu"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Font Family"
@@ -1606,10 +1978,8 @@ msgid "For a secure and distraction-free experience."
 msgstr "Güvenli ve dikkat dağıtıcı olmayan bir deneyim için."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
-msgid "For example, information regarding which companies you sent this resume "
-"to or the links to the job descriptions can be noted down here."
-msgstr "Örneğin, bu özgeçmişi hangi şirketlere gönderdiğinize ilişkin bilgiler "
-"veya iş tanımlarının bağlantıları buraya not edilebilir."
+msgid "For example, information regarding which companies you sent this resume to or the links to the job descriptions can be noted down here."
+msgstr "Örneğin, bu özgeçmişi hangi şirketlere gönderdiğinize ilişkin bilgiler veya iş tanımlarının bağlantıları buraya not edilebilir."
 
 #: src/dialogs/api-key/create.tsx
 msgid "For security reasons, this key will only be displayed once."
@@ -1641,6 +2011,14 @@ msgstr "Serbest biçimli"
 msgid "French"
 msgstr "Fransızca"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "From your resume and the posting"
+msgstr "Özgeçmişinizden ve ilandan"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Full resume data for backup or import."
+msgstr "Yedekleme veya içe aktarma için tam özgeçmiş verisi."
+
 #. Layout editor toggle label that makes a page single-column
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
@@ -1655,6 +2033,10 @@ msgstr "Tam Ekran"
 msgid "Fullscreen Editor"
 msgstr "Tam Ekran Düzenleyici"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Gaps:"
+msgstr "Eksikler:"
+
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "Rastgele bir isim oluştur"
@@ -1664,18 +2046,12 @@ msgid "German"
 msgstr "Almanca"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
-msgid "Get a review of your resume with an overall score, strengths, and "
-"actionable suggestions."
-msgstr "Genel bir puan, güçlü yönler ve eyleme geçirilebilir önerilerle "
-"özgeçmişinizin bir incelemesini alın."
+msgid "Get a review of your resume with an overall score, strengths, and actionable suggestions."
+msgstr "Genel bir puan, güçlü yönler ve eyleme geçirilebilir önerilerle özgeçmişinizin bir incelemesini alın."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
-msgid "Get an in-depth AI-powered review of your resume with an overall score, "
-"key strengths, and practical suggestions. To activate this feature, "
-"please update your AI settings."
-msgstr "Genel bir puan, güçlü yönler ve pratik önerilerle özgeçmişinizin yapay "
-"zeka destekli derinlemesine bir incelemesini alın. Bu özelliği "
-"etkinleştirmek için lütfen AI ayarlarınızı güncelleyin."
+msgid "Get an in-depth AI-powered review of your resume with an overall score, key strengths, and practical suggestions. To activate this feature, please update your AI settings."
+msgstr "Genel bir puan, güçlü yönler ve pratik önerilerle özgeçmişinizin yapay zeka destekli derinlemesine bir incelemesini alın. Bu özelliği etkinleştirmek için lütfen AI ayarlarınızı güncelleyin."
 
 #: src/routes/_home/-sections/hero.tsx
 msgid "Get Started"
@@ -1690,11 +2066,16 @@ msgid "GitHub"
 msgstr "GitHub"
 
 #. Secondary navigation button on backup-code verification screen
-#: src/components/layout/not-found-screen.tsx
 #: src/features/auth/pages/verify-2fa-backup.tsx
 msgid "Go Back"
 msgstr "Geri Dön"
 
+#: src/components/layout/not-found-screen.tsx
+msgid "Go home"
+msgstr "Eve git"
+
+#: src/components/layout/error-screen.tsx
+#: src/components/layout/not-found-screen.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Gösterge Paneline Git"
@@ -1716,6 +2097,10 @@ msgid "Google"
 msgstr "Google"
 
 #: src/features/settings/integrations/components/ai-section.tsx
+msgid "Google Gemini"
+msgstr "Google Gemini"
+
+#: src/features/settings/integrations/components/ai-section.tsx
 msgid "gpt-4.1"
 msgstr "gpt-4.1"
 
@@ -1730,6 +2115,10 @@ msgstr "Yunanca"
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Grid"
 msgstr "Izgara"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Groq"
+msgstr "Groq"
 
 #: src/routes/_home/-sections/donate.tsx
 msgid "Grow the Team"
@@ -1773,24 +2162,16 @@ msgid "Hebrew"
 msgstr "İbranice"
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Help me bring more experienced contributors on board, reducing the "
-"burden on a single maintainer and accelerating development."
-msgstr "Daha deneyimli katkıda bulunanları eklememe yardım edin, böylece tek "
-"bir bakıcının üzerindeki yük azalır ve geliştirme hızlanır."
+msgid "Help me bring more experienced contributors on board, reducing the burden on a single maintainer and accelerating development."
+msgstr "Daha deneyimli katkıda bulunanları eklememe yardım edin, böylece tek bir bakıcının üzerindeki yük azalır ve geliştirme hızlanır."
 
 #: src/features/settings/pages/preferences.tsx
 msgid "Help translate the app to your language"
 msgstr "Uygulamayı kendi dilinize çevirmeye yardım edin"
 
 #: src/dialogs/resume/template/gallery.tsx
-msgid "Here's a range of resume templates for different professions and "
-"personalities. Whether you prefer modern or classic, bold or simple, "
-"there is a design to match you. Look through the options below and "
-"choose a template that fits your style."
-msgstr "Farklı meslekler ve kişilikler için çeşitli özgeçmiş şablonları burada. "
-"İster modern ister klasik, iddialı ya da sade tercih edin, size uygun "
-"bir tasarım mevcut. Aşağıdaki seçeneklere göz atın ve tarzınıza uygun "
-"bir şablon seçin."
+msgid "Here's a range of resume templates for different professions and personalities. Whether you prefer modern or classic, bold or simple, there is a design to match you. Look through the options below and choose a template that fits your style."
+msgstr "Farklı meslekler ve kişilikler için çeşitli özgeçmiş şablonları burada. İster modern ister klasik, iddialı ya da sade tercih edin, size uygun bir tasarım mevcut. Aşağıdaki seçeneklere göz atın ve tarzınıza uygun bir şablon seçin."
 
 #: src/dialogs/api-key/create.tsx
 msgid "Here's your new API key"
@@ -1833,6 +2214,10 @@ msgstr "Bağlantının altını çizili kısmını gizle"
 #: src/features/auth/pages/resume-password.tsx
 msgid "Hide password"
 msgstr "Şifreyi gizle"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Hide picture"
+msgstr "Resmi gizle"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Hide Section Icons"
@@ -1884,15 +2269,47 @@ msgstr "Macarca"
 msgid "Icon"
 msgstr "Simge"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Identify gaps for an applicant tracking system and apply only high-confidence keyword improvements."
+msgstr "Başvuru takip sistemindeki eksiklikleri belirleyin ve yalnızca yüksek güvenilirlik düzeyine sahip anahtar kelime iyileştirmelerini uygulayın."
+
 #: src/dialogs/resume/import.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "İçe Aktar"
+
+#. placeholder {0}: importable.length
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Import {0}"
+msgstr "{0} içe aktar"
 
 #: src/dialogs/resume/import.tsx
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Import an existing resume"
 msgstr "Mevcut bir özgeçmişi içe aktar"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Import CSV"
+msgstr "CSV içe aktar"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Import failed. Check the CSV and try again."
+msgstr "İçe aktarma başarısız oldu. CSV'yi kontrol edip tekrar deneyin."
+
+#: src/features/applications/components/import-applications-sheet.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Import from CSV"
+msgstr "CSV'den içe aktar"
+
+#. placeholder {0}: result.imported
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Imported {0} application(s)."
+msgstr "{0} başvuru içe aktarıldı."
+
+#: src/dialogs/resume/import.tsx
+msgid "Importing from PDF or Word requires a connected AI provider."
+msgstr "PDF veya Word dosyalarından içe aktarma işlemi için bağlantılı bir yapay zeka sağlayıcısı gereklidir."
 
 #: src/dialogs/resume/import.tsx
 msgid "Importing your resume..."
@@ -1901,6 +2318,18 @@ msgstr "Özgeçmişiniz içe aktarılıyor..."
 #: src/dialogs/resume/import.tsx
 msgid "Importing…"
 msgstr "… İçe Aktarılıyor"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Include resume header"
+msgstr "Özgeçmiş başlığını dahil et"
+
+#: src/components/input/rich-input.tsx
+msgid "Increase indent"
+msgstr "Girintiyi artır"
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Increase zoom"
+msgstr "Yakınlaştırmayı artırın"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -1914,9 +2343,9 @@ msgstr "Bilgi"
 msgid "Inline Code"
 msgstr "Satır İçi Kod"
 
-#: src/components/input/rich-input.tsx
-msgid "Insert Table"
-msgstr "Tablo Ekle"
+#: src/routes/dashboard/applications/index.tsx
+msgid "Insights"
+msgstr "İçgörüler"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Instant Generation"
@@ -1962,6 +2391,26 @@ msgstr "İtalik"
 msgid "Japanese"
 msgstr "Japonca"
 
+#: src/features/command-palette/pages/navigation.tsx
+msgid "Job"
+msgstr "İş"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Job description"
+msgstr "İş tanımı"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Job posting"
+msgstr "İş ilanı"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Job search pipeline"
+msgstr "İş arama hattı"
+
+#: src/features/command-palette/pages/navigation.tsx
+msgid "Jobs"
+msgstr "İşler"
+
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
 #: src/features/auth/pages/register.tsx
@@ -2000,6 +2449,11 @@ msgstr "Yasla"
 msgid "Kannada"
 msgstr "Kanada Dili"
 
+#. Layout editor toggle that prevents a section from splitting across pages
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Keep together"
+msgstr "Bir arada kalın"
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Key"
 msgstr "Anahtar"
@@ -2019,6 +2473,7 @@ msgstr "Korece"
 
 #. Short field label for custom display text associated with a URL
 #: src/components/input/url-input.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Label"
 msgstr "Etiket"
@@ -2052,11 +2507,13 @@ msgstr "Son analiz tarihi {updatedAtLabel}"
 msgid "Last downloaded on {0}"
 msgstr "{0} tarihinde son indirildi"
 
-#. placeholder {0}: syncStatus.lastSyncedParentRevision
-#. placeholder {1}: syncStatus.parent?.revision
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Last synced revision {0}; parent revision {1}."
-msgstr ""
+#: src/routes/dashboard/applications/index.tsx
+msgid "Last updated"
+msgstr "Son güncelleme"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Updated"
+msgstr "Son Güncelleme"
 
 #: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -2092,6 +2549,10 @@ msgstr "Başlığı orijinaline sıfırlamak için boş bırakın."
 msgid "Left Align"
 msgstr "Sola Hizala"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Let AI read the posting and fill the fields below."
+msgstr "AI ilani okusun ve aşağıdaki alanları doldursun."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Letter"
 msgstr "Harf"
@@ -2125,6 +2586,18 @@ msgstr "Açık tema"
 msgid "Line Height"
 msgstr "Satır Yüksekliği"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Link a Reactive Resume (recommended)"
+msgstr "Reactive Resume bağla (önerilir)"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Link a resume and add a job description (Edit) to score your fit and tailor a copy."
+msgstr "Özgeçmiş bağlayın ve uyumunuzu puanlayıp kopyayı uyarlamak için iş tanımı ekleyin (Düzenle)."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Linked Reactive Resume"
+msgstr "Bağlı Reactive Resume"
+
 #. Authentication provider display name in account settings
 #. Brand name label for LinkedIn social sign-in button
 #: src/features/auth/components/social-auth.tsx
@@ -2132,6 +2605,14 @@ msgstr "Satır Yüksekliği"
 #: src/routes/_home/-sections/footer.tsx
 msgid "LinkedIn"
 msgstr "LinkedIn"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "LinkedIn, Referral…"
+msgstr "LinkedIn, Referans…"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Linking a Reactive Resume enables AI match scoring and tailoring."
+msgstr "Reactive Resume bağlamak, AI eşleşme puanlamasını ve uyarlamayı etkinleştirir."
 
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
@@ -2147,24 +2628,36 @@ msgstr "Litvanca"
 
 #: src/dialogs/resume/import.tsx
 msgid "Loading AI providers. Please try again in a moment."
-msgstr "Yapay zeka sağlayıcıları yükleniyor. Lütfen bir süre sonra tekrar "
-"deneyin."
+msgstr "Yapay zeka sağlayıcıları yükleniyor. Lütfen bir süre sonra tekrar deneyin."
+
+#: src/features/command-palette/pages/resumes.tsx
+msgid "Loading applications…"
+msgstr "Uygulamalar yükleniyor…"
 
 #: src/features/settings/integrations/components/ai-section.tsx
+#: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Loading providers…"
 msgstr "Sağlayıcılar yükleniyor…"
 
 #: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Loading resumes…"
 msgstr "Özgeçmişler yükleniyor…"
 
-#: src/components/layout/loading-screen.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Loading threads…"
+msgstr "İş parçacıkları yükleniyor…"
+
+#: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
 msgstr "Yükleniyor…"
 
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Location"
 msgstr "Konum"
@@ -2205,6 +2698,10 @@ msgstr "Ana"
 msgid "Main navigation"
 msgstr "Ana gezinme"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Make the experience section more results-oriented and remove vague responsibilities."
+msgstr "Deneyim bölümünü daha sonuç odaklı hale getirin ve belirsiz sorumlulukları kaldırın."
+
 #: src/libs/locale.ts
 msgid "Malay"
 msgstr "Malayca"
@@ -2225,28 +2722,55 @@ msgstr "Kenar Boşluğu (Yatay)"
 msgid "Margin (Vertical)"
 msgstr "Kenar Boşluğu (Dikey)"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Mark rejected"
+msgstr "Reddedildi olarak işaretle"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Match scoring failed."
+msgstr "Eşleşme puanlaması başarısız oldu."
+
 #. Impact severity label in resume analysis suggestion card
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Medium"
 msgstr "Orta"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Merge parent changes into this child resume, or dismiss them to keep "
-"this child resume as-is."
-msgstr ""
-
+#. File format label in import source selector
 #. File format label in import source selector
 #: src/dialogs/resume/import.tsx
 msgid "Microsoft Word"
 msgstr "Microsoft Word"
 
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Missing working resume"
+msgstr "Eksik iş özgeçmişi"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Mistral AI"
+msgstr "Mistral Yapay Zeka"
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Model"
 msgstr "Model"
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Move section to another column or page"
+msgstr "Bölümü başka bir sütuna veya sayfaya taşı"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Move stage"
+msgstr "Aşamayı taşı"
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Move to"
 msgstr "Taşı"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Moved to"
+msgstr "Şuraya taşındı"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Multilingual"
@@ -2264,9 +2788,11 @@ msgstr "https:// ile başlamalıdır."
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/settings/pages/profile.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Name"
 msgstr "İsim"
 
@@ -2278,17 +2804,21 @@ msgstr "Nepalce"
 msgid "Network"
 msgstr "Sosyal Ağ"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "New Application"
+msgstr "Yeni Başvuru"
+
 #: src/routes/_home/-sections/features.tsx
-msgid "New features are constantly being added and improved, so be sure to "
-"check back often."
-msgstr "Yeni özellikler sürekli olarak ekleniyor ve geliştiriliyor, bu yüzden "
-"sık sık yeniden kontrol ettiğinizden emin olun."
+msgid "New features are constantly being added and improved, so be sure to check back often."
+msgstr "Yeni özellikler sürekli olarak ekleniyor ve geliştiriliyor, bu yüzden sık sık yeniden kontrol ettiğinizden emin olun."
 
 #: src/components/input/rich-input.tsx
 msgid "New Line"
 msgstr "Yeni Satır"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "New Page"
 msgstr "Yeni Sayfa"
 
@@ -2302,13 +2832,31 @@ msgstr "Yeni Şifre"
 msgid "New Section"
 msgstr "Yeni Bölüm"
 
+#: src/features/applications/components/table-view.tsx
+msgid "New tag…"
+msgstr "Yeni etiket…"
+
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "New thread"
+msgstr "Yeni konu"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "New Thread"
+msgstr "Yeni Konu"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "No Advertising, No Tracking"
 msgstr "Reklam Yok, Takip Yok"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "No content changes were detected, but the parent revision is newer."
-msgstr ""
+#: src/routes/dashboard/applications/index.tsx
+msgid "No applications match your filters."
+msgstr "Filtrelerinizle eşleşen başvuru yok."
+
+#: src/features/applications/components/insights-view.tsx
+msgid "No applications yet — add a few to see your funnel and reply rates."
+msgstr "Henüz başvuru yok — huninizi ve yanıt oranlarınızı görmek için birkaç tane ekleyin."
 
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
@@ -2319,23 +2867,56 @@ msgstr "AI sağlayıcısından herhangi bir veri dönmemiştir."
 msgid "No passkeys registered yet."
 msgstr "Henüz kayıtlı geçiş anahtarı yok."
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
+msgid "No prior data"
+msgstr "Önceden herhangi bir veri yok."
+
 #: src/components/ui/combobox.tsx
 msgid "No results found."
 msgstr "Hiçbir sonuç bulunamadı."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "No resume linked."
+msgstr "Bağlı özgeçmiş yok."
+
+#: src/routes/dashboard/resumes/-components/grid-view.tsx
+#: src/routes/dashboard/resumes/-components/list-view.tsx
+msgid "No resumes match your search."
+msgstr "Arama kriterlerinize uyan hiçbir özgeçmiş bulunamadı."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "No resumes yet."
+msgstr "Henüz özgeçmiş yok."
+
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "No saved versions yet."
+msgstr "Henüz kaydedilmiş sürüm yok."
+
+#: src/features/applications/components/insights-view.tsx
+msgid "No source data yet."
+msgstr "Henüz kaynak verisi yok."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
 msgid "No style rules yet."
 msgstr "Henüz stil kuralları yok."
 
 #: src/features/settings/integrations/components/ai-section.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
 msgid "No tested provider"
 msgstr "Test edilmiş sağlayıcı yok."
+
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "No threads yet."
+msgstr "Henüz hiçbir konu açılmadı."
 
 #: src/libs/locale.ts
 msgid "Norwegian"
 msgstr "Norveççe"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Not connected"
+msgstr "Bağlı değil"
+
+#: src/features/applications/components/application-form-sheet.tsx
 #: src/libs/resume/section.tsx
 msgid "Notes"
 msgstr "Notlar"
@@ -2343,6 +2924,10 @@ msgstr "Notlar"
 #: src/libs/locale.ts
 msgid "Odia"
 msgstr "Odiya"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Ollama Cloud"
+msgstr "Ollama Bulutu"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "One-Click Sign-In"
@@ -2352,6 +2937,15 @@ msgstr "Tek Tıkla Giriş"
 msgid "Ongoing Maintenance"
 msgstr "Devam Eden Bakım"
 
+#. Helper note explaining the keep-together limitation
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Only applies when the section fits on a single page."
+msgstr "Bu özellik yalnızca ilgili bölüm tek bir sayfaya sığdığında geçerlidir."
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Only the first {MAX_IMPORT} rows import at once — {overflow} left out. Split the file to import the rest."
+msgstr "Tek seferde yalnızca ilk {MAX_IMPORT} satır içe aktarılır — {overflow} dışarıda kaldı. Kalanı içe aktarmak için dosyayı bölün."
+
 #. Resume card context menu action to open the resume editor
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
@@ -2360,13 +2954,21 @@ msgid "Open"
 msgstr "Aç"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Open assistant"
-msgstr ""
+msgid "Open AI agent"
+msgstr "Açık yapay zeka ajanı"
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Open AI assistant"
+msgstr "Açık yapay zeka asistanı"
 
 #. Button label to open the user's default email app
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Open Email Client"
 msgstr "E-posta İstemcisini Aç"
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Open in builder"
+msgstr "Yapıcıda aç"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Open Integrations Settings"
@@ -2376,22 +2978,39 @@ msgstr "Entegrasyon Ayarlarını Açın"
 msgid "Open Source"
 msgstr "Açık Kaynak"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "OpenAI"
+msgstr "OpenAI"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "OpenAI-compatible"
+msgstr "OpenAI uyumlu"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "OpenRouter"
+msgstr "OpenRouter"
+
 #: src/routes/_home/-sections/donate.tsx
 #: src/routes/_home/-sections/footer.tsx
 msgid "opens in new tab"
 msgstr "yeni sekmede açılır"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Optionally, set a password so that only people with the password can "
-"view your resume through the link."
-msgstr "İsterseniz bir şifre belirleyin, böylece yalnızca şifreye sahip olanlar "
-"bağlantı üzerinden özgeçmişinizi görüntüleyebilir."
+msgid "Optionally, set a password so that only people with the password can view your resume through the link."
+msgstr "İsterseniz bir şifre belirleyin, böylece yalnızca şifreye sahip olanlar bağlantı üzerinden özgeçmişinizi görüntüleyebilir."
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+msgid "Options for {title}"
+msgstr "{title} için seçenekler"
 
 #: src/features/auth/components/social-auth.tsx
-msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) "
-"instead of email and password"
+msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
 msgid "or continue with"
 msgstr "veya şununla devam et"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Or upload a resume PDF"
+msgstr "Veya bir özgeçmiş PDF'i yükleyin"
 
 #: src/components/input/rich-input.tsx
 msgid "Ordered List"
@@ -2411,6 +3030,7 @@ msgstr "Sayfa"
 
 #. Layout editor page label with 1-based page number
 #. placeholder {0}: pageIndex + 1
+#. placeholder {0}: targetPageIndex + 1
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Page {0}"
@@ -2420,21 +3040,9 @@ msgstr "Sayfa {0}"
 msgid "Paragraph"
 msgstr "Paragraf"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent changes"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent resume has updates"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent updates have been applied."
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent updates have been dismissed."
-msgstr ""
+#: src/components/input/rich-input.tsx
+msgid "Paragraph and heading style"
+msgstr "Paragraf ve başlık stili"
 
 #. Authentication provider display name in account settings
 #. Label for passkey sign-in button
@@ -2489,6 +3097,43 @@ msgstr "Şifre koruması devre dışı bırakıldı."
 msgid "Password protection has been enabled."
 msgstr "Şifre koruması etkinleştirildi."
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Paste a job posting URL"
+msgstr "İş ilanı URL'sini yapıştır"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source and Tags."
+msgstr "Satırları yapıştırın veya .csv yükleyin. Company, Role, Stage, Stage Date, Salary, Source ve Tags gibi sütunları eşleştiririz."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Paste the posting — powers AI match scoring and tailoring."
+msgstr "İlanı yapıştırın — AI eşleşme puanlamasını ve uyarlamayı çalıştırır."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch applied"
+msgstr "Yama uygulandı."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch conflicted"
+msgstr "Yama çakışması"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch failed"
+msgstr "Yama başarısız oldu. ..."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch pending"
+msgstr "Yama bekleniyor"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch rolled back"
+msgstr "Yama geri alındı."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch rolled back."
+msgstr "Yama geri alındı."
+
+#. File format label in import source selector
 #. File format label in import source selector
 #: src/dialogs/resume/import.tsx
 msgid "PDF"
@@ -2501,32 +3146,49 @@ msgstr "PDF"
 msgid "Period"
 msgstr "Dönem"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Perplexity"
+msgstr "Şaşkınlık"
+
 #: src/libs/locale.ts
 msgid "Persian"
 msgstr "Farsça"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Personalize your resume with any colors, fonts or designs, and make it "
-"your own."
-msgstr "Özgeçmişinizi dilediğiniz renkler, yazı tipleri veya tasarımlarla "
-"kişiselleştirin ve kendinize özgü hale getirin."
+msgid "Personalize your resume with any colors, fonts or designs, and make it your own."
+msgstr "Özgeçmişinizi dilediğiniz renkler, yazı tipleri veya tasarımlarla kişiselleştirin ve kendinize özgü hale getirin."
 
 #: src/dialogs/resume/sections/reference.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Phone"
 msgstr "Telefon"
 
+#: src/components/input/icon-picker.tsx
+msgid "Pick an icon"
+msgstr "Bir simge seçin"
+
 #: src/libs/resume/section.tsx
 msgid "Picture"
 msgstr "Resim"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Pipeline flow"
+msgstr "Hat akışı"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Pipeline health across all applications"
+msgstr "Tüm başvurularda hat sağlığı"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Plain text, ideal for AI tools and quick edits."
+msgstr "Düz metin; AI araçları ve hızlı düzenlemeler için idealdir."
 
 #: src/features/auth/pages/reset-password.tsx
 msgid "Please enter a new password for your account"
 msgstr "Hesabınız için yeni bir şifre girin"
 
 #: src/features/auth/pages/resume-password.tsx
-msgid "Please enter the password shared with you by the owner of the resume to "
-"continue."
+msgid "Please enter the password shared with you by the owner of the resume to continue."
 msgstr "Devam etmek için özgeçmişin sahibinin sizinle paylaştığı şifreyi girin."
 
 #: src/components/input/rich-input.tsx
@@ -2537,11 +3199,17 @@ msgstr "Bağlamak istediğiniz URL'yi girin:"
 msgid "Please support the project"
 msgstr "Lütfen projeyi destekleyin."
 
-#: src/features/resume/public/public-resume.tsx
-#: src/routes/builder/$resumeId/-components/dock.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Please upload a PDF file."
+msgstr "Lütfen bir PDF dosyası yükleyin."
+
+#: src/features/resume/export/use-resume-export.ts
 msgid "Please wait while your PDF is being generated..."
 msgstr "PDF'niz oluşturulurken lütfen bekleyin..."
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Please wait while your PDF is being generated…"
+msgstr "PDF dosyanız oluşturulurken lütfen bekleyin…"
 
 #: src/libs/locale.ts
 msgid "Polish"
@@ -2572,20 +3240,30 @@ msgstr "Pozisyon"
 msgid "Preferences"
 msgstr "Tercihler"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Prepare a conservative patch that improves clarity without changing my career narrative."
+msgstr "Kariyer öykümü değiştirmeden netliği artıracak, daha muhafazakar bir yama hazırlayın."
+
+#: src/features/resume/export/use-resume-export.ts
+msgid "Preparing your resume for printing..."
+msgstr "Özgeçmişinizi yazdırmaya hazırlamak..."
+
 #: src/components/input/color-picker.tsx
 msgid "Presets"
 msgstr "Ön Ayarlar"
 
 #: src/components/input/chip-input.tsx
-msgid "Press <0>{RETURN_KEY}</0> or <1>{COMMA_KEY}</1> to add or save the "
-"current keyword."
-msgstr "Mevcut anahtar kelimeyi eklemek veya kaydetmek için <0>{RETURN_KEY}</0> "
-"veya <1>{COMMA_KEY}</1> tuşuna basın."
+msgid "Press <0>{RETURN_KEY}</0> or <1>{COMMA_KEY}</1> to add or save the current keyword."
+msgstr "Mevcut anahtar kelimeyi eklemek veya kaydetmek için <0>{RETURN_KEY}</0> veya <1>{COMMA_KEY}</1> tuşuna basın."
 
 #. Command palette hint that pressing Enter opens the selected resume
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Press <0>Enter</0> to open"
 msgstr "Açmak için <0>Enter</0> tuşuna basın"
+
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
+msgid "Preview"
+msgstr "Önizleme"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Primary Color"
@@ -2622,10 +3300,8 @@ msgid "Protect your resume from unauthorized access with a password"
 msgstr "Özgeçmişinizi yetkisiz erişimden bir şifreyle koruyun"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Protect your resume with a password, and let only people with the "
-"password view it."
-msgstr "Özgeçmişinizi bir şifre ile koruyun ve yalnızca şifreye sahip kişilerin "
-"görmesine izin verin."
+msgid "Protect your resume with a password, and let only people with the password view it."
+msgstr "Özgeçmişinizi bir şifre ile koruyun ve yalnızca şifreye sahip kişilerin görmesine izin verin."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Provider"
@@ -2645,6 +3321,10 @@ msgstr "Yayınlar"
 msgid "Publisher"
 msgstr "Yayınlayıcı"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Re-score"
+msgstr "Yeniden puanla"
+
 #: src/routes/_home/-sections/header.tsx
 msgid "Reactive Resume - Go to homepage"
 msgstr "Reactive Özgeçmiş - Ana sayfaya git"
@@ -2655,49 +3335,24 @@ msgid "Reactive Resume (JSON)"
 msgstr "Reaktif Özgeçmiş (JSON)"
 
 #: src/routes/_home/-sections/prefooter.tsx
-msgid "Reactive Resume continues to grow thanks to its vibrant community. This "
-"project owes its progress to numerous individuals who've dedicated their "
-"time and skills to make it better. We celebrate the coders who've "
-"enhanced its features on GitHub, the linguists whose translations on "
-"Crowdin have made it accessible to a broader audience, and the people "
-"who've donated to support its continued development."
-msgstr "Reactive Resume canlı topluluğu sayesinde büyümeye devam ediyor. Bu "
-"proje, onu daha iyi hale getirmek için zamanını ve yeteneklerini adayan "
-"sayısız kişiye borçludur. GitHub'da özelliklerini geliştiren "
-"yazılımcıları, Crowdin'de çevirileriyle daha geniş bir kitleye "
-"ulaşmasını sağlayan dil bilimcileri ve sürekli gelişimini destekleyen "
-"bağışçıları kutluyoruz."
+msgid "Reactive Resume continues to grow thanks to its vibrant community. This project owes its progress to numerous individuals who've dedicated their time and skills to make it better. We celebrate the coders who've enhanced its features on GitHub, the linguists whose translations on Crowdin have made it accessible to a broader audience, and the people who've donated to support its continued development."
+msgstr "Reactive Resume canlı topluluğu sayesinde büyümeye devam ediyor. Bu proje, onu daha iyi hale getirmek için zamanını ve yeteneklerini adayan sayısız kişiye borçludur. GitHub'da özelliklerini geliştiren yazılımcıları, Crowdin'de çevirileriyle daha geniş bir kitleye ulaşmasını sağlayan dil bilimcileri ve sürekli gelişimini destekleyen bağışçıları kutluyoruz."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Reactive Resume is a free and open-source project, built with love and "
-"maintained by me and a community of contributors. Your donations help "
-"keep the lights on and the code flowing."
-msgstr "Reactive Resume, sevgiyle yapılan ve benimle birlikte katkıda "
-"bulunanlar topluluğunun sürdürdüğü ücretsiz ve açık kaynaklı bir "
-"projedir. Bağışlarınız ışıkların açık kalmasına ve kodun akmasına "
-"yardımcı olur."
+msgid "Reactive Resume is a free and open-source project, built with love and maintained by me and a community of contributors. Your donations help keep the lights on and the code flowing."
+msgstr "Reactive Resume, sevgiyle yapılan ve benimle birlikte katkıda bulunanlar topluluğunun sürdürdüğü ücretsiz ve açık kaynaklı bir projedir. Bağışlarınız ışıkların açık kalmasına ve kodun akmasına yardımcı olur."
 
 #: src/routes/_home/-sections/hero.tsx
-msgid "Reactive Resume is a free and open-source resume builder that simplifies "
-"the process of creating, updating, and sharing your resume."
-msgstr "Reactive Resume, özgeçmişinizi oluşturma, güncelleme ve paylaşma "
-"sürecini kolaylaştıran ücretsiz ve açık kaynaklı bir özgeçmiş "
-"oluşturucusudur."
+msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
+msgstr "Reactive Resume, özgeçmişinizi oluşturma, güncelleme ve paylaşma sürecini kolaylaştıran ücretsiz ve açık kaynaklı bir özgeçmiş oluşturucusudur."
 
 #: src/components/ui/donation-toast.tsx
-msgid "Reactive Resume is free and open source. If it has helped you, please "
-"consider donating."
-msgstr "Reactive Resume ücretsiz ve açık kaynaklıdır. Eğer size yardımcı "
-"olduysa, lütfen bağış yapmayı düşünün."
+msgid "Reactive Resume is free and open source. If it has helped you, please consider donating."
+msgstr "Reactive Resume ücretsiz ve açık kaynaklıdır. Eğer size yardımcı olduysa, lütfen bağış yapmayı düşünün."
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Reactive Resume is open-source, privacy-focused, and completely free. "
-"Unlike other resume builders, it doesn't show ads, track your data, or "
-"limit your features behind a paywall."
-msgstr "Reactive Özgeçmiş açık kaynaklı, gizliliğe önem veren ve tamamen "
-"ücretsizdir. Diğer özgeçmiş oluşturuculardan farklı olarak reklam "
-"göstermez, verilerinizi takip etmez veya özelliklerinizi bir ödeme "
-"duvarının arkasına gizlemez."
+msgid "Reactive Resume is open-source, privacy-focused, and completely free. Unlike other resume builders, it doesn't show ads, track your data, or limit your features behind a paywall."
+msgstr "Reactive Özgeçmiş açık kaynaklı, gizliliğe önem veren ve tamamen ücretsizdir. Diğer özgeçmiş oluşturuculardan farklı olarak reklam göstermez, verilerinizi takip etmez veya özelliklerinizi bir ödeme duvarının arkasına gizlemez."
 
 #: src/routes/_home/-sections/sponsors.tsx
 msgid "Reactive Resume stays free, open-source, and independent because companies choose to support the work behind it. Their sponsorship helps fund hosting, maintenance, and continued development for the community."
@@ -2705,13 +3360,17 @@ msgstr "Reactive Resume, şirketlerin arkasındaki çalışmaları desteklemeyi 
 
 #. App version label in footer; includes semantic version variable
 #: src/components/ui/copyright.tsx
-msgid "Reactive Resume v{__APP_VERSION__}"
-msgstr "Reaktif Özgeçmiş v{__APP_VERSION__}"
+msgid "Reactive Resume v<0>{__APP_VERSION__}</0>"
+msgstr "Reaktif Özgeçmiş v<0>{__APP_VERSION__}</0>"
 
 #. Import source option for legacy Reactive Resume v4 JSON format
 #: src/dialogs/resume/import.tsx
 msgid "Reactive Resume v4 (JSON)"
 msgstr "Reaktif Özgeçmiş v4 (JSON)"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Reading…"
+msgstr "Okunuyor…"
 
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Recipient"
@@ -2727,7 +3386,7 @@ msgstr "Dikdörtgen (Tam Genişlik)"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Redo"
-msgstr ""
+msgstr "Tekrarla"
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -2735,9 +3394,9 @@ msgstr ""
 msgid "References"
 msgstr "Referanslar"
 
-#: src/components/layout/error-screen.tsx
-msgid "Refresh"
-msgstr "Yenile"
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Referred by…, things to emphasize, etc."
+msgstr "Yönlendiren…, vurgulanacak şeyler vb."
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -2746,6 +3405,10 @@ msgstr "Yeni Cihaz Kaydetme"
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Remember your password? <0/>"
 msgstr "Şifrenizi hatırladınız mı? <0/>"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Remote, Hybrid, a city…"
+msgstr "Uzaktan, Hibrit, bir şehir…"
 
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Remove"
@@ -2756,9 +3419,29 @@ msgstr "Kaldır"
 msgid "Remove {chip}"
 msgstr "{chip} adresini kaldırın"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Remove contact"
+msgstr "Kişiyi kaldır"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
+msgid "Remove custom field"
+msgstr "Özel alanı kaldır"
+
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Remove file"
+msgstr "Dosyayı kaldır"
+
+#: src/components/input/rich-input.tsx
+msgid "Remove link"
+msgstr "Bağlantıyı kaldır"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
 msgstr "Şifreyi Kaldır"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Remove tag"
+msgstr "Etiketi kaldır"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Removing password protection..."
@@ -2771,6 +3454,10 @@ msgstr "Yeniden adlandır"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Reorder"
 msgstr "Yeniden Sırala"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
+msgid "Reorder custom field"
+msgstr "Özel alanı yeniden sırala"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Report a Bug"
@@ -2814,6 +3501,25 @@ msgstr "Şifreniz sıfırlanıyor..."
 msgid "Resources"
 msgstr "Kaynaklar"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Restore"
+msgstr "Eski haline getirmek"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Restore the resume to before this patch? This will roll back this patch and any patches applied after it."
+msgstr "Bu yamadan önceki haline geri döndür? Bu işlem, bu yamayı ve sonrasında uygulanan tüm yamaları geri alacaktır."
+
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Restore this version?"
+msgstr "Bu sürümü geri yüklemek ister misiniz?"
+
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/resume/export/download-dialog.tsx
+#: src/routes/agent/-components/resume-pane.tsx
+#: src/routes/agent/$threadId.tsx
+msgid "Resume"
+msgstr "Sürdürmek"
+
 #: src/libs/resume/section.tsx
 msgid "Resume Analysis"
 msgstr "Özgeçmiş Analizi"
@@ -2822,9 +3528,25 @@ msgstr "Özgeçmiş Analizi"
 msgid "Resume analysis complete."
 msgstr "Özgeçmiş analizi tamamlandı."
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
-msgid "Resume updated"
-msgstr ""
+#: src/features/resume/preview/resume-accessible-text.tsx
+msgid "Resume content"
+msgstr "Özgeçmiş içeriği"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Resume file"
+msgstr "Özgeçmiş dosyası"
+
+#: src/features/applications/components/application-card.tsx
+msgid "Resume linked"
+msgstr "Özgeçmiş bağlandı"
+
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Resume options"
+msgstr "Özgeçmiş seçenekleri"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Resume patch"
+msgstr "Özgeçmiş yaması"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
@@ -2834,27 +3556,37 @@ msgstr ""
 msgid "Resumes"
 msgstr "Özgeçmişler"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review and merge or dismiss the latest parent changes for this child "
-"resume."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Retry"
+msgstr "Tekrar dene"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review parent updates"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Review the resume against a job description and ask me questions before changing uncertain sections."
+msgstr "Özgeçmişinizi iş tanımıyla karşılaştırın ve emin olmadığınız bölümleri değiştirmeden önce bana sorular sorun."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review the parent changes before merging because some edits overlap with "
-"this child resume."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Rework the summary so it targets a senior engineering manager role without sounding generic."
+msgstr "Özeti, genel bir ifade kullanmadan, kıdemli mühendislik yöneticisi rolünü hedefleyecek şekilde yeniden düzenleyin."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review updates"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Rewrite this resume for a startup founder-to-product-lead transition with clear business impact."
+msgstr "Bu özgeçmişi, net iş etkisi yaratacak şekilde, bir girişim kurucusundan ürün liderine geçiş yapacak şekilde yeniden yazın."
 
 #: src/components/input/rich-input.tsx
 msgid "Right Align"
 msgstr "Sağa Hizala"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Role (optional)"
+msgstr "Rol (isteğe bağlı)"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Role / title"
+msgstr "Rol / unvan"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Role A–Z"
+msgstr "Rol A–Z"
 
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Role Progression"
@@ -2877,19 +3609,39 @@ msgid "rules"
 msgstr "tüzük"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
-msgid "Run your first analysis to get a scorecard, strengths, and prioritized "
-"suggestions."
-msgstr "Bir puan kartı, güçlü yönler ve önceliklendirilmiş öneriler elde etmek "
-"için ilk analizinizi çalıştırın."
+msgid "Run your first analysis to get a scorecard, strengths, and prioritized suggestions."
+msgstr "Bir puan kartı, güçlü yönler ve önceliklendirilmiş öneriler elde etmek için ilk analizinizi çalıştırın."
 
 #: src/libs/locale.ts
 msgid "Russian"
 msgstr "Rusça"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Salary"
+msgstr "Maaş"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Salary range"
+msgstr "Maaş aralığı"
+
 #. Passkey rename prompt confirm action in authentication settings
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Save"
 msgstr "Kaydet"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Save & Test Provider"
+msgstr "Kaydet ve Test Et Sağlayıcı"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Save & Upload"
+msgstr "Kaydet ve Yükle"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Save changes"
+msgstr "Değişiklikleri kaydet"
 
 #: src/dialogs/resume/index.tsx
 #: src/dialogs/resume/sections/award.tsx
@@ -2911,24 +3663,41 @@ msgstr "Kaydet"
 msgid "Save Changes"
 msgstr "Değişiklikleri Kaydet"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Save Provider"
-msgstr "Sağlayıcıyı Kaydet"
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Saved"
+msgstr "Kaydedildi"
+
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Saving…"
+msgstr "Kaydediliyor…"
 
 #: src/dialogs/auth/enable-two-factor.tsx
-msgid "Scan the QR code below with your preferred authenticator app. You can "
-"also copy the secret below and paste it into your app."
-msgstr "Aşağıdaki QR kodunu seçtiğiniz kimlik doğrulayıcı uygulama ile tarayın. "
-"Ayrıca aşağıdaki gizli anahtarı kopyalayıp uygulamanıza "
-"yapıştırabilirsiniz."
+msgid "Scan the QR code below with your preferred authenticator app. You can also copy the secret below and paste it into your app."
+msgstr "Aşağıdaki QR kodunu seçtiğiniz kimlik doğrulayıcı uygulama ile tarayın. Ayrıca aşağıdaki gizli anahtarı kopyalayıp uygulamanıza yapıştırabilirsiniz."
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "Okul"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Score my fit"
+msgstr "Uyumumu puanla"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Scorecard"
 msgstr "Puan Kartı"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Scoring your fit…"
+msgstr "Uyumunuz puanlanıyor…"
+
+#: src/routes/dashboard/-components/sidebar.tsx
+msgid "Search"
+msgstr "Aramak"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Search applications…"
+msgstr "Başvurularda ara…"
 
 #. Accessible label for command palette search input
 #: src/features/command-palette/index.tsx
@@ -2945,6 +3714,10 @@ msgstr "Bir simge arayın"
 msgid "Search for…"
 msgstr "… için arama yapın"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search resumes..."
+msgstr "Özgeçmişleri arayın..."
+
 #: src/components/ui/combobox.tsx
 msgid "Search..."
 msgstr "Ara..."
@@ -2958,23 +3731,57 @@ msgstr "Arama…"
 msgid "Secret copied to clipboard."
 msgstr "Gizli anahtar panoya kopyalandı."
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "Section options"
+msgstr "Bölüm seçenekleri"
+
 #: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "Bölüm Türü"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Select a tested AI provider first."
-msgstr ""
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "See how this resume matches the posting"
+msgstr "Bu özgeçmişin ilanla nasıl eşleştiğini görün"
+
+#. placeholder {0}: app.company
+#: src/features/applications/components/table-view.tsx
+msgid "Select {0}"
+msgstr "{0} seç"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Select a resume"
+msgstr "Bir özgeçmiş seçin"
+
+#: src/routes/agent/index.tsx
+msgid "Select a thread"
+msgstr "Bir konu seçin"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Select all"
+msgstr "Tümünü seç"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Select an agent model"
+msgstr "Bir temsilci modeli seçin"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Select an AI provider"
+msgstr "Bir yapay zeka sağlayıcısı seçin"
 
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "Seç..."
 
+#: src/features/applications/components/table-view.tsx
+msgid "selected"
+msgstr "seçildi"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
 msgstr "Docker ile kendi kendine barındırma"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Send message"
 msgstr "Mesaj gönder"
 
@@ -3000,8 +3807,28 @@ msgstr "Sırpça"
 msgid "Set Password"
 msgstr "Şifreyi Ayarla"
 
+#: src/dialogs/resume/import.tsx
+msgid "Set up a provider"
+msgstr "Bir sağlayıcı kurun"
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Set up an AI provider"
+msgstr "Bir yapay zeka sağlayıcısı kurun."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Set up an AI provider before starting a thread."
+msgstr "Konu açmadan önce bir yapay zeka sağlayıcısı ayarlayın."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Set up an AI provider to chat about this resume and apply edits automatically."
+msgstr "Bu özgeçmiş hakkında sohbet etmek ve düzenlemeleri otomatik olarak uygulamak için bir yapay zeka sağlayıcısı ayarlayın."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Set up an AI provider to get started."
+msgstr "Başlamak için bir yapay zeka sağlayıcısı kurun."
+
 #: src/features/command-palette/pages/navigation.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
+#: src/routes/agent/-components/new-thread-setup.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "Ayarlar"
@@ -3016,8 +3843,7 @@ msgstr "Gölge Genişliği"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Share your resume with a public URL, and let others view it."
-msgstr "Özgeçmişinizi herkese açık bir URL ile paylaşın ve başkalarının "
-"görmesine izin verin."
+msgstr "Özgeçmişinizi herkese açık bir URL ile paylaşın ve başkalarının görmesine izin verin."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Shareable Links"
@@ -3032,6 +3858,11 @@ msgstr "Paylaşım"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Show"
 msgstr "Göster"
+
+#. placeholder {0}: Math.min(remaining, COLUMN_PAGE_SIZE)
+#: src/features/applications/components/board.tsx
+msgid "Show {0} more"
+msgstr "{0} tane daha göster"
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
@@ -3063,10 +3894,24 @@ msgstr "Başlıkta bağlantıyı göster"
 msgid "Show password"
 msgstr "Şifreyi göster"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Show picture"
+msgstr "Resmi göster"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Show the same first-page header on the cover letter."
+msgstr "Ön yazıda da aynı ilk sayfa başlığını göster."
+
+#. placeholder {0}: rows.length
+#. placeholder {1}: applications.length
+#: src/features/applications/components/table-view.tsx
+msgid "Showing {0} of {1}"
+msgstr "{1} içinden {0} gösteriliyor"
+
 #. Layout editor column label for the secondary sidebar area
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Sidebar"
-msgstr "<<<<<<< HEAD"
+msgstr "Kenar çubuğu"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/index.tsx
 msgid "Sidebar Width"
@@ -3112,42 +3957,27 @@ msgid "Signing up..."
 msgstr "Kayıt olunuyor..."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with a magenta left border accent; compact and efficient "
-"for entry-level or internship applications."
-msgstr "Magenta sol kenar vurgulu tek sütun; yeni başlayanlar veya staj "
-"başvuruları için kompakt ve verimli."
+msgid "Single-column with a magenta left border accent; compact and efficient for entry-level or internship applications."
+msgstr "Magenta sol kenar vurgulu tek sütun; yeni başlayanlar veya staj başvuruları için kompakt ve verimli."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with a minimal top header and lots of whitespace; clean "
-"and modern for designers or content creators."
-msgstr "Minimal üst başlığa ve bol beyaz alana sahip tek sütun; tasarımcılar "
-"veya içerik üreticileri için temiz ve modern."
+msgid "Single-column with a minimal top header and lots of whitespace; clean and modern for designers or content creators."
+msgstr "Minimal üst başlığa ve bol beyaz alana sahip tek sütun; tasarımcılar veya içerik üreticileri için temiz ve modern."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with a sidebar and clean grid layout; versatile for any "
-"professional or technical role."
-msgstr "Yan panel ve temiz ızgara yerleşimine sahip tek sütun; her türlü "
-"profesyonel veya teknik rol için çok yönlü."
+msgid "Single-column with a sidebar and clean grid layout; versatile for any professional or technical role."
+msgstr "Yan panel ve temiz ızgara yerleşimine sahip tek sütun; her türlü profesyonel veya teknik rol için çok yönlü."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with an inline three-column entry header (position · "
-"organization · period); compact and ATS-friendly, well-suited for Asian "
-"resume conventions (CN/JP/KR)."
-msgstr "Satır içi üç sütunlu giriş başlığına sahip tek sütun (pozisyon - "
-"organizasyon - nokta); kompakt ve ATS dostu, Asya özgeçmiş kuralları "
-"(CN/JP/KR) için çok uygun."
+msgid "Single-column with an inline three-column entry header (position · organization · period); compact and ATS-friendly, well-suited for Asian resume conventions (CN/JP/KR)."
+msgstr "Satır içi üç sütunlu giriş başlığına sahip tek sütun (pozisyon - organizasyon - nokta); kompakt ve ATS dostu, Asya özgeçmiş kuralları (CN/JP/KR) için çok uygun."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with uppercase section headings and a primary-color top "
-"rule on every page; polished for executive, consulting, or startup "
-"resumes."
-msgstr "Tek sütunlu, büyük harfli bölüm başlıkları ve her sayfada ana renkte "
-"üst çizgi bulunan; yönetici, danışmanlık veya girişim özgeçmişleri için "
-"ideal."
+msgid "Single-column with uppercase section headings and a primary-color top rule on every page; polished for executive, consulting, or startup resumes."
+msgstr "Tek sütunlu, büyük harfli bölüm başlıkları ve her sayfada ana renkte üst çizgi bulunan; yönetici, danışmanlık veya girişim özgeçmişleri için ideal."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column; polished and serious for senior or enterprise-level "
-"positions."
+msgid "Single-column; polished and serious for senior or enterprise-level positions."
 msgstr "Tek sütun; üst düzey veya kurumsal pozisyonlar için ciddi ve özenli."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
@@ -3161,6 +3991,9 @@ msgid "Skills"
 msgstr "Yetenekler"
 
 #: src/routes/_home/route.tsx
+#: src/routes/builder/$resumeId/-components/desktop-builder-shell.tsx
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
+#: src/routes/dashboard/route.tsx
 msgid "Skip to main content"
 msgstr "Ana içeriğe atla"
 
@@ -3176,18 +4009,35 @@ msgstr "Slovence"
 msgid "Slug"
 msgstr "Slug"
 
+#: src/components/layout/error-screen.tsx
+msgid "Something went wrong"
+msgstr "Bir şeyler ters gitti."
+
 #. Fallback error description when resume analysis request fails
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Something went wrong while analyzing your resume."
 msgstr "Özgeçmişinizi analiz ederken bir şeyler yanlış gitti."
 
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Something went wrong. Please try again."
 msgstr "Bir hata oluştu. Lütfen tekrar deneyin."
 
+#: src/routes/dashboard/applications/index.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Sort by"
 msgstr "Sırala"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Sort by…"
+msgstr "Sırala…"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Source"
+msgstr "Kaynak"
 
 #: src/routes/_home/-sections/footer.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
@@ -3220,6 +4070,15 @@ msgstr "Sponsorlar"
 msgid "Square"
 msgstr "Kare"
 
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Stage"
+msgstr "Aşama"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Stage date"
+msgstr "Aşama tarihi"
+
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
 msgstr "GitHub'da bize yıldız verin (yeni sekmede açılır)"
@@ -3229,13 +4088,13 @@ msgstr "GitHub'da bize yıldız verin (yeni sekmede açılır)"
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
 msgstr "GitHub'da bize yıldız verin, şu anda {0} yıldız (yeni sekmede açılır)"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Start a builder assistant thread that edits the active resume directly."
-msgstr ""
+#: src/routes/agent/$threadId.tsx
+msgid "Start a new thread"
+msgstr "Yeni bir konu başlatın"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Start assistant"
-msgstr ""
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Start a thread"
+msgstr "Bir konu başlatın"
 
 #: src/dialogs/resume/index.tsx
 msgid "Start building your resume by giving it a name."
@@ -3246,6 +4105,19 @@ msgstr "Bir ad vererek özgeçmişinizi oluşturmaya başlayın."
 msgid "Start building your resume from scratch"
 msgstr "Özgeçmişinizi sıfırdan oluşturmaya başlayın"
 
+#: src/routes/agent/index.tsx
+msgid "Start new thread"
+msgstr "Yeni konu başlat"
+
+#. Layout editor toggle that forces a section to begin on a new page
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Start on new page"
+msgstr "Yeni sayfada başlayın"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Start Thread"
+msgstr "Konuyu Başlat"
+
 #: src/libs/resume/section.tsx
 msgid "Statistics"
 msgstr "İstatistikler"
@@ -3254,7 +4126,7 @@ msgstr "İstatistikler"
 msgid "Stay"
 msgstr "Kal"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Stop generation"
 msgstr "Üretimi durdurun"
 
@@ -3265,6 +4137,10 @@ msgstr "Güçlü Yönler"
 #: src/components/input/rich-input.tsx
 msgid "Strike"
 msgstr "Üstü Çizili"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Strong fit"
+msgstr "Güçlü uyum"
 
 #: src/routes/_home/-sections/footer.tsx
 msgid "Subreddit"
@@ -3303,18 +4179,40 @@ msgstr "Koyu temaya geç"
 msgid "Switch to light theme"
 msgstr "Açık temaya geç"
 
-#: src/components/input/rich-input.tsx
+#. placeholder {0}: templates[template].name
+#: src/dialogs/resume/template/gallery.tsx
+msgid "Switched to the {0} template."
+msgstr "{0} şablonuna geçildi."
+
+#: src/features/resume/builder/draft.ts
+msgid "Synced changes made in another tab."
+msgstr "Başka bir sekmede yapılan değişiklikler senkronize edildi."
+
+#: src/routes/dashboard/applications/index.tsx
 msgid "Table"
 msgstr "Tablo"
 
 #: src/dialogs/resume/index.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
 msgid "Tags"
 msgstr "Etiketler"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Etiketler, özgeçmişinizi anahtar kelimelerle kategorize etmek için "
-"kullanılabilir."
+msgstr "Etiketler, özgeçmişinizi anahtar kelimelerle kategorize etmek için kullanılabilir."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Tailor my resume"
+msgstr "Özgeçmişimi uyarla"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Tailor this resume to a product manager job description and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
+msgstr "Bu özgeçmişi ürün yöneticisi iş tanımına göre uyarlayın ve yol haritası sahipliği, paydaş iletişimi ve ölçülebilir lansman sonuçlarını vurgulayın."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Tailoring failed."
+msgstr "Uyarlama başarısız oldu."
 
 #: src/libs/locale.ts
 msgid "Tamil"
@@ -3340,13 +4238,17 @@ msgstr "Şablonlar"
 msgid "Test"
 msgstr "Test"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Tested"
-msgstr "Test edildi"
-
 #: src/routes/_home/-sections/testimonials.tsx
 msgid "Testimonials"
 msgstr "Görüşler"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Testing…"
+msgstr "Test ediliyor…"
+
+#: src/components/input/rich-input.tsx
+msgid "Text alignment"
+msgstr "Metin hizalaması"
 
 #: src/components/input/rich-input.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3361,7 +4263,7 @@ msgstr "Tayca"
 msgid "Thank you to our sponsors"
 msgstr "Sponsorlarımıza teşekkür ederiz."
 
-#: src/routes/agent/$threadId.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "The agent needs your input."
 msgstr "Temsilcinin sizin görüşünüze ihtiyacı var."
 
@@ -3375,10 +4277,8 @@ msgid "The API key has been deleted successfully."
 msgstr "API anahtarı başarıyla silindi."
 
 #: src/features/settings/pages/api-keys.tsx
-msgid "The API key will no longer be able to access your data after deletion. "
-"This action cannot be undone."
-msgstr "API anahtarı silindikten sonra artık verilerinize erişemeyecektir. Bu "
-"işlem geri alınamaz."
+msgid "The API key will no longer be able to access your data after deletion. This action cannot be undone."
+msgstr "API anahtarı silindikten sonra artık verilerinize erişemeyecektir. Bu işlem geri alınamaz."
 
 #. Empty-state message when no command palette results match the search query
 #: src/features/command-palette/index.tsx
@@ -3390,10 +4290,9 @@ msgstr "Aradığınız komut yok."
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "İçe aktarılan dosya geçerli bir özgeçmişe ayrıştırılamadı."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "The parent resume changed. Review it to keep or dismiss the newer parent "
-"version."
-msgstr ""
+#: src/components/layout/not-found-screen.tsx
+msgid "The page you're looking for may have been moved or no longer exists."
+msgstr "Aradığınız sayfa taşınmış olabilir veya artık mevcut olmayabilir."
 
 #: src/features/auth/pages/resume-password.tsx
 msgid "The password you entered is incorrect"
@@ -3407,6 +4306,10 @@ msgstr "Erişmeye çalıştığınız özgeçmiş şifre korumalıdır"
 msgid "The URL you entered is not valid."
 msgstr "Girdiğiniz URL geçerli değil."
 
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "The working resume was deleted. This thread is read-only."
+msgstr "Çalışma özgeçmişi silindi. Bu konu yalnızca okunabilir durumdadır."
+
 #. Menu item that opens appearance theme selection submenu
 #: src/features/command-palette/pages/preferences/theme.tsx
 #: src/features/settings/pages/preferences.tsx
@@ -3418,16 +4321,22 @@ msgstr "Tema"
 msgid "Then, enter the 6 digit code that the app provides to continue."
 msgstr "Daha sonra, devam etmek için uygulamanın verdiği 6 haneli kodu girin."
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+#: src/features/resume/export/use-resume-export.ts
 msgid "There was a problem while generating the DOCX, please try again."
 msgstr "DOCX oluşturulurken bir sorun oluştu, lütfen tekrar deneyin."
 
-#: src/features/resume/public/public-resume.tsx
-#: src/routes/builder/$resumeId/-components/dock.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+#: src/features/resume/export/use-resume-export.ts
+#: src/routes/agent/-components/resume-pane.tsx
 msgid "There was a problem while generating the PDF, please try again."
 msgstr "PDF oluşturulurken bir sorun oluştu, lütfen tekrar deneyin."
+
+#: src/features/resume/export/use-resume-export.ts
+msgid "There was a problem while preparing your resume for printing, please try again."
+msgstr "Özgeçmişinizin yazdırılması sırasında bir sorun oluştu, lütfen tekrar deneyin."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Thinking"
+msgstr "Düşünme"
 
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
@@ -3439,79 +4348,125 @@ msgstr "Bu işlem geri alınamaz."
 msgid "This action cannot be undone. All your data will be permanently deleted."
 msgstr "Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecek."
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This action cannot be undone. Conversation messages and uploaded attachments will be removed. The working resume remains in your dashboard and can be deleted separately."
+msgstr "Bu işlem geri alınamaz. Konuşma mesajları ve yüklenen ekler silinecektir. Çalışma özgeçmişiniz kontrol panelinizde kalır ve ayrı olarak silinebilir."
+
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "This action cannot be undone. Messages and thread attachments will be removed."
+msgstr "Bu işlem geri alınamaz. Mesajlar ve ekler silinecektir."
+
+#: src/routes/agent/$threadId.tsx
+msgid "This agent thread could not be opened."
+msgstr "Bu temsilci başlığı açılamadı."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "This assistant could not be opened."
+msgstr "Bu asistan açılamadı."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "This entry will be permanently deleted. This can't be undone."
+msgstr "Bu girdi kalıcı olarak silinecek. Bu işlem geri alınamaz."
+
 #: src/dialogs/resume/import.tsx
-msgid "This feature requires a tested AI provider. Please add one in the "
-"settings."
-msgstr "Bu özellik, test edilmiş bir yapay zeka sağlayıcısı gerektirir. Lütfen "
-"ayarlardan bir tane ekleyin."
+msgid "This feature requires a connected AI provider. Please set one up in the settings."
+msgstr "Bu özellik için bağlantılı bir yapay zeka sağlayıcısı gereklidir. Lütfen ayarlardan bir tane kurun."
 
 #: src/dialogs/resume/index.tsx
 msgid "This is a URL-friendly name for your resume."
 msgstr "Bu, özgeçmişiniz için URL dostu bir isimdir."
 
 #: src/dialogs/resume/import.tsx
-msgid "This may take a few minutes, depending on the response of the AI "
-"provider. Please do not close the window or refresh the page."
-msgstr "Bu, yapay zeka sağlayıcısının yanıtına bağlı olarak birkaç dakika "
-"sürebilir. Lütfen pencereyi kapatmayın veya sayfayı yenilemeyin."
+msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
+msgstr "Bu, yapay zeka sağlayıcısının yanıtına bağlı olarak birkaç dakika sürebilir. Lütfen pencereyi kapatmayın veya sayfayı yenilemeyin."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "This removes the current messages for this resume. You can start a new "
-"chat afterward."
-msgstr ""
-
-#: src/features/resume/builder/draft.ts
-msgid "This resume could not be saved because it is no longer available."
-msgstr ""
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "This resume is locked"
+msgstr "Bu özgeçmiş kilitli."
 
 #: src/features/resume/builder/draft.ts
 msgid "This resume is locked and cannot be updated."
 msgstr "Bu özgeçmiş kilitli ve güncellenemez."
 
+#: src/features/resume/builder/draft.ts
+msgid "This resume was updated by an AI agent."
+msgstr "Bu özgeçmiş bir yapay zeka ajanı tarafından güncellendi."
+
+#: src/features/resume/builder/draft.ts
+msgid "This resume's sharing settings changed elsewhere."
+msgstr "Bu özgeçmişin paylaşım ayarları başka bir yerde değiştirildi."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
-msgid "This section is reserved for your personal notes specific to this "
-"resume. The content here remains private and is not shared with anyone "
-"else."
-msgstr "Bu bölüm, bu özgeçmişe özel kişisel notlarınız için ayrılmıştır. "
-"Buradaki içerik gizli kalır ve başkasıyla paylaşılmaz."
+msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
+msgstr "Bu bölüm, bu özgeçmişe özel kişisel notlarınız için ayrılmıştır. Buradaki içerik gizli kalır ve başkasıyla paylaşılmaz."
 
 #: src/features/auth/pages/register.tsx
 msgid "This step is optional, but recommended."
 msgstr "Bu adım isteğe bağlıdır, ancak önerilir."
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This thread is archived. New messages cannot be sent."
+msgstr "Bu konu arşivlendi. Yeni mesaj gönderilemez."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This thread is read-only"
+msgstr "Bu konu başlığı salt okunur."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This thread is read-only because the working resume or AI provider is unavailable."
+msgstr "Bu konu başlığı salt okunur durumdadır çünkü çalışan özgeçmiş veya yapay zeka sağlayıcısı mevcut değildir."
+
 #: src/dialogs/api-key/create.tsx
-msgid "This will generate a new API key to access the Reactive Resume API to "
-"allow machines to interact with your resume data."
-msgstr "Bu, makinelerin özgeçmiş verilerinizle etkileşime girmesine olanak "
-"tanımak için Reaktif Özgeçmiş API'sine erişecek yeni bir API anahtarı "
-"oluşturur."
+msgid "This will generate a new API key to access the Reactive Resume API to allow machines to interact with your resume data."
+msgstr "Bu, makinelerin özgeçmiş verilerinizle etkileşime girmesine olanak tanımak için Reaktif Özgeçmiş API'sine erişecek yeni bir API anahtarı oluşturur."
 
 #: src/features/settings/authentication/components/passkeys.tsx
-msgid "This will help you identify it later, if you plan to have multiple "
-"passkeys."
-msgstr "Bu, birden fazla geçiş anahtarına sahip olmayı planlıyorsanız, daha "
-"sonra tanımlamanıza yardımcı olacaktır."
+msgid "This will help you identify it later, if you plan to have multiple passkeys."
+msgstr "Bu, birden fazla geçiş anahtarına sahip olmayı planlıyorsanız, daha sonra tanımlamanıza yardımcı olacaktır."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "This will remove all items from this section."
 msgstr "Bu, bu bölümdeki tüm öğeleri kaldıracaktır."
 
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Thread actions"
+msgstr "İş parçacığı işlemleri"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Thread archived."
+msgstr "Konu arşivlendi."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Thread deleted."
+msgstr "Konu silindi."
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+#: src/routes/agent/$threadId.tsx
+msgid "Threads"
+msgstr "Konular"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Tighten the skills section so it supports the target role instead of reading like a keyword dump."
+msgstr "Beceri bölümünü, anahtar kelime yığını gibi görünmek yerine hedef rolü destekleyecek şekilde düzenleyin."
+
 #: src/routes/_home/-sections/hero.tsx
 msgid "Timelapse demonstration of building a resume with Reactive Resume"
-msgstr "Reactive Özgeçmiş ile bir özgeçmiş oluşturmanın zaman atlamalı "
-"gösterimi"
+msgstr "Reactive Özgeçmiş ile bir özgeçmiş oluşturmanın zaman atlamalı gösterimi"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Timeline"
+msgstr "Zaman çizelgesi"
 
 #: src/dialogs/api-key/create.tsx
-msgid "Tip: Give your API key a name, corresponding to the purpose of the key, "
-"to help you identify it later."
-msgstr "İpucu: API anahtarınıza, anahtarın amacına uygun bir isim vererek daha "
-"sonra kolayca tanımlayabilirsiniz."
+msgid "Tip: Give your API key a name, corresponding to the purpose of the key, to help you identify it later."
+msgstr "İpucu: API anahtarınıza, anahtarın amacına uygun bir isim vererek daha sonra kolayca tanımlayabilirsiniz."
 
 #: src/dialogs/resume/index.tsx
-msgid "Tip: You can name the resume referring to the position you are applying "
-"for."
-msgstr "İpucu: Başvurduğunuz pozisyona referansla özgeçmişinize isim "
-"verebilirsiniz."
+msgid "Tip: You can name the resume referring to the position you are applying for."
+msgstr "İpucu: Başvurduğunuz pozisyona referansla özgeçmişinize isim verebilirsiniz."
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
@@ -3521,10 +4476,17 @@ msgid "Title"
 msgstr "Başlık"
 
 #: src/features/settings/pages/danger-zone.tsx
-msgid "To delete your account, you need to enter the confirmation text and "
-"click the button below."
-msgstr "Hesabınızı silmek için onay metnini girmeniz ve aşağıdaki butona "
-"tıklamanız gerekir."
+msgid "To delete your account, you need to enter the confirmation text and click the button below."
+msgstr "Hesabınızı silmek için onay metnini girmeniz ve aşağıdaki butona tıklamanız gerekir."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Together.ai"
+msgstr "Birlikte.ai"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/shared/section-base.tsx
+msgid "Toggle {sectionTitle} section"
+msgstr "{sectionTitle} bölümünü açıp kapat"
 
 #. Screen-reader label for opening or closing the left sidebar in resume builder
 #: src/routes/builder/$resumeId/-components/header.tsx
@@ -3535,10 +4497,26 @@ msgstr "Sol kenar çubuğunu aç / kapat"
 msgid "Toggle page stacking"
 msgstr "Sayfa yığılmasını aç/kapat"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Toggle resume preview"
+msgstr "Özgeçmiş önizlemesini aç/kapat"
+
 #. Screen-reader label for opening or closing the right sidebar in resume builder
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Toggle right sidebar"
 msgstr "Sağ kenar çubuğunu aç / kapat"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Toggle threads"
+msgstr "Konuları açıp kapat"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Track a job you're applying to and link the resume you sent."
+msgstr "Başvurduğunuz işi takip edin ve gönderdiğiniz özgeçmişi bağlayın."
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Track your first application"
+msgstr "İlk başvurunuzu takip edin"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Track your resume's views and downloads"
@@ -3549,73 +4527,53 @@ msgstr "Özgeçmişinizin görüntülenme ve indirilme sayılarını takip edin"
 msgid "Translations"
 msgstr "Çeviriler"
 
+#: src/components/layout/error-screen.tsx
+msgid "Try again"
+msgstr "Tekrar deneyin"
+
 #: src/libs/locale.ts
 msgid "Turkish"
 msgstr "Türkçe"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
-msgid "Turn on public sharing to track how many times your resume has been "
-"viewed or downloaded. Only you can see your resume's statistics."
-msgstr "Özgeçmişinizin kaç kez görüntülendiğini veya indirildiğini takip etmek "
-"için herkese açık paylaşımı açın. Özgeçmişinizin istatistiklerini "
-"yalnızca siz görebilirsiniz."
+msgid "Turn on public sharing to track how many times your resume has been viewed or downloaded. Only you can see your resume's statistics."
+msgstr "Özgeçmişinizin kaç kez görüntülendiğini veya indirildiğini takip etmek için herkese açık paylaşımı açın. Özgeçmişinizin istatistiklerini yalnızca siz görebilirsiniz."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a bold colored sidebar and skill bars; great for "
-"creative or tech roles where visual flair is welcome."
-msgstr "Yan paneli ve beceri çubuklarıyla çift sütun; görsel açıdan dikkat "
-"çekici yerlerin hoş karşılandığı yaratıcı veya teknoloji rolleri için "
-"harika."
+msgid "Two-column with a bold colored sidebar and skill bars; great for creative or tech roles where visual flair is welcome."
+msgstr "Yan paneli ve beceri çubuklarıyla çift sütun; görsel açıdan dikkat çekici yerlerin hoş karşılandığı yaratıcı veya teknoloji rolleri için harika."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a dark teal sidebar and skills grid; modern feel for "
-"developers, data scientists, or technical PMs."
-msgstr "Koyu camgöbeği yan paneli ve beceri ızgarasıyla çift sütun; "
-"geliştiriciler, veri bilimcileri veya teknik proje yöneticileri için "
-"modern bir his."
+msgid "Two-column with a dark teal sidebar and skills grid; modern feel for developers, data scientists, or technical PMs."
+msgstr "Koyu camgöbeği yan paneli ve beceri ızgarasıyla çift sütun; geliştiriciler, veri bilimcileri veya teknik proje yöneticileri için modern bir his."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a left margin color; simple and approachable for "
-"creative, editorial, or junior roles."
-msgstr "Sol kenar rengiyle çift sütun; yaratıcı, editoryal veya yeni başlayan "
-"roller için basit ve yaklaşılabilir."
+msgid "Two-column with a left margin color; simple and approachable for creative, editorial, or junior roles."
+msgstr "Sol kenar rengiyle çift sütun; yaratıcı, editoryal veya yeni başlayan roller için basit ve yaklaşılabilir."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a muted color sidebar; earthy and calm, suits "
-"sustainability, healthcare, or nonprofit sectors."
-msgstr "Soluk renkli yan paneli ile çift sütun; toprak tonlu ve sakin, "
-"sürdürülebilirlik, sağlık veya kar amacı gütmeyen sektörler için uygun."
+msgid "Two-column with a muted color sidebar; earthy and calm, suits sustainability, healthcare, or nonprofit sectors."
+msgstr "Soluk renkli yan paneli ile çift sütun; toprak tonlu ve sakin, sürdürülebilirlik, sağlık veya kar amacı gütmeyen sektörler için uygun."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a soft header accent and circular profile photo; ideal "
-"for marketing, HR, or client-facing roles."
-msgstr "Yumuşak başlık vurgusu ve dairesel profil fotoğrafına sahip çift sütun; "
-"pazarlama, insan kaynakları veya müşteriyle yüz yüze olunan roller için "
-"ideal."
+msgid "Two-column with a soft header accent and circular profile photo; ideal for marketing, HR, or client-facing roles."
+msgstr "Yumuşak başlık vurgusu ve dairesel profil fotoğrafına sahip çift sütun; pazarlama, insan kaynakları veya müşteriyle yüz yüze olunan roller için ideal."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with accent colors and clean typography; balanced choice for "
-"business analysts or operations roles."
-msgstr "Vurgu renkleri ve temiz tipografi ile çift sütun; iş analistleri veya "
-"operasyon rolleri için dengeli bir seçim."
+msgid "Two-column with accent colors and clean typography; balanced choice for business analysts or operations roles."
+msgstr "Vurgu renkleri ve temiz tipografi ile çift sütun; iş analistleri veya operasyon rolleri için dengeli bir seçim."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column, clean and professional with subtle section dividers; suits "
-"corporate, finance, or consulting positions."
-msgstr "Bölüm ayırıcıları ile temiz ve profesyonel çift sütun; kurumsal, finans "
-"veya danışmanlık pozisyonları için uygun."
+msgid "Two-column, clean and professional with subtle section dividers; suits corporate, finance, or consulting positions."
+msgstr "Bölüm ayırıcıları ile temiz ve profesyonel çift sütun; kurumsal, finans veya danışmanlık pozisyonları için uygun."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column, minimal and text-dense with no decorative elements; perfect "
-"for traditional industries or ATS-heavy applications."
-msgstr "Dekoratif öğesi olmayan minimal ve metin yoğun çift sütun; geleneksel "
-"sektörler veya ATS odaklı başvurular için mükemmel."
+msgid "Two-column, minimal and text-dense with no decorative elements; perfect for traditional industries or ATS-heavy applications."
+msgstr "Dekoratif öğesi olmayan minimal ve metin yoğun çift sütun; geleneksel sektörler veya ATS odaklı başvurular için mükemmel."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column, minimal with light gray sidebar and subtle icons; "
-"professional and understated for legal, finance, or executive roles."
-msgstr "Açık gri yan panel ve ince simgelerle minimal çift sütun; hukuk, finans "
-"veya yönetici rolleri için profesyonel ve sade."
+msgid "Two-column, minimal with light gray sidebar and subtle icons; professional and understated for legal, finance, or executive roles."
+msgstr "Açık gri yan panel ve ince simgelerle minimal çift sütun; hukuk, finans veya yönetici rolleri için profesyonel ve sade."
 
 #: src/features/auth/pages/verify-2fa.tsx
 #: src/features/settings/authentication/components/two-factor.tsx
@@ -3658,17 +4616,19 @@ msgstr "Tipografi"
 msgid "Ukrainian"
 msgstr "Ukraynaca"
 
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Unarchive"
+msgstr "Arşivden çıkar"
+
 #: src/components/input/rich-input.tsx
 msgid "Underline"
 msgstr "Altı Çizili"
 
+#: src/dialogs/resume/template/gallery.tsx
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Undo"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Unknown provider"
-msgstr ""
+msgstr "Geri al"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Unlimited Resumes"
@@ -3692,21 +4652,12 @@ msgstr "Kilidi aç"
 msgid "Unnamed passkey"
 msgstr "İsimsiz geçiş anahtarı"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Untested"
-msgstr "Test edilmemiş"
-
 #: src/features/settings/pages/profile.tsx
 msgid "Unverified"
 msgstr "Doğrulanmamış"
 
-#. Resume card context menu action to edit resume metadata
-#. Resume card dropdown action to edit resume metadata
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Güncelle"
 
@@ -3776,9 +4727,25 @@ msgstr "Mevcut bir gönüllü deneyimi güncelle"
 msgid "Update Password"
 msgstr "Şifreyi Güncelle"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Update project bullets to show leadership, constraints, tradeoffs, and measurable outcomes."
+msgstr "Proje özetindeki maddeleri güncelleyerek liderliği, kısıtlamaları, ödünleşmeleri ve ölçülebilir sonuçları gösterin."
+
 #: src/dialogs/resume/index.tsx
 msgid "Update Resume"
 msgstr "Özgeçmişi Güncelle"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Update the calendar date for this timeline entry."
+msgstr "Bu zaman çizelgesi girdisi için takvim tarihini güncelleyin."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Update this application's details."
+msgstr "Bu başvurunun ayrıntılarını güncelleyin."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Update this timeline note."
+msgstr "Bu zaman çizelgesi notunu güncelleyin."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
@@ -3792,6 +4759,14 @@ msgstr "Şifreniz güncelleniyor..."
 msgid "Updating your resume..."
 msgstr "Özgeçmişiniz güncelleniyor..."
 
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Upload .csv"
+msgstr ".csv yükle"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Upload attachments"
+msgstr "Ekleri yükle"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Upload picture"
 msgstr "Resim yükle"
@@ -3799,6 +4774,10 @@ msgstr "Resim yükle"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Uploading picture…"
 msgstr "Resim yükleniyor…"
+
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Uploading…"
+msgstr "Yükleniyor…"
 
 #. Form field label for the generated public resume link in sharing settings
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
@@ -3811,8 +4790,13 @@ msgid "Use"
 msgstr "Kullanmak"
 
 #: src/components/input/color-picker.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Use color {color}"
 msgstr "Renk kullanın {color}"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Use sample"
+msgstr "Örneği kullan"
 
 #. Label for username input on registration form
 #: src/dialogs/resume/sections/profile.tsx
@@ -3832,6 +4816,10 @@ msgstr "Özbekçe"
 #: src/components/input/rich-input.tsx
 msgid "Valid URLs must start with http:// or https://."
 msgstr "Geçerli URL'ler http:// veya https:// ile başlamalıdır."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Vercel AI Gateway"
+msgstr "Vercel AI Ağ Geçidi"
 
 #: src/features/settings/pages/profile.tsx
 msgid "Verified"
@@ -3868,6 +4856,10 @@ msgstr "Şifre doğrulanıyor..."
 msgid "Verifying your email is required when resetting your password."
 msgstr "Şifrenizi sıfırlarken e-postanızı doğrulamanız gereklidir."
 
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Version history"
+msgstr "Sürüm geçmişi"
+
 #: src/libs/locale.ts
 msgid "Vietnamese"
 msgstr "Vietnamca"
@@ -3882,6 +4874,18 @@ msgstr "Görüntülenmeler"
 msgid "Volunteer"
 msgstr "Gönüllü"
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
+msgid "vs previous 30 days"
+msgstr "önceki 30 güne kıyasla"
+
+#: src/dialogs/resume/import.tsx
+msgid "We couldn't detect the format automatically — please choose it above."
+msgstr "Formatı otomatik olarak algılayamadık — lütfen yukarıdan seçin."
+
+#: src/components/layout/not-found-screen.tsx
+msgid "We couldn't find that page"
+msgstr "O sayfayı bulamadık."
+
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/education.tsx
@@ -3894,6 +4898,10 @@ msgstr "Gönüllü"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Website"
 msgstr "İnternet sitesi"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "What do you want to do?"
+msgstr "Ne yapmak istiyorsunuz?"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
@@ -3913,45 +4921,44 @@ msgstr "En son sürümdeki yenilikler?"
 msgid "When locked, the resume cannot be updated or deleted."
 msgstr "Kilitliyken, özgeçmiş güncellenemez veya silinemez."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Work on this resume"
-msgstr ""
+#: src/features/applications/components/insights-view.tsx
+msgid "Where applications come from"
+msgstr "Başvuruların geldiği yerler"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Where your applications went"
+msgstr "Başvurularınızın gittiği yerler"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Work OpenAI"
 msgstr "OpenAI ile çalışın"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Working…"
 msgstr "Çalışmakta…"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Worth a shot"
+msgstr "Denemeye değer"
 
 #: src/routes/_home/-sections/footer.tsx
 msgid "X (Twitter)"
 msgstr "X (Twitter)"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes, Reactive Resume is available in multiple languages. You can choose "
-"your preferred language in the settings page, or using the language "
-"switcher in the top right corner. If you don't see your language, or you "
-"would like to improve the existing translations, you can <0>contribute "
-"to the translations on Crowdin<1> (opens in new tab)</1></0>."
-msgstr "Evet, Reactive Özgeçmiş birçok dilde mevcuttur. Tercih ettiğiniz dili "
-"ayarlar sayfasından veya sağ üst köşedeki dil değiştiriciyi kullanarak "
-"seçebilirsiniz. Eğer dilinizi göremiyorsanız ya da mevcut çevirileri "
-"geliştirmek istiyorsanız, <0>Crowdin'de çevirilere katkıda "
-"bulunabilirsiniz<1> (yeni sekmede açılır)</1></0>."
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "xAI Grok"
+msgstr "xAI Grok"
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Yes! Reactive Resume is completely free to use, with no hidden costs, "
-"premium tiers, or subscription fees. It's open-source and will always "
-"remain free."
-msgstr "Evet! Reactive Resume tamamen ücretsizdir, gizli maliyetler, premium "
-"katmanlar veya abonelik ücretleri yoktur. Açık kaynaklıdır ve her zaman "
-"ücretsiz kalacaktır."
+msgid "Yes, Reactive Resume is available in multiple languages. You can choose your preferred language in the settings page, or using the language switcher in the top right corner. If you don't see your language, or you would like to improve the existing translations, you can <0>contribute to the translations on Crowdin<1> (opens in new tab)</1></0>."
+msgstr "Evet, Reactive Özgeçmiş birçok dilde mevcuttur. Tercih ettiğiniz dili ayarlar sayfasından veya sağ üst köşedeki dil değiştiriciyi kullanarak seçebilirsiniz. Eğer dilinizi göremiyorsanız ya da mevcut çevirileri geliştirmek istiyorsanız, <0>Crowdin'de çevirilere katkıda bulunabilirsiniz<1> (yeni sekmede açılır)</1></0>."
+
+#: src/routes/_home/-sections/faq.tsx
+msgid "Yes! Reactive Resume is completely free to use, with no hidden costs, premium tiers, or subscription fees. It's open-source and will always remain free."
+msgstr "Evet! Reactive Resume tamamen ücretsizdir, gizli maliyetler, premium katmanlar veya abonelik ücretleri yoktur. Açık kaynaklıdır ve her zaman ücretsiz kalacaktır."
 
 #: src/routes/_home/-sections/features.tsx
-msgid "You also have the option to deploy on your own servers using the Docker "
-"image."
+msgid "You also have the option to deploy on your own servers using the Docker image."
 msgstr "Ayrıca Docker imajı ile kendi sunucularınıza kurulum yapabilirsiniz."
 
 #: src/features/auth/pages/login.tsx
@@ -3959,12 +4966,8 @@ msgid "You can also use your username to login."
 msgstr "Giriş yapmak için kullanıcı adınızı da kullanabilirsiniz."
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "You can share your resume via a unique public URL, protect it with a "
-"password, or download it as a PDF to share directly. The choice is "
-"yours!"
-msgstr "Özgeçmişinizi benzersiz bir halka açık URL ile paylaşabilir, şifre ile "
-"koruyabilir veya doğrudan paylaşmak için PDF olarak indirebilirsiniz. "
-"Seçim size ait!"
+msgid "You can share your resume via a unique public URL, protect it with a password, or download it as a PDF to share directly. The choice is yours!"
+msgstr "Özgeçmişinizi benzersiz bir halka açık URL ile paylaşabilir, şifre ile koruyabilir veya doğrudan paylaşmak için PDF olarak indirebilirsiniz. Seçim size ait!"
 
 #: src/hooks/use-form-blocker.tsx
 msgid "You have unsaved changes that will be lost."
@@ -3987,27 +4990,25 @@ msgstr "API anahtarınız panoya kopyalandı."
 msgid "Your changes are saved automatically."
 msgstr "Değişiklikleriniz otomatik olarak kaydediliyor."
 
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Your data has been exported successfully."
+msgstr "Verileriniz başarıyla dışa aktarıldı."
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Your data is secure, and never shared or sold to anyone."
 msgstr "Verileriniz güvende ve asla kimseyle paylaşılmaz, satılmaz."
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Your data is stored securely and is never shared with third parties. You "
-"can also self-host Reactive Resume on your own servers for complete "
-"control over your data."
-msgstr "Verileriniz güvenli bir şekilde saklanır ve asla üçüncü partilerle "
-"paylaşılmaz. Kendi sunucularınızda Reactive Resume'u barındırarak "
-"verileriniz üzerinde tam kontrol sahibi olabilirsiniz."
+msgid "Your data is stored securely and is never shared with third parties. You can also self-host Reactive Resume on your own servers for complete control over your data."
+msgstr "Verileriniz güvenli bir şekilde saklanır ve asla üçüncü partilerle paylaşılmaz. Kendi sunucularınızda Reactive Resume'u barındırarak verileriniz üzerinde tam kontrol sahibi olabilirsiniz."
 
 #: src/features/resume/builder/draft.ts
 msgid "Your latest changes could not be saved."
 msgstr "Son değişiklikleriniz kaydedilemedi."
 
 #: src/features/auth/pages/reset-password.tsx
-msgid "Your password has been reset successfully. You can now sign in with your "
-"new password."
-msgstr "Şifreniz başarıyla sıfırlandı. Artık yeni şifrenizle giriş "
-"yapabilirsiniz."
+msgid "Your password has been reset successfully. You can now sign in with your new password."
+msgstr "Şifreniz başarıyla sıfırlandı. Artık yeni şifrenizle giriş yapabilirsiniz."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Your password has been updated successfully."
@@ -4035,25 +5036,34 @@ msgstr "Özgeçmişiniz başarıyla çoğaltıldı."
 msgid "Your resume has been imported successfully."
 msgstr "Özgeçmişiniz başarıyla içe aktarıldı."
 
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Your resume has been restored to the selected version."
+msgstr "Özgeçmişiniz seçilen sürüme geri yüklendi."
+
 #: src/dialogs/resume/index.tsx
 msgid "Your resume has been updated successfully."
 msgstr "Özgeçmişiniz başarıyla güncellendi."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Your resume's public link is currently protected by a password. Share "
-"the password only with people you trust."
-msgstr "Özgeçmişinizin herkese açık bağlantısı şu anda bir şifre ile "
-"korunmaktadır. Şifreyi yalnızca güvendiğiniz kişilerle paylaşın."
+msgid "Your resume's public link is currently protected by a password. Share the password only with people you trust."
+msgstr "Özgeçmişinizin herkese açık bağlantısı şu anda bir şifre ile korunmaktadır. Şifreyi yalnızca güvendiğiniz kişilerle paylaşın."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Your support ensures the project remains free and accessible for "
-"everyone, now and in the future."
-msgstr "Desteğiniz projenin şimdi ve gelecekte ücretsiz ve herkesin erişimine "
-"açık kalmasını sağlar."
+msgid "Your support ensures the project remains free and accessible for everyone, now and in the future."
+msgstr "Desteğiniz projenin şimdi ve gelecekte ücretsiz ve herkesin erişimine açık kalmasını sağlar."
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Zoom"
+msgstr "Zoom"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Zoom in"
 msgstr "Yakınlaştır"
+
+#: src/routes/agent/-components/resume-pane.tsx
+#: src/routes/builder/$resumeId/-components/dock.tsx
+msgid "Zoom level"
+msgstr "Yakınlaştırma seviyesi"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Zoom out"

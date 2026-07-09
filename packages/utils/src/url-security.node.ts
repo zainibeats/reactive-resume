@@ -180,31 +180,6 @@ export function parseUrl(input: string) {
 	}
 }
 
-export function parseAllowedHostList(value?: string) {
-	if (!value) return new Set<string>();
-
-	const hosts = value
-		.split(",")
-		.map((entry) => entry.trim().toLowerCase())
-		.filter(Boolean);
-
-	return new Set(hosts);
-}
-
-export function isAllowedExternalUrl(input: string, allowedHosts: Set<string>) {
-	const parsed = parseUrl(input);
-	if (!parsed) return false;
-	if (parsed.protocol !== "https:") return false;
-	if (parsed.username || parsed.password) return false;
-	if (isPrivateOrLoopbackHost(parsed.hostname)) return false;
-
-	const hostname = normalizeHostname(parsed.hostname);
-	if (allowedHosts.has(hostname)) return true;
-
-	const origin = parsed.origin.toLowerCase();
-	return allowedHosts.has(origin);
-}
-
 type OAuthRedirectUriOptions = {
 	allowUnsafe?: boolean;
 };

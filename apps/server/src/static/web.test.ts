@@ -15,7 +15,7 @@ vi.mock("@hono/node-server/serve-static", () => ({
 	serveStatic: vi.fn(() => vi.fn()),
 }));
 
-const { handleWebApp, handleWebAppHead } = await import("./web");
+const { handleWebApp } = await import("./web");
 
 describe("web app fallback classification", () => {
 	beforeEach(() => {
@@ -30,6 +30,15 @@ describe("web app fallback classification", () => {
 		expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
 		expect(response.headers.get("X-Robots-Tag")).toBeNull();
 		expect(await response.text()).toBe("<html>app</html>");
+	});
+
+	it.each(["/", "/alice/resume"])("sets framing and report-only CSP security headers on %s", async (pathname) => {
+		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("X-Frame-Options")).toBe("DENY");
+		expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+		expect(response.headers.get("Content-Security-Policy-Report-Only")).toContain("frame-ancestors 'none'");
 	});
 
 	it.each([
@@ -103,8 +112,10 @@ describe("web app fallback classification", () => {
 	});
 
 	it("mirrors fallback status and headers for HEAD without a body", async () => {
-		const knownResponse = handleWebAppHead(new Request("https://example.com/dashboard"));
-		const unknownResponse = handleWebAppHead(new Request("https://example.com/unknown/extra/path"));
+		const knownResponse = await handleWebApp(new Request("https://example.com/dashboard", { method: "HEAD" }));
+		const unknownResponse = await handleWebApp(
+			new Request("https://example.com/unknown/extra/path", { method: "HEAD" }),
+		);
 
 		expect(knownResponse.status).toBe(200);
 		expect(knownResponse.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");

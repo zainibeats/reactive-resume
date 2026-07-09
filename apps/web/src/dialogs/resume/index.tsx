@@ -13,7 +13,7 @@ import {
 import { useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -66,7 +66,10 @@ const defaultValues: FormValues = {
 };
 
 export function CreateResumeDialog(_: DialogProps<"resume.create">) {
+	const navigate = useNavigate();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
+	// Skip the unsaved-changes guard when we close as a result of a successful create.
+	const didCreateRef = useRef(false);
 
 	const { mutate: createResume, isPending } = useMutation(orpc.resume.create.mutationOptions());
 
@@ -82,9 +85,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 			const toastId = toast.loading(t`Creating your resume...`);
 
 			createResume(value, {
-				onSuccess: () => {
+				onSuccess: (id) => {
+					didCreateRef.current = true;
 					toast.success(t`Your resume has been created successfully.`, { id: toastId });
 					closeDialog();
+					void navigate({ to: "/builder/$resumeId", params: { resumeId: id } });
 				},
 				onError: (error) => {
 					toast.error(getResumeErrorMessage(error), { id: toastId });
@@ -99,7 +104,9 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 		form.setFieldValue("slug", slugify(name));
 	}, [form, name]);
 
-	useFormBlocker(form);
+	useFormBlocker(form, {
+		shouldBlock: () => !didCreateRef.current && form.state.isDirty && !form.state.isSubmitting,
+	});
 
 	const onCreateSampleResume = () => {
 		const values = form.state.values;
@@ -115,9 +122,11 @@ export function CreateResumeDialog(_: DialogProps<"resume.create">) {
 		const toastId = toast.loading(t`Creating your resume...`);
 
 		createResume(data, {
-			onSuccess: () => {
+			onSuccess: (id) => {
+				didCreateRef.current = true;
 				toast.success(t`Your resume has been created successfully.`, { id: toastId });
 				closeDialog();
+				void navigate({ to: "/builder/$resumeId", params: { resumeId: id } });
 			},
 			onError: (error) => {
 				toast.error(getResumeErrorMessage(error), { id: toastId });

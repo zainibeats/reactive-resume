@@ -11,7 +11,7 @@ import {
 	sortFontWeights,
 } from "@reactive-resume/fonts";
 import { isCJKLocale } from "@reactive-resume/utils/locale";
-import { Font } from "../renderer";
+import { Font } from "#react-pdf-renderer";
 
 type FontWeightRange = {
 	lowest: number;
@@ -26,7 +26,7 @@ const preferredFallbackFontWeights = ["400", "700", "600", "500"] satisfies Font
 
 // `fontFamily` is widened to `string | string[]` so react-pdf can do
 // glyph-level font fallback for CJK characters (#2986).
-export type PdfTypography = Omit<Typography, "body" | "heading"> & {
+type PdfTypography = Omit<Typography, "body" | "heading"> & {
 	body: Omit<Typography["body"], "fontFamily"> & { fontFamily: string | string[] };
 	heading: Omit<Typography["heading"], "fontFamily"> & { fontFamily: string | string[] };
 };

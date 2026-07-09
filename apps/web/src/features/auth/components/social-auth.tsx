@@ -66,68 +66,20 @@ type SocialAuthButtonsProps = {
 function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps) {
 	const router = useRouter();
 
-	const handleSocialLogin = async (provider: string) => {
+	const runSignIn = async (fn: () => Promise<{ error: { message?: string } | null }>) => {
 		const toastId = toast.loading(t`Signing in...`);
-
-		const { error } = await authClient.signIn.social(getSocialSignInOptions(provider, requestSignUp));
-
+		const { error } = await fn();
 		if (error) {
 			toast.error(
 				error.message ||
 					t({
-						comment: "Fallback toast when social sign-in fails without a provider error message",
+						comment: "Fallback toast when sign-in fails without an error message",
 						message: "Failed to sign in. Please try again.",
 					}),
 				{ id: toastId },
 			);
 			return;
 		}
-
-		toast.dismiss(toastId);
-		await router.invalidate();
-	};
-
-	const handleOAuthLogin = async () => {
-		const toastId = toast.loading(t`Signing in...`);
-
-		const { error } = await authClient.signIn.oauth2({
-			providerId: "custom",
-			callbackURL: "/dashboard",
-		});
-
-		if (error) {
-			toast.error(
-				error.message ||
-					t({
-						comment: "Fallback toast when custom OAuth sign-in fails without a provider error message",
-						message: "Failed to sign in. Please try again.",
-					}),
-				{ id: toastId },
-			);
-			return;
-		}
-
-		toast.dismiss(toastId);
-		await router.invalidate();
-	};
-
-	const handlePasskeyLogin = async () => {
-		const toastId = toast.loading(t`Signing in...`);
-
-		const { error } = await authClient.signIn.passkey({ autoFill: false });
-
-		if (error) {
-			toast.error(
-				error.message ||
-					t({
-						comment: "Fallback toast when passkey sign-in fails without an error message",
-						message: "Failed to sign in. Please try again.",
-					}),
-				{ id: toastId },
-			);
-			return;
-		}
-
 		toast.dismiss(toastId);
 		await router.invalidate();
 	};
@@ -136,7 +88,14 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 		<div className="grid grid-cols-2 gap-4">
 			<Button
 				variant="secondary"
-				onClick={handleOAuthLogin}
+				onClick={() =>
+					runSignIn(() =>
+						authClient.signIn.oauth2({
+							providerId: "custom",
+							callbackURL: "/dashboard",
+						}),
+					)
+				}
 				className={cn("hidden", "custom" in providers && "inline-flex")}
 			>
 				<VaultIcon />
@@ -145,7 +104,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 
 			<Button
 				variant="secondary"
-				onClick={handlePasskeyLogin}
+				onClick={() => runSignIn(() => authClient.signIn.passkey({ autoFill: false }))}
 				className={cn("hidden", "passkey" in providers && "inline-flex")}
 			>
 				<FingerprintIcon />
@@ -153,7 +112,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 			</Button>
 
 			<Button
-				onClick={() => handleSocialLogin("google")}
+				onClick={() => runSignIn(() => authClient.signIn.social(getSocialSignInOptions("google", requestSignUp)))}
 				className={cn(
 					"hidden flex-1 bg-[#4285F4] text-white hover:bg-[#4285F4]/80",
 					"google" in providers && "inline-flex",
@@ -164,7 +123,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 			</Button>
 
 			<Button
-				onClick={() => handleSocialLogin("github")}
+				onClick={() => runSignIn(() => authClient.signIn.social(getSocialSignInOptions("github", requestSignUp)))}
 				className={cn(
 					"hidden flex-1 bg-[#2b3137] text-white hover:bg-[#2b3137]/80",
 					"github" in providers && "inline-flex",
@@ -175,7 +134,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 			</Button>
 
 			<Button
-				onClick={() => handleSocialLogin("linkedin")}
+				onClick={() => runSignIn(() => authClient.signIn.social(getSocialSignInOptions("linkedin", requestSignUp)))}
 				className={cn(
 					"hidden flex-1 bg-[#0A66C2] text-white hover:bg-[#0A66C2]/80",
 					"linkedin" in providers && "inline-flex",

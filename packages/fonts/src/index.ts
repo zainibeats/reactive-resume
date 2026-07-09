@@ -1,13 +1,16 @@
 import type { Locale, Script } from "@reactive-resume/utils/locale";
-import { unique } from "@reactive-resume/utils/field";
 import { getLocaleScript, isCjkScript } from "@reactive-resume/utils/locale";
+
+// ponytail: inlined from @reactive-resume/utils/field (sole consumer)
+const unique = <T>(items: T[]): T[] => [...new Set(items)];
+
 import webFontListJSON from "./webfontlist.json";
 
-export type FontCategory = "display" | "handwriting" | "monospace" | "serif" | "sans-serif";
+type FontCategory = "display" | "handwriting" | "monospace" | "serif" | "sans-serif";
 export type FontWeight = "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900";
-export type FontFileWeight = FontWeight | `${FontWeight}italic`;
+type FontFileWeight = FontWeight | `${FontWeight}italic`;
 
-export type StandardFont = {
+type StandardFont = {
 	type: "standard";
 	category: FontCategory;
 	family: string;
@@ -23,7 +26,7 @@ export type WebFont = {
 	files: Record<FontFileWeight, string>;
 };
 
-export type FontRecord = StandardFont | WebFont;
+type FontRecord = StandardFont | WebFont;
 
 const preferredChineseFontFamilies = [
 	"Noto Sans SC",
@@ -64,25 +67,6 @@ const fontDisplayNames: Partial<Record<string, string>> = {
 	"ZCOOL QingKe HuangYou": "站酷庆科黄油体",
 };
 
-const resumeCjkSansFontFallbacks = [
-	"Noto Sans SC",
-	"PingFang SC",
-	"Hiragino Sans GB",
-	"Microsoft YaHei",
-	"SimHei",
-	"Source Han Sans SC",
-	"WenQuanYi Micro Hei",
-] as const;
-
-const resumeCjkSerifFontFallbacks = [
-	"Noto Serif SC",
-	"Songti SC",
-	"SimSun",
-	"Source Han Serif SC",
-	"KaiTi",
-	"FangSong",
-] as const;
-
 // Per-script Noto web font, split by serif/sans category. These match the
 // actual writing system: Hangul lives only in the KR fonts, Kana only in JP,
 // Arabic glyphs only in the Arabic fonts, etc. — so a Latin or Simplified-
@@ -100,24 +84,6 @@ const scriptFonts: Record<Script, { serif: string; sansSerif: string }> = {
 	thai: { serif: "Noto Sans Thai", sansSerif: "Noto Sans Thai" },
 };
 
-const genericFontFamilies = new Set([
-	"-apple-system",
-	"BlinkMacSystemFont",
-	"cursive",
-	"emoji",
-	"fantasy",
-	"fangsong",
-	"math",
-	"monospace",
-	"sans-serif",
-	"serif",
-	"system-ui",
-	"ui-monospace",
-	"ui-rounded",
-	"ui-sans-serif",
-	"ui-serif",
-]);
-
 export const webFontList = webFontListJSON as WebFont[];
 export const webFontMap = new Map<string, WebFont>(webFontList.map((font) => [font.family, font]));
 export const standardFontList = standardPdfFontList.filter((font) => !webFontMap.has(font.family));
@@ -129,11 +95,6 @@ function orderFonts(fonts: FontRecord[]) {
 	return [...fonts].sort((a, b) => {
 		return a.family.localeCompare(b.family, undefined, { sensitivity: "base" });
 	});
-}
-
-function toCSSFontFamilyToken(fontFamily: string) {
-	if (genericFontFamilies.has(fontFamily)) return fontFamily;
-	return `'${fontFamily.replaceAll("\\", "\\\\").replaceAll("'", "\\'")}'`;
 }
 
 export const fontList = orderFonts([...standardFontList, ...webFontList]);
@@ -182,15 +143,6 @@ export function getFontSearchKeywords(family: string) {
 	);
 }
 
-function getCjkFallbacksByCategory(category: FontCategory | null) {
-	return category === "serif" ? resumeCjkSerifFontFallbacks : resumeCjkSansFontFallbacks;
-}
-
-function getPrimaryCjkWebFont(family: string) {
-	const category = getFontCategory(family);
-	return category === "serif" ? "Noto Serif SC" : "Noto Sans SC";
-}
-
 function getScriptFont(script: Script, category: FontCategory | null) {
 	const variants = scriptFonts[script];
 	return category === "serif" ? variants.serif : variants.sansSerif;
@@ -214,13 +166,6 @@ export function getWebFontSource(family: string, weight: FontWeight = "400", ita
 
 export function sortFontWeights<T extends string>(fontWeights: T[]): T[] {
 	return [...fontWeights].sort((a, b) => Number(a) - Number(b));
-}
-
-export function getFallbackWebFontFamilies(family: string) {
-	if (isStandardPdfFontFamily(family)) return [];
-
-	const fallback = getPrimaryCjkWebFont(family);
-	return fallback === family ? [] : [fallback];
 }
 
 /**
@@ -251,53 +196,4 @@ export function getPdfFallbackFontFamilies(
 	return unique(ordered.map((script) => getScriptFont(script, category)))
 		.filter((candidate) => candidate !== family)
 		.filter((candidate) => Boolean(getWebFont(candidate)));
-}
-
-/**
- * Back-compat single-font resolver kept for the public `@reactive-resume/fonts`
- * surface: returns the Simplified Chinese fallback (Noto Sans/Serif SC) for a
- * family, or `null` when the family already is that fallback.
- */
-export function getPdfCjkFallbackFontFamily(family: string): string | null {
-	const fallback = getPrimaryCjkWebFont(family);
-	if (fallback === family) return null;
-	if (!getWebFont(fallback)) return null;
-
-	return fallback;
-}
-
-export function getLoadableWebFontWeights(family: string, preferredWeights: string[]) {
-	const font = webFontMap.get(family);
-	if (!font) return [];
-
-	const availableWeights = new Set<FontWeight>(font.weights);
-	const matchingWeights = unique(preferredWeights).filter((weight): weight is FontWeight =>
-		availableWeights.has(weight as FontWeight),
-	);
-
-	if (matchingWeights.length > 0) return matchingWeights;
-
-	const defaultWeights = ["400", "500", "600", "700"].filter((weight): weight is FontWeight =>
-		availableWeights.has(weight as FontWeight),
-	);
-	if (defaultWeights.length > 0) return defaultWeights.slice(0, 2);
-
-	return font.weights.slice(0, 2);
-}
-
-export function buildResumeFontFamily(fontFamily: string) {
-	const category = getFontCategory(fontFamily);
-	const genericFallback = category === "serif" ? "serif" : "sans-serif";
-
-	return unique([
-		fontFamily,
-		...getCjkFallbacksByCategory(category),
-		"system-ui",
-		"-apple-system",
-		"BlinkMacSystemFont",
-		"Segoe UI",
-		genericFallback,
-	])
-		.map(toCSSFontFamilyToken)
-		.join(", ");
 }

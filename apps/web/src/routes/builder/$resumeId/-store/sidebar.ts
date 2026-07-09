@@ -1,12 +1,12 @@
 import type { Layout, usePanelRef } from "react-resizable-panels";
+import Cookies from "js-cookie";
 import { useCallback, useMemo } from "react";
-import { useWindowSize } from "usehooks-ts";
+import { useMediaQuery, useWindowSize } from "usehooks-ts";
 import { create } from "zustand/react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type PanelImperativeHandle = ReturnType<typeof usePanelRef>;
 
-export const BUILDER_LAYOUT_COOKIE_NAME = "builder_layout";
+const BUILDER_LAYOUT_COOKIE_NAME = "builder_layout";
 
 export type BuilderLayout = {
 	left: number;
@@ -101,8 +101,8 @@ type UseBuilderSidebarReturn = {
 	toggleSidebar: (side: "left" | "right", forceState?: boolean) => void;
 };
 
-export function useBuilderSidebar<T = UseBuilderSidebarReturn>(selector?: (builder: UseBuilderSidebarReturn) => T): T {
-	const isMobile = useIsMobile();
+export function useBuilderSidebar(): UseBuilderSidebarReturn {
+	const isMobile = useMediaQuery("(max-width: 767px)", { initializeWithValue: false });
 	const { width } = useWindowSize();
 
 	const { maxSidebarSize, minSidebarSize, collapsedSidebarSize, expandSize, groupResizeBehavior } =
@@ -135,7 +135,8 @@ export function useBuilderSidebar<T = UseBuilderSidebarReturn>(selector?: (build
 		[expandSize],
 	);
 
-	const state = useMemo(() => {
+	// ponytail: memoized but callers destructure; selector removed (state rebuilt every render, zero benefit)
+	return useMemo(() => {
 		return {
 			maxSidebarSize,
 			minSidebarSize,
@@ -145,6 +146,15 @@ export function useBuilderSidebar<T = UseBuilderSidebarReturn>(selector?: (build
 			toggleSidebar,
 		};
 	}, [maxSidebarSize, minSidebarSize, collapsedSidebarSize, groupResizeBehavior, isCollapsed, toggleSidebar]);
-
-	return selector ? selector(state) : (state as T);
 }
+
+export const setBuilderLayout = (data: BuilderLayout) => {
+	const layout = parseBuilderLayoutCookie(JSON.stringify(data));
+	Cookies.set(BUILDER_LAYOUT_COOKIE_NAME, JSON.stringify(layout), { path: "/" });
+};
+
+export const getBuilderLayout = (): BuilderLayout => {
+	const layout = Cookies.get(BUILDER_LAYOUT_COOKIE_NAME);
+	if (!layout) return DEFAULT_BUILDER_LAYOUT;
+	return parseBuilderLayoutCookie(layout);
+};

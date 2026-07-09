@@ -5,14 +5,8 @@ import type { Resume } from "./draft";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "@lingui/core";
-import { ORPCError } from "@orpc/client";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
-import {
-	flushPendingResumeSave,
-	useBuilderResumeUpdateSubscription,
-	useResumeStore,
-	useResumeUpdateSubscription,
-} from "./draft";
+import { useBuilderResumeUpdateSubscription, useResumeStore, useResumeUpdateSubscription } from "./draft";
 
 const orpcMocks = vi.hoisted(() => ({
 	getResumeById: vi.fn(),
@@ -38,14 +32,6 @@ const toastMocks = vi.hoisted(() => ({
 
 vi.mock("@orpc/client", () => ({
 	consumeEventIterator: consumeEventIteratorMock,
-	ORPCError: class ORPCError extends Error {
-		code: string;
-
-		constructor(code: string) {
-			super(code);
-			this.code = code;
-		}
-	},
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -97,7 +83,6 @@ function makeResume(id: string): Resume {
 		slug: id,
 		tags: [],
 		data: cloneResumeData(defaultResumeData),
-		revision: 1,
 		isLocked: false,
 		isPublic: false,
 		hasPassword: false,
@@ -168,43 +153,6 @@ describe("builder resume autosave", () => {
 			expect.objectContaining({ signal: expect.any(AbortSignal) }),
 		);
 		expect(orpcMocks.patchResume).not.toHaveBeenCalled();
-	});
-
-	it("can undo and redo local document edits", async () => {
-		const initial = makeResume("resume-history");
-		const edited = withBasicsName(initial, "Edited Name");
-		orpcMocks.updateResume.mockResolvedValue(edited);
-		useResumeStore.getState().initialize(initial);
-
-		useResumeStore.getState().updateResumeData((draft) => {
-			draft.basics.name = "Edited Name";
-		});
-
-		expect(useResumeStore.getState().undoStack).toHaveLength(1);
-		expect(useResumeStore.getState().redoStack).toHaveLength(0);
-
-		useResumeStore.getState().undoResumeData();
-
-		expect(useResumeStore.getState().resume?.data.basics.name).toBe(initial.data.basics.name);
-		expect(useResumeStore.getState().undoStack).toHaveLength(0);
-		expect(useResumeStore.getState().redoStack).toHaveLength(1);
-
-		useResumeStore.getState().redoResumeData();
-
-		expect(useResumeStore.getState().resume?.data.basics.name).toBe("Edited Name");
-		expect(useResumeStore.getState().undoStack).toHaveLength(1);
-		expect(useResumeStore.getState().redoStack).toHaveLength(0);
-	});
-
-	it("does not add history entries for no-op document edits", () => {
-		const initial = makeResume("resume-noop");
-		useResumeStore.getState().initialize(initial);
-
-		useResumeStore.getState().updateResumeData(() => {});
-
-		expect(useResumeStore.getState().undoStack).toHaveLength(0);
-		expect(useResumeStore.getState().redoStack).toHaveLength(0);
-		expect(orpcMocks.updateResume).not.toHaveBeenCalled();
 	});
 
 	it("saves the latest pending snapshot after an in-flight save resolves", async () => {
@@ -301,50 +249,145 @@ describe("builder resume autosave", () => {
 		);
 		expect(orpcMocks.patchResume).not.toHaveBeenCalled();
 	});
+});
 
-	it("does not keep retrying when the resume update returns NOT_FOUND", async () => {
-		const initial = makeResume("resume-not-found");
-		orpcMocks.updateResume.mockRejectedValue(new ORPCError("NOT_FOUND"));
-		useResumeStore.getState().initialize(initial);
-
-		useResumeStore.getState().updateResumeData((draft) => {
-			draft.basics.name = "Unsaved Name";
-		});
-
-		vi.advanceTimersByTime(500);
-		await flushMicrotasks();
-
-		expect(toastMocks.error).toHaveBeenCalledWith(
-			"This resume could not be saved because it is no longer available.",
-			expect.objectContaining({ duration: Number.POSITIVE_INFINITY }),
+describe("builder resume undo/redo", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+		orpcMocks.updateResume.mockReset();
+		// Echo the submitted data back so the autosave completion doesn't count as an external rebase.
+		orpcMocks.updateResume.mockImplementation((input: { id: string; data: ResumeData }) =>
+			Promise.resolve({ ...makeResume(input.id), data: input.data }),
 		);
-
-		orpcMocks.updateResume.mockClear();
-		vi.advanceTimersByTime(1000);
-		await flushMicrotasks();
-
-		expect(orpcMocks.updateResume).not.toHaveBeenCalled();
+		routerParamsMock.value = {};
+		i18n.loadAndActivate({ locale: "en-US", messages: {} });
+		useResumeStore.getState().reset();
 	});
 
-	it("flushes a pending local save before continuing", async () => {
-		const initial = makeResume("resume-flush");
-		const saved = withBasicsName(initial, "Local Name");
-		orpcMocks.updateResume.mockResolvedValue(saved);
-		useResumeStore.getState().initialize(initial);
+	afterEach(() => {
+		vi.clearAllTimers();
+		vi.useRealTimers();
+		useResumeStore.getState().reset();
+	});
 
-		useResumeStore.getState().updateResumeData((draft) => {
-			draft.basics.name = "Local Name";
+	it("coalesces rapid edits into a single undo step and restores the pre-burst state", () => {
+		const store = useResumeStore.getState;
+		store().initialize(makeResume("undo-coalesce"));
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "First";
+		});
+		store().updateResumeData((draft) => {
+			draft.basics.name = "Second";
 		});
 
-		await act(async () => {
-			await flushPendingResumeSave(initial.id);
+		expect(store().undoStack.length).toBe(1);
+		expect(store().canUndo).toBe(true);
+		expect(store().canRedo).toBe(false);
+		expect(store().resume?.data.basics.name).toBe("Second");
+
+		store().undo();
+		expect(store().resume?.data.basics.name).toBe(defaultResumeData.basics.name);
+		expect(store().canUndo).toBe(false);
+		expect(store().canRedo).toBe(true);
+
+		store().redo();
+		expect(store().resume?.data.basics.name).toBe("Second");
+		expect(store().canRedo).toBe(false);
+	});
+
+	it("separates edits outside the coalesce window into distinct undo steps", async () => {
+		const store = useResumeStore.getState;
+		store().initialize(makeResume("undo-boundary"));
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "A";
 		});
 
-		expect(orpcMocks.updateResume).toHaveBeenCalledWith(
-			{ id: initial.id, data: expect.objectContaining({ basics: expect.objectContaining({ name: "Local Name" }) }) },
-			expect.any(Object),
-		);
-		expect(useResumeStore.getState().resume?.data.basics.name).toBe("Local Name");
+		// Let the autosave flush (echoes the data back) and advance past the coalesce window.
+		vi.advanceTimersByTime(600);
+		await flushMicrotasks();
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "B";
+		});
+
+		expect(store().undoStack.length).toBe(2);
+
+		store().undo();
+		expect(store().resume?.data.basics.name).toBe("A");
+
+		store().undo();
+		expect(store().resume?.data.basics.name).toBe(defaultResumeData.basics.name);
+	});
+
+	it("clears the redo branch when a new edit follows an undo", () => {
+		const store = useResumeStore.getState;
+		store().initialize(makeResume("undo-redo-clear"));
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "One";
+		});
+		store().undo();
+		expect(store().canRedo).toBe(true);
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "Two";
+		});
+
+		expect(store().canRedo).toBe(false);
+		expect(store().redoStack.length).toBe(0);
+	});
+
+	it("does not undo when the resume is locked", () => {
+		const store = useResumeStore.getState;
+		store().initialize(makeResume("undo-locked"));
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "Editable";
+		});
+		store().patchResume((resume) => {
+			resume.isLocked = true;
+		});
+
+		store().undo();
+		expect(store().resume?.data.basics.name).toBe("Editable");
+	});
+
+	it("preserves the undo stack when the server echoes the current data (autosave)", () => {
+		const store = useResumeStore.getState;
+		store().initialize(makeResume("rebase-echo"));
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "Edited";
+		});
+		expect(store().undoStack.length).toBe(1);
+
+		const current = store().resume;
+		if (!current) throw new Error("expected a current resume");
+		// Autosave echo: the server returns data identical to what's already in the store.
+		store().replaceResumeFromServer({ ...current, data: cloneResumeData(current.data) });
+
+		expect(store().undoStack.length).toBe(1);
+		expect(store().canUndo).toBe(true);
+	});
+
+	it("clears the undo stack when the server sends different data (external rebase)", () => {
+		const store = useResumeStore.getState;
+		store().initialize(makeResume("rebase-external"));
+
+		store().updateResumeData((draft) => {
+			draft.basics.name = "Edited";
+		});
+		expect(store().undoStack.length).toBe(1);
+
+		const current = store().resume;
+		if (!current) throw new Error("expected a current resume");
+		// External / AI rebase: incoming data differs, so the local undo history no longer applies.
+		store().replaceResumeFromServer(withBasicsName(current, "External Name"));
+
+		expect(store().undoStack.length).toBe(0);
+		expect(store().canUndo).toBe(false);
 	});
 });
 
@@ -410,11 +453,6 @@ describe("resume update stream subscription", () => {
 
 		expect(queryClientMock.setQueryData).toHaveBeenCalledWith(["resume", "getById", initial.id], remote);
 		expect(useResumeStore.getState().resume?.data.basics.name).toBe("Remote Name");
-		expect(useResumeStore.getState().undoStack).toHaveLength(1);
-
-		useResumeStore.getState().undoResumeData();
-
-		expect(useResumeStore.getState().resume?.data.basics.name).toBe(initial.data.basics.name);
 	});
 
 	it("does not overwrite pending local builder edits when a remote update arrives", async () => {

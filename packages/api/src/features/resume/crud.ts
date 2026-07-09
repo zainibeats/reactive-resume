@@ -1,4 +1,4 @@
-import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
+import { createSampleResumeData } from "@reactive-resume/schema/resume/sample";
 import { generateRandomName, slugify } from "@reactive-resume/utils/string";
 import { protectedProcedure } from "../../context";
 import { resumeDto } from "../../dto/resume";
@@ -71,7 +71,7 @@ export const crudRouter = {
 				tags: input.tags,
 				locale: context.locale,
 				userId: context.user.id,
-				...(input.withSampleData ? { data: sampleResumeData } : {}),
+				...(input.withSampleData ? { data: createSampleResumeData(input.name) } : {}),
 			});
 		}),
 
@@ -99,7 +99,7 @@ export const crudRouter = {
 			const name = generateRandomName();
 			const slug = slugify(name);
 
-			return resumeService.create({
+			const id = await resumeService.create({
 				name,
 				slug,
 				tags: [],
@@ -107,6 +107,16 @@ export const crudRouter = {
 				locale: context.locale,
 				userId: context.user.id,
 			});
+
+			// Milestone checkpoint for the imported document (best-effort).
+			await resumeService.versions.snapshot({
+				resumeId: id,
+				userId: context.user.id,
+				data: input.data,
+				label: "Imported",
+			});
+
+			return id;
 		}),
 
 	update: protectedProcedure

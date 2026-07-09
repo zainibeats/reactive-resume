@@ -1,16 +1,16 @@
 import type { Style } from "@react-pdf/types";
 import type { CustomField } from "@reactive-resume/schema/resume/data";
 import type { IconName } from "phosphor-icons-react-pdf/dynamic";
-import { View } from "../../renderer";
+import { View } from "#react-pdf-renderer";
 import { getCustomFieldLinkUrl, getWebsiteDisplayText } from "./contact";
 import { Icon, Link, Text } from "./primitives";
+
+type ContactStyle = Style | Style[];
 
 type WebsiteDisplay = {
 	url: string;
 	label?: string | undefined;
 };
-
-type ContactStyle = Style | Style[];
 
 type WebsiteContactItemProps = {
 	website: WebsiteDisplay;
@@ -55,4 +55,63 @@ export const CustomFieldContactItem = ({ field, style, textStyle, iconColor }: C
 	}
 
 	return <View {...(style ? { style } : {})}>{children}</View>;
+};
+
+type EmailContactItemProps = {
+	email: string;
+	style?: ContactStyle;
+	textStyle?: ContactStyle;
+	iconColor?: string;
+	/** Override icon; defaults to "envelope". ditgar uses "at". */
+	iconName?: IconName;
+};
+
+export const EmailContactItem = ({
+	email,
+	style,
+	textStyle,
+	iconColor,
+	iconName = "envelope",
+}: EmailContactItemProps) => {
+	if (!email) return null;
+	return (
+		<Link src={`mailto:${email}`} {...(style ? { style } : {})}>
+			<Icon name={iconName} {...(iconColor ? { color: iconColor } : {})} />
+			<Text {...(textStyle ? { style: textStyle } : {})}>{email}</Text>
+		</Link>
+	);
+};
+
+type PhoneContactItemProps = {
+	phone: string;
+	style?: ContactStyle;
+	textStyle?: ContactStyle;
+	iconColor?: string;
+};
+
+export const PhoneContactItem = ({ phone, style, textStyle, iconColor }: PhoneContactItemProps) => {
+	if (!phone) return null;
+	return (
+		<Link src={`tel:${phone}`} {...(style ? { style } : {})}>
+			<Icon name="phone" {...(iconColor ? { color: iconColor } : {})} />
+			<Text {...(textStyle ? { style: textStyle } : {})}>{phone}</Text>
+		</Link>
+	);
+};
+
+type LocationContactItemProps = {
+	location: string;
+	style?: ContactStyle;
+	textStyle?: ContactStyle;
+	iconColor?: string;
+};
+
+export const LocationContactItem = ({ location, style, textStyle, iconColor }: LocationContactItemProps) => {
+	if (!location) return null;
+	return (
+		<View {...(style ? { style } : {})}>
+			<Icon name="map-pin" {...(iconColor ? { color: iconColor } : {})} />
+			<Text {...(textStyle ? { style: textStyle } : {})}>{location}</Text>
+		</View>
+	);
 };

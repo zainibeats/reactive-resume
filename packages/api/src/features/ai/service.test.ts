@@ -1,114 +1,83 @@
 import type { UIMessage } from "ai";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { convertToModelMessages, modelMessageSchema } from "ai";
 
-let convertToOllamaChatMessages: typeof import("./service").convertToOllamaChatMessages;
-let normalizeOllamaChatStreamLine: typeof import("./service").normalizeOllamaChatStreamLine;
+const envMock = vi.hoisted(() => ({
+	FLAG_ALLOW_UNSAFE_AI_BASE_URL: false,
+}));
+
+vi.mock("@reactive-resume/env/server", () => ({ env: envMock }));
+
+afterEach(() => {
+	vi.unstubAllGlobals();
+});
+
+function stubOpenAICompatibleResponse(response?: { content?: string; finishReason?: string }) {
+	let requestBody: unknown;
+
+	const fetchMock = vi.fn(async (_input: unknown, init?: { body?: unknown }) => {
+		const body = JSON.parse(String(init?.body ?? "{}")) as { max_tokens?: number };
+		requestBody = body;
+		const hasEnoughOutputTokens = (body.max_tokens ?? 0) >= 128;
+
+		return new Response(
+			JSON.stringify({
+				id: "chatcmpl-test",
+				object: "chat.completion",
+				created: 1,
+				model: "test-model",
+				choices: [
+					{
+						index: 0,
+						message: { role: "assistant", content: response?.content ?? (hasEnoughOutputTokens ? "1" : "") },
+						finish_reason: response?.finishReason ?? (hasEnoughOutputTokens ? "stop" : "length"),
+					},
+				],
+				usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+			}),
+			{ headers: { "Content-Type": "application/json" } },
+		);
+	});
+
+	vi.stubGlobal("fetch", fetchMock);
+
+	return { fetchMock, getRequestBody: () => requestBody };
+}
+
+const { testConnection } = await import("./service");
 
 describe("AI chat service", () => {
-	beforeAll(async () => {
-		vi.stubEnv("APP_URL", "http://localhost:3000");
-		vi.stubEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres");
-		vi.stubEnv("AUTH_SECRET", "test-secret");
+	it("tests OpenAI-compatible providers without requiring structured output", async () => {
+		const openAiCompatible = stubOpenAICompatibleResponse();
 
-		({ convertToOllamaChatMessages, normalizeOllamaChatStreamLine } = await import("./service"));
+		await expect(
+			testConnection({
+				provider: "openai-compatible",
+				model: "test-model",
+				apiKey: "test-key",
+				baseURL: "https://example.test/v1",
+			}),
+		).resolves.toBe(true);
+
+		expect(openAiCompatible.fetchMock).toHaveBeenCalledTimes(1);
+		expect(openAiCompatible.getRequestBody()).not.toHaveProperty("response_format");
+		expect(openAiCompatible.getRequestBody()).toMatchObject({ max_tokens: 128, temperature: 0 });
 	});
 
-	const messagesWithProposal: UIMessage[] = [
-		{
-			id: "user-1",
-			role: "user",
-			parts: [{ type: "text", text: "Add draft references." }],
-		},
-		{
-			id: "assistant-1",
-			role: "assistant",
-			parts: [
-				{
-					type: "tool-propose_resume_patches",
-					toolCallId: "call-1",
-					state: "output-available",
-					input: {
-						proposals: [
-							{
-								title: "Add draft references",
-								operations: [
-									{
-										op: "replace",
-										path: "/sections/references/items",
-										value: [
-											{ id: "reference-1", name: "Jane Mitchell" },
-											{ id: "reference-2", name: "Marcus Chen" },
-											{ id: "reference-3", name: "Olivia Ramirez" },
-										],
-									},
-								],
-							},
-						],
-					},
-					output: {
-						proposals: [
-							{
-								id: "proposal-1",
-								title: "Add draft references",
-								baseUpdatedAt: "2026-05-10T06:38:27.093Z",
-								operations: [
-									{
-										op: "replace",
-										path: "/sections/references/items",
-										value: [
-											{ id: "reference-1", name: "Jane Mitchell" },
-											{ id: "reference-2", name: "Marcus Chen" },
-											{ id: "reference-3", name: "Olivia Ramirez" },
-										],
-									},
-								],
-							},
-						],
-					},
-				},
-			],
-		},
-		{
-			id: "assistant-2",
-			role: "assistant",
-			parts: [{ type: "text", text: "I prepared draft reference changes for review." }],
-		},
-		{
-			id: "user-2",
-			role: "user",
-			parts: [{ type: "text", text: "Reduce it down to the first two." }],
-		},
-	];
+	it("explains when the provider test hits the output limit", async () => {
+		stubOpenAICompatibleResponse({ content: "1. The connection works.", finishReason: "length" });
+
+		await expect(
+			testConnection({
+				provider: "openai-compatible",
+				model: "test-model",
+				apiKey: "test-key",
+				baseURL: "https://example.test/v1",
+			}),
+		).rejects.toThrow("The model returned too much text during the provider test.");
+	});
 
 	it("keeps proposal tool history valid for follow-up chat messages", async () => {
-		const modelMessages = await convertToModelMessages(messagesWithProposal);
-
-		expect(modelMessages.map((message) => message.role)).toEqual(["user", "assistant", "tool", "assistant", "user"]);
-		expect(JSON.stringify(modelMessages)).toContain("proposal-1");
-		expect(JSON.stringify(modelMessages)).toContain("/sections/references/items");
-		expect(JSON.stringify(modelMessages)).toContain("tool-result");
-
-		for (const message of modelMessages) {
-			expect(modelMessageSchema.safeParse(message).success).toBe(true);
-		}
-	});
-
-	it("converts proposal tool history to assistant text for Ollama", () => {
-		const modelMessages = convertToOllamaChatMessages(messagesWithProposal);
-
-		expect(modelMessages.map((message) => message.role)).toEqual(["user", "assistant", "assistant", "user"]);
-		expect(JSON.stringify(modelMessages)).toContain("Prepared resume patch proposal");
-		expect(JSON.stringify(modelMessages)).toContain("Add draft references");
-		expect(JSON.stringify(modelMessages)).toContain("replace /sections/references/items");
-		expect(JSON.stringify(modelMessages)).not.toContain("tool-result");
-
-		for (const message of modelMessages) {
-			expect(modelMessageSchema.safeParse(message).success).toBe(true);
-		}
-	});
-
-	it("falls back to proposal tool input when Ollama history has no tool output", () => {
 		const messages: UIMessage[] = [
 			{
 				id: "user-1",
@@ -122,7 +91,7 @@ describe("AI chat service", () => {
 					{
 						type: "tool-propose_resume_patches",
 						toolCallId: "call-1",
-						state: "input-available",
+						state: "output-available",
 						input: {
 							proposals: [
 								{
@@ -141,8 +110,33 @@ describe("AI chat service", () => {
 								},
 							],
 						},
+						output: {
+							proposals: [
+								{
+									id: "proposal-1",
+									title: "Add draft references",
+									baseUpdatedAt: "2026-05-10T06:38:27.093Z",
+									operations: [
+										{
+											op: "replace",
+											path: "/sections/references/items",
+											value: [
+												{ id: "reference-1", name: "Jane Mitchell" },
+												{ id: "reference-2", name: "Marcus Chen" },
+												{ id: "reference-3", name: "Olivia Ramirez" },
+											],
+										},
+									],
+								},
+							],
+						},
 					},
 				],
+			},
+			{
+				id: "assistant-2",
+				role: "assistant",
+				parts: [{ type: "text", text: "I prepared draft reference changes for review." }],
 			},
 			{
 				id: "user-2",
@@ -151,77 +145,15 @@ describe("AI chat service", () => {
 			},
 		];
 
-		const modelMessages = convertToOllamaChatMessages(messages);
+		const modelMessages = await convertToModelMessages(messages);
 
-		expect(modelMessages.map((message) => message.role)).toEqual(["user", "assistant", "user"]);
+		expect(modelMessages.map((message) => message.role)).toEqual(["user", "assistant", "tool", "assistant", "user"]);
+		expect(JSON.stringify(modelMessages)).toContain("proposal-1");
 		expect(JSON.stringify(modelMessages)).toContain("/sections/references/items");
-		expect(JSON.stringify(modelMessages)).toContain("Prepared resume patch proposal");
-	});
+		expect(JSON.stringify(modelMessages)).toContain("tool-result");
 
-	it("normalizes Ollama final chat stream chunks without a message envelope", () => {
-		const line = JSON.stringify({
-			done: true,
-			done_reason: "stop",
-			total_duration: 100,
-			prompt_eval_count: 12,
-			eval_count: 3,
-		});
-		const normalized = JSON.parse(
-			normalizeOllamaChatStreamLine(line, "llama3.2", () => new Date("2026-06-15T00:00:00.000Z")),
-		);
-
-		expect(normalized).toEqual({
-			model: "llama3.2",
-			created_at: "2026-06-15T00:00:00.000Z",
-			done: true,
-			done_reason: "stop",
-			total_duration: 100,
-			prompt_eval_count: 12,
-			eval_count: 3,
-			message: { role: "assistant", content: "" },
-		});
-	});
-
-	it("wraps top-level Ollama tool calls in the chat message envelope", () => {
-		const line = JSON.stringify({
-			tool_calls: [
-				{
-					function: {
-						name: "apply_resume_patch",
-						arguments: { title: "Rewrite summary", operations: [] },
-					},
-				},
-			],
-		});
-		const normalized = JSON.parse(
-			normalizeOllamaChatStreamLine(line, "llama3.2", () => new Date("2026-06-15T00:00:00.000Z")),
-		);
-
-		expect(normalized).toEqual({
-			model: "llama3.2",
-			created_at: "2026-06-15T00:00:00.000Z",
-			done: false,
-			message: {
-				role: "assistant",
-				content: "",
-				tool_calls: [
-					{
-						function: {
-							name: "apply_resume_patch",
-							arguments: { title: "Rewrite summary", operations: [] },
-						},
-					},
-				],
-			},
-		});
-	});
-
-	it("leaves non-chat and error stream lines unchanged", () => {
-		const errorLine = JSON.stringify({ error: "model unloaded" });
-		const unrelatedLine = JSON.stringify({ status: "pulling manifest" });
-
-		expect(normalizeOllamaChatStreamLine(errorLine, "llama3.2")).toBe(errorLine);
-		expect(normalizeOllamaChatStreamLine(unrelatedLine, "llama3.2")).toBe(unrelatedLine);
-		expect(normalizeOllamaChatStreamLine("not json", "llama3.2")).toBe("not json");
+		for (const message of modelMessages) {
+			expect(modelMessageSchema.safeParse(message).success).toBe(true);
+		}
 	});
 });

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 import { renderHtml } from "react-pdf-html";
-import { Text as PdfText } from "../../renderer";
+import { Text as PdfText } from "#react-pdf-renderer";
 import { convertPseudoBulletParagraphs, normalizeRichTextHtml, richTextMarkClassName } from "./rich-text-html";
 
 type PdfElement = ReactElement<{ children?: unknown; element?: { tag: string } }>;

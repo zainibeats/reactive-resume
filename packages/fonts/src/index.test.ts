@@ -1,13 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-	buildResumeFontFamily,
 	fontList,
-	getFallbackWebFontFamilies,
 	getFont,
 	getFontDisplayName,
 	getFontSearchKeywords,
-	getLoadableWebFontWeights,
-	getPdfCjkFallbackFontFamily,
 	getPdfFallbackFontFamilies,
 	getWebFont,
 	getWebFontSource,
@@ -150,20 +146,6 @@ describe("getWebFontSource", () => {
 	});
 });
 
-describe("getPdfCjkFallbackFontFamily", () => {
-	it("returns Noto Sans SC for sans-serif/standard PDF fonts", () => {
-		expect(getPdfCjkFallbackFontFamily("Helvetica")).toBe("Noto Sans SC");
-	});
-
-	it("returns Noto Serif SC for serif fonts", () => {
-		expect(getPdfCjkFallbackFontFamily("Times-Roman")).toBe("Noto Serif SC");
-	});
-
-	it("returns null when family already is the CJK fallback", () => {
-		expect(getPdfCjkFallbackFontFamily("Noto Sans SC")).toBeNull();
-	});
-});
-
 describe("getPdfFallbackFontFamilies", () => {
 	it("puts the Korean Noto font first for the ko-KR locale (Hangul needs KR, not SC)", () => {
 		expect(getPdfFallbackFontFamilies("Times-Roman", { locale: "ko-KR" })).toEqual(["Noto Serif KR", "Noto Serif SC"]);
@@ -231,102 +213,6 @@ describe("getPdfFallbackFontFamilies", () => {
 		for (const family of families) {
 			expect(getWebFont(family)).toBeDefined();
 		}
-	});
-});
-
-describe("getFallbackWebFontFamilies", () => {
-	it("returns empty array for standard PDF fonts", () => {
-		expect(getFallbackWebFontFamilies("Helvetica")).toEqual([]);
-		expect(getFallbackWebFontFamilies("Courier")).toEqual([]);
-		expect(getFallbackWebFontFamilies("Times-Roman")).toEqual([]);
-	});
-
-	it("returns the primary CJK web font for non-standard, non-CJK families", () => {
-		// e.g. Roboto (sans-serif) → Noto Sans SC fallback
-		const roboto = getWebFont("Roboto");
-		if (roboto) {
-			expect(getFallbackWebFontFamilies("Roboto")).toEqual(["Noto Sans SC"]);
-		}
-	});
-
-	it("returns empty when family is already its primary CJK fallback", () => {
-		expect(getFallbackWebFontFamilies("Noto Sans SC")).toEqual([]);
-	});
-});
-
-describe("getLoadableWebFontWeights", () => {
-	it("returns empty array for unknown fonts", () => {
-		expect(getLoadableWebFontWeights("definitely-not-a-font", ["400"])).toEqual([]);
-	});
-
-	it("returns matching weights when preferred weights are available", () => {
-		const roboto = getWebFont("Roboto");
-		if (roboto) {
-			const result = getLoadableWebFontWeights("Roboto", ["400", "700"]);
-			for (const weight of result) {
-				expect(roboto.weights).toContain(weight);
-			}
-		}
-	});
-
-	it("falls back to default weights when no preferences match", () => {
-		const roboto = getWebFont("Roboto");
-		if (roboto) {
-			const result = getLoadableWebFontWeights("Roboto", ["999"]);
-			expect(result.length).toBeGreaterThan(0);
-		}
-	});
-
-	it("deduplicates preferred weights", () => {
-		const roboto = getWebFont("Roboto");
-		if (roboto?.weights.includes("400")) {
-			const result = getLoadableWebFontWeights("Roboto", ["400", "400"]);
-			expect(result).toEqual(["400"]);
-		}
-	});
-});
-
-describe("buildResumeFontFamily", () => {
-	it("wraps the primary family in single quotes", () => {
-		const result = buildResumeFontFamily("Roboto");
-		expect(result.startsWith("'Roboto',")).toBe(true);
-	});
-
-	it("includes generic sans-serif fallback by default", () => {
-		const result = buildResumeFontFamily("Roboto");
-		expect(result.endsWith("sans-serif")).toBe(true);
-	});
-
-	it("uses serif fallback for serif-category fonts", () => {
-		expect(buildResumeFontFamily("Times-Roman").endsWith("serif")).toBe(true);
-	});
-
-	it("includes system-ui and Segoe UI fallbacks", () => {
-		const result = buildResumeFontFamily("Roboto");
-		expect(result).toContain("system-ui");
-		expect(result).toContain("Segoe UI");
-	});
-
-	it("includes CJK fallbacks for sans-serif fonts", () => {
-		const result = buildResumeFontFamily("Roboto");
-		expect(result).toContain("Noto Sans SC");
-	});
-
-	it("includes CJK serif fallbacks for serif fonts", () => {
-		const result = buildResumeFontFamily("Times-Roman");
-		expect(result).toContain("Noto Serif SC");
-	});
-
-	it("does not duplicate primary family in fallback list", () => {
-		const result = buildResumeFontFamily("Noto Sans SC");
-		// Family should appear once
-		const occurrences = result.split("Noto Sans SC").length - 1;
-		expect(occurrences).toBe(1);
-	});
-
-	it("escapes single quotes in family names", () => {
-		const result = buildResumeFontFamily("Bob's Font");
-		expect(result).toContain("Bob\\'s Font");
 	});
 });
 

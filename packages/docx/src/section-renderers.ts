@@ -43,6 +43,15 @@ function getHtmlStyle(): HtmlStyleConfig {
 	};
 }
 
+/** Base TextRun properties (font, size, color) shared across all section renderers. */
+function getBaseRun() {
+	return {
+		...(bodyFont ? { font: bodyFont } : {}),
+		...(bodySize ? { size: bodySize } : {}),
+		...(textColor ? { color: textColor } : {}),
+	};
+}
+
 /**
  * Creates a section heading paragraph with primary color and bottom border.
  * Uses the heading typography set via `setRenderConfig`.
@@ -70,11 +79,7 @@ function sectionHeading(title: string, colorHex: string): Paragraph {
 }
 
 function titleAndSubtitle(primary: string, secondary: string, rightText?: string): Paragraph {
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 	const children: (TextRun | ExternalHyperlink)[] = [new TextRun({ text: primary, bold: true, ...baseRun })];
 
 	if (secondary) {
@@ -151,12 +156,7 @@ function renderExperience(section: Sections["experience"], colorHex: string): Pa
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		if (item.roles && item.roles.length > 0) {
@@ -202,11 +202,7 @@ function renderEducation(section: Sections["education"], colorHex: string): Para
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		const degreeArea = [item.degree, item.area].filter(Boolean).join(", ");
@@ -259,11 +255,7 @@ function renderSkills(section: Sections["skills"], colorHex: string): Paragraph[
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		const children: TextRun[] = [new TextRun({ text: item.name, bold: true, ...baseRun })];
@@ -287,11 +279,7 @@ function renderLanguages(section: Sections["languages"], colorHex: string): Para
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		const children: TextRun[] = [new TextRun({ text: item.language, bold: true, ...baseRun })];
@@ -311,11 +299,7 @@ function renderInterests(section: Sections["interests"], colorHex: string): Para
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		const children: TextRun[] = [new TextRun({ text: item.name, bold: true, ...baseRun })];
@@ -418,11 +402,7 @@ function renderReferences(section: Sections["references"], colorHex: string): Pa
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		const children: TextRun[] = [new TextRun({ text: item.name, bold: true, ...baseRun })];
@@ -457,11 +437,7 @@ function renderProfiles(section: Sections["profiles"], colorHex: string): Paragr
 	if (section.hidden || items.length === 0) return [];
 
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
-	const baseRun = {
-		...(bodyFont ? { font: bodyFont } : {}),
-		...(bodySize ? { size: bodySize } : {}),
-		...(textColor ? { color: textColor } : {}),
-	};
+	const baseRun = getBaseRun();
 
 	for (const item of items) {
 		const children: (TextRun | ExternalHyperlink)[] = [new TextRun({ text: item.network, bold: true, ...baseRun })];
@@ -530,7 +506,7 @@ export function renderCustomSection(section: CustomSection, colorHex: string): P
 
 	// Cover letter type — render recipient + content
 	if (sectionType === "cover-letter") {
-		const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
+		const paragraphs: Paragraph[] = [];
 		for (const item of visibleItems) {
 			if ("recipient" in item && item.recipient) {
 				paragraphs.push(...htmlToParagraphs(item.recipient, getHtmlStyle()));

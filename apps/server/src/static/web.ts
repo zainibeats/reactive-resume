@@ -52,12 +52,21 @@ function isPublicResumePath(pathname: string): boolean {
 	return segments.length === 2 && firstSegment !== undefined && !reservedPublicResumeSegments.has(firstSegment);
 }
 
+const BASE_SECURITY_HEADERS = {
+	"X-Frame-Options": "DENY",
+	"X-Content-Type-Options": "nosniff",
+	"Referrer-Policy": "strict-origin-when-cross-origin",
+	"Content-Security-Policy-Report-Only":
+		"default-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+};
+
 function getFallbackResponseHeaders(pathname: string) {
-	if (pathname === "/") return { "Content-Type": "text/html; charset=UTF-8" };
+	if (pathname === "/") return { "Content-Type": "text/html; charset=UTF-8", ...BASE_SECURITY_HEADERS };
 	if (isNoindexShellPath(pathname) || isPublicResumePath(pathname)) {
 		return {
 			"Content-Type": "text/html; charset=UTF-8",
 			"X-Robots-Tag": "noindex, follow",
+			...BASE_SECURITY_HEADERS,
 		};
 	}
 
@@ -74,23 +83,20 @@ function notFoundResponse(options: { head?: boolean; noindex?: boolean } = {}) {
 	});
 }
 
+// ponytail: GET and HEAD share the same routing logic; method determines body presence
 export async function handleWebApp(request: Request) {
+	const isHead = request.method === "HEAD";
 	const pathname = new URL(request.url).pathname;
-	if (!isNoindexShellPath(pathname) && isAssetPath(pathname)) return new Response("Not Found", { status: 404 });
+
+	if (!isNoindexShellPath(pathname) && isAssetPath(pathname)) {
+		return new Response(isHead ? null : "Not Found", { status: 404 });
+	}
 
 	const headers = getFallbackResponseHeaders(pathname);
-	if (!headers) return notFoundResponse({ noindex: true });
+	if (!headers) return notFoundResponse({ head: isHead, noindex: true });
+
+	if (isHead) return new Response(null, { status: 200, headers });
 
 	const html = await fs.readFile(indexHtmlPath, "utf-8");
 	return new Response(html, { headers });
-}
-
-export function handleWebAppHead(request: Request) {
-	const pathname = new URL(request.url).pathname;
-	if (!isNoindexShellPath(pathname) && isAssetPath(pathname)) return new Response(null, { status: 404 });
-
-	const headers = getFallbackResponseHeaders(pathname);
-	if (!headers) return notFoundResponse({ head: true, noindex: true });
-
-	return new Response(null, { status: 200, headers });
 }

@@ -1,21 +1,34 @@
 import { Trans } from "@lingui/react/macro";
 import { KeyIcon, LockOpenIcon, ToggleLeftIcon, ToggleRightIcon } from "@phosphor-icons/react";
 import { m } from "motion/react";
-import { useCallback, useMemo } from "react";
-import { match } from "ts-pattern";
+import { useCallback } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { useDialogStore } from "@/dialogs/store";
 import { authClient } from "@/libs/auth/client";
 import { useAuthAccounts } from "./hooks";
 
+// ponytail: shared hover/tap wrapper — identical in both branches, match(boolean) removed
+function ActionButton({ children }: { children: React.ReactNode }) {
+	return (
+		<m.div
+			className="will-change-transform"
+			whileHover={{ y: -1, scale: 1.01 }}
+			whileTap={{ scale: 0.99 }}
+			transition={{ duration: 0.14, ease: "easeOut" }}
+		>
+			{children}
+		</m.div>
+	);
+}
+
 export function TwoFactorSection() {
 	const { openDialog } = useDialogStore();
 	const { hasAccount } = useAuthAccounts();
 	const { data: session } = authClient.useSession();
 
-	const hasPassword = useMemo(() => hasAccount("credential"), [hasAccount]);
-	const hasTwoFactor = useMemo(() => session?.user.twoFactorEnabled ?? false, [session]);
+	const hasPassword = hasAccount("credential");
+	const hasTwoFactor = session?.user.twoFactorEnabled ?? false;
 
 	const handleTwoFactorAction = useCallback(() => {
 		if (hasTwoFactor) {
@@ -30,7 +43,7 @@ export function TwoFactorSection() {
 	return (
 		<m.div
 			className="will-change-[transform,opacity]"
-			initial={{ opacity: 0, y: -20 }}
+			initial={{ y: -20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2, delay: 0.2, ease: "easeOut" }}
 		>
@@ -42,34 +55,21 @@ export function TwoFactorSection() {
 					<Trans>Two-Factor Authentication</Trans>
 				</h2>
 
-				{match(hasTwoFactor)
-					.with(true, () => (
-						<m.div
-							className="will-change-transform"
-							whileHover={{ y: -1, scale: 1.01 }}
-							whileTap={{ scale: 0.99 }}
-							transition={{ duration: 0.14, ease: "easeOut" }}
-						>
-							<Button variant="outline" onClick={handleTwoFactorAction}>
+				<ActionButton>
+					<Button variant="outline" onClick={handleTwoFactorAction}>
+						{hasTwoFactor ? (
+							<>
 								<ToggleLeftIcon />
 								<Trans>Disable 2FA</Trans>
-							</Button>
-						</m.div>
-					))
-					.with(false, () => (
-						<m.div
-							className="will-change-transform"
-							whileHover={{ y: -1, scale: 1.01 }}
-							whileTap={{ scale: 0.99 }}
-							transition={{ duration: 0.14, ease: "easeOut" }}
-						>
-							<Button variant="outline" onClick={handleTwoFactorAction}>
+							</>
+						) : (
+							<>
 								<ToggleRightIcon />
 								<Trans>Enable 2FA</Trans>
-							</Button>
-						</m.div>
-					))
-					.exhaustive()}
+							</>
+						)}
+					</Button>
+				</ActionButton>
 			</div>
 		</m.div>
 	);

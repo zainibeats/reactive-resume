@@ -8,7 +8,7 @@ msgstr ""
 "Language: ro\n"
 "Project-Id-Version: reactive-resume\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-06-18 16:54\n"
+"PO-Revision-Date: 2026-07-08 23:18\n"
 "Last-Translator: \n"
 "Language-Team: Romanian\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100>0 && n%100<20)) ? 1 : 2);\n"
@@ -18,20 +18,14 @@ msgstr ""
 "X-Crowdin-File: /apps/web/locales/en-US.po\n"
 "X-Crowdin-File-ID: 545\n"
 
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Last Updated"
-msgstr "Ultima actualizare"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Created"
-msgstr "Creat"
-
-#. js-lingui-explicit-id
-#: src/routes/dashboard/resumes/index.tsx
-msgid "Name"
-msgstr "Nume"
+#. placeholder {0}: application.role
+#. placeholder {0}: current.role
+#. placeholder {1}: application.company
+#. placeholder {1}: current.company
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "\"{0} · {1}\" and its full timeline will be permanently deleted. This can't be undone."
+msgstr "\"{0} · {1}\" și istoricul său complet vor fi șterse definitiv. Această acțiune nu poate fi anulată."
 
 #: src/routes/_home/-sections/footer.tsx
 #: src/routes/_home/-sections/hero.tsx
@@ -48,35 +42,53 @@ msgstr "{0, plural, one {# element} few {# elemente} other {# de elemente}}"
 msgid "{0, plural, one {# role} other {# roles}}"
 msgstr "{0, plural, one {# rol} few {# roluri} other {# de roluri}}"
 
+#. placeholder {0}: insights.total
+#: src/features/applications/components/insights-view.tsx
+msgid "{0} applications tracked"
+msgstr "{0} candidaturi urmărite"
+
+#. Character count readout for the rich-text editor
+#. placeholder {0}: state.characterCount
+#: src/components/input/rich-input.tsx
+msgid "{0} characters"
+msgstr "caractere {0}"
+
+#. placeholder {0}: importable.length
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "{0} ready to import"
+msgstr "{0} gata de importat"
+
+#. placeholder {0}: insights.rejected
+#: src/features/applications/components/insights-view.tsx
+msgid "{0} rejected"
+msgstr "{0} respinse"
+
+#. placeholder {0}: parsed.skipped
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "{0} skipped (missing company/role)"
+msgstr "{0} omis (compania/rolul lipsă)"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "{column, plural, one {# Column} other {# Columns}}"
 msgstr "{column, plural, one {# coloană} few {# coloane} other {# de coloane}}"
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
+msgid "{label} over the last 30 days"
+msgstr "{label} în ultimele 30 de zile"
+
 #: src/routes/_home/-sections/hero.tsx
 msgid "<0>Finally,</0><1>A free and open-source resume builder</1>"
-msgstr "<0>În sfârșit,</0><1>Un constructor de CV-uri gratuit și "
-"open-source</1>"
+msgstr "<0>În sfârșit,</0><1>Un constructor de CV-uri gratuit și open-source</1>"
 
 #: src/routes/_home/-sections/faq.tsx
-msgctxt "Home page FAQ section heading with each word visually separated into "
-"individual spans"
+msgctxt "Home page FAQ section heading with each word visually separated into individual spans"
 msgid "<0>Frequently</0><1>Asked</1><2>Questions</2>"
 msgstr "<0>Întrebări</0><1>Frecvent</1><2>Adresate</2>"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
-msgid "<0>Thank you for using Reactive Resume! This app is a labor of love, "
-"created mostly in my spare time, with wonderful support from open-source "
-"contributors around the world.</0><1>If Reactive Resume has been helpful "
-"to you, and you'd like to help keep it free and open for everyone, "
-"please consider making a donation. Every little bit is appreciated!</1>"
-msgstr "<0>Vă mulțumim că folosiți Reactive Resume! Această aplicație este un "
-"proiect de suflet, creată în mare parte în timpul meu liber, cu un "
-"sprijin minunat din partea contribuitorilor open-source din întreaga "
-"lume.</0><1>Dacă Reactive Resume v-a fost de ajutor și doriți să "
-"contribuiți la menținerea ei gratuită și deschisă pentru toată lumea, "
-"vă rugăm să luați în considerare o donație. Orice contribuție este "
-"apreciată!</1>"
+msgid "<0>Thank you for using Reactive Resume! This app is a labor of love, created mostly in my spare time, with wonderful support from open-source contributors around the world.</0><1>If Reactive Resume has been helpful to you, and you'd like to help keep it free and open for everyone, please consider making a donation. Every little bit is appreciated!</1>"
+msgstr "<0>Vă mulțumim că folosiți Reactive Resume! Această aplicație este un proiect de suflet, creată în mare parte în timpul meu liber, cu un sprijin minunat din partea contribuitorilor open-source din întreaga lume.</0><1>Dacă Reactive Resume v-a fost de ajutor și doriți să contribuiți la menținerea ei gratuită și deschisă pentru toată lumea, vă rugăm să luați în considerare o donație. Orice contribuție este apreciată!</1>"
 
 #: src/dialogs/api-key/create.tsx
 msgid "1 month"
@@ -99,16 +111,16 @@ msgid "6 months"
 msgstr "6 luni"
 
 #: src/features/settings/pages/profile.tsx
-msgid "A confirmation link has been sent to your current email address. Please "
-"check your inbox to confirm the change."
-msgstr "Un link de confirmare a fost trimis la adresa dvs. de e-mail actuală. "
-"Vă rugăm să vă verificați inboxul pentru a confirma modificarea."
+msgid "A confirmation link has been sent to your current email address. Please check your inbox to confirm the change."
+msgstr "Un link de confirmare a fost trimis la adresa dvs. de e-mail actuală. Vă rugăm să vă verificați inboxul pentru a confirma modificarea."
 
 #: src/routes/_home/-sections/footer.tsx
-msgid "A free and open-source resume builder that simplifies the process of "
-"creating, updating, and sharing your resume."
-msgstr "Un constructor de CV-uri gratuit și open-source care simplifică "
-"procesul de creare, actualizare și partajare a CV-ului."
+msgid "A free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
+msgstr "Un constructor de CV-uri gratuit și open-source care simplifică procesul de creare, actualizare și partajare a CV-ului."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "A friendly nudge for the recruiter"
+msgstr "Un ghiont prietenos pentru recrutor"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
@@ -116,46 +128,57 @@ msgid "A link to your resume has been copied to clipboard."
 msgstr "Un link către CV-ul dvs. a fost copiat în clipboard."
 
 #: src/routes/_home/-sections/testimonials.tsx
-msgid "A lot of people have written to me over the years to share their "
-"experiences with Reactive Resume and how it has helped them, and I never "
-"get tired of reading them. If you have a story to share, let me know by "
-"sending me an email at <0>{email}</0>."
-msgstr "De-a lungul anilor, mulți oameni mi-au scris pentru a-și împărtăși "
-"experiențele cu Reactive Resume și modul în care i-a ajutat, și nu mă "
-"satur niciodată să le citesc. Dacă aveți o poveste de împărtășit, "
-"anunțați-mă trimițându-mi un e-mail la <0>{email}</0>."
+msgid "A lot of people have written to me over the years to share their experiences with Reactive Resume and how it has helped them, and I never get tired of reading them. If you have a story to share, let me know by sending me an email at <0>{email}</0>."
+msgstr "De-a lungul anilor, mulți oameni mi-au scris pentru a-și împărtăși experiențele cu Reactive Resume și modul în care i-a ajutat, și nu mă satur niciodată să le citesc. Dacă aveți o poveste de împărtășit, anunțați-mă trimițându-mi un e-mail la <0>{email}</0>."
 
 #: src/features/settings/pages/profile.tsx
-msgid "A new verification link has been sent to your email address. Please "
-"check your inbox to verify your account."
-msgstr "Un nou link de verificare a fost trimis la adresa dvs. de e-mail. Vă "
-"rugăm să vă verificați inboxul pentru a vă verifica contul."
+msgid "A new verification link has been sent to your email address. Please check your inbox to verify your account."
+msgstr "Un nou link de verificare a fost trimis la adresa dvs. de e-mail. Vă rugăm să vă verificați inboxul pentru a vă verifica contul."
 
 #: src/components/ui/copyright.tsx
 msgid "A passion project by <0>Amruth Pillai</0>."
 msgstr "Un proiect de pasiune realizat de <0>Amruth Pillai</0>."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "A stretch"
+msgstr "O întindere"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "A4"
 msgstr "A4"
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Absolutely! You can export your resume to PDF with a single click. The "
-"exported PDF maintains all your formatting and styling perfectly."
-msgstr "Desigur! Puteți exporta CV-ul în PDF cu un singur clic. PDF-ul exportat "
-"păstrează perfect toată formatarea și stilizarea."
+msgid "Absolutely! You can export your resume to PDF with a single click. The exported PDF maintains all your formatting and styling perfectly."
+msgstr "Desigur! Puteți exporta CV-ul în PDF cu un singur clic. PDF-ul exportat păstrează perfect toată formatarea și stilizarea."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Access your resumes and data programmatically using the API."
 msgstr "Accesați CV-urile și datele dvs. programatic folosind API-ul."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Active provider"
-msgstr ""
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "Account menu"
+msgstr "Meniul Cont"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Actions"
+msgstr "Acțiuni"
+
+#: src/routes/builder/$resumeId/-components/dock.tsx
+msgid "Actual size (100%)"
+msgstr "Dimensiune reală (100%)"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Add"
+msgstr "Adăuga"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "Adăugați un câmp personalizat"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Add a job you're applying to, link the resume you sent, and move it through your pipeline as things progress."
+msgstr "Adăugați o slujbă la care aplicați, conectați CV-ul pe care l-ați trimis și mutați-l prin canalizare pe măsură ce lucrurile progresează."
 
 #: src/components/input/chip-input.tsx
 msgid "Add a keyword..."
@@ -223,27 +246,40 @@ msgstr "Adăugați o nouă abilitate"
 msgid "Add a new volunteer experience"
 msgstr "Adăugați o nouă activitate de voluntariat"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Add a note…"
+msgstr "Adăugați o notă…"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Add a tag and press Enter…"
+msgstr "Adaugă o etichetă și apasă Enter…"
+
 #: src/features/settings/integrations/components/ai-section.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Add and test a provider before using the builder assistant."
-msgstr ""
+msgid "Add and test a provider before starting an agent thread."
+msgstr "Adăugați și testați un furnizor înainte de a porni un fir de execuție pentru agent."
 
-#: src/components/input/rich-input.tsx
-msgid "Add Column After"
-msgstr "Adăugați coloană după"
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Add application"
+msgstr "Adăugați aplicația"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Column Before"
-msgstr "Adăugați coloană înainte"
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Add contact"
+msgstr "Adăugați contact"
 
 #: src/components/input/chip-input.tsx
 msgid "Add keyword"
 msgstr "Adăugați cuvântul cheie"
 
+#: src/components/input/rich-input.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
+msgid "Add link"
+msgstr "Adăugați link"
+
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Add multiple roles to show career progression at the same company."
-msgstr "Adaugă mai multe roluri pentru a arăta progresia carierei în aceeași "
-"companie."
+msgstr "Adaugă mai multe roluri pentru a arăta progresia carierei în aceeași companie."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Add Page"
@@ -257,37 +293,62 @@ msgstr "Adăugați furnizor"
 msgid "Add Role"
 msgstr "Adaugă rol"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Row After"
-msgstr "Adăugați rând după"
+#: src/features/applications/components/table-view.tsx
+msgid "Add tag"
+msgstr "Adăugați etichetă"
 
-#: src/components/input/rich-input.tsx
-msgid "Add Row Before"
-msgstr "Adăugați rând înainte"
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Add to pipeline"
+msgstr "Adăugați la conductă"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Adjust the resume for a remote-first role that values async communication and ownership."
+msgstr "Ajustați CV-ul pentru un rol de lucru la distanță, care valorizează comunicarea asincronă și responsabilitatea."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Advanced"
+msgstr "Avansat"
 
 #: src/libs/locale.ts
 msgid "Afrikaans"
 msgstr "Afrikaans"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "Agent"
+msgstr "Agent"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Agent ready"
+msgstr "Agent gata"
+
+#: src/routes/dashboard/-components/sidebar.tsx
+msgid "Agents"
+msgstr "Agenți"
+
 #: src/dialogs/resume/import.tsx
 msgid "AI"
 msgstr "AI"
 
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "AI agent setup is unavailable right now. Please try again in a moment."
+msgstr "Configurarea agentului AI nu este disponibilă momentan. Vă rugăm să încercați din nou imediat."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "AI agent setup is unavailable until REDIS_URL and ENCRYPTION_SECRET are configured."
+msgstr "Configurarea agentului AI nu este disponibilă până când nu sunt configurate REDIS_URL și ENCRYPTION_SECRET."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "AI assistant"
+msgstr "Asistent AI"
+
 #: src/features/settings/integrations/components/ai-section.tsx
-msgid "AI provider management is unavailable until REDIS_URL and "
-"ENCRYPTION_SECRET are configured."
-msgstr "Gestionarea furnizorilor de inteligență artificială nu este disponibilă "
-"până când nu sunt configurate REDIS_URL și ENCRYPTION_SECRET."
+msgid "AI provider management is unavailable until REDIS_URL and ENCRYPTION_SECRET are configured."
+msgstr "Gestionarea furnizorilor de inteligență artificială nu este disponibilă până când nu sunt configurate REDIS_URL și ENCRYPTION_SECRET."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "AI provider management is unavailable. Please try again."
-msgstr "Gestionarea furnizorilor de inteligență artificială nu este "
-"disponibilă. Vă rugăm să încercați din nou."
-
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "AI provider saved. Test it before use."
-msgstr "Furnizor de inteligență artificială salvat. Testați-l înainte de "
-"utilizare."
+msgstr "Gestionarea furnizorilor de inteligență artificială nu este disponibilă. Vă rugăm să încercați din nou."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "AI Providers"
@@ -295,8 +356,7 @@ msgstr "Furnizori de inteligență artificială"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured."
-msgstr "Furnizorii de inteligență artificială necesită configurarea REDIS_URL "
-"și ENCRYPTION_SECRET."
+msgstr "Furnizorii de inteligență artificială necesită configurarea REDIS_URL și ENCRYPTION_SECRET."
 
 #: src/libs/locale.ts
 msgid "Albanian"
@@ -315,9 +375,8 @@ msgid "Amharic"
 msgstr "Amharică"
 
 #: src/components/layout/error-screen.tsx
-#: src/components/layout/not-found-screen.tsx
-msgid "An error occurred while loading the page."
-msgstr "A apărut o eroare la încărcarea paginii."
+msgid "An unexpected error stopped this page from loading. You can try again or head back."
+msgstr "O eroare neașteptată a oprit încărcarea acestei pagini. Puteți încerca din nou sau puteți reveni."
 
 #. Fallback toast when importing a resume fails for an unknown reason
 #: src/dialogs/resume/import.tsx
@@ -336,17 +395,21 @@ msgstr "Analizând…"
 msgid "And many more..."
 msgstr "Și multe altele..."
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Anyone visiting the resume's public URL must enter this password to "
-"access it."
-msgstr "Oricine accesează URL-ul public al CV-ului trebuie să introducă această "
-"parolă pentru a-l vedea."
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Anthropic Claude"
+msgstr "Antropicul Claude"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Any tag"
+msgstr "Orice etichetă"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Anyone who has the resume's public URL will be able to view and download "
-"your resume without entering a password."
-msgstr "Oricine are URL-ul public al CV-ului va putea să vizualizeze și să "
-"descarce CV-ul fără a introduce o parolă."
+msgid "Anyone visiting the resume's public URL must enter this password to access it."
+msgstr "Oricine accesează URL-ul public al CV-ului trebuie să introducă această parolă pentru a-l vedea."
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+msgid "Anyone who has the resume's public URL will be able to view and download your resume without entering a password."
+msgstr "Oricine are URL-ul public al CV-ului va putea să vizualizeze și să descarce CV-ul fără a introduce o parolă."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Anyone with the link can view and download the resume."
@@ -368,8 +431,7 @@ msgstr "Chei API"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "API keys are encrypted on the server and never shown again after saving."
-msgstr "Cheile API sunt criptate pe server și nu vor mai fi afișate niciodată "
-"după salvare."
+msgstr "Cheile API sunt criptate pe server și nu vor mai fi afișate niciodată după salvare."
 
 #: src/features/settings/pages/api-keys.tsx
 msgid "API Reference"
@@ -379,29 +441,73 @@ msgstr "Referință API"
 msgid "App"
 msgstr "Aplicație"
 
+#: src/features/applications/components/application-actions-menu.tsx
+msgid "Application actions"
+msgstr "Acțiuni de aplicare"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Application added to your pipeline."
+msgstr "Aplicație adăugată la conducta dvs."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Application Copilot"
+msgstr "Copilotul aplicației"
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Application deleted."
+msgstr "Aplicația a fost ștearsă."
+
 #: src/routes/_home/-sections/statistics.tsx
 msgid "Application Statistics"
 msgstr "Statistici aplicație"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Application updated."
+msgstr "Aplicația a fost actualizată."
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Applications"
+msgstr "Aplicații"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Applications over time"
+msgstr "Candidaturi în timp"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Applications sent per week (last 8 weeks)"
+msgstr "Candidaturi trimise pe săptămână (ultimele 8 săptămâni)"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Applied"
+msgstr "Candidatură trimisă"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Applied on"
+msgstr "Aplicat pe"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
 msgid "Applied Rules"
 msgstr "Reguli aplicate"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Apply anyway"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Apply updates"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Applying parent updates..."
-msgstr ""
-
 #: src/libs/locale.ts
 msgid "Arabic"
 msgstr "Arabă"
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Archive"
+msgstr "Arhivă"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Archived"
+msgstr "Arhivat"
 
 #: src/hooks/use-form-blocker.tsx
 msgid "Are you sure you want to close this dialog?"
@@ -451,37 +557,38 @@ msgstr "Domeniu de studiu"
 msgid "Artificial Intelligence"
 msgstr "Inteligență artificială"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Ask anything about this resume"
 msgstr "Întreabă orice despre acest CV"
-
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
-msgid "Ask for targeted edits, keyword cleanup, bullet rewrites, or a "
-"role-specific review."
-msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Aspect Ratio"
 msgstr "Raport de aspect"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Assistant"
-msgstr ""
 #: src/routes/_home/-sections/sponsors.tsx
 msgid "Atlas Cloud supports Reactive Resume as a project sponsor. If your company would like to sponsor the project, email <0>{sponsorshipEmail}</0>."
 msgstr "Atlas Cloud acceptă Reactive Resume ca sponsor al proiectului. Dacă firma dumneavoastră dorește să sponsorizeze proiectul, trimiteți un e-mail la <0>{sponsorshipEmail}</0> ."
 
-#: src/routes/agent/$threadId.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Attach a cover letter (PDF)"
+msgstr "Atașați o scrisoare de intenție (PDF)"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Attach a resume file (PDF)"
+msgstr "Atașează un fișier CV (PDF)"
+
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Attach files"
 msgstr "Atașați fișiere"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Assistant ready"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Attachment"
+msgstr "Atașament"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Assistant setup is unavailable until AI providers are configured."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Attachment uploaded."
+msgstr "Atașament încărcat."
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -489,11 +596,17 @@ msgstr ""
 msgid "Authentication"
 msgstr "Autentificare"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Auto-fill"
+msgstr "Umplere automată"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Auto-fill failed. Paste the description instead."
+msgstr "Completarea automată a eșuat. Lipiți în schimb descrierea."
+
 #: src/routes/_home/-sections/features.tsx
-msgid "Available in multiple languages. If you would like to contribute, check "
-"out Crowdin."
-msgstr "Disponibilă în mai multe limbi. Dacă doriți să contribuiți, accesați "
-"Crowdin."
+msgid "Available in multiple languages. If you would like to contribute, check out Crowdin."
+msgstr "Disponibilă în mai multe limbi. Dacă doriți să contribuiți, accesați Crowdin."
 
 #: src/dialogs/resume/sections/award.tsx
 msgctxt "(noun) person, organization, or entity that gives an award"
@@ -514,6 +627,10 @@ msgstr "Azeră"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to Login"
 msgstr "Înapoi la autentificare"
+
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Back to resumes"
+msgstr "Înapoi la CV-uri"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Background Color"
@@ -539,17 +656,24 @@ msgstr "Șabloane frumoase din care să alegeți, cu altele pe drum."
 msgid "Bengali"
 msgstr "Bengaleză"
 
+#: src/features/resume/export/download-dialog.tsx
+msgid "Best for applications, sharing, and printing."
+msgstr "Ideal pentru aplicații, partajare și imprimare."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Blank draft"
+msgstr "Schiță goală"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Board"
+msgstr "Bord"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
 msgstr "Corp"
 
 #: src/components/input/rich-input.tsx
-#: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/project.tsx
-#: src/dialogs/resume/sections/skill.tsx
 msgid "Bold"
 msgstr "Aldin"
 
@@ -561,6 +685,10 @@ msgstr "Rază colțuri"
 msgid "Border Width"
 msgstr "Lățime bordură"
 
+#: src/features/resume/public/public-resume.tsx
+msgid "Build your own resume"
+msgstr "Creează-ți propriul CV"
+
 #. Screen-reader dialog title for the command palette in the resume builder
 #: src/features/command-palette/index.tsx
 msgid "Builder Command Palette"
@@ -569,6 +697,14 @@ msgstr "Paletă de comenzi a constructorului"
 #: src/libs/locale.ts
 msgid "Bulgarian"
 msgstr "Bulgară"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Bulk delete failed. Please try again."
+msgstr "Ștergerea în bloc a eșuat. Vă rugăm să încercați din nou."
+
+#: src/features/applications/components/table-view.tsx
+msgid "Bulk update failed. Please try again."
+msgstr "Actualizarea în bloc a eșuat. Vă rugăm să încercați din nou."
 
 #: src/components/input/rich-input.tsx
 msgid "Bullet List"
@@ -593,31 +729,26 @@ msgstr "Pot să-mi export CV-ul în PDF?"
 #. Profile settings form action to discard unsaved edits
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
-#: src/dialogs/resume/sections/award.tsx
-#: src/dialogs/resume/sections/certification.tsx
-#: src/dialogs/resume/sections/cover-letter.tsx
 #: src/dialogs/resume/sections/custom.tsx
-#: src/dialogs/resume/sections/education.tsx
-#: src/dialogs/resume/sections/experience.tsx
-#: src/dialogs/resume/sections/interest.tsx
-#: src/dialogs/resume/sections/language.tsx
-#: src/dialogs/resume/sections/profile.tsx
-#: src/dialogs/resume/sections/project.tsx
-#: src/dialogs/resume/sections/publication.tsx
-#: src/dialogs/resume/sections/reference.tsx
-#: src/dialogs/resume/sections/skill.tsx
-#: src/dialogs/resume/sections/summary-item.tsx
-#: src/dialogs/resume/sections/volunteer.tsx
+#: src/dialogs/resume/sections/section-item-dialog.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/import-applications-sheet.tsx
 #: src/features/settings/pages/api-keys.tsx
 #: src/features/settings/pages/danger-zone.tsx
 #: src/features/settings/pages/profile.tsx
 #: src/hooks/use-prompt.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Cancel"
 msgstr "Anulează"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Cannot restore; the resume has changed since this edit was applied."
+msgstr "Nu se poate restaura; CV-ul s-a modificat de când a fost aplicată această modificare."
 
 #: src/libs/locale.ts
 msgid "Catalan"
@@ -627,9 +758,9 @@ msgstr "Catalană"
 msgid "Center Align"
 msgstr "Aliniere la centru"
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Center view"
-msgstr "Centrează vizualizarea"
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Cerebras"
+msgstr "Cerebra"
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -657,6 +788,11 @@ msgstr "V-ați răzgândit? Redenumiți CV-ul cu ceva mai descriptiv."
 msgid "Changelog"
 msgstr "Jurnal de modificări"
 
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/$threadId.tsx
+msgid "Chat"
+msgstr "Chat"
+
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Check your email for a link to reset your password."
 msgstr "Verificați-vă e-mailul pentru un link de resetare a parolei."
@@ -664,10 +800,6 @@ msgstr "Verificați-vă e-mailul pentru un link de resetare a parolei."
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
 msgstr "Verificați-vă e-mailul pentru un link de verificare a contului."
-
-#: src/dialogs/resume/index.tsx
-msgid "Child resume created successfully."
-msgstr ""
 
 #: src/libs/locale.ts
 msgid "Chinese (Simplified)"
@@ -677,11 +809,27 @@ msgstr "Chineză (simplificată)"
 msgid "Chinese (Traditional)"
 msgstr "Chineză (tradițională)"
 
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Choose a model and resume draft."
+msgstr "Alegeți un model și o schiță de CV."
+
 #. Preset or custom shade refer to the color picker
 #. Preset or custom shade refer to the color picker
 #: src/components/input/rich-input.tsx
 msgid "Choose a preset or custom shade."
 msgstr "Alegeți o nuanță prestabilită sau personalizată."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Choose a resume"
+msgstr "Alege un CV"
+
+#: src/routes/agent/index.tsx
+msgid "Choose an existing conversation from the sidebar, or start a new draft-focused thread."
+msgstr "Alege o conversație existentă din bara laterală sau începe un nou fir de discuții axat pe schițe."
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
+msgstr "Alegeți PDF, DOCX, Markdown sau JSON. Exportați CV-ul și scrisoarea de intenție separat, atunci când sunt disponibile."
 
 #: src/components/level/combobox.tsx
 msgid "Circle"
@@ -690,33 +838,29 @@ msgstr "Cerc"
 #. Clear the highlight color
 #. Clear the text color
 #: src/components/input/rich-input.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
+#: src/features/applications/components/table-view.tsx
 msgid "Clear"
 msgstr "Clar"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Clear chat"
-msgstr ""
+#: src/routes/dashboard/applications/index.tsx
+msgid "Clear filters"
+msgstr "Ștergeți filtrele"
 
 #: src/components/ui/combobox.tsx
 msgid "Clear selection"
 msgstr "Ștergeți selecția"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Clear this assistant chat?"
-msgstr ""
-
 #: src/dialogs/resume/import.tsx
 msgid "Click here to select a file to import"
 msgstr "Faceți clic aici pentru a selecta un fișier de importat"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Close"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Close AI assistant"
+msgstr "Închide asistentul AI"
 
-#: src/components/input/rich-input.tsx
-msgid "Code Block"
-msgstr "Bloc de cod"
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Cohere"
+msgstr "Coerență"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
@@ -739,8 +883,21 @@ msgid "Community"
 msgstr "Comunitate"
 
 #: src/dialogs/resume/sections/experience.tsx
+#: src/features/applications/components/application-form-sheet.tsx
 msgid "Company"
 msgstr "Companie"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Company / Role"
+msgstr "Companie / Rol"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Company A–Z"
+msgstr "Companie A–Z"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Compare this resume against this role URL and update keywords while keeping the voice concise and credible."
+msgstr "Compară acest CV cu adresa URL a acestui rol și actualizează cuvintele cheie, menținând în același timp un ton concis și credibil."
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Completely free, forever, no hidden costs."
@@ -755,14 +912,26 @@ msgstr "Complet gratuit, pentru totdeauna, fără costuri ascunse."
 msgid "Confirm"
 msgstr "Confirmă"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Conflicting child edits"
-msgstr ""
-
 #. Authentication settings action to link a social login provider
 #: src/features/settings/authentication/components/social-provider.tsx
 msgid "Connect"
 msgstr "Conectează"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Connected"
+msgstr "Conectat"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Connection failed"
+msgstr "Conexiunea a eșuat"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Connection verified — provider is ready to use."
+msgstr "Conexiune verificată — furnizorul este gata de utilizare."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Contacts"
+msgstr "Contacte"
 
 #: src/dialogs/resume/sections/cover-letter.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
@@ -783,41 +952,50 @@ msgid "Continue where you left off"
 msgstr "Continuați de unde ați rămas"
 
 #: src/dialogs/resume/import.tsx
-msgid "Continue where you left off by importing an existing resume you created "
-"using Reactive Resume or any another resume builder. Supported formats "
-"include PDF, Microsoft Word, as well as JSON files from Reactive Resume."
-msgstr "Continuați de unde ați rămas importând un CV existent creat cu Reactive "
-"Resume sau cu orice alt constructor de CV-uri. Formatele acceptate "
-"includ PDF, Microsoft Word, precum și fișiere JSON din Reactive Resume."
+msgid "Continue where you left off by importing an existing resume you created using Reactive Resume or any another resume builder. Supported formats include PDF, Microsoft Word, as well as JSON files from Reactive Resume."
+msgstr "Continuați de unde ați rămas importând un CV existent creat cu Reactive Resume sau cu orice alt constructor de CV-uri. Formatele acceptate includ PDF, Microsoft Word, precum și fișiere JSON din Reactive Resume."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Contributions fund bug fixes, security updates, and continuous "
-"improvements to keep the app running smoothly."
-msgstr "Contribuțiile finanțează remedieri de erori, actualizări de securitate "
-"și îmbunătățiri continue pentru ca aplicația să funcționeze fără "
-"probleme."
+msgid "Contributions fund bug fixes, security updates, and continuous improvements to keep the app running smoothly."
+msgstr "Contribuțiile finanțează remedieri de erori, actualizări de securitate și îmbunătățiri continue pentru ca aplicația să funcționeze fără probleme."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Conversation copied."
+msgstr "Conversație copiată."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Conversation JSON copied."
+msgstr "JSON-ul conversației a fost copiat."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Copied to clipboard."
+msgstr "Copiat în clipboard."
 
 #. Action button to copy two-factor backup codes to clipboard
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/features/applications/components/application-ai-copilot.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Copy"
 msgstr "Copiază"
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Copy and store these backup codes in case you lose your device."
-msgstr "Copiați și stocați aceste coduri de rezervă în caz că vă pierdeți "
-"dispozitivul."
+msgstr "Copiați și stocați aceste coduri de rezervă în caz că vă pierdeți dispozitivul."
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Copy Backup Codes"
 msgstr "Copiază codurile de rezervă"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Copy JSON"
+msgstr "Copiază JSON"
+
 #: src/dialogs/api-key/create.tsx
-msgid "Copy this secret key and use it in your applications to access your "
-"data."
-msgstr "Copiați această cheie secretă și folosiți-o în aplicațiile dvs. pentru "
-"a vă accesa datele."
+msgid "Copy this secret key and use it in your applications to access your data."
+msgstr "Copiați această cheie secretă și folosiți-o în aplicațiile dvs. pentru a vă accesa datele."
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Copy URL"
 msgstr "Copiază URL-ul"
 
@@ -828,9 +1006,64 @@ msgstr "Copiază URL-ul"
 msgid "Could not reach the AI provider. Please try again."
 msgstr "Nu s-a putut ajunge la furnizorul AI. Vă rugăm să încercați din nou."
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Could not restore this patch."
+msgstr "Nu s-a putut restaura acest patch."
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
 msgstr "Nu s-a putut verifica conexiunea furnizorului."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Could not verify the connection. Check the API key, model, and base URL."
+msgstr "Nu s-a putut verifica conexiunea. Verificați cheia API, modelul și adresa URL de bază."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Couldn't add the application. Please try again."
+msgstr "Aplicația nu a putut fi adăugată. Vă rugăm să încercați din nou."
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't delete the application."
+msgstr "Nu s-a putut șterge aplicația."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't delete the timeline entry."
+msgstr "Nu s-a putut șterge intrarea din cronologie."
+
+#: src/features/applications/components/board.tsx
+msgid "Couldn't move the application. Please try again."
+msgstr "Aplicația nu a putut fi mutată. Vă rugăm să încercați din nou."
+
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Couldn't save"
+msgstr "Nu s-a putut salva"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't save the note."
+msgstr "Nu s-a putut salva nota."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Couldn't save your changes. Please try again."
+msgstr "Modificările nu au putut fi salvate. Vă rugăm să încercați din nou."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't update the timeline entry."
+msgstr "Nu s-a putut actualiza intrarea din cronologie."
+
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Couldn't upload the file. Please try again."
+msgstr "Nu s-a putut încărca fișierul. Vă rugăm să încercați din nou."
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Count by source"
+msgstr "Numărați după sursă"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/resume/export/download-dialog.tsx
+msgid "Cover letter"
+msgstr "Scrisoare de intenție"
 
 #. Fallback title for a custom cover letter item in resume builder when recipient is empty
 #. Fallback title for a custom cover letter item in resume builder when recipient is unavailable
@@ -840,6 +1073,10 @@ msgstr "Nu s-a putut verifica conexiunea furnizorului."
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Cover Letter"
 msgstr "Scrisoare de intenție"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Cover letter draft"
+msgstr "Schiță de scrisoare de intenție"
 
 #. Create API key dialog submit action
 #: src/dialogs/api-key/create.tsx
@@ -859,13 +1096,13 @@ msgstr "Scrisoare de intenție"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "Creează"
 
-#: src/dialogs/resume/index.tsx
-msgid "Create a linked child resume that can review and merge future updates "
-"from this parent."
-msgstr ""
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Create a copy tuned to this job"
+msgstr "Creați o copie adaptată la această lucrare"
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -951,14 +1188,9 @@ msgstr "Creați un exemplu de CV"
 msgid "Create as many resumes as you want, without limits."
 msgstr "Creați câte CV-uri doriți, fără limite."
 
-#. Resume card context menu action to create a linked child resume
-#. Resume card dropdown action to create a linked child resume
-#: src/dialogs/resume/index.tsx
-#: src/routes/builder/$resumeId/-components/header.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
-msgid "Create child resume"
-msgstr ""
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Create from scratch"
+msgstr "Creați de la zero"
 
 #. Call-to-action link from login page to account registration page
 #: src/features/auth/pages/login.tsx
@@ -970,9 +1202,14 @@ msgstr "Creați unul acum"
 msgid "Create resume with options"
 msgstr "Creați un CV cu opțiuni"
 
-#: src/dialogs/resume/index.tsx
-msgid "Creating child resume..."
-msgstr ""
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Created"
+msgstr "Creat"
+
+#. placeholder {0}: result.name
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Created \"{0}\" and linked it to this application."
+msgstr "A creat „{0}” și l-a conectat la această aplicație."
 
 #: src/dialogs/api-key/create.tsx
 msgid "Creating your API key..."
@@ -982,9 +1219,21 @@ msgstr "Se creează cheia API..."
 msgid "Creating your resume..."
 msgstr "Se creează CV-ul..."
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Crop picture"
+msgstr "Decupează imaginea"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "CSV data"
+msgstr "date CSV"
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Current Password"
 msgstr "Parolă curentă"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Current stage"
+msgstr "Etapa actuală"
 
 #: src/components/input/color-picker.tsx
 msgid "Custom"
@@ -1027,6 +1276,10 @@ msgstr "Întunecată"
 msgid "Dark theme"
 msgstr "Temă întunecată"
 
+#: src/routes/dashboard/-components/sidebar.tsx
+msgid "Dashboard"
+msgstr "Bord"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Data Security"
 msgstr "Securitatea datelor"
@@ -1036,6 +1289,22 @@ msgstr "Securitatea datelor"
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Date"
 msgstr "Dată"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Date applied"
+msgstr "Data candidaturii"
+
+#: src/components/input/rich-input.tsx
+msgid "Decrease indent"
+msgstr "Micșorează indentarea"
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Decrease zoom"
+msgstr "Reduceți zoomul"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "DeepSeek"
+msgstr "Căutare profundă"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Degree"
@@ -1047,8 +1316,13 @@ msgstr "Diplomă"
 #. Passkey row action to remove the selected passkey
 #. Resume card context menu destructive action to remove a resume
 #. Resume card dropdown destructive action to remove a resume
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
 #: src/features/settings/pages/api-keys.tsx
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
@@ -1060,10 +1334,6 @@ msgstr "Șterge"
 #: src/features/settings/pages/danger-zone.tsx
 msgid "Delete Account"
 msgstr "Șterge contul"
-
-#: src/components/input/rich-input.tsx
-msgid "Delete Column"
-msgstr "Șterge coloană"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Delete Page"
@@ -1077,13 +1347,28 @@ msgstr "Ștergeți imaginea"
 msgid "Delete provider"
 msgstr "Ștergeți furnizorul"
 
-#: src/components/input/rich-input.tsx
-msgid "Delete Row"
-msgstr "Șterge rând"
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Delete this agent thread?"
+msgstr "Ștergeți acest fir de discuție al agentului?"
 
-#: src/components/input/rich-input.tsx
-msgid "Delete Table"
-msgstr "Șterge tabel"
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete this application?"
+msgstr "Ștergi această candidatură?"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete this timeline entry?"
+msgstr "Ștergeți această intrare din cronologie?"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete timeline entry"
+msgstr "Ștergeți intrarea din cronologie"
+
+#. placeholder {0}: result.deleted
+#: src/features/applications/components/table-view.tsx
+msgid "Deleted {0} application(s)."
+msgstr "S-au șters {0} aplicații."
 
 #: src/features/settings/pages/danger-zone.tsx
 msgid "Deleting your account..."
@@ -1111,6 +1396,7 @@ msgid "Description"
 msgstr "Descriere"
 
 #: src/libs/resume/section.tsx
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Design"
 msgstr "Design"
 
@@ -1138,18 +1424,18 @@ msgid "Discord"
 msgstr "Discord"
 
 #: src/components/ui/donation-toast.tsx
-#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/features/applications/components/application-ai-copilot.tsx
 msgid "Dismiss"
 msgstr "Închide"
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Dismissing parent updates..."
-msgstr ""
 
 #: src/routes/_home/-sections/footer.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Documentation"
 msgstr "Documentație"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Documents sent"
+msgstr "Documente trimise"
 
 #: src/features/auth/pages/login.tsx
 msgid "Don't have an account? <0/>"
@@ -1164,41 +1450,25 @@ msgid "Donate to Reactive Resume"
 msgstr "Donează către Reactive Resume"
 
 #. Action button to download two-factor backup codes as a text file
+#. Primary action in the builder header to open resume download options
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/features/resume/export/download-dialog.tsx
+#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Download"
 msgstr "Descarcă"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume as a Word document. Use this file to "
-"further customize your resume in Microsoft Word or Google Docs."
-msgstr "Descărcați o copie a CV-ului dvs. ca document Word. Utilizați acest "
-"fișier pentru a vă personaliza în continuare CV-ul în Microsoft Word "
-"sau Google Docs."
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Download a copy of all your data, including your profile and every resume, as a JSON file."
+msgstr "Descarcă o copie a tuturor datelor tale, inclusiv profilul și fiecare CV, ca fișier JSON."
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume in JSON format. Use this file for backup "
-"or to import your resume into other applications, including AI "
-"assistants."
-msgstr "Descărcați o copie a CV-ului în format JSON. Folosiți acest fișier "
-"pentru backup sau pentru a importa CV-ul în alte aplicații, inclusiv "
-"asistenți AI."
-
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
-msgid "Download a copy of your resume in PDF format. Use this file for printing "
-"or to easily share your resume with recruiters."
-msgstr "Descărcați o copie a CV-ului în format PDF. Folosiți acest fișier "
-"pentru imprimare sau pentru a partaja ușor CV-ul cu recrutorii."
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Download DOCX"
-msgstr "Descărcați DOCX"
-
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Download JSON"
-msgstr "Descarcă JSON"
+#. Primary action in the builder header to open resume download options
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Download options"
+msgstr "Opțiuni de descărcare"
 
 #: src/features/resume/public/public-resume.tsx
-#: src/routes/builder/$resumeId/-components/dock.tsx
+#: src/routes/agent/-components/resume-pane.tsx
 msgid "Download PDF"
 msgstr "Descarcă PDF-ul"
 
@@ -1206,9 +1476,25 @@ msgstr "Descarcă PDF-ul"
 msgid "Downloads"
 msgstr "Descărcări"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Draft a cover letter"
+msgstr "Redacta o scrisoare de intentie"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Draft a follow-up"
+msgstr "Elaborați o continuare"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Drafting failed."
+msgstr "Redactarea a eșuat."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
 msgstr "Glisați și fixați secțiunile aici pentru a le muta între coloane"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Drag to reposition and use the slider to zoom before uploading."
+msgstr "Trageți pentru a repoziționa și folosiți glisorul pentru a mări înainte de încărcare."
 
 #. Resume card context menu action to create a copy
 #. Resume card dropdown action to create a copy
@@ -1220,6 +1506,10 @@ msgstr "Glisați și fixați secțiunile aici pentru a le muta între coloane"
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Duplicate"
 msgstr "Duplică"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Duplicate as AI Draft"
+msgstr "Duplicat ca schiță AI"
 
 #: src/dialogs/resume/index.tsx
 msgid "Duplicate Resume"
@@ -1237,7 +1527,14 @@ msgstr "Se duplică CV-ul..."
 msgid "Dutch"
 msgstr "Olandeză"
 
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Earlier versions are kept; the builder's undo history is reset."
+msgstr "Versiunile anterioare sunt păstrate; istoricul de anulare al constructorului este resetat."
+
 #: src/components/input/chip-input.tsx
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
 msgid "Edit"
 msgstr "Edita"
 
@@ -1246,23 +1543,46 @@ msgstr "Edita"
 msgid "Edit {chip}"
 msgstr "Editează {chip}"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Edit application"
+msgstr "Editați aplicația"
+
 #. Screen reader description for the fullscreen rich-text editor dialog
 #: src/components/input/rich-input.tsx
 msgid "Edit content in fullscreen mode"
 msgstr "Editarea conținutului în modul fullscreen"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Edit date"
+msgstr "Editați data"
+
+#. Resume card context menu action to edit resume metadata
+#. Resume card dropdown action to edit resume metadata
+#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+msgid "Edit details"
+msgstr "Editați detaliile"
+
 #: src/components/input/chip-input.tsx
 msgid "Edit keyword"
 msgstr "Editare cuvânt cheie"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Edit note"
+msgstr "Editați nota"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Editable in Word, Google Docs, and Pages."
+msgstr "Editabil în Word, Google Docs și Pages."
+
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "Editing is disabled until you unlock it."
+msgstr "Editarea este dezactivată până când o deblocați."
+
 #: src/components/input/chip-input.tsx
 msgid "Editing keyword..."
 msgstr "Editarea cuvântului cheie..."
-
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Edits are applied to this resume and can be undone from the builder "
-"dock."
-msgstr ""
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -1284,9 +1604,17 @@ msgstr "E-mail"
 msgid "Email Address"
 msgstr "Adresă de e-mail"
 
+#: src/features/settings/pages/profile.tsx
+msgid "Email delivery isn't configured on this instance, so verification is disabled."
+msgstr "Livrarea e-mailurilor nu este configurată pe această instanță, așadar verificarea este dezactivată."
+
 #: src/features/settings/authentication/components/two-factor.tsx
 msgid "Enable 2FA"
 msgstr "Activează 2FA"
+
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "Enable editing"
+msgstr "Activează editarea"
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Enable Two-Factor Authentication"
@@ -1313,8 +1641,7 @@ msgid "English (United Kingdom)"
 msgstr "Engleză (Regatul Unit)"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Enhance the security of your account with additional layers of "
-"protection."
+msgid "Enhance the security of your account with additional layers of protection."
 msgstr "Sporiți securitatea contului prin straturi suplimentare de protecție."
 
 #: src/features/settings/authentication/components/passkeys.tsx
@@ -1323,8 +1650,7 @@ msgstr "Introduceți un nume pentru cheia de acces."
 
 #: src/features/auth/pages/verify-2fa-backup.tsx
 msgid "Enter one of your saved backup codes to access your account"
-msgstr "Introduceți unul dintre codurile de rezervă salvate pentru a accesa "
-"contul"
+msgstr "Introduceți unul dintre codurile de rezervă salvate pentru a accesa contul"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Enter the URL to link to"
@@ -1336,36 +1662,23 @@ msgstr "Introduceți codul de verificare din aplicația de autentificare"
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Enter your current password and a new password to update your account."
-msgstr "Introduceți parola curentă și o parolă nouă pentru a vă actualiza "
-"contul."
+msgstr "Introduceți parola curentă și o parolă nouă pentru a vă actualiza contul."
 
 #: src/dialogs/auth/enable-two-factor.tsx
-msgid "Enter your password to confirm setting up two-factor authentication. "
-"When enabled, you'll need to enter a code from your authenticator app "
-"every time you log in."
-msgstr "Introduceți parola pentru a confirma configurarea autentificării cu doi "
-"factori. Când este activată, va trebui să introduceți un cod din "
-"aplicația de autentificare de fiecare dată când vă conectați."
+msgid "Enter your password to confirm setting up two-factor authentication. When enabled, you'll need to enter a code from your authenticator app every time you log in."
+msgstr "Introduceți parola pentru a confirma configurarea autentificării cu doi factori. Când este activată, va trebui să introduceți un cod din aplicația de autentificare de fiecare dată când vă conectați."
 
 #: src/dialogs/auth/disable-two-factor.tsx
-msgid "Enter your password to disable two-factor authentication. Your account "
-"will be less secure without 2FA enabled."
-msgstr "Introduceți parola pentru a dezactiva autentificarea cu doi factori. "
-"Contul va fi mai puțin sigur fără 2FA activat."
+msgid "Enter your password to disable two-factor authentication. Your account will be less secure without 2FA enabled."
+msgstr "Introduceți parola pentru a dezactiva autentificarea cu doi factori. Contul va fi mai puțin sigur fără 2FA activat."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Every contribution, big or small, makes a huge difference to the "
-"project.<0/>Thank you for your support!"
-msgstr "Fiecare contribuție, mare sau mică, face o diferență uriașă pentru "
-"proiect.<0/>Vă mulțumim pentru sprijin!"
+msgid "Every contribution, big or small, makes a huge difference to the project.<0/>Thank you for your support!"
+msgstr "Fiecare contribuție, mare sau mică, face o diferență uriașă pentru proiect.<0/>Vă mulțumim pentru sprijin!"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Everything you need to create, customize, and share professional "
-"resumes. Built with privacy in mind, powered by open source, and "
-"completely free forever."
-msgstr "Tot ce aveți nevoie pentru a crea, personaliza și partaja CV-uri "
-"profesionale. Construit având confidențialitatea în minte, bazat pe "
-"open source și complet gratuit pentru totdeauna."
+msgid "Everything you need to create, customize, and share professional resumes. Built with privacy in mind, powered by open source, and completely free forever."
+msgstr "Tot ce aveți nevoie pentru a crea, personaliza și partaja CV-uri profesionale. Construit având confidențialitatea în minte, bazat pe open source și complet gratuit pentru totdeauna."
 
 #: src/components/input/rich-input.tsx
 msgid "Exit Fullscreen"
@@ -1387,41 +1700,45 @@ msgid "Expires on {0}"
 msgstr "Expiră la {0}"
 
 #: src/routes/_home/-sections/templates.tsx
-msgid "Explore our diverse selection of templates, each designed to fit "
-"different styles, professions, and personalities. Reactive Resume "
-"currently offers 12 templates, with more on the way."
-msgstr "Explorați selecția noastră diversă de șabloane, fiecare conceput pentru "
-"a se potrivi diferitelor stiluri, profesii și personalități. Reactive "
-"Resume oferă în prezent 12 șabloane, cu altele pe drum."
+msgid "Explore our diverse selection of templates, each designed to fit different styles, professions, and personalities. Reactive Resume currently offers 12 templates, with more on the way."
+msgstr "Explorați selecția noastră diversă de șabloane, fiecare conceput pentru a se potrivi diferitelor stiluri, profesii și personalități. Reactive Resume oferă în prezent 12 șabloane, cu altele pe drum."
 
 #: src/features/settings/pages/api-keys.tsx
-msgid "Explore the API documentation to learn how to integrate Reactive Resume "
-"with your applications. Find detailed endpoints, request examples, and "
-"authentication methods."
-msgstr "Explorați documentația API pentru a afla cum să integrați Reactive "
-"Resume cu aplicațiile dvs. Găsiți endpoint-uri detaliate, exemple de "
-"cereri și metode de autentificare."
+msgid "Explore the API documentation to learn how to integrate Reactive Resume with your applications. Find detailed endpoints, request examples, and authentication methods."
+msgstr "Explorați documentația API pentru a afla cum să integrați Reactive Resume cu aplicațiile dvs. Găsiți endpoint-uri detaliate, exemple de cereri și metode de autentificare."
 
 #: src/libs/resume/section.tsx
 msgid "Export"
 msgstr "Exportă"
 
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Export my data"
+msgstr "Exportați datele mele"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Export PNG"
+msgstr "Exportă PNG"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Export your resume or cover letter in the format you need."
+msgstr "Exportați CV-ul sau scrisoarea de intenție în formatul de care aveți nevoie."
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Export your resume to PDF instantly, without any waiting or delays."
-msgstr "Exportă-ți CV-ul instantaneu în format PDF, fără nicio așteptare sau "
-"întârziere."
+msgstr "Exportă-ți CV-ul instantaneu în format PDF, fără nicio așteptare sau întârziere."
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Failed"
-msgstr "Eșuat"
+#: src/features/applications/components/insights-view.tsx
+msgid "Exported pipeline-flow.png"
+msgstr "Exportat pipeline-flow.png"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Failed to analyze resume."
 msgstr "A eșuat analiza CV-ului."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Failed to clear assistant chat."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Failed to archive thread."
+msgstr "Nu s-a putut arhiva firul de discuție."
 
 #. Fallback toast when creating an API key fails
 #: src/dialogs/api-key/create.tsx
@@ -1436,8 +1753,7 @@ msgstr "Nu ați reușit să vă creați contul. Vă rugăm să încercați din n
 #. Fallback toast when deleting a passkey fails
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Failed to delete passkey. Please try again."
-msgstr "Nu s-a reușit ștergerea codului de acces. Vă rugăm să încercați din "
-"nou."
+msgstr "Nu s-a reușit ștergerea codului de acces. Vă rugăm să încercați din nou."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Failed to delete provider."
@@ -1448,6 +1764,11 @@ msgstr "Nu s-a putut șterge furnizorul."
 msgid "Failed to delete the API key. Please try again."
 msgstr "Nu s-a reușit ștergerea cheii API. Vă rugăm să încercați din nou."
 
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Failed to delete thread."
+msgstr "Nu s-a putut șterge firul de discuție."
+
 #. Fallback toast when account deletion fails
 #: src/features/settings/pages/danger-zone.tsx
 msgid "Failed to delete your account. Please try again."
@@ -1456,14 +1777,17 @@ msgstr "Nu ați reușit să vă ștergeți contul. Vă rugăm să încercați di
 #. Fallback toast when disabling two-factor authentication fails
 #: src/dialogs/auth/disable-two-factor.tsx
 msgid "Failed to disable two-factor authentication. Please try again."
-msgstr "Nu ați reușit să dezactivați autentificarea cu doi factori. Vă rugăm să "
-"încercați din nou."
+msgstr "Nu ați reușit să dezactivați autentificarea cu doi factori. Vă rugăm să încercați din nou."
 
 #. Fallback toast when enabling two-factor authentication fails
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Failed to enable two-factor authentication. Please try again."
-msgstr "Nu ați reușit să activați autentificarea cu doi factori. Vă rugăm să "
-"încercați din nou."
+msgstr "Nu ați reușit să activați autentificarea cu doi factori. Vă rugăm să încercați din nou."
+
+#. Fallback toast when data export fails
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Failed to export your data. Please try again."
+msgstr "Exportul datelor a eșuat. Vă rugăm să încercați din nou."
 
 #. Fallback toast when linking a social authentication provider fails
 #: src/features/settings/authentication/components/hooks.tsx
@@ -1483,14 +1807,12 @@ msgstr "A eșuat redenumirea cheii de acces. Vă rugăm să încercați din nou.
 #. Fallback toast when requesting email change confirmation fails
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to request email change. Please try again."
-msgstr "A eșuat solicitarea de schimbare a adresei de e-mail. Vă rugăm să "
-"încercați din nou."
+msgstr "A eșuat solicitarea de schimbare a adresei de e-mail. Vă rugăm să încercați din nou."
 
 #. Fallback toast when resending account verification email fails
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to resend verification email. Please try again."
-msgstr "Nu s-a reușit retrimiterea e-mailului de verificare. Vă rugăm să "
-"încercați din nou."
+msgstr "Nu s-a reușit retrimiterea e-mailului de verificare. Vă rugăm să încercați din nou."
 
 #. Fallback toast when resetting password fails and no backend message is available
 #: src/features/auth/pages/reset-password.tsx
@@ -1504,17 +1826,14 @@ msgstr "Furnizorul de inteligență artificială nu a putut fi salvat."
 #. Fallback toast when requesting password reset email fails without backend message
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Failed to send password reset email. Please try again."
-msgstr "A eșuat trimiterea e-mailului de resetare a parolei. Vă rugăm să "
-"încercați din nou."
+msgstr "A eșuat trimiterea e-mailului de resetare a parolei. Vă rugăm să încercați din nou."
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Failed to setup two-factor authentication."
 msgstr "Configurarea autentificării cu doi factori a eșuat."
 
-#. Fallback toast when custom OAuth sign-in fails without a provider error message
-#. Fallback toast when passkey sign-in fails without an error message
 #. Fallback toast when sign-in fails and no server error message is available
-#. Fallback toast when social sign-in fails without a provider error message
+#. Fallback toast when sign-in fails without an error message
 #: src/features/auth/components/social-auth.tsx
 #: src/features/auth/pages/login.tsx
 msgid "Failed to sign in. Please try again."
@@ -1525,9 +1844,13 @@ msgstr "Autentificarea a eșuat. Vă rugăm să încercați din nou."
 msgid "Failed to sign out. Please try again."
 msgstr "Nu ați reușit să vă deconectați. Vă rugăm să încercați din nou."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Failed to start assistant thread."
-msgstr ""
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Failed to start agent thread."
+msgstr "Nu s-a putut porni firul de discuție al agentului."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Failed to start the AI assistant."
+msgstr "Asistentul AI nu a putut fi pornit."
 
 #. Fallback toast when unlinking a social authentication provider fails
 #: src/features/settings/authentication/components/hooks.tsx
@@ -1546,8 +1869,11 @@ msgstr "Nu ați reușit să vă actualizați parola. Vă rugăm să încercați 
 #. Fallback toast when updating profile details fails
 #: src/features/settings/pages/profile.tsx
 msgid "Failed to update your profile. Please try again."
-msgstr "Nu ați reușit să vă actualizați profilul. Vă rugăm să încercați din "
-"nou."
+msgstr "Nu ați reușit să vă actualizați profilul. Vă rugăm să încercați din nou."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Failed to upload attachment."
+msgstr "Atașamentul nu a putut fi încărcat."
 
 #. Fallback toast when uploading profile picture for resume fails
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
@@ -1562,8 +1888,7 @@ msgstr "Nu s-a reușit verificarea parolei. Vă rugăm să încercați din nou."
 #. Fallback toast when verifying a backup two-factor authentication code fails
 #: src/features/auth/pages/verify-2fa-backup.tsx
 msgid "Failed to verify your backup code. Please try again."
-msgstr "Nu s-a reușit verificarea codului dvs. de rezervă. Vă rugăm să "
-"încercați din nou."
+msgstr "Nu s-a reușit verificarea codului dvs. de rezervă. Vă rugăm să încercați din nou."
 
 #. Fallback toast when verifying a two-factor authentication code fails
 #. Fallback toast when verifying two-factor setup code fails
@@ -1576,13 +1901,37 @@ msgstr "Nu s-a reușit verificarea codului dvs. Vă rugăm să încercați din n
 msgid "Features"
 msgstr "Funcționalități"
 
+#: src/dialogs/resume/import.tsx
+msgid "File"
+msgstr "Fişier"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Filled in what we could from the posting."
+msgstr "Am completat ce am putut din postare."
+
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Filter by"
 msgstr "Filtrați după"
 
+#: src/routes/dashboard/applications/index.tsx
+msgid "Filter by tags"
+msgstr "Filtrează după etichete"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Find weak bullets and rewrite them with stronger outcomes, numbers, scope, and sharper verbs."
+msgstr "Găsește punctele slabe și rescrie-le cu rezultate, numere, domenii de aplicare și verbe mai precise."
+
 #: src/libs/locale.ts
 msgid "Finnish"
 msgstr "Finlandeză"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Fireworks"
+msgstr "Focuri de artificii"
+
+#: src/routes/builder/$resumeId/-components/dock.tsx
+msgid "Fit to view"
+msgstr "Potrivire pentru vizualizare"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Flexibility"
@@ -1591,6 +1940,22 @@ msgstr "Flexibilitate"
 #: src/dialogs/resume/sections/language.tsx
 msgid "Fluency"
 msgstr "Fluență"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Follow-up"
+msgstr "Urmare"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Follow-up date"
+msgstr "Data de urmărire"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Follow-up draft"
+msgstr "Schiță ulterioară"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Follow-up note"
+msgstr "Notă de urmărire"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgid "Font Family"
@@ -1613,10 +1978,8 @@ msgid "For a secure and distraction-free experience."
 msgstr "Pentru o experiență sigură și fără distrageri."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
-msgid "For example, information regarding which companies you sent this resume "
-"to or the links to the job descriptions can be noted down here."
-msgstr "De exemplu, informații cu privire la companiile cărora le-ați trimis "
-"acest CV sau link-urile către fișele posturilor pot fi notate aici."
+msgid "For example, information regarding which companies you sent this resume to or the links to the job descriptions can be noted down here."
+msgstr "De exemplu, informații cu privire la companiile cărora le-ați trimis acest CV sau link-urile către fișele posturilor pot fi notate aici."
 
 #: src/dialogs/api-key/create.tsx
 msgid "For security reasons, this key will only be displayed once."
@@ -1648,6 +2011,14 @@ msgstr "Formă liberă"
 msgid "French"
 msgstr "Franceză"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "From your resume and the posting"
+msgstr "Din CV-ul tău și din postare"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Full resume data for backup or import."
+msgstr "Date complete ale CV-ului pentru backup sau import."
+
 #. Layout editor toggle label that makes a page single-column
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Full Width"
@@ -1662,6 +2033,10 @@ msgstr "Ecran complet"
 msgid "Fullscreen Editor"
 msgstr "Editor fullscreen"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Gaps:"
+msgstr "Lacune:"
+
 #: src/dialogs/resume/index.tsx
 msgid "Generate a random name"
 msgstr "Generați un nume aleatoriu"
@@ -1671,19 +2046,12 @@ msgid "German"
 msgstr "Germană"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
-msgid "Get a review of your resume with an overall score, strengths, and "
-"actionable suggestions."
-msgstr "Obțineți o analiză a CV-ului dvs. cu un scor general, puncte forte și "
-"sugestii utile."
+msgid "Get a review of your resume with an overall score, strengths, and actionable suggestions."
+msgstr "Obțineți o analiză a CV-ului dvs. cu un scor general, puncte forte și sugestii utile."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
-msgid "Get an in-depth AI-powered review of your resume with an overall score, "
-"key strengths, and practical suggestions. To activate this feature, "
-"please update your AI settings."
-msgstr "Obțineți o analiză detaliată a CV-ului dvs. cu ajutorul inteligenței "
-"artificiale, cu un scor general, puncte forte și sugestii practice. "
-"Pentru a activa această funcție, vă rugăm să vă actualizați setările "
-"AI."
+msgid "Get an in-depth AI-powered review of your resume with an overall score, key strengths, and practical suggestions. To activate this feature, please update your AI settings."
+msgstr "Obțineți o analiză detaliată a CV-ului dvs. cu ajutorul inteligenței artificiale, cu un scor general, puncte forte și sugestii practice. Pentru a activa această funcție, vă rugăm să vă actualizați setările AI."
 
 #: src/routes/_home/-sections/hero.tsx
 msgid "Get Started"
@@ -1698,11 +2066,16 @@ msgid "GitHub"
 msgstr "GitHub"
 
 #. Secondary navigation button on backup-code verification screen
-#: src/components/layout/not-found-screen.tsx
 #: src/features/auth/pages/verify-2fa-backup.tsx
 msgid "Go Back"
 msgstr "Înapoi"
 
+#: src/components/layout/not-found-screen.tsx
+msgid "Go home"
+msgstr "Du-te acasă"
+
+#: src/components/layout/error-screen.tsx
+#: src/components/layout/not-found-screen.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Mergi la panoul de control"
@@ -1724,6 +2097,10 @@ msgid "Google"
 msgstr "Google"
 
 #: src/features/settings/integrations/components/ai-section.tsx
+msgid "Google Gemini"
+msgstr "Google Gemini"
+
+#: src/features/settings/integrations/components/ai-section.tsx
 msgid "gpt-4.1"
 msgstr "gpt-4.1"
 
@@ -1738,6 +2115,10 @@ msgstr "Greacă"
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Grid"
 msgstr "Grilă"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Groq"
+msgstr "Groq"
 
 #: src/routes/_home/-sections/donate.tsx
 msgid "Grow the Team"
@@ -1781,24 +2162,16 @@ msgid "Hebrew"
 msgstr "Ebraică"
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Help me bring more experienced contributors on board, reducing the "
-"burden on a single maintainer and accelerating development."
-msgstr "Ajutați-mă să atrag contribuitori mai experimentați, reducând povara "
-"asupra unui singur responsabil și accelerând dezvoltarea."
+msgid "Help me bring more experienced contributors on board, reducing the burden on a single maintainer and accelerating development."
+msgstr "Ajutați-mă să atrag contribuitori mai experimentați, reducând povara asupra unui singur responsabil și accelerând dezvoltarea."
 
 #: src/features/settings/pages/preferences.tsx
 msgid "Help translate the app to your language"
 msgstr "Ajutați la traducerea aplicației în limba dvs."
 
 #: src/dialogs/resume/template/gallery.tsx
-msgid "Here's a range of resume templates for different professions and "
-"personalities. Whether you prefer modern or classic, bold or simple, "
-"there is a design to match you. Look through the options below and "
-"choose a template that fits your style."
-msgstr "Aici aveți o gamă de șabloane de CV pentru diferite profesii și "
-"personalități. Indiferent dacă preferați modern sau clasic, îndrăzneț "
-"sau simplu, există un design care vi se potrivește. Răsfoiți opțiunile "
-"de mai jos și alegeți un șablon care se potrivește stilului dvs."
+msgid "Here's a range of resume templates for different professions and personalities. Whether you prefer modern or classic, bold or simple, there is a design to match you. Look through the options below and choose a template that fits your style."
+msgstr "Aici aveți o gamă de șabloane de CV pentru diferite profesii și personalități. Indiferent dacă preferați modern sau clasic, îndrăzneț sau simplu, există un design care vi se potrivește. Răsfoiți opțiunile de mai jos și alegeți un șablon care se potrivește stilului dvs."
 
 #: src/dialogs/api-key/create.tsx
 msgid "Here's your new API key"
@@ -1841,6 +2214,10 @@ msgstr "Ascunde sublinierea linkului"
 #: src/features/auth/pages/resume-password.tsx
 msgid "Hide password"
 msgstr "Ascundeți parola"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Hide picture"
+msgstr "Ascunde imaginea"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Hide Section Icons"
@@ -1892,15 +2269,47 @@ msgstr "Maghiară"
 msgid "Icon"
 msgstr "Iconiță"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Identify gaps for an applicant tracking system and apply only high-confidence keyword improvements."
+msgstr "Identificați lacunele unui sistem de urmărire a candidaților și aplicați doar îmbunătățiri ale cuvintelor cheie cu un nivel ridicat de încredere."
+
 #: src/dialogs/resume/import.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Import"
 msgstr "Import"
+
+#. placeholder {0}: importable.length
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Import {0}"
+msgstr "Importă {0}"
 
 #: src/dialogs/resume/import.tsx
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Import an existing resume"
 msgstr "Importați un CV existent"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Import CSV"
+msgstr "Importați CSV"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Import failed. Check the CSV and try again."
+msgstr "Importul nu a reușit. Verificați CSV și încercați din nou."
+
+#: src/features/applications/components/import-applications-sheet.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Import from CSV"
+msgstr "Importă din CSV"
+
+#. placeholder {0}: result.imported
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Imported {0} application(s)."
+msgstr "Au importat {0} aplicații."
+
+#: src/dialogs/resume/import.tsx
+msgid "Importing from PDF or Word requires a connected AI provider."
+msgstr "Importul din PDF sau Word necesită un furnizor de inteligență artificială conectat."
 
 #: src/dialogs/resume/import.tsx
 msgid "Importing your resume..."
@@ -1909,6 +2318,18 @@ msgstr "Se importă CV-ul..."
 #: src/dialogs/resume/import.tsx
 msgid "Importing…"
 msgstr "Importarea…"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Include resume header"
+msgstr "Include antetul CV-ului"
+
+#: src/components/input/rich-input.tsx
+msgid "Increase indent"
+msgstr "Măriți indentarea"
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Increase zoom"
+msgstr "Măriți zoomul"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -1922,9 +2343,9 @@ msgstr "Informație"
 msgid "Inline Code"
 msgstr "Cod în linie"
 
-#: src/components/input/rich-input.tsx
-msgid "Insert Table"
-msgstr "Inserează tabel"
+#: src/routes/dashboard/applications/index.tsx
+msgid "Insights"
+msgstr "Perspective"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Instant Generation"
@@ -1970,6 +2391,26 @@ msgstr "Cursiv"
 msgid "Japanese"
 msgstr "Japoneză"
 
+#: src/features/command-palette/pages/navigation.tsx
+msgid "Job"
+msgstr "Post"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Job description"
+msgstr "Descrierea postului"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Job posting"
+msgstr "Afisare de locuri de munca"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Job search pipeline"
+msgstr "Fluxul căutării de joburi"
+
+#: src/features/command-palette/pages/navigation.tsx
+msgid "Jobs"
+msgstr "Locuri de muncă"
+
 #. Example full name placeholder on profile settings form
 #. Example full name placeholder on registration form
 #: src/features/auth/pages/register.tsx
@@ -2008,6 +2449,11 @@ msgstr "Aliniere justificată"
 msgid "Kannada"
 msgstr "Kannada"
 
+#. Layout editor toggle that prevents a section from splitting across pages
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Keep together"
+msgstr "Rămâneți împreună"
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Key"
 msgstr "Cheie"
@@ -2027,6 +2473,7 @@ msgstr "Coreeană"
 
 #. Short field label for custom display text associated with a URL
 #: src/components/input/url-input.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Label"
 msgstr "Etichetă"
@@ -2060,11 +2507,13 @@ msgstr "Ultima analiză efectuată pe {updatedAtLabel}"
 msgid "Last downloaded on {0}"
 msgstr "Ultima descărcare la {0}"
 
-#. placeholder {0}: syncStatus.lastSyncedParentRevision
-#. placeholder {1}: syncStatus.parent?.revision
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Last synced revision {0}; parent revision {1}."
-msgstr ""
+#: src/routes/dashboard/applications/index.tsx
+msgid "Last updated"
+msgstr "Ultima actualizare"
+
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Last Updated"
+msgstr "Ultima actualizare"
 
 #: src/routes/dashboard/resumes/-components/cards/resume-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
@@ -2100,6 +2549,10 @@ msgstr "Lăsați necompletat pentru a reseta titlul la cel original."
 msgid "Left Align"
 msgstr "Aliniere la stânga"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Let AI read the posting and fill the fields below."
+msgstr "Lasă AI să citească postarea și să completeze câmpurile de mai jos."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Letter"
 msgstr "Scrisoare"
@@ -2133,6 +2586,18 @@ msgstr "Temă deschisă"
 msgid "Line Height"
 msgstr "Înălțimea liniei"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Link a Reactive Resume (recommended)"
+msgstr "Asociază un Reactive Resume (recomandat)"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Link a resume and add a job description (Edit) to score your fit and tailor a copy."
+msgstr "Conectați un CV și adăugați o descriere a postului (Editați) pentru a vă nota potrivirea și a personaliza o copie."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Linked Reactive Resume"
+msgstr "CV-ul reactiv legat"
+
 #. Authentication provider display name in account settings
 #. Brand name label for LinkedIn social sign-in button
 #: src/features/auth/components/social-auth.tsx
@@ -2140,6 +2605,14 @@ msgstr "Înălțimea liniei"
 #: src/routes/_home/-sections/footer.tsx
 msgid "LinkedIn"
 msgstr "LinkedIn"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "LinkedIn, Referral…"
+msgstr "LinkedIn, Recomandare…"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Linking a Reactive Resume enables AI match scoring and tailoring."
+msgstr "Asocierea unui Reactive Resume activează scorul de potrivire AI și adaptarea."
 
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Linking your {providerName} account..."
@@ -2155,24 +2628,36 @@ msgstr "Lituaniană"
 
 #: src/dialogs/resume/import.tsx
 msgid "Loading AI providers. Please try again in a moment."
-msgstr "Se încarcă furnizorii de inteligență artificială. Vă rugăm să încercați "
-"din nou imediat."
+msgstr "Se încarcă furnizorii de inteligență artificială. Vă rugăm să încercați din nou imediat."
+
+#: src/features/command-palette/pages/resumes.tsx
+msgid "Loading applications…"
+msgstr "Se încarcă aplicațiile…"
 
 #: src/features/settings/integrations/components/ai-section.tsx
+#: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Loading providers…"
 msgstr "Se încarcă furnizorii…"
 
 #: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Loading resumes…"
 msgstr "Se încarcă CV-urile…"
 
-#: src/components/layout/loading-screen.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Loading threads…"
+msgstr "Se încarcă firele de discuție…"
+
+#: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
 msgstr "Se încarcă…"
 
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Location"
 msgstr "Locație"
@@ -2213,6 +2698,10 @@ msgstr "Principal"
 msgid "Main navigation"
 msgstr "Navigare principală"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Make the experience section more results-oriented and remove vague responsibilities."
+msgstr "Orientați secțiunea de experiență mai mult spre rezultate și eliminați responsabilitățile vagi."
+
 #: src/libs/locale.ts
 msgid "Malay"
 msgstr "Malay"
@@ -2233,28 +2722,55 @@ msgstr "Margine (orizontală)"
 msgid "Margin (Vertical)"
 msgstr "Margine (verticală)"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Mark rejected"
+msgstr "Mark a respins"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Match scoring failed."
+msgstr "Scorul meciului a eșuat."
+
 #. Impact severity label in resume analysis suggestion card
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Medium"
 msgstr "Mediu"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Merge parent changes into this child resume, or dismiss them to keep "
-"this child resume as-is."
-msgstr ""
-
+#. File format label in import source selector
 #. File format label in import source selector
 #: src/dialogs/resume/import.tsx
 msgid "Microsoft Word"
 msgstr "Microsoft Word"
 
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Missing working resume"
+msgstr "CV de lucru lipsă"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Mistral AI"
+msgstr "Mistral AI"
+
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Model"
 msgstr "Model"
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Move section to another column or page"
+msgstr "Mutați secțiunea în altă coloană sau pagină"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Move stage"
+msgstr "Mutați scena"
+
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Move to"
 msgstr "Mută în"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Moved to"
+msgstr "Mutat în"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Multilingual"
@@ -2272,9 +2788,11 @@ msgstr "Trebuie să înceapă cu https://"
 #: src/dialogs/resume/sections/project.tsx
 #: src/dialogs/resume/sections/reference.tsx
 #: src/dialogs/resume/sections/skill.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/settings/pages/profile.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
+#: src/routes/dashboard/resumes/index.tsx
 msgid "Name"
 msgstr "Nume"
 
@@ -2286,17 +2804,21 @@ msgstr "Nepaleză"
 msgid "Network"
 msgstr "Rețea"
 
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "New Application"
+msgstr "Aplicație nouă"
+
 #: src/routes/_home/-sections/features.tsx
-msgid "New features are constantly being added and improved, so be sure to "
-"check back often."
-msgstr "Funcționalități noi sunt adăugate și îmbunătățite constant, așa că "
-"reveniți des."
+msgid "New features are constantly being added and improved, so be sure to check back often."
+msgstr "Funcționalități noi sunt adăugate și îmbunătățite constant, așa că reveniți des."
 
 #: src/components/input/rich-input.tsx
 msgid "New Line"
 msgstr "Linie nouă"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "New Page"
 msgstr "Pagină nouă"
 
@@ -2310,13 +2832,31 @@ msgstr "Parolă nouă"
 msgid "New Section"
 msgstr "Secțiune nouă"
 
+#: src/features/applications/components/table-view.tsx
+msgid "New tag…"
+msgstr "Etichetă nouă…"
+
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "New thread"
+msgstr "Fir nou"
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "New Thread"
+msgstr "Subiect nou"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "No Advertising, No Tracking"
 msgstr "Fără reclame, fără urmărire"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "No content changes were detected, but the parent revision is newer."
-msgstr ""
+#: src/routes/dashboard/applications/index.tsx
+msgid "No applications match your filters."
+msgstr "Nicio aplicație nu se potrivește cu filtrele dvs."
+
+#: src/features/applications/components/insights-view.tsx
+msgid "No applications yet — add a few to see your funnel and reply rates."
+msgstr "Încă nu există aplicații — adăugați câteva pentru a vedea canalul și ratele de răspuns."
 
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
@@ -2327,23 +2867,56 @@ msgstr "Furnizorul de AI nu a trimis niciun fel de date."
 msgid "No passkeys registered yet."
 msgstr "Nicio cheie de acces înregistrată încă."
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
+msgid "No prior data"
+msgstr "Fără date anterioare"
+
 #: src/components/ui/combobox.tsx
 msgid "No results found."
 msgstr "Nu s-a găsit niciun rezultat."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "No resume linked."
+msgstr "Niciun CV nu este legat."
+
+#: src/routes/dashboard/resumes/-components/grid-view.tsx
+#: src/routes/dashboard/resumes/-components/list-view.tsx
+msgid "No resumes match your search."
+msgstr "Niciun CV nu corespunde căutării dvs."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "No resumes yet."
+msgstr "Încă nu există CV-uri."
+
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "No saved versions yet."
+msgstr "Încă nu există versiuni salvate."
+
+#: src/features/applications/components/insights-view.tsx
+msgid "No source data yet."
+msgstr "Nu există date sursă încă."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles.tsx
 msgid "No style rules yet."
 msgstr "Încă nu există reguli de stil."
 
 #: src/features/settings/integrations/components/ai-section.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
 msgid "No tested provider"
 msgstr "Niciun furnizor testat"
+
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "No threads yet."
+msgstr "Încă nu există subiecte de discuție."
 
 #: src/libs/locale.ts
 msgid "Norwegian"
 msgstr "Norvegiană"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Not connected"
+msgstr "Neconectat"
+
+#: src/features/applications/components/application-form-sheet.tsx
 #: src/libs/resume/section.tsx
 msgid "Notes"
 msgstr "Notițe"
@@ -2351,6 +2924,10 @@ msgstr "Notițe"
 #: src/libs/locale.ts
 msgid "Odia"
 msgstr "Odia"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Ollama Cloud"
+msgstr "Norul Ollama"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "One-Click Sign-In"
@@ -2360,6 +2937,15 @@ msgstr "Autentificare cu un singur clic"
 msgid "Ongoing Maintenance"
 msgstr "Mentenanță continuă"
 
+#. Helper note explaining the keep-together limitation
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Only applies when the section fits on a single page."
+msgstr "Se aplică numai atunci când secțiunea încape pe o singură pagină."
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Only the first {MAX_IMPORT} rows import at once — {overflow} left out. Split the file to import the rest."
+msgstr "Numai primele {MAX_IMPORT} rânduri sunt importate simultan — {overflow} a fost exclus. Împărțiți fișierul pentru a importa restul."
+
 #. Resume card context menu action to open the resume editor
 #. Resume card dropdown action to open the resume editor
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
@@ -2368,13 +2954,21 @@ msgid "Open"
 msgstr "Deschis"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Open assistant"
-msgstr ""
+msgid "Open AI agent"
+msgstr "Agent deschis de inteligență artificială"
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Open AI assistant"
+msgstr "Asistent AI deschis"
 
 #. Button label to open the user's default email app
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Open Email Client"
 msgstr "Deschide clientul de e-mail"
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Open in builder"
+msgstr "Deschide în constructor"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Open Integrations Settings"
@@ -2384,22 +2978,39 @@ msgstr "Deschideți Setări integrări"
 msgid "Open Source"
 msgstr "Sursă publică"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "OpenAI"
+msgstr "OpenAI"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "OpenAI-compatible"
+msgstr "Compatibil cu OpenAI"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "OpenRouter"
+msgstr "OpenRouter"
+
 #: src/routes/_home/-sections/donate.tsx
 #: src/routes/_home/-sections/footer.tsx
 msgid "opens in new tab"
 msgstr "se deschide într-o filă nouă"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Optionally, set a password so that only people with the password can "
-"view your resume through the link."
-msgstr "Opțional, setați o parolă astfel încât doar persoanele care o cunosc să "
-"poată vedea CV-ul prin link."
+msgid "Optionally, set a password so that only people with the password can view your resume through the link."
+msgstr "Opțional, setați o parolă astfel încât doar persoanele care o cunosc să poată vedea CV-ul prin link."
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
+msgid "Options for {title}"
+msgstr "Opțiuni pentru {title}"
 
 #: src/features/auth/components/social-auth.tsx
-msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) "
-"instead of email and password"
+msgctxt "Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password"
 msgid "or continue with"
 msgstr "sau continuați cu"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Or upload a resume PDF"
+msgstr "Sau încarcă un CV PDF"
 
 #: src/components/input/rich-input.tsx
 msgid "Ordered List"
@@ -2419,6 +3030,7 @@ msgstr "Pagină"
 
 #. Layout editor page label with 1-based page number
 #. placeholder {0}: pageIndex + 1
+#. placeholder {0}: targetPageIndex + 1
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Page {0}"
@@ -2428,21 +3040,9 @@ msgstr "Pagina {0}"
 msgid "Paragraph"
 msgstr "Paragraf"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent changes"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent resume has updates"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent updates have been applied."
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Parent updates have been dismissed."
-msgstr ""
+#: src/components/input/rich-input.tsx
+msgid "Paragraph and heading style"
+msgstr "Stilul paragrafului și al titlului"
 
 #. Authentication provider display name in account settings
 #. Label for passkey sign-in button
@@ -2497,6 +3097,43 @@ msgstr "Protecția prin parolă a fost dezactivată."
 msgid "Password protection has been enabled."
 msgstr "Protecția prin parolă a fost activată."
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Paste a job posting URL"
+msgstr "Inserați o adresă URL de postare de locuri de muncă"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source and Tags."
+msgstr "Lipiți rânduri sau încărcați un .csv. Hartăm coloane precum Companie, Rol, Etapă, Data etapei, Salariu, Sursă și Etichete."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Paste the posting — powers AI match scoring and tailoring."
+msgstr "Lipiți postarea — stimulează punctarea și personalizarea meciurilor AI."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch applied"
+msgstr "Aplicat plasture"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch conflicted"
+msgstr "Conflict de patch-uri"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch failed"
+msgstr "Patch-ul a eșuat"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch pending"
+msgstr "Patch în așteptare"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch rolled back"
+msgstr "Patch-ul a fost anulat"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Patch rolled back."
+msgstr "Patch-ul a fost retras."
+
+#. File format label in import source selector
 #. File format label in import source selector
 #: src/dialogs/resume/import.tsx
 msgid "PDF"
@@ -2509,34 +3146,50 @@ msgstr "PDF"
 msgid "Period"
 msgstr "Perioadă"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Perplexity"
+msgstr "Perplexitate"
+
 #: src/libs/locale.ts
 msgid "Persian"
 msgstr "Persană"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Personalize your resume with any colors, fonts or designs, and make it "
-"your own."
-msgstr "Personalizați CV-ul cu orice culori, fonturi sau designuri și faceți-l "
-"al dvs."
+msgid "Personalize your resume with any colors, fonts or designs, and make it your own."
+msgstr "Personalizați CV-ul cu orice culori, fonturi sau designuri și faceți-l al dvs."
 
 #: src/dialogs/resume/sections/reference.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Phone"
 msgstr "Telefon"
 
+#: src/components/input/icon-picker.tsx
+msgid "Pick an icon"
+msgstr "Alegeți o pictogramă"
+
 #: src/libs/resume/section.tsx
 msgid "Picture"
 msgstr "Imagine"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Pipeline flow"
+msgstr "Debitul conductei"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Pipeline health across all applications"
+msgstr "Sănătatea conductei în toate aplicațiile"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Plain text, ideal for AI tools and quick edits."
+msgstr "Text simplu, ideal pentru instrumente AI și editări rapide."
 
 #: src/features/auth/pages/reset-password.tsx
 msgid "Please enter a new password for your account"
 msgstr "Introduceți o parolă nouă pentru contul dvs."
 
 #: src/features/auth/pages/resume-password.tsx
-msgid "Please enter the password shared with you by the owner of the resume to "
-"continue."
-msgstr "Introduceți parola primită de la proprietarul CV-ului pentru a "
-"continua."
+msgid "Please enter the password shared with you by the owner of the resume to continue."
+msgstr "Introduceți parola primită de la proprietarul CV-ului pentru a continua."
 
 #: src/components/input/rich-input.tsx
 msgid "Please enter the URL you want to link to:"
@@ -2546,11 +3199,17 @@ msgstr "Introduceți URL-ul la care doriți să faceți link:"
 msgid "Please support the project"
 msgstr "Vă rugăm să susțineți proiectul"
 
-#: src/features/resume/public/public-resume.tsx
-#: src/routes/builder/$resumeId/-components/dock.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Please upload a PDF file."
+msgstr "Vă rugăm să încărcați un fișier PDF."
+
+#: src/features/resume/export/use-resume-export.ts
 msgid "Please wait while your PDF is being generated..."
 msgstr "Vă rugăm să așteptați în timp ce se generează PDF-ul..."
+
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "Please wait while your PDF is being generated…"
+msgstr "Vă rugăm să așteptați în timp ce se generează PDF-ul…"
 
 #: src/libs/locale.ts
 msgid "Polish"
@@ -2581,20 +3240,30 @@ msgstr "Poziție"
 msgid "Preferences"
 msgstr "Preferințe"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Prepare a conservative patch that improves clarity without changing my career narrative."
+msgstr "Pregătesc un patch conservator care să îmbunătățească claritatea fără a-mi schimba narațiunea carierei."
+
+#: src/features/resume/export/use-resume-export.ts
+msgid "Preparing your resume for printing..."
+msgstr "Pregătirea CV-ului pentru tipărire..."
+
 #: src/components/input/color-picker.tsx
 msgid "Presets"
 msgstr "Presetări"
 
 #: src/components/input/chip-input.tsx
-msgid "Press <0>{RETURN_KEY}</0> or <1>{COMMA_KEY}</1> to add or save the "
-"current keyword."
-msgstr "Apăsați <0>{RETURN_KEY}</0> sau <1>{COMMA_KEY}</1> pentru a adăuga sau "
-"salva cuvântul cheie curent."
+msgid "Press <0>{RETURN_KEY}</0> or <1>{COMMA_KEY}</1> to add or save the current keyword."
+msgstr "Apăsați <0>{RETURN_KEY}</0> sau <1>{COMMA_KEY}</1> pentru a adăuga sau salva cuvântul cheie curent."
 
 #. Command palette hint that pressing Enter opens the selected resume
 #: src/features/command-palette/pages/resumes.tsx
 msgid "Press <0>Enter</0> to open"
 msgstr "Apăsați <0>Enter</0> pentru a deschide"
+
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
+msgid "Preview"
+msgstr "Previzualizare"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Primary Color"
@@ -2631,10 +3300,8 @@ msgid "Protect your resume from unauthorized access with a password"
 msgstr "Protejați CV-ul de acces neautorizat cu o parolă"
 
 #: src/routes/_home/-sections/features.tsx
-msgid "Protect your resume with a password, and let only people with the "
-"password view it."
-msgstr "Protejați CV-ul cu o parolă și permiteți doar persoanelor care o cunosc "
-"să îl vadă."
+msgid "Protect your resume with a password, and let only people with the password view it."
+msgstr "Protejați CV-ul cu o parolă și permiteți doar persoanelor care o cunosc să îl vadă."
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Provider"
@@ -2654,6 +3321,10 @@ msgstr "Publicații"
 msgid "Publisher"
 msgstr "Editor"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Re-score"
+msgstr "Re-scorați"
+
 #: src/routes/_home/-sections/header.tsx
 msgid "Reactive Resume - Go to homepage"
 msgstr "Reactive Resume - Mergi la pagina principală"
@@ -2664,49 +3335,24 @@ msgid "Reactive Resume (JSON)"
 msgstr "Rezumat reactiv (JSON)"
 
 #: src/routes/_home/-sections/prefooter.tsx
-msgid "Reactive Resume continues to grow thanks to its vibrant community. This "
-"project owes its progress to numerous individuals who've dedicated their "
-"time and skills to make it better. We celebrate the coders who've "
-"enhanced its features on GitHub, the linguists whose translations on "
-"Crowdin have made it accessible to a broader audience, and the people "
-"who've donated to support its continued development."
-msgstr "Reactive Resume continuă să crească datorită comunității sale vibrante. "
-"Acest proiect își datorează progresul numeroaselor persoane care și-au "
-"dedicat timpul și abilitățile pentru a-l îmbunătăți. Îi sărbătorim pe "
-"programatorii care i-au îmbunătățit funcționalitățile pe GitHub, pe "
-"lingviștii ale căror traduceri pe Crowdin l-au făcut accesibil unui "
-"public mai larg și pe oamenii care au donat pentru a sprijini "
-"dezvoltarea sa continuă."
+msgid "Reactive Resume continues to grow thanks to its vibrant community. This project owes its progress to numerous individuals who've dedicated their time and skills to make it better. We celebrate the coders who've enhanced its features on GitHub, the linguists whose translations on Crowdin have made it accessible to a broader audience, and the people who've donated to support its continued development."
+msgstr "Reactive Resume continuă să crească datorită comunității sale vibrante. Acest proiect își datorează progresul numeroaselor persoane care și-au dedicat timpul și abilitățile pentru a-l îmbunătăți. Îi sărbătorim pe programatorii care i-au îmbunătățit funcționalitățile pe GitHub, pe lingviștii ale căror traduceri pe Crowdin l-au făcut accesibil unui public mai larg și pe oamenii care au donat pentru a sprijini dezvoltarea sa continuă."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Reactive Resume is a free and open-source project, built with love and "
-"maintained by me and a community of contributors. Your donations help "
-"keep the lights on and the code flowing."
-msgstr "Reactive Resume este un proiect gratuit și open-source, construit cu "
-"dragoste și întreținut de mine și de o comunitate de contribuitori. "
-"Donațiile dvs. ajută la menținerea proiectului și la dezvoltarea "
-"codului."
+msgid "Reactive Resume is a free and open-source project, built with love and maintained by me and a community of contributors. Your donations help keep the lights on and the code flowing."
+msgstr "Reactive Resume este un proiect gratuit și open-source, construit cu dragoste și întreținut de mine și de o comunitate de contribuitori. Donațiile dvs. ajută la menținerea proiectului și la dezvoltarea codului."
 
 #: src/routes/_home/-sections/hero.tsx
-msgid "Reactive Resume is a free and open-source resume builder that simplifies "
-"the process of creating, updating, and sharing your resume."
-msgstr "Reactive Resume este un constructor de CV-uri gratuit și open-source "
-"care simplifică procesul de creare, actualizare și partajare a CV-ului."
+msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
+msgstr "Reactive Resume este un constructor de CV-uri gratuit și open-source care simplifică procesul de creare, actualizare și partajare a CV-ului."
 
 #: src/components/ui/donation-toast.tsx
-msgid "Reactive Resume is free and open source. If it has helped you, please "
-"consider donating."
-msgstr "Reactive Resume este gratuit și open source. Dacă te-a ajutat, te rugăm "
-"să iei în considerare o donație."
+msgid "Reactive Resume is free and open source. If it has helped you, please consider donating."
+msgstr "Reactive Resume este gratuit și open source. Dacă te-a ajutat, te rugăm să iei în considerare o donație."
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Reactive Resume is open-source, privacy-focused, and completely free. "
-"Unlike other resume builders, it doesn't show ads, track your data, or "
-"limit your features behind a paywall."
-msgstr "Reactive Resume este open-source, axat pe confidențialitate și complet "
-"gratuit. Spre deosebire de alți constructori de CV-uri, nu afișează "
-"reclame, nu vă urmărește datele și nu limitează funcționalitățile în "
-"spatele unui paywall."
+msgid "Reactive Resume is open-source, privacy-focused, and completely free. Unlike other resume builders, it doesn't show ads, track your data, or limit your features behind a paywall."
+msgstr "Reactive Resume este open-source, axat pe confidențialitate și complet gratuit. Spre deosebire de alți constructori de CV-uri, nu afișează reclame, nu vă urmărește datele și nu limitează funcționalitățile în spatele unui paywall."
 
 #: src/routes/_home/-sections/sponsors.tsx
 msgid "Reactive Resume stays free, open-source, and independent because companies choose to support the work behind it. Their sponsorship helps fund hosting, maintenance, and continued development for the community."
@@ -2714,13 +3360,17 @@ msgstr "Reactive Resume rămâne gratuit, open-source și independent, deoarece 
 
 #. App version label in footer; includes semantic version variable
 #: src/components/ui/copyright.tsx
-msgid "Reactive Resume v{__APP_VERSION__}"
-msgstr "Reactive Resume v{__APP_VERSION__}"
+msgid "Reactive Resume v<0>{__APP_VERSION__}</0>"
+msgstr "CV reactiv v<0>{__APP_VERSION__}</0>"
 
 #. Import source option for legacy Reactive Resume v4 JSON format
 #: src/dialogs/resume/import.tsx
 msgid "Reactive Resume v4 (JSON)"
 msgstr "CV reactiv v4 (JSON)"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Reading…"
+msgstr "Lectură…"
 
 #: src/dialogs/resume/sections/cover-letter.tsx
 msgid "Recipient"
@@ -2736,7 +3386,7 @@ msgstr "Dreptunghi (lățime completă)"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Redo"
-msgstr ""
+msgstr "Refaceți"
 
 #: src/dialogs/resume/sections/custom.tsx
 #: src/libs/resume/section-title.ts
@@ -2744,9 +3394,9 @@ msgstr ""
 msgid "References"
 msgstr "Referințe"
 
-#: src/components/layout/error-screen.tsx
-msgid "Refresh"
-msgstr "Reîncarcă"
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Referred by…, things to emphasize, etc."
+msgstr "Referit de..., lucruri de subliniat etc."
 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
@@ -2755,6 +3405,10 @@ msgstr "Înregistrare dispozitiv nou"
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Remember your password? <0/>"
 msgstr "Îți amintești parola? <0/>"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Remote, Hybrid, a city…"
+msgstr "Remote, hibrid, un oraș…"
 
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Remove"
@@ -2765,9 +3419,29 @@ msgstr "Elimină"
 msgid "Remove {chip}"
 msgstr "Eliminați {chip}"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Remove contact"
+msgstr "Eliminați contactul"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
+msgid "Remove custom field"
+msgstr "Eliminați câmpul personalizat"
+
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Remove file"
+msgstr "Elimină fișierul"
+
+#: src/components/input/rich-input.tsx
+msgid "Remove link"
+msgstr "Eliminați linkul"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Remove Password"
 msgstr "Elimină parola"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Remove tag"
+msgstr "Elimină eticheta"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Removing password protection..."
@@ -2780,6 +3454,10 @@ msgstr "Redenumește"
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Reorder"
 msgstr "Reordonează"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
+msgid "Reorder custom field"
+msgstr "Reordonați câmpul personalizat"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Report a Bug"
@@ -2823,6 +3501,25 @@ msgstr "Se resetează parola..."
 msgid "Resources"
 msgstr "Resurse"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Restore"
+msgstr "Restabili"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Restore the resume to before this patch? This will roll back this patch and any patches applied after it."
+msgstr "Restaurați CV-ul la starea anterioară acestui patch? Această acțiune va anula acest patch și orice patch-uri aplicate după acesta."
+
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Restore this version?"
+msgstr "Restaurați această versiune?"
+
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/resume/export/download-dialog.tsx
+#: src/routes/agent/-components/resume-pane.tsx
+#: src/routes/agent/$threadId.tsx
+msgid "Resume"
+msgstr "Relua"
+
 #: src/libs/resume/section.tsx
 msgid "Resume Analysis"
 msgstr "Analiza CV-ului"
@@ -2831,9 +3528,25 @@ msgstr "Analiza CV-ului"
 msgid "Resume analysis complete."
 msgstr "Analiza CV-ului este completă."
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
-msgid "Resume updated"
-msgstr ""
+#: src/features/resume/preview/resume-accessible-text.tsx
+msgid "Resume content"
+msgstr "Conținut CV"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Resume file"
+msgstr "Fișier CV"
+
+#: src/features/applications/components/application-card.tsx
+msgid "Resume linked"
+msgstr "CV-ul legat"
+
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Resume options"
+msgstr "Opțiuni pentru CV"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Resume patch"
+msgstr "Reluare patch"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
@@ -2843,27 +3556,37 @@ msgstr ""
 msgid "Resumes"
 msgstr "CV-uri"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review and merge or dismiss the latest parent changes for this child "
-"resume."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Retry"
+msgstr "Reîncercați"
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review parent updates"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Review the resume against a job description and ask me questions before changing uncertain sections."
+msgstr "Verifică CV-ul în raport cu fișa postului și pune-mi întrebări înainte de a modifica secțiunile incerte."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review the parent changes before merging because some edits overlap with "
-"this child resume."
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Rework the summary so it targets a senior engineering manager role without sounding generic."
+msgstr "Reelaborați rezumatul astfel încât să vizeze un rol de manager senior de inginerie, fără a suna generic."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "Review updates"
-msgstr ""
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Rewrite this resume for a startup founder-to-product-lead transition with clear business impact."
+msgstr "Rescrie acest CV pentru o tranziție de la fondator de startup la lider de produs, cu un impact clar asupra afacerii."
 
 #: src/components/input/rich-input.tsx
 msgid "Right Align"
 msgstr "Aliniere la dreapta"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Role (optional)"
+msgstr "Rol (opțional)"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Role / title"
+msgstr "Rol/titlu"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Role A–Z"
+msgstr "Rol A–Z"
 
 #: src/dialogs/resume/sections/experience.tsx
 msgid "Role Progression"
@@ -2886,19 +3609,39 @@ msgid "rules"
 msgstr "reguli"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
-msgid "Run your first analysis to get a scorecard, strengths, and prioritized "
-"suggestions."
-msgstr "Efectuați prima analiză pentru a obține o fișă de evaluare, puncte "
-"forte și sugestii prioritizate."
+msgid "Run your first analysis to get a scorecard, strengths, and prioritized suggestions."
+msgstr "Efectuați prima analiză pentru a obține o fișă de evaluare, puncte forte și sugestii prioritizate."
 
 #: src/libs/locale.ts
 msgid "Russian"
 msgstr "Rusă"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Salary"
+msgstr "Salariu"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Salary range"
+msgstr "Gama de salariu"
+
 #. Passkey rename prompt confirm action in authentication settings
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Save"
 msgstr "Salvați"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Save & Test Provider"
+msgstr "Salvați și testați furnizorul"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Save & Upload"
+msgstr "Salvați și încărcați"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Save changes"
+msgstr "Salvați modificările"
 
 #: src/dialogs/resume/index.tsx
 #: src/dialogs/resume/sections/award.tsx
@@ -2920,24 +3663,41 @@ msgstr "Salvați"
 msgid "Save Changes"
 msgstr "Salvează modificările"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Save Provider"
-msgstr "Salvați furnizorul"
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Saved"
+msgstr "Salvat"
+
+#: src/routes/builder/$resumeId/-components/header.tsx
+msgid "Saving…"
+msgstr "Salvarea…"
 
 #: src/dialogs/auth/enable-two-factor.tsx
-msgid "Scan the QR code below with your preferred authenticator app. You can "
-"also copy the secret below and paste it into your app."
-msgstr "Scanați codul QR de mai jos cu aplicația de autentificare preferată. De "
-"asemenea, puteți copia secretul de mai jos și să îl inserați în "
-"aplicație."
+msgid "Scan the QR code below with your preferred authenticator app. You can also copy the secret below and paste it into your app."
+msgstr "Scanați codul QR de mai jos cu aplicația de autentificare preferată. De asemenea, puteți copia secretul de mai jos și să îl inserați în aplicație."
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "School"
 msgstr "Școală"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Score my fit"
+msgstr "Punctează-mi potrivirea"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Scorecard"
 msgstr "Fișă de scor"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Scoring your fit…"
+msgstr "Punerea punctului pentru potrivirea ta..."
+
+#: src/routes/dashboard/-components/sidebar.tsx
+msgid "Search"
+msgstr "Căutare"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Search applications…"
+msgstr "Căutați aplicații..."
 
 #. Accessible label for command palette search input
 #: src/features/command-palette/index.tsx
@@ -2954,6 +3714,10 @@ msgstr "Căutați o iconiță"
 msgid "Search for…"
 msgstr "Căutați…"
 
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Search resumes..."
+msgstr "Căutare CV-uri..."
+
 #: src/components/ui/combobox.tsx
 msgid "Search..."
 msgstr "Caută..."
@@ -2967,23 +3731,57 @@ msgstr "Căutare…"
 msgid "Secret copied to clipboard."
 msgstr "Secret copiat în clipboard."
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "Section options"
+msgstr "Opțiuni secțiune"
+
 #: src/dialogs/resume/sections/custom.tsx
 msgid "Section Type"
 msgstr "Tip secțiune"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Select a tested AI provider first."
-msgstr ""
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "See how this resume matches the posting"
+msgstr "Vedeți cum se potrivește acest CV cu postarea"
+
+#. placeholder {0}: app.company
+#: src/features/applications/components/table-view.tsx
+msgid "Select {0}"
+msgstr "Selectați {0}"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Select a resume"
+msgstr "Selectați un CV"
+
+#: src/routes/agent/index.tsx
+msgid "Select a thread"
+msgstr "Selectați un fir de discuție"
+
+#: src/features/applications/components/table-view.tsx
+msgid "Select all"
+msgstr "Selectați toate"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Select an agent model"
+msgstr "Selectați un model de agent"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Select an AI provider"
+msgstr "Selectați un furnizor de inteligență artificială"
 
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "Selectează..."
 
+#: src/features/applications/components/table-view.tsx
+msgid "selected"
+msgstr "selectat"
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Self-Host with Docker"
 msgstr "Self-host cu Docker"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Send message"
 msgstr "Trimite mesaj"
 
@@ -3009,8 +3807,28 @@ msgstr "Sârbă"
 msgid "Set Password"
 msgstr "Setează parolă"
 
+#: src/dialogs/resume/import.tsx
+msgid "Set up a provider"
+msgstr "Configurați un furnizor"
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Set up an AI provider"
+msgstr "Configurați un furnizor de inteligență artificială"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Set up an AI provider before starting a thread."
+msgstr "Configurați un furnizor de inteligență artificială înainte de a începe un thread."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "Set up an AI provider to chat about this resume and apply edits automatically."
+msgstr "Configurează un furnizor de inteligență artificială pentru a discuta despre acest CV și a aplica automat modificările."
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Set up an AI provider to get started."
+msgstr "Configurați un furnizor de inteligență artificială pentru a începe."
+
 #: src/features/command-palette/pages/navigation.tsx
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
+#: src/routes/agent/-components/new-thread-setup.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "Setări"
@@ -3040,6 +3858,11 @@ msgstr "Partajarea"
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Show"
 msgstr "Arată"
+
+#. placeholder {0}: Math.min(remaining, COLUMN_PAGE_SIZE)
+#: src/features/applications/components/board.tsx
+msgid "Show {0} more"
+msgstr "Afișați încă {0}"
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
@@ -3071,10 +3894,24 @@ msgstr "Afișează linkul în titlu"
 msgid "Show password"
 msgstr "Afișați parola"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Show picture"
+msgstr "Afișați imaginea"
+
+#: src/features/resume/export/download-dialog.tsx
+msgid "Show the same first-page header on the cover letter."
+msgstr "Afișează același antet de primă pagină și pe scrisoarea de intenție."
+
+#. placeholder {0}: rows.length
+#. placeholder {1}: applications.length
+#: src/features/applications/components/table-view.tsx
+msgid "Showing {0} of {1}"
+msgstr "Se afișează {0} din {1}"
+
 #. Layout editor column label for the secondary sidebar area
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Sidebar"
-msgstr "Bară laterală<<<<<<< HEAD"
+msgstr "Bară laterală"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/index.tsx
 msgid "Sidebar Width"
@@ -3120,44 +3957,28 @@ msgid "Signing up..."
 msgstr "Înregistrare..."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with a magenta left border accent; compact and efficient "
-"for entry-level or internship applications."
-msgstr "O singură coloană cu un accent de culoare magenta pe marginea stângă; "
-"compact și eficient pentru poziții entry-level sau stagii."
+msgid "Single-column with a magenta left border accent; compact and efficient for entry-level or internship applications."
+msgstr "O singură coloană cu un accent de culoare magenta pe marginea stângă; compact și eficient pentru poziții entry-level sau stagii."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with a minimal top header and lots of whitespace; clean "
-"and modern for designers or content creators."
-msgstr "O singură coloană cu un header superior minimal și mult spațiu alb; "
-"curat și modern pentru designeri sau creatori de conținut."
+msgid "Single-column with a minimal top header and lots of whitespace; clean and modern for designers or content creators."
+msgstr "O singură coloană cu un header superior minimal și mult spațiu alb; curat și modern pentru designeri sau creatori de conținut."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with a sidebar and clean grid layout; versatile for any "
-"professional or technical role."
-msgstr "O singură coloană cu bară laterală și layout tip grid curat; versatil "
-"pentru orice rol profesional sau tehnic."
+msgid "Single-column with a sidebar and clean grid layout; versatile for any professional or technical role."
+msgstr "O singură coloană cu bară laterală și layout tip grid curat; versatil pentru orice rol profesional sau tehnic."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with an inline three-column entry header (position · "
-"organization · period); compact and ATS-friendly, well-suited for Asian "
-"resume conventions (CN/JP/KR)."
-msgstr "O singură coloană cu un antet de intrare în linie pe trei coloane "
-"(poziție - organizație - punct); compact și prietenos pentru ATS, bine "
-"adaptat pentru convențiile CV-urilor asiatice (CN/JP/KR)."
+msgid "Single-column with an inline three-column entry header (position · organization · period); compact and ATS-friendly, well-suited for Asian resume conventions (CN/JP/KR)."
+msgstr "O singură coloană cu un antet de intrare în linie pe trei coloane (poziție - organizație - punct); compact și prietenos pentru ATS, bine adaptat pentru convențiile CV-urilor asiatice (CN/JP/KR)."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column with uppercase section headings and a primary-color top "
-"rule on every page; polished for executive, consulting, or startup "
-"resumes."
-msgstr "O singură coloană cu titluri de secțiune cu majuscule și o linie de sus "
-"în culoarea primară pe fiecare pagină; rafinat pentru CV-uri de "
-"directori, consultanți sau startup-uri."
+msgid "Single-column with uppercase section headings and a primary-color top rule on every page; polished for executive, consulting, or startup resumes."
+msgstr "O singură coloană cu titluri de secțiune cu majuscule și o linie de sus în culoarea primară pe fiecare pagină; rafinat pentru CV-uri de directori, consultanți sau startup-uri."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column; polished and serious for senior or enterprise-level "
-"positions."
-msgstr "O singură coloană; finisat și serios pentru poziții de nivel senior sau "
-"enterprise."
+msgid "Single-column; polished and serious for senior or enterprise-level positions."
+msgstr "O singură coloană; finisat și serios pentru poziții de nivel senior sau enterprise."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Size"
@@ -3170,6 +3991,9 @@ msgid "Skills"
 msgstr "Abilități"
 
 #: src/routes/_home/route.tsx
+#: src/routes/builder/$resumeId/-components/desktop-builder-shell.tsx
+#: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
+#: src/routes/dashboard/route.tsx
 msgid "Skip to main content"
 msgstr "Săriți la conținutul principal"
 
@@ -3185,18 +4009,35 @@ msgstr "Slovenă"
 msgid "Slug"
 msgstr "Slug"
 
+#: src/components/layout/error-screen.tsx
+msgid "Something went wrong"
+msgstr "Ceva nu a mers bine"
+
 #. Fallback error description when resume analysis request fails
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "Something went wrong while analyzing your resume."
 msgstr "Ceva nu a mers bine în timpul analizării CV-ului dumneavoastră."
 
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Something went wrong. Please try again."
 msgstr "Ceva nu a funcționat. Vă rugăm să încercați din nou."
 
+#: src/routes/dashboard/applications/index.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Sort by"
 msgstr "Sortați după"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Sort by…"
+msgstr "Sortează după…"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Source"
+msgstr "Sursă"
 
 #: src/routes/_home/-sections/footer.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
@@ -3229,6 +4070,15 @@ msgstr "Sponsorizări"
 msgid "Square"
 msgstr "Pătrat"
 
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
+msgid "Stage"
+msgstr "Etapă"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Stage date"
+msgstr "Data etapei"
+
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub (opens in new tab)"
 msgstr "Adăugați o steluță pentru noi pe GitHub (se deschide într-o filă nouă)"
@@ -3236,16 +4086,15 @@ msgstr "Adăugați o steluță pentru noi pe GitHub (se deschide într-o filă n
 #. placeholder {0}: starCount.toLocaleString()
 #: src/components/input/github-stars-button.tsx
 msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
-msgstr "Adăugați o steluță pentru noi pe GitHub, în prezent {0} stele (se "
-"deschide într-o filă nouă)"
+msgstr "Adăugați o steluță pentru noi pe GitHub, în prezent {0} stele (se deschide într-o filă nouă)"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Start a builder assistant thread that edits the active resume directly."
-msgstr ""
+#: src/routes/agent/$threadId.tsx
+msgid "Start a new thread"
+msgstr "Începeți un nou fir de discuție"
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Start assistant"
-msgstr ""
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Start a thread"
+msgstr "Începeți un fir de discuție"
 
 #: src/dialogs/resume/index.tsx
 msgid "Start building your resume by giving it a name."
@@ -3256,6 +4105,19 @@ msgstr "Începeți să vă creați CV-ul dându-i un nume."
 msgid "Start building your resume from scratch"
 msgstr "Începeți să vă creați CV-ul de la zero"
 
+#: src/routes/agent/index.tsx
+msgid "Start new thread"
+msgstr "Începeți un nou fir de discuție"
+
+#. Layout editor toggle that forces a section to begin on a new page
+#: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
+msgid "Start on new page"
+msgstr "Începeți pe o pagină nouă"
+
+#: src/routes/agent/-components/new-thread-setup.tsx
+msgid "Start Thread"
+msgstr "Începeți firul de discuție"
+
 #: src/libs/resume/section.tsx
 msgid "Statistics"
 msgstr "Statistici"
@@ -3264,7 +4126,7 @@ msgstr "Statistici"
 msgid "Stay"
 msgstr "Rămâi"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Stop generation"
 msgstr "Opriți generarea"
 
@@ -3275,6 +4137,10 @@ msgstr "Puncte forte"
 #: src/components/input/rich-input.tsx
 msgid "Strike"
 msgstr "Tăiat"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Strong fit"
+msgstr "Potrivire puternică"
 
 #: src/routes/_home/-sections/footer.tsx
 msgid "Subreddit"
@@ -3313,18 +4179,40 @@ msgstr "Comutați la tema întunecată"
 msgid "Switch to light theme"
 msgstr "Comutați la tema deschisă"
 
-#: src/components/input/rich-input.tsx
+#. placeholder {0}: templates[template].name
+#: src/dialogs/resume/template/gallery.tsx
+msgid "Switched to the {0} template."
+msgstr "S-a trecut la șablonul {0}."
+
+#: src/features/resume/builder/draft.ts
+msgid "Synced changes made in another tab."
+msgstr "Modificările sincronizate efectuate într-o altă filă."
+
+#: src/routes/dashboard/applications/index.tsx
 msgid "Table"
-msgstr "Tabel"
+msgstr "Masă"
 
 #: src/dialogs/resume/index.tsx
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/table-view.tsx
 msgid "Tags"
 msgstr "Etichete"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
-msgstr "Etichetele pot fi folosite pentru a categoriza CV-ul după cuvinte "
-"cheie."
+msgstr "Etichetele pot fi folosite pentru a categoriza CV-ul după cuvinte cheie."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Tailor my resume"
+msgstr "Personalizează-mi CV-ul"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Tailor this resume to a product manager job description and emphasize roadmap ownership, stakeholder communication, and measurable launch outcomes."
+msgstr "Adaptați acest CV la fișa postului de manager de produs și puneți accent pe responsabilitatea pentru foaia de parcurs, comunicarea cu părțile interesate și rezultatele măsurabile ale lansării."
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Tailoring failed."
+msgstr "Croitoria a eșuat."
 
 #: src/libs/locale.ts
 msgid "Tamil"
@@ -3350,13 +4238,17 @@ msgstr "Șabloane"
 msgid "Test"
 msgstr "Test"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Tested"
-msgstr "Testat"
-
 #: src/routes/_home/-sections/testimonials.tsx
 msgid "Testimonials"
 msgstr "Testimoniale"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Testing…"
+msgstr "Testarea…"
+
+#: src/components/input/rich-input.tsx
+msgid "Text alignment"
+msgstr "Alinierea textului"
 
 #: src/components/input/rich-input.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3371,25 +4263,22 @@ msgstr "Thailandeză"
 msgid "Thank you to our sponsors"
 msgstr "Mulțumim sponsorilor noștri"
 
-#: src/routes/agent/$threadId.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "The agent needs your input."
 msgstr "Agentul are nevoie de contribuția dumneavoastră."
 
 #. Error description when AI returns invalid resume analysis format
 #: src/routes/builder/$resumeId/-sidebar/right/sections/resume-analysis.tsx
 msgid "The AI returned an invalid analysis format. Please try again."
-msgstr "AI a returnat un format de analiză invalid. Vă rugăm să încercați din "
-"nou."
+msgstr "AI a returnat un format de analiză invalid. Vă rugăm să încercați din nou."
 
 #: src/features/settings/pages/api-keys.tsx
 msgid "The API key has been deleted successfully."
 msgstr "Cheia API a fost ștearsă cu succes."
 
 #: src/features/settings/pages/api-keys.tsx
-msgid "The API key will no longer be able to access your data after deletion. "
-"This action cannot be undone."
-msgstr "Cheia API nu va mai putea accesa datele dvs. după ștergere. Această "
-"acțiune nu poate fi anulată."
+msgid "The API key will no longer be able to access your data after deletion. This action cannot be undone."
+msgstr "Cheia API nu va mai putea accesa datele dvs. după ștergere. Această acțiune nu poate fi anulată."
 
 #. Empty-state message when no command palette results match the search query
 #: src/features/command-palette/index.tsx
@@ -3401,10 +4290,9 @@ msgstr "Comanda pe care o căutați nu există."
 msgid "The imported file could not be parsed into a valid resume."
 msgstr "Fișierul importat nu a putut fi analizat într-un rezumat valid."
 
-#: src/routes/builder/$resumeId/-components/header.tsx
-msgid "The parent resume changed. Review it to keep or dismiss the newer parent "
-"version."
-msgstr ""
+#: src/components/layout/not-found-screen.tsx
+msgid "The page you're looking for may have been moved or no longer exists."
+msgstr "Pagina pe care o căutați s-ar putea să fi fost mutată sau să nu mai existe."
 
 #: src/features/auth/pages/resume-password.tsx
 msgid "The password you entered is incorrect"
@@ -3418,6 +4306,10 @@ msgstr "CV-ul la care încercați să accesați este protejat prin parolă"
 msgid "The URL you entered is not valid."
 msgstr "URL-ul introdus nu este valid."
 
+#: src/routes/agent/-components/resume-pane.tsx
+msgid "The working resume was deleted. This thread is read-only."
+msgstr "CV-ul de lucru a fost șters. Acest fir de discuție este doar pentru citire."
+
 #. Menu item that opens appearance theme selection submenu
 #: src/features/command-palette/pages/preferences/theme.tsx
 #: src/features/settings/pages/preferences.tsx
@@ -3427,21 +4319,24 @@ msgstr "Temă"
 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Then, enter the 6 digit code that the app provides to continue."
-msgstr "Apoi introduceți codul din 6 cifre oferit de aplicație pentru a "
-"continua."
+msgstr "Apoi introduceți codul din 6 cifre oferit de aplicație pentru a continua."
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+#: src/features/resume/export/use-resume-export.ts
 msgid "There was a problem while generating the DOCX, please try again."
-msgstr "A apărut o problemă în timpul generării DOCX, vă rugăm să încercați din "
-"nou."
+msgstr "A apărut o problemă în timpul generării DOCX, vă rugăm să încercați din nou."
 
-#: src/features/resume/public/public-resume.tsx
-#: src/routes/builder/$resumeId/-components/dock.tsx
-#: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
+#: src/features/resume/export/use-resume-export.ts
+#: src/routes/agent/-components/resume-pane.tsx
 msgid "There was a problem while generating the PDF, please try again."
-msgstr "A apărut o problemă la generarea PDF-ului, vă rugăm să încercați din "
-"nou."
+msgstr "A apărut o problemă la generarea PDF-ului, vă rugăm să încercați din nou."
+
+#: src/features/resume/export/use-resume-export.ts
+msgid "There was a problem while preparing your resume for printing, please try again."
+msgstr "A apărut o problemă la pregătirea CV-ului pentru tipărire. Vă rugăm să încercați din nou."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Thinking"
+msgstr "Gândire"
 
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
@@ -3451,80 +4346,126 @@ msgstr "Această acțiune nu poate fi anulată."
 
 #: src/features/settings/pages/danger-zone.tsx
 msgid "This action cannot be undone. All your data will be permanently deleted."
-msgstr "Această acțiune nu poate fi anulată. Toate datele dvs. vor fi șterse "
-"definitiv."
+msgstr "Această acțiune nu poate fi anulată. Toate datele dvs. vor fi șterse definitiv."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This action cannot be undone. Conversation messages and uploaded attachments will be removed. The working resume remains in your dashboard and can be deleted separately."
+msgstr "Această acțiune nu poate fi anulată. Mesajele din conversație și atașamentele încărcate vor fi eliminate. CV-ul de lucru rămâne în tabloul de bord și poate fi șters separat."
+
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "This action cannot be undone. Messages and thread attachments will be removed."
+msgstr "Această acțiune nu poate fi anulată. Mesajele și atașamentele la firul de discuție vor fi eliminate."
+
+#: src/routes/agent/$threadId.tsx
+msgid "This agent thread could not be opened."
+msgstr "Acest fir de discuție cu agentul nu a putut fi deschis."
+
+#: src/routes/builder/$resumeId/-components/ai-assistant.tsx
+msgid "This assistant could not be opened."
+msgstr "Acest asistent nu a putut fi deschis."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "This entry will be permanently deleted. This can't be undone."
+msgstr "Această intrare va fi ștearsă definitiv. Această acțiune nu poate fi anulată."
 
 #: src/dialogs/resume/import.tsx
-msgid "This feature requires a tested AI provider. Please add one in the "
-"settings."
-msgstr "Această funcție necesită un furnizor de inteligență artificială testat. "
-"Adăugați unul în setări."
+msgid "This feature requires a connected AI provider. Please set one up in the settings."
+msgstr "Această funcție necesită un furnizor de inteligență artificială conectat. Vă rugăm să configurați unul în setări."
 
 #: src/dialogs/resume/index.tsx
 msgid "This is a URL-friendly name for your resume."
 msgstr "Acesta este un nume prietenos cu URL-ul pentru CV."
 
 #: src/dialogs/resume/import.tsx
-msgid "This may take a few minutes, depending on the response of the AI "
-"provider. Please do not close the window or refresh the page."
-msgstr "Acest lucru poate dura câteva minute, în funcție de răspunsul "
-"furnizorului AI. Vă rugăm să nu închideți fereastra și să nu "
-"reîncărcați pagina."
+msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
+msgstr "Acest lucru poate dura câteva minute, în funcție de răspunsul furnizorului AI. Vă rugăm să nu închideți fereastra și să nu reîncărcați pagina."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "This removes the current messages for this resume. You can start a new "
-"chat afterward."
-msgstr ""
-
-#: src/features/resume/builder/draft.ts
-msgid "This resume could not be saved because it is no longer available."
-msgstr ""
+#: src/routes/builder/$resumeId/-sidebar/left/index.tsx
+msgid "This resume is locked"
+msgstr "Acest CV este blocat"
 
 #: src/features/resume/builder/draft.ts
 msgid "This resume is locked and cannot be updated."
 msgstr "Acest CV este blocat și nu poate fi actualizat."
 
+#: src/features/resume/builder/draft.ts
+msgid "This resume was updated by an AI agent."
+msgstr "Acest CV a fost actualizat de un agent de inteligență artificială."
+
+#: src/features/resume/builder/draft.ts
+msgid "This resume's sharing settings changed elsewhere."
+msgstr "Setările de partajare ale acestui CV s-au modificat în altă parte."
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
-msgid "This section is reserved for your personal notes specific to this "
-"resume. The content here remains private and is not shared with anyone "
-"else."
-msgstr "Această secțiune este rezervată pentru notele dumneavoastră personale "
-"specifice acestui CV. Conținutul de aici rămâne privat și nu este "
-"partajat cu nimeni altcineva."
+msgid "This section is reserved for your personal notes specific to this resume. The content here remains private and is not shared with anyone else."
+msgstr "Această secțiune este rezervată pentru notele dumneavoastră personale specifice acestui CV. Conținutul de aici rămâne privat și nu este partajat cu nimeni altcineva."
 
 #: src/features/auth/pages/register.tsx
 msgid "This step is optional, but recommended."
 msgstr "Acest pas este opțional, dar recomandat."
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This thread is archived. New messages cannot be sent."
+msgstr "Acest fir de discuție este arhivat. Nu se pot trimite mesaje noi."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This thread is read-only"
+msgstr "Acest fir de discuție este doar pentru citire"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "This thread is read-only because the working resume or AI provider is unavailable."
+msgstr "Acest fir de discuție este doar pentru citire deoarece CV-ul funcțional sau furnizorul de inteligență artificială nu este disponibil."
+
 #: src/dialogs/api-key/create.tsx
-msgid "This will generate a new API key to access the Reactive Resume API to "
-"allow machines to interact with your resume data."
-msgstr "Aceasta va genera o nouă cheie API pentru a accesa API-ul Reactive "
-"Resume, permițând sistemelor să interacționeze cu datele CV-ului."
+msgid "This will generate a new API key to access the Reactive Resume API to allow machines to interact with your resume data."
+msgstr "Aceasta va genera o nouă cheie API pentru a accesa API-ul Reactive Resume, permițând sistemelor să interacționeze cu datele CV-ului."
 
 #: src/features/settings/authentication/components/passkeys.tsx
-msgid "This will help you identify it later, if you plan to have multiple "
-"passkeys."
-msgstr "Acest lucru vă va ajuta să o identificați ulterior, dacă intenționați "
-"să aveți mai multe chei de acces."
+msgid "This will help you identify it later, if you plan to have multiple passkeys."
+msgstr "Acest lucru vă va ajuta să o identificați ulterior, dacă intenționați să aveți mai multe chei de acces."
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "This will remove all items from this section."
 msgstr "Acest lucru va elimina toate elementele din această secțiune."
 
+#: src/routes/agent/-components/agent-chat.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+msgid "Thread actions"
+msgstr "Acțiuni fir de discuție"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Thread archived."
+msgstr "Fir de discuție arhivat."
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Thread deleted."
+msgstr "Firul de discuție a fost șters."
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+#: src/routes/agent/-components/thread-sidebar.tsx
+#: src/routes/agent/$threadId.tsx
+msgid "Threads"
+msgstr "Fire de discuție"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Tighten the skills section so it supports the target role instead of reading like a keyword dump."
+msgstr "Restrângeți secțiunea de competențe astfel încât să susțină rolul țintă, în loc să se citească ca o secțiune de cuvinte cheie."
+
 #: src/routes/_home/-sections/hero.tsx
 msgid "Timelapse demonstration of building a resume with Reactive Resume"
 msgstr "Demonstrație timelapse de construire a unui CV cu Reactive Resume"
 
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Timeline"
+msgstr "Cronologie"
+
 #: src/dialogs/api-key/create.tsx
-msgid "Tip: Give your API key a name, corresponding to the purpose of the key, "
-"to help you identify it later."
-msgstr "Sfat: Dați cheii API un nume, corespunzător scopului ei, pentru a o "
-"putea identifica mai ușor mai târziu."
+msgid "Tip: Give your API key a name, corresponding to the purpose of the key, to help you identify it later."
+msgstr "Sfat: Dați cheii API un nume, corespunzător scopului ei, pentru a o putea identifica mai ușor mai târziu."
 
 #: src/dialogs/resume/index.tsx
-msgid "Tip: You can name the resume referring to the position you are applying "
-"for."
+msgid "Tip: You can name the resume referring to the position you are applying for."
 msgstr "Sfat: Puteți denumi CV-ul în funcție de postul pentru care candidați."
 
 #: src/dialogs/resume/sections/award.tsx
@@ -3535,10 +4476,17 @@ msgid "Title"
 msgstr "Titlu"
 
 #: src/features/settings/pages/danger-zone.tsx
-msgid "To delete your account, you need to enter the confirmation text and "
-"click the button below."
-msgstr "Pentru a vă șterge contul, trebuie să introduceți textul de confirmare "
-"și să faceți clic pe butonul de mai jos."
+msgid "To delete your account, you need to enter the confirmation text and click the button below."
+msgstr "Pentru a vă șterge contul, trebuie să introduceți textul de confirmare și să faceți clic pe butonul de mai jos."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Together.ai"
+msgstr "Împreună.ai"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/shared/section-base.tsx
+msgid "Toggle {sectionTitle} section"
+msgstr "Comutare secțiune {sectionTitle}"
 
 #. Screen-reader label for opening or closing the left sidebar in resume builder
 #: src/routes/builder/$resumeId/-components/header.tsx
@@ -3549,10 +4497,26 @@ msgstr "Alternați bara laterală din stânga"
 msgid "Toggle page stacking"
 msgstr "Comutare stivuire pagini"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Toggle resume preview"
+msgstr "Comutare previzualizare CV"
+
 #. Screen-reader label for opening or closing the right sidebar in resume builder
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Toggle right sidebar"
 msgstr "Alternați bara laterală din dreapta"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Toggle threads"
+msgstr "Comutare fir de discuție"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Track a job you're applying to and link the resume you sent."
+msgstr "Urmăriți un loc de muncă la care aplicați și conectați CV-ul pe care l-ați trimis."
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Track your first application"
+msgstr "Urmăriți prima aplicație"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Track your resume's views and downloads"
@@ -3563,74 +4527,53 @@ msgstr "Urmăriți vizualizările și descărcările CV-ului"
 msgid "Translations"
 msgstr "Traduceri"
 
+#: src/components/layout/error-screen.tsx
+msgid "Try again"
+msgstr "Încearcă din nou"
+
 #: src/libs/locale.ts
 msgid "Turkish"
 msgstr "Turcă"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
-msgid "Turn on public sharing to track how many times your resume has been "
-"viewed or downloaded. Only you can see your resume's statistics."
-msgstr "Activați partajarea publică pentru a urmări de câte ori CV-ul a fost "
-"vizualizat sau descărcat. Doar dvs. puteți vedea statisticile CV-ului."
+msgid "Turn on public sharing to track how many times your resume has been viewed or downloaded. Only you can see your resume's statistics."
+msgstr "Activați partajarea publică pentru a urmări de câte ori CV-ul a fost vizualizat sau descărcat. Doar dvs. puteți vedea statisticile CV-ului."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a bold colored sidebar and skill bars; great for "
-"creative or tech roles where visual flair is welcome."
-msgstr "Două coloane cu o bară laterală colorată îndrăzneață și bare de "
-"abilități; excelent pentru roluri creative sau tehnice unde este "
-"apreciat impactul vizual."
+msgid "Two-column with a bold colored sidebar and skill bars; great for creative or tech roles where visual flair is welcome."
+msgstr "Două coloane cu o bară laterală colorată îndrăzneață și bare de abilități; excelent pentru roluri creative sau tehnice unde este apreciat impactul vizual."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a dark teal sidebar and skills grid; modern feel for "
-"developers, data scientists, or technical PMs."
-msgstr "Două coloane cu o bară laterală teal închis și grid de abilități; "
-"aspect modern pentru dezvoltatori, data scientists sau PM tehnici."
+msgid "Two-column with a dark teal sidebar and skills grid; modern feel for developers, data scientists, or technical PMs."
+msgstr "Două coloane cu o bară laterală teal închis și grid de abilități; aspect modern pentru dezvoltatori, data scientists sau PM tehnici."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a left margin color; simple and approachable for "
-"creative, editorial, or junior roles."
-msgstr "Două coloane cu o margine stângă colorată; simplu și prietenos pentru "
-"roluri creative, editoriale sau de junior."
+msgid "Two-column with a left margin color; simple and approachable for creative, editorial, or junior roles."
+msgstr "Două coloane cu o margine stângă colorată; simplu și prietenos pentru roluri creative, editoriale sau de junior."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a muted color sidebar; earthy and calm, suits "
-"sustainability, healthcare, or nonprofit sectors."
-msgstr "Două coloane cu o bară laterală în tonuri estompate; sobru și calm, "
-"potrivit pentru domenii de sustenabilitate, sănătate sau nonprofit."
+msgid "Two-column with a muted color sidebar; earthy and calm, suits sustainability, healthcare, or nonprofit sectors."
+msgstr "Două coloane cu o bară laterală în tonuri estompate; sobru și calm, potrivit pentru domenii de sustenabilitate, sănătate sau nonprofit."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with a soft header accent and circular profile photo; ideal "
-"for marketing, HR, or client-facing roles."
-msgstr "Două coloane cu accent discret în header și fotografie de profil "
-"circulară; ideal pentru marketing, HR sau roluri orientate spre relația "
-"cu clienții."
+msgid "Two-column with a soft header accent and circular profile photo; ideal for marketing, HR, or client-facing roles."
+msgstr "Două coloane cu accent discret în header și fotografie de profil circulară; ideal pentru marketing, HR sau roluri orientate spre relația cu clienții."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column with accent colors and clean typography; balanced choice for "
-"business analysts or operations roles."
-msgstr "Două coloane cu culori de accent și tipografie curată; alegere "
-"echilibrată pentru analiști de business sau roluri de operațiuni."
+msgid "Two-column with accent colors and clean typography; balanced choice for business analysts or operations roles."
+msgstr "Două coloane cu culori de accent și tipografie curată; alegere echilibrată pentru analiști de business sau roluri de operațiuni."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column, clean and professional with subtle section dividers; suits "
-"corporate, finance, or consulting positions."
-msgstr "Două coloane, curat și profesional cu separatoare subtile între "
-"secțiuni; potrivit pentru poziții corporate, financiare sau de "
-"consultanță."
+msgid "Two-column, clean and professional with subtle section dividers; suits corporate, finance, or consulting positions."
+msgstr "Două coloane, curat și profesional cu separatoare subtile între secțiuni; potrivit pentru poziții corporate, financiare sau de consultanță."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column, minimal and text-dense with no decorative elements; perfect "
-"for traditional industries or ATS-heavy applications."
-msgstr "Două coloane, minimal și dens în text fără elemente decorative; perfect "
-"pentru industrii tradiționale sau aplicații unde contează mult "
-"compatibilitatea cu ATS."
+msgid "Two-column, minimal and text-dense with no decorative elements; perfect for traditional industries or ATS-heavy applications."
+msgstr "Două coloane, minimal și dens în text fără elemente decorative; perfect pentru industrii tradiționale sau aplicații unde contează mult compatibilitatea cu ATS."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Two-column, minimal with light gray sidebar and subtle icons; "
-"professional and understated for legal, finance, or executive roles."
-msgstr "Două coloane, minimal cu bară laterală gri deschis și iconițe subtile; "
-"profesional și discret pentru roluri în juridic, finanțe sau management "
-"executiv."
+msgid "Two-column, minimal with light gray sidebar and subtle icons; professional and understated for legal, finance, or executive roles."
+msgstr "Două coloane, minimal cu bară laterală gri deschis și iconițe subtile; profesional și discret pentru roluri în juridic, finanțe sau management executiv."
 
 #: src/features/auth/pages/verify-2fa.tsx
 #: src/features/settings/authentication/components/two-factor.tsx
@@ -3673,17 +4616,19 @@ msgstr "Tipografie"
 msgid "Ukrainian"
 msgstr "Ucraineană"
 
+#: src/features/applications/components/application-actions-menu.tsx
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Unarchive"
+msgstr "Dezarhivați"
+
 #: src/components/input/rich-input.tsx
 msgid "Underline"
 msgstr "Subliniat"
 
+#: src/dialogs/resume/template/gallery.tsx
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Undo"
-msgstr ""
-
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Unknown provider"
-msgstr ""
+msgstr "Anula"
 
 #: src/routes/_home/-sections/features.tsx
 msgid "Unlimited Resumes"
@@ -3707,21 +4652,12 @@ msgstr "Deblocare"
 msgid "Unnamed passkey"
 msgstr "Cheie de acces fără nume"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "Untested"
-msgstr "Netestat"
-
 #: src/features/settings/pages/profile.tsx
 msgid "Unverified"
 msgstr "Neverificat"
 
-#. Resume card context menu action to edit resume metadata
-#. Resume card dropdown action to edit resume metadata
-#: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
-#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
-#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Update"
 msgstr "Actualizează"
 
@@ -3791,9 +4727,25 @@ msgstr "Actualizați o experiență de voluntariat existentă"
 msgid "Update Password"
 msgstr "Actualizare parolă"
 
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Update project bullets to show leadership, constraints, tradeoffs, and measurable outcomes."
+msgstr "Actualizați punctele cheie ale proiectului pentru a arăta conducerea, constrângerile, compromisurile și rezultatele măsurabile."
+
 #: src/dialogs/resume/index.tsx
 msgid "Update Resume"
 msgstr "Actualizați CV-ul"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Update the calendar date for this timeline entry."
+msgstr "Actualizați data calendaristică pentru această intrare din cronologie."
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Update this application's details."
+msgstr "Actualizați detaliile acestei aplicații."
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Update this timeline note."
+msgstr "Actualizați această notă din cronologie."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
@@ -3807,6 +4759,14 @@ msgstr "Se actualizează parola..."
 msgid "Updating your resume..."
 msgstr "Se actualizează CV-ul..."
 
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Upload .csv"
+msgstr "Încărcați .csv"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "Upload attachments"
+msgstr "Încărcați atașamente"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Upload picture"
 msgstr "Încărcați imaginea"
@@ -3814,6 +4774,10 @@ msgstr "Încărcați imaginea"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Uploading picture…"
 msgstr "Se încarcă imaginea…"
+
+#: src/features/applications/components/file-attachment-field.tsx
+msgid "Uploading…"
+msgstr "Se încarcă..."
 
 #. Form field label for the generated public resume link in sharing settings
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
@@ -3826,8 +4790,13 @@ msgid "Use"
 msgstr "Utilizare"
 
 #: src/components/input/color-picker.tsx
+#: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Use color {color}"
 msgstr "Utilizați culoarea {color}"
+
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "Use sample"
+msgstr "Utilizați eșantion"
 
 #. Label for username input on registration form
 #: src/dialogs/resume/sections/profile.tsx
@@ -3847,6 +4816,10 @@ msgstr "Uzbecă"
 #: src/components/input/rich-input.tsx
 msgid "Valid URLs must start with http:// or https://."
 msgstr "URL-urile valide trebuie să înceapă cu http:// sau https://."
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Vercel AI Gateway"
+msgstr "Vercel AI Gateway"
 
 #: src/features/settings/pages/profile.tsx
 msgid "Verified"
@@ -3883,6 +4856,10 @@ msgstr "Se verifică parola..."
 msgid "Verifying your email is required when resetting your password."
 msgstr "Verificarea e-mailului este necesară pentru resetarea parolei."
 
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Version history"
+msgstr "Istoricul versiunilor"
+
 #: src/libs/locale.ts
 msgid "Vietnamese"
 msgstr "Vietnameză"
@@ -3897,6 +4874,18 @@ msgstr "Vizualizări"
 msgid "Volunteer"
 msgstr "Voluntariat"
 
+#: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
+msgid "vs previous 30 days"
+msgstr "față de ultimele 30 de zile"
+
+#: src/dialogs/resume/import.tsx
+msgid "We couldn't detect the format automatically — please choose it above."
+msgstr "Nu am putut detecta formatul automat — vă rugăm să îl alegeți mai sus."
+
+#: src/components/layout/not-found-screen.tsx
+msgid "We couldn't find that page"
+msgstr "Nu am putut găsi pagina respectivă"
+
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/education.tsx
@@ -3909,6 +4898,10 @@ msgstr "Voluntariat"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Website"
 msgstr "Website"
+
+#: src/routes/agent/-components/agent-chat.tsx
+msgid "What do you want to do?"
+msgstr "Ce vreţi să faceţi?"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "What do you want to rename this section to?"
@@ -3928,59 +4921,53 @@ msgstr "Ce este nou în cea mai recentă versiune?"
 msgid "When locked, the resume cannot be updated or deleted."
 msgstr "Când este blocat, CV-ul nu poate fi actualizat sau șters."
 
-#: src/routes/builder/$resumeId/-components/assistant-panel.tsx
-msgid "Work on this resume"
-msgstr ""
+#: src/features/applications/components/insights-view.tsx
+msgid "Where applications come from"
+msgstr "De unde vin aplicațiile"
+
+#: src/features/applications/components/insights-view.tsx
+msgid "Where your applications went"
+msgstr "Unde au mers aplicațiile dvs"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Work OpenAI"
 msgstr "Lucrează cu OpenAI"
 
-#: src/routes/builder/$resumeId/-components/assistant-chat.tsx
+#: src/routes/agent/-components/agent-chat.tsx
 msgid "Working…"
 msgstr "Lucrând…"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Worth a shot"
+msgstr "Merită o șansă"
 
 #: src/routes/_home/-sections/footer.tsx
 msgid "X (Twitter)"
 msgstr "X (Twitter)"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes, Reactive Resume is available in multiple languages. You can choose "
-"your preferred language in the settings page, or using the language "
-"switcher in the top right corner. If you don't see your language, or you "
-"would like to improve the existing translations, you can <0>contribute "
-"to the translations on Crowdin<1> (opens in new tab)</1></0>."
-msgstr "Da, Reactive Resume este disponibil în mai multe limbi. Puteți alege "
-"limba preferată în pagina de setări sau folosind comutatorul de limbă "
-"din colțul din dreapta sus. Dacă nu vedeți limba dvs. sau doriți să "
-"îmbunătățiți traducerile existente, puteți <0>contribui la traduceri pe "
-"Crowdin<1> (se deschide într-o filă nouă)</1></0>."
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "xAI Grok"
+msgstr "xAI Grok"
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Yes! Reactive Resume is completely free to use, with no hidden costs, "
-"premium tiers, or subscription fees. It's open-source and will always "
-"remain free."
-msgstr "Da! Reactive Resume este complet gratuit de utilizat, fără costuri "
-"ascunse, niveluri premium sau abonamente. Este open-source și va rămâne "
-"întotdeauna gratuit."
+msgid "Yes, Reactive Resume is available in multiple languages. You can choose your preferred language in the settings page, or using the language switcher in the top right corner. If you don't see your language, or you would like to improve the existing translations, you can <0>contribute to the translations on Crowdin<1> (opens in new tab)</1></0>."
+msgstr "Da, Reactive Resume este disponibil în mai multe limbi. Puteți alege limba preferată în pagina de setări sau folosind comutatorul de limbă din colțul din dreapta sus. Dacă nu vedeți limba dvs. sau doriți să îmbunătățiți traducerile existente, puteți <0>contribui la traduceri pe Crowdin<1> (se deschide într-o filă nouă)</1></0>."
+
+#: src/routes/_home/-sections/faq.tsx
+msgid "Yes! Reactive Resume is completely free to use, with no hidden costs, premium tiers, or subscription fees. It's open-source and will always remain free."
+msgstr "Da! Reactive Resume este complet gratuit de utilizat, fără costuri ascunse, niveluri premium sau abonamente. Este open-source și va rămâne întotdeauna gratuit."
 
 #: src/routes/_home/-sections/features.tsx
-msgid "You also have the option to deploy on your own servers using the Docker "
-"image."
-msgstr "Aveți și opțiunea de a implementa pe propriile servere folosind "
-"imaginea Docker."
+msgid "You also have the option to deploy on your own servers using the Docker image."
+msgstr "Aveți și opțiunea de a implementa pe propriile servere folosind imaginea Docker."
 
 #: src/features/auth/pages/login.tsx
 msgid "You can also use your username to login."
 msgstr "Puteți folosi și numele de utilizator pentru a vă autentifica."
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "You can share your resume via a unique public URL, protect it with a "
-"password, or download it as a PDF to share directly. The choice is "
-"yours!"
-msgstr "Puteți partaja CV-ul printr-un URL public unic, îl puteți proteja cu o "
-"parolă sau îl puteți descărca ca PDF pentru a-l partaja direct. "
-"Alegerea vă aparține!"
+msgid "You can share your resume via a unique public URL, protect it with a password, or download it as a PDF to share directly. The choice is yours!"
+msgstr "Puteți partaja CV-ul printr-un URL public unic, îl puteți proteja cu o parolă sau îl puteți descărca ca PDF pentru a-l partaja direct. Alegerea vă aparține!"
 
 #: src/hooks/use-form-blocker.tsx
 msgid "You have unsaved changes that will be lost."
@@ -4003,28 +4990,25 @@ msgstr "Cheia API a fost copiată în clipboard."
 msgid "Your changes are saved automatically."
 msgstr "Modificările sunt salvate automat."
 
+#: src/features/settings/pages/danger-zone.tsx
+msgid "Your data has been exported successfully."
+msgstr "Datele dumneavoastră au fost exportate cu succes."
+
 #: src/routes/_home/-sections/features.tsx
 msgid "Your data is secure, and never shared or sold to anyone."
-msgstr "Datele dvs. sunt în siguranță și nu sunt niciodată partajate sau "
-"vândute nimănui."
+msgstr "Datele dvs. sunt în siguranță și nu sunt niciodată partajate sau vândute nimănui."
 
 #: src/routes/_home/-sections/faq.tsx
-msgid "Your data is stored securely and is never shared with third parties. You "
-"can also self-host Reactive Resume on your own servers for complete "
-"control over your data."
-msgstr "Datele dvs. sunt stocate în siguranță și nu sunt niciodată partajate cu "
-"terți. De asemenea, puteți auto-găzdui Reactive Resume pe propriile "
-"servere pentru control complet asupra datelor."
+msgid "Your data is stored securely and is never shared with third parties. You can also self-host Reactive Resume on your own servers for complete control over your data."
+msgstr "Datele dvs. sunt stocate în siguranță și nu sunt niciodată partajate cu terți. De asemenea, puteți auto-găzdui Reactive Resume pe propriile servere pentru control complet asupra datelor."
 
 #: src/features/resume/builder/draft.ts
 msgid "Your latest changes could not be saved."
 msgstr "Ultimele modificări ale dvs. nu au putut fi salvate."
 
 #: src/features/auth/pages/reset-password.tsx
-msgid "Your password has been reset successfully. You can now sign in with your "
-"new password."
-msgstr "Parola a fost resetată cu succes. Vă puteți autentifica acum cu noua "
-"parolă."
+msgid "Your password has been reset successfully. You can now sign in with your new password."
+msgstr "Parola a fost resetată cu succes. Vă puteți autentifica acum cu noua parolă."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Your password has been updated successfully."
@@ -4052,25 +5036,34 @@ msgstr "CV-ul a fost duplicat cu succes."
 msgid "Your resume has been imported successfully."
 msgstr "CV-ul a fost importat cu succes."
 
+#: src/routes/builder/$resumeId/-components/version-history.tsx
+msgid "Your resume has been restored to the selected version."
+msgstr "CV-ul dumneavoastră a fost restaurat la versiunea selectată."
+
 #: src/dialogs/resume/index.tsx
 msgid "Your resume has been updated successfully."
 msgstr "CV-ul a fost actualizat cu succes."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Your resume's public link is currently protected by a password. Share "
-"the password only with people you trust."
-msgstr "Linkul public al CV-ului este în prezent protejat prin parolă. "
-"Partajați parola doar cu persoanele în care aveți încredere."
+msgid "Your resume's public link is currently protected by a password. Share the password only with people you trust."
+msgstr "Linkul public al CV-ului este în prezent protejat prin parolă. Partajați parola doar cu persoanele în care aveți încredere."
 
 #: src/routes/_home/-sections/donate.tsx
-msgid "Your support ensures the project remains free and accessible for "
-"everyone, now and in the future."
-msgstr "Sprijinul dvs. asigură că proiectul rămâne gratuit și accesibil pentru "
-"toată lumea, acum și în viitor."
+msgid "Your support ensures the project remains free and accessible for everyone, now and in the future."
+msgstr "Sprijinul dvs. asigură că proiectul rămâne gratuit și accesibil pentru toată lumea, acum și în viitor."
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Zoom"
+msgstr "Zoom"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Zoom in"
 msgstr "Mărește"
+
+#: src/routes/agent/-components/resume-pane.tsx
+#: src/routes/builder/$resumeId/-components/dock.tsx
+msgid "Zoom level"
+msgstr "Nivel de zoom"
 
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Zoom out"

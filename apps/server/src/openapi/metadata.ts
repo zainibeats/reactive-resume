@@ -32,7 +32,7 @@ export async function handleOAuthProtectedResource() {
 	const metadata = {
 		resource: env.APP_URL,
 		bearer_methods_supported: ["header"],
-		authorization_servers: [env.APP_URL, `${env.APP_URL}/api/auth`],
+		authorization_servers: [`${env.APP_URL}/api/auth`],
 	};
 
 	return Response.json(metadata, {

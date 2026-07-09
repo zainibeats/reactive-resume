@@ -8,7 +8,7 @@ type ResolveAiBaseUrlInput = {
 	baseURL?: string | null;
 };
 
-const LOCAL_AI_PROVIDERS = new Set<AIProvider>(["ollama", "lmstudio"]);
+const LOCAL_AI_PROVIDERS = new Set<AIProvider>(["ollama"]);
 
 function assertSafeUrl(input: string, errorCode: string, options?: { allowUnsafe?: boolean }) {
 	const parsed = parseUrl(input);

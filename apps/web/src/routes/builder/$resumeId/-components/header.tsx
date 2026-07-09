@@ -1,12 +1,11 @@
-import type { SyncDiff } from "./sync-diff";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
-	ArrowsClockwiseIcon,
 	CaretDownIcon,
-	CodeIcon,
+	CheckCircleIcon,
+	CircleNotchIcon,
 	CopySimpleIcon,
-	GitBranchIcon,
+	DownloadSimpleIcon,
 	HouseSimpleIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
@@ -14,25 +13,12 @@ import {
 	SidebarSimpleIcon,
 	TrashSimpleIcon,
 	WarningCircleIcon,
-	XCircleIcon,
 } from "@phosphor-icons/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
-import { Badge } from "@reactive-resume/ui/components/badge";
+import { match } from "ts-pattern";
 import { Button } from "@reactive-resume/ui/components/button";
-import { Checkbox } from "@reactive-resume/ui/components/checkbox";
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@reactive-resume/ui/components/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -41,111 +27,35 @@ import {
 	DropdownMenuTrigger,
 } from "@reactive-resume/ui/components/dropdown-menu";
 import { useDialogStore } from "@/dialogs/store";
-import { useCurrentResume, usePatchResume } from "@/features/resume/builder/draft";
+import {
+	useCurrentBuilderResumeSelector,
+	useCurrentResume,
+	usePatchResume,
+	useResumeStore,
+} from "@/features/resume/builder/draft";
+import { ResumeDownloadDialog } from "@/features/resume/export/download-dialog";
 import { useConfirm } from "@/hooks/use-confirm";
 import { getResumeErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useBuilderSidebar } from "../-store/sidebar";
-import { EditJsonDialog } from "./edit-json-dialog";
-import { formatDiffPath, formatDiffValue } from "./sync-diff";
-
-function getDiffOperationLabel(op: SyncDiff["op"]) {
-	switch (op) {
-		case "add":
-			return t`Added`;
-		case "remove":
-			return t`Removed`;
-		case "replace":
-			return t`Changed`;
-		case "move":
-			return t`Moved`;
-		case "copy":
-			return t`Copied`;
-		case "test":
-			return t`Checked`;
-	}
-}
-
-function getDiffOperationVariant(op: SyncDiff["op"]): "default" | "secondary" | "destructive" | "outline" {
-	switch (op) {
-		case "add":
-		case "copy":
-			return "default";
-		case "remove":
-			return "destructive";
-		case "replace":
-		case "move":
-			return "secondary";
-		case "test":
-			return "outline";
-	}
-}
-
-type ParentChangeDiffProps = {
-	diff: SyncDiff;
-	checked?: boolean;
-	onCheckedChange?: (checked: boolean) => void;
-};
-
-function ParentChangeDiff({ diff, checked, onCheckedChange }: ParentChangeDiffProps) {
-	return (
-		<li className="overflow-hidden rounded-lg border bg-background">
-			<div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-3 py-2">
-				{onCheckedChange && (
-					<Checkbox
-						aria-label={`Select parent change ${formatDiffPath(diff.path)}`}
-						checked={checked}
-						onCheckedChange={(value) => onCheckedChange(value === true)}
-					/>
-				)}
-				<Badge variant={getDiffOperationVariant(diff.op)}>{getDiffOperationLabel(diff.op)}</Badge>
-				{diff.hasConflict && (
-					<Badge variant="destructive">
-						<Trans>Conflict</Trans>
-					</Badge>
-				)}
-				<span className="min-w-0 flex-1 truncate text-muted-foreground text-xs" title={diff.path}>
-					{formatDiffPath(diff.path)}
-				</span>
-				{diff.from && (
-					<span className="truncate text-muted-foreground text-xs" title={diff.from}>
-						<Trans>from</Trans> {formatDiffPath(diff.from)}
-					</span>
-				)}
-			</div>
-
-			<div className="grid gap-0 md:grid-cols-2">
-				<div className="min-w-0 border-b md:border-e md:border-b-0">
-					<div className="border-b bg-destructive/5 px-3 py-1.5 font-medium text-destructive text-xs">
-						<Trans>Previous</Trans>
-					</div>
-					<pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words p-3 font-mono text-muted-foreground text-xs">
-						{formatDiffValue(diff.previous, diff.hasPrevious)}
-					</pre>
-				</div>
-				<div className="min-w-0">
-					<div className="border-b bg-primary/5 px-3 py-1.5 font-medium text-primary text-xs">
-						<Trans>Parent update</Trans>
-					</div>
-					<pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words p-3 font-mono text-xs">
-						{formatDiffValue(diff.next, diff.hasNext)}
-					</pre>
-				</div>
-			</div>
-		</li>
-	);
-}
+import { BuilderAiAssistant } from "./ai-assistant";
+import { BuilderVersionHistory } from "./version-history";
 
 export function BuilderHeader() {
-	const resume = useCurrentResume();
-	const name = resume.name;
-	const isLocked = resume.isLocked;
-	const toggleSidebar = useBuilderSidebar((state) => state.toggleSidebar);
+	// Subscribe to only the metadata fields this header renders. Selecting the whole resume re-renders
+	// the header on every keystroke (immer replaces the resume reference on each content edit).
+	const name = useCurrentBuilderResumeSelector((resume) => resume.name);
+	const isLocked = useCurrentBuilderResumeSelector((resume) => resume.isLocked);
+	const resumeId = useCurrentBuilderResumeSelector((resume) => resume.id);
+	const { toggleSidebar } = useBuilderSidebar();
 
+	// Equal-width flex-1 side groups keep the center title group truly centered regardless of the
+	// wider Download button on the right.
 	return (
-		<>
-			<div className="absolute inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b bg-popover px-1.5">
-				<Button size="icon" variant="ghost" onClick={() => toggleSidebar("left")}>
+		<div className="absolute inset-x-0 top-0 z-50 flex h-14 min-w-0 items-center gap-x-2 border-b bg-popover px-1.5">
+			<div className="flex min-w-0 flex-1 items-center justify-start">
+				{/* Hidden below `md`: on mobile the sidebar panels never mount, so `toggleSidebar` no-ops — the bottom tab bar handles this. */}
+				<Button size="icon" variant="ghost" className="hidden md:flex" onClick={() => toggleSidebar("left")}>
 					<SidebarSimpleIcon />
 					<span className="sr-only">
 						<Trans comment="Screen-reader label for opening or closing the left sidebar in resume builder">
@@ -153,29 +63,36 @@ export function BuilderHeader() {
 						</Trans>
 					</span>
 				</Button>
+			</div>
 
-				<div className="flex min-w-0 items-center gap-x-1">
-					<Button
-						size="icon"
-						variant="ghost"
-						aria-label={t({
-							comment: "Accessible label for button navigating from builder to resumes dashboard",
-							message: "Go to resumes dashboard",
-						})}
-						nativeButton={false}
-						render={
-							<Link to="/dashboard/resumes" search={{ sort: "lastUpdatedAt", tags: [] }}>
-								<HouseSimpleIcon />
-							</Link>
-						}
-					/>
-					<span className="me-2.5 text-muted-foreground">/</span>
-					<h2 className="min-w-0 flex-1 truncate font-medium">{name}</h2>
-					{isLocked && <LockSimpleIcon className="ms-2 text-muted-foreground" />}
-					<BuilderHeaderDropdown />
-				</div>
+			<div className="flex min-w-0 items-center gap-x-1">
+				<Button
+					size="icon"
+					variant="ghost"
+					aria-label={t({
+						comment: "Accessible label for button navigating from builder to resumes dashboard",
+						message: "Go to resumes dashboard",
+					})}
+					nativeButton={false}
+					render={
+						<Link to="/dashboard/resumes" search={{ sort: "lastUpdatedAt", tags: [] }}>
+							<HouseSimpleIcon />
+						</Link>
+					}
+				/>
+				<span className="me-2.5 text-muted-foreground">/</span>
+				<h2 className="min-w-0 truncate font-medium">{name}</h2>
+				{isLocked && <LockSimpleIcon className="ms-2 text-muted-foreground" />}
+				<SaveStatusIndicator />
+				<BuilderAiAssistant resumeId={resumeId} />
+				<BuilderVersionHistory resumeId={resumeId} />
+				<BuilderHeaderDropdown />
+			</div>
 
-				<Button size="icon" variant="ghost" onClick={() => toggleSidebar("right")}>
+			<div className="flex min-w-0 flex-1 items-center justify-end gap-x-1">
+				<ResumeDownloadButton />
+
+				<Button size="icon" variant="ghost" className="hidden md:flex" onClick={() => toggleSidebar("right")}>
 					<SidebarSimpleIcon className="-scale-x-100" />
 					<span className="sr-only">
 						<Trans comment="Screen-reader label for opening or closing the right sidebar in resume builder">
@@ -184,232 +101,65 @@ export function BuilderHeader() {
 					</span>
 				</Button>
 			</div>
-
-			<ChildResumeSyncAlert />
-		</>
+		</div>
 	);
 }
 
-function ChildResumeSyncAlert() {
-	const [isReviewOpen, setIsReviewOpen] = useState(false);
-	const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
-	const queryClient = useQueryClient();
+function ResumeDownloadButton() {
 	const resume = useCurrentResume();
-	const patchResume = usePatchResume();
-	const id = resume.id;
-	const isLocked = resume.isLocked;
-	const parentId = resume.parentId;
-
-	const { data: syncStatus } = useQuery({
-		...orpc.resume.getSyncStatus.queryOptions({ input: { id } }),
-		enabled: Boolean(parentId),
-	});
-	const { mutate: applyParentUpdates, isPending: isApplyingParentUpdates } = useMutation(
-		orpc.resume.applyParentUpdates.mutationOptions(),
-	);
-	const { mutate: dismissParentUpdates, isPending: isDismissingParentUpdates } = useMutation(
-		orpc.resume.dismissParentUpdates.mutationOptions(),
-	);
-
-	useEffect(() => {
-		if (!isReviewOpen || !syncStatus) return;
-
-		setSelectedPaths(Array.from(new Set(syncStatus.diffs.map((diff) => diff.path))));
-	}, [isReviewOpen, syncStatus]);
-
-	if (!parentId || !syncStatus?.isBehind) return null;
-
-	const refreshSyncStatus = () => {
-		void queryClient.invalidateQueries({ queryKey: orpc.resume.getSyncStatus.queryKey({ input: { id } }) });
-		void queryClient.invalidateQueries({ queryKey: orpc.resume.getById.queryKey({ input: { id } }) });
-	};
-
-	const selectedPathSet = new Set(selectedPaths);
-	const selectablePaths = Array.from(new Set(syncStatus.diffs.map((diff) => diff.path)));
-	const selectedCount = selectablePaths.filter((path) => selectedPathSet.has(path)).length;
-	const hasSelectedChanges = syncStatus.operations.length === 0 || selectedCount > 0;
-	const hasSelectedConflicts = syncStatus.diffs.some((diff) => selectedPathSet.has(diff.path) && diff.hasConflict);
-	const areAllChangesSelected =
-		selectablePaths.length > 0 && selectablePaths.every((path) => selectedPathSet.has(path));
-
-	const togglePath = (path: string, checked: boolean) => {
-		setSelectedPaths((current) => {
-			const next = new Set(current);
-			if (checked) next.add(path);
-			else next.delete(path);
-
-			return Array.from(next);
-		});
-	};
-
-	const toggleAllPaths = (checked: boolean) => {
-		setSelectedPaths(checked ? selectablePaths : []);
-	};
-
-	const applyUpdates = (force = false) => {
-		const toastId = toast.loading(t`Applying parent updates...`);
-
-		applyParentUpdates(
-			{ id, force, ...(syncStatus.operations.length > 0 ? { paths: selectedPaths } : {}) },
-			{
-				onSuccess: (updated) => {
-					patchResume((draft) => {
-						Object.assign(draft, updated);
-					});
-					refreshSyncStatus();
-					setIsReviewOpen(false);
-					toast.success(t`Parent updates have been applied.`, { id: toastId });
-				},
-				onError: (error) => {
-					toast.error(getResumeErrorMessage(error), { id: toastId });
-				},
-			},
-		);
-	};
-
-	const dismissUpdates = () => {
-		const toastId = toast.loading(t`Dismissing parent updates...`);
-
-		dismissParentUpdates(
-			{ id },
-			{
-				onSuccess: (updated) => {
-					patchResume((draft) => {
-						Object.assign(draft, updated);
-					});
-					refreshSyncStatus();
-					setIsReviewOpen(false);
-					toast.success(t`Parent updates have been dismissed.`, { id: toastId });
-				},
-				onError: (error) => {
-					toast.error(getResumeErrorMessage(error), { id: toastId });
-				},
-			},
-		);
-	};
-
-	const isPending = isApplyingParentUpdates || isDismissingParentUpdates;
 
 	return (
-		<>
-			<div className="pointer-events-none absolute inset-x-2 top-16 z-40 flex justify-center sm:inset-x-4">
-				<Alert className="pointer-events-auto max-w-3xl border-primary/30 bg-popover shadow-lg sm:pe-36">
-					<WarningCircleIcon />
-					<AlertTitle>
-						<Trans>Parent resume has updates</Trans>
-					</AlertTitle>
-					<AlertDescription>
-						{syncStatus.hasConflicts ? (
-							<Trans>Review the parent changes before merging because some edits overlap with this child resume.</Trans>
-						) : syncStatus.operationCount > 0 ? (
-							<Trans>Review and merge or dismiss the latest parent changes for this child resume.</Trans>
-						) : (
-							<Trans>The parent resume changed. Review it to keep or dismiss the newer parent version.</Trans>
-						)}
-					</AlertDescription>
-					<AlertAction className="static col-start-2 mt-2 sm:absolute sm:inset-e-2 sm:top-2 sm:mt-0">
-						<Button size="sm" onClick={() => setIsReviewOpen(true)}>
-							<Trans>Review updates</Trans>
-						</Button>
-					</AlertAction>
-				</Alert>
-			</div>
+		<ResumeDownloadDialog
+			resume={resume}
+			trigger={(disabled) => (
+				<Button
+					size="sm"
+					aria-label={t({
+						comment: "Primary action in the builder header to open resume download options",
+						message: "Download options",
+					})}
+					disabled={disabled}
+					className="px-2 sm:px-2.5"
+				>
+					{disabled ? (
+						<CircleNotchIcon className="animate-spin sm:me-1.5" />
+					) : (
+						<DownloadSimpleIcon className="sm:me-1.5" />
+					)}
+					<span className="hidden sm:inline">
+						<Trans comment="Primary action in the builder header to open resume download options">Download</Trans>
+					</span>
+				</Button>
+			)}
+		/>
+	);
+}
 
-			<Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-				<DialogContent className="xl:max-w-5xl">
-					<DialogHeader>
-						<DialogTitle className="flex items-center gap-x-2">
-							<GitBranchIcon />
-							<Trans>Review parent updates</Trans>
-						</DialogTitle>
-						<DialogDescription>
-							<Trans>
-								Merge parent changes into this child resume, or dismiss them to keep this child resume as-is.
-							</Trans>
-						</DialogDescription>
-					</DialogHeader>
+function SaveStatusIndicator() {
+	const status = useResumeStore((state) => state.saveStatus);
+	if (status === "idle") return null;
 
-					<div className="space-y-4">
-						<div className="rounded-lg border bg-muted/30 p-3">
-							<div className="font-medium text-sm">{syncStatus.parent?.name}</div>
-							<div className="mt-1 text-muted-foreground text-sm">
-								<Trans>Last synced revision</Trans> {syncStatus.lastSyncedParentRevision};{" "}
-								<Trans>parent revision</Trans> {syncStatus.parent?.revision}.
-							</div>
-						</div>
+	const { icon, label } = match(status)
+		.with("saving", () => ({
+			icon: <CircleNotchIcon className="animate-spin" />,
+			label: t`Saving…`,
+		}))
+		.with("saved", () => ({ icon: <CheckCircleIcon />, label: t`Saved` }))
+		.with("error", () => ({
+			icon: <WarningCircleIcon className="text-destructive" />,
+			label: t`Couldn't save`,
+		}))
+		.exhaustive();
 
-						{syncStatus.hasConflicts && (
-							<div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-								<div className="font-medium text-destructive text-sm">
-									<Trans>Conflicting child edits</Trans>
-								</div>
-								<ul className="mt-2 max-h-32 space-y-1 overflow-auto text-sm">
-									{syncStatus.conflicts.map((path) => (
-										<li key={path} className="font-mono text-muted-foreground text-xs">
-											{path}
-										</li>
-									))}
-								</ul>
-							</div>
-						)}
-
-						<div>
-							<div className="font-medium text-sm">
-								<Trans>Parent changes</Trans>
-							</div>
-							{syncStatus.operations.length > 0 ? (
-								<>
-									<div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2">
-										<div className="flex items-center gap-2 text-sm">
-											<Checkbox
-												aria-label="Select all changes"
-												checked={areAllChangesSelected}
-												onCheckedChange={(value) => toggleAllPaths(value === true)}
-											/>
-											<span>Select all changes</span>
-										</div>
-										<span className="text-muted-foreground text-xs">
-											{selectedCount} of {selectablePaths.length} selected
-										</span>
-									</div>
-									<ul className="mt-2 max-h-[min(60svh,36rem)] space-y-3 overflow-auto pe-1 text-sm">
-										{syncStatus.diffs.map((diff, index) => (
-											<ParentChangeDiff
-												key={`${diff.op}-${diff.path}-${index}`}
-												diff={diff}
-												checked={selectedPathSet.has(diff.path)}
-												onCheckedChange={(checked) => togglePath(diff.path, checked)}
-											/>
-										))}
-									</ul>
-								</>
-							) : (
-								<p className="mt-2 text-muted-foreground text-sm">
-									<Trans>No content changes were detected, but the parent revision is newer.</Trans>
-								</p>
-							)}
-						</div>
-					</div>
-
-					<DialogFooter>
-						<DialogClose render={<Button variant="outline" disabled={isPending} />}>
-							<Trans>Close</Trans>
-						</DialogClose>
-						<Button variant="destructive" disabled={isLocked || isPending} onClick={dismissUpdates}>
-							<XCircleIcon />
-							<Trans>Dismiss</Trans>
-						</Button>
-						<Button
-							disabled={isLocked || isPending || !hasSelectedChanges}
-							onClick={() => applyUpdates(hasSelectedConflicts)}
-						>
-							<ArrowsClockwiseIcon />
-							{hasSelectedConflicts ? <Trans>Apply anyway</Trans> : <Trans>Apply updates</Trans>}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-		</>
+	return (
+		<span
+			className="ms-1 flex shrink-0 items-center gap-x-1 text-muted-foreground text-xs"
+			aria-live="polite"
+			role="status"
+		>
+			{icon}
+			<span className="hidden md:inline">{label}</span>
+		</span>
 	);
 }
 
@@ -420,7 +170,6 @@ function BuilderHeaderDropdown() {
 
 	const resume = useCurrentResume();
 	const patchResume = usePatchResume();
-	const [isJsonEditorOpen, setIsJsonEditorOpen] = useState(false);
 	const id = resume.id;
 	const name = resume.name;
 	const slug = resume.slug;
@@ -436,10 +185,6 @@ function BuilderHeaderDropdown() {
 
 	const handleDuplicate = () => {
 		openDialog("resume.duplicate", { id, name, slug, tags, shouldRedirect: true });
-	};
-
-	const handleDerive = () => {
-		openDialog("resume.derive", { id, name, slug, tags, shouldRedirect: true });
 	};
 
 	const handleToggleLock = async () => {
@@ -467,14 +212,8 @@ function BuilderHeaderDropdown() {
 	};
 
 	const handleDelete = async () => {
-		const confirmation = await confirm("Are you sure you want to delete this resume?", {
-			description: (
-				<>
-					Resume: <span className="font-medium text-foreground">{name}</span>
-					<br />
-					This action cannot be undone.
-				</>
-			),
+		const confirmation = await confirm(t`Are you sure you want to delete this resume?`, {
+			description: t`This action cannot be undone.`,
 		});
 
 		if (!confirmation) return;
@@ -496,51 +235,38 @@ function BuilderHeaderDropdown() {
 	};
 
 	return (
-		<>
-			<DropdownMenu>
-				<DropdownMenuTrigger
-					render={
-						<Button size="icon" variant="ghost">
-							<CaretDownIcon />
-						</Button>
-					}
-				/>
+		<DropdownMenu>
+			<DropdownMenuTrigger
+				render={
+					<Button size="icon" variant="ghost" aria-label={t`Resume options`}>
+						<CaretDownIcon />
+					</Button>
+				}
+			/>
 
-				<DropdownMenuContent>
-					<DropdownMenuItem disabled={isLocked} onClick={handleUpdate}>
-						<PencilSimpleLineIcon className="me-2" />
-						<Trans>Update</Trans>
-					</DropdownMenuItem>
+			<DropdownMenuContent>
+				<DropdownMenuItem disabled={isLocked} onClick={handleUpdate}>
+					<PencilSimpleLineIcon className="me-2" />
+					<Trans>Edit details</Trans>
+				</DropdownMenuItem>
 
-					<DropdownMenuItem disabled={isLocked} onClick={() => setIsJsonEditorOpen(true)}>
-						<CodeIcon className="me-2" />
-						Edit JSON
-					</DropdownMenuItem>
+				<DropdownMenuItem onClick={handleDuplicate}>
+					<CopySimpleIcon className="me-2" />
+					<Trans>Duplicate</Trans>
+				</DropdownMenuItem>
 
-					<DropdownMenuItem onClick={handleDuplicate}>
-						<CopySimpleIcon className="me-2" />
-						<Trans>Duplicate</Trans>
-					</DropdownMenuItem>
+				<DropdownMenuItem onClick={handleToggleLock}>
+					{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}
+					{isLocked ? <Trans>Unlock</Trans> : <Trans>Lock</Trans>}
+				</DropdownMenuItem>
 
-					<DropdownMenuItem onClick={handleDerive}>
-						<GitBranchIcon className="me-2" />
-						<Trans>Create child resume</Trans>
-					</DropdownMenuItem>
+				<DropdownMenuSeparator />
 
-					<DropdownMenuItem onClick={handleToggleLock}>
-						{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}
-						{isLocked ? <Trans>Unlock</Trans> : <Trans>Lock</Trans>}
-					</DropdownMenuItem>
-
-					<DropdownMenuSeparator />
-
-					<DropdownMenuItem variant="destructive" disabled={isLocked} onClick={handleDelete}>
-						<TrashSimpleIcon className="me-2" />
-						<Trans>Delete</Trans>
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-			<EditJsonDialog data={resume.data} open={isJsonEditorOpen} onOpenChange={setIsJsonEditorOpen} />
-		</>
+				<DropdownMenuItem variant="destructive" disabled={isLocked} onClick={handleDelete}>
+					<TrashSimpleIcon className="me-2" />
+					<Trans>Delete</Trans>
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }

@@ -1,7 +1,7 @@
 import z from "zod";
 import { protectedProcedure } from "../../context";
 import { storageUploadRateLimit } from "../../middleware/rate-limit";
-import { isAgentEnvironmentUnavailable, throwUnavailable } from "./routing";
+import { mapAgentEnvironmentError } from "./routing";
 import { agentService } from "./service";
 
 function base64ToUint8Array(value: string) {
@@ -26,19 +26,15 @@ export const attachmentsRouter = {
 			}),
 		)
 		.use(storageUploadRateLimit)
+		.use(mapAgentEnvironmentError)
 		.handler(async ({ context, input }) => {
-			try {
-				return await agentService.attachments.create({
-					userId: context.user.id,
-					threadId: input.threadId,
-					filename: input.filename,
-					mediaType: input.mediaType,
-					data: base64ToUint8Array(input.data),
-				});
-			} catch (error) {
-				if (isAgentEnvironmentUnavailable(error)) throwUnavailable();
-				throw error;
-			}
+			return await agentService.attachments.create({
+				userId: context.user.id,
+				threadId: input.threadId,
+				filename: input.filename,
+				mediaType: input.mediaType,
+				data: base64ToUint8Array(input.data),
+			});
 		}),
 
 	delete: protectedProcedure
@@ -51,12 +47,8 @@ export const attachmentsRouter = {
 		})
 		.input(z.object({ id: z.string() }))
 		.output(z.void())
+		.use(mapAgentEnvironmentError)
 		.handler(async ({ context, input }) => {
-			try {
-				await agentService.attachments.delete({ id: input.id, userId: context.user.id });
-			} catch (error) {
-				if (isAgentEnvironmentUnavailable(error)) throwUnavailable();
-				throw error;
-			}
+			await agentService.attachments.delete({ id: input.id, userId: context.user.id });
 		}),
 };

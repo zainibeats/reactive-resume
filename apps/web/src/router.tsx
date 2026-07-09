@@ -1,3 +1,4 @@
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { createRouter } from "@tanstack/react-router";
@@ -11,7 +12,7 @@ import { getQueryClient } from "./libs/query/client";
 import { getTheme } from "./libs/theme";
 import { routeTree } from "./routeTree.gen";
 
-const ErrorScreenWithI18n: typeof ErrorScreen = (props) => (
+const ErrorScreenWithI18n = (props: ErrorComponentProps) => (
 	<I18nProvider i18n={i18n}>
 		<ErrorScreen {...props} />
 	</I18nProvider>
@@ -23,9 +24,9 @@ const LoadingScreenWithI18n: typeof LoadingScreen = () => (
 	</I18nProvider>
 );
 
-const NotFoundScreenWithI18n: typeof NotFoundScreen = (props) => (
+const NotFoundScreenWithI18n = () => (
 	<I18nProvider i18n={i18n}>
-		<NotFoundScreen {...props} />
+		<NotFoundScreen />
 	</I18nProvider>
 );
 

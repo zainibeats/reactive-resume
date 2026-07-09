@@ -1,7 +1,7 @@
 import type { Style } from "@react-pdf/types";
 import type { ReactNode } from "react";
 import { createElement } from "react";
-import { Text as PdfText } from "../../renderer";
+import { Text as PdfText } from "#react-pdf-renderer";
 import {
 	getRichTextEdgeTrimStyle,
 	isRichTextElementInsideListItem,
