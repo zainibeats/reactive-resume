@@ -212,7 +212,7 @@ const CopyApiKeyForm = ({ apiKey }: CopyApiKeyFormProps) => {
 					<Trans>Here's your new API key</Trans>
 				</DialogTitle>
 				<DialogDescription>
-					<Trans>Copy this secret key and use it in your applications to access your data.</Trans>
+					<Trans>Use this secret key to access your data through the API.</Trans>
 				</DialogDescription>
 			</DialogHeader>
 

@@ -16,6 +16,7 @@ const AI_PROVIDERS = [
 	"cerebras",
 	"perplexity",
 	"ollama",
+	"lmstudio",
 	"openai-compatible",
 ] as const;
 
@@ -39,5 +40,6 @@ export const AI_PROVIDER_DEFAULT_BASE_URLS: Record<AIProvider, string> = {
 	cerebras: "https://api.cerebras.ai/v1",
 	perplexity: "https://api.perplexity.ai",
 	ollama: "https://ollama.com/api",
+	lmstudio: "http://localhost:1234/v1",
 	"openai-compatible": "",
 };

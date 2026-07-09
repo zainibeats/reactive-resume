@@ -121,7 +121,7 @@ function RouteComponent() {
 		<div className="flex h-[calc(100dvh-2rem)] flex-col gap-4">
 			<DashboardHeader
 				icon={BriefcaseIcon}
-				title={t`Applications`}
+				title={t`Job Search`}
 				actions={
 					!isEmpty ? (
 						<>
@@ -131,7 +131,7 @@ function RouteComponent() {
 							</Button>
 							<Button size="sm" onClick={() => setAddOpen(true)}>
 								<PlusIcon />
-								<Trans>Add application</Trans>
+								<Trans>Add job</Trans>
 							</Button>
 						</>
 					) : undefined
@@ -152,7 +152,7 @@ function RouteComponent() {
 							</InputGroupAddon>
 							<InputGroupInput
 								value={search}
-								placeholder={t`Search applications…`}
+								placeholder={t`Search saved jobs…`}
 								onChange={(event) => setSearch({ search: event.target.value })}
 							/>
 						</InputGroup>
@@ -283,7 +283,7 @@ function RouteComponent() {
 						{view !== "insights" && filtered.length === 0 ? (
 							<div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
 								<p className="font-medium text-sm">
-									<Trans>No applications match your filters.</Trans>
+									<Trans>No saved jobs match your filters.</Trans>
 								</p>
 								<Button
 									size="sm"
@@ -328,19 +328,18 @@ function EmptyState({ onAdd, onImport }: { onAdd: () => void; onImport: () => vo
 			</div>
 			<div className="max-w-md space-y-1.5">
 				<h2 className="font-semibold text-lg">
-					<Trans>Track your first application</Trans>
+					<Trans>Save your first job posting</Trans>
 				</h2>
 				<p className="text-muted-foreground text-sm">
 					<Trans>
-						Add a job you're applying to, link the resume you sent, and move it through your pipeline as things
-						progress.
+						Keep the posting, link a resume, score your fit, and create a tailored copy when you are ready to apply.
 					</Trans>
 				</p>
 			</div>
 			<div className="flex gap-2">
 				<Button onClick={onAdd}>
 					<PlusIcon />
-					<Trans>Add application</Trans>
+					<Trans>Add job</Trans>
 				</Button>
 				<Button variant="outline" onClick={onImport}>
 					<DownloadSimpleIcon />

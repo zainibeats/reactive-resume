@@ -85,9 +85,13 @@ export function ResumesCommandGroup() {
 					<Trans>Resumes</Trans>
 				</CommandItem>
 
-				<CommandItem keywords={[t`Applications`]} value="search.applications" onSelect={() => pushPage("applications")}>
+				<CommandItem
+					keywords={[t`Applications`, t`Jobs`, t`Saved Jobs`]}
+					value="search.applications"
+					onSelect={() => pushPage("applications")}
+				>
 					<BriefcaseIcon />
-					<Trans>Applications</Trans>
+					<Trans>Saved Jobs</Trans>
 				</CommandItem>
 			</BaseCommandGroup>
 
@@ -125,15 +129,15 @@ export function ResumesCommandGroup() {
 			) : null}
 
 			{searchPage === "applications" ? (
-				<BaseCommandGroup page={commandSearchPage} heading={<Trans>Applications</Trans>}>
+				<BaseCommandGroup page={commandSearchPage} heading={<Trans>Saved Jobs</Trans>}>
 					<CommandItem value="applications.create" onSelect={onCreateApplication}>
 						<PlusIcon />
-						<Trans>New Application</Trans>
+						<Trans>Add Job</Trans>
 					</CommandItem>
 
 					{isLoadingApplications ? (
 						<CommandLoading>
-							<Trans>Loading applications…</Trans>
+							<Trans>Loading saved jobs…</Trans>
 						</CommandLoading>
 					) : (
 						filteredApplications.map((application) => (

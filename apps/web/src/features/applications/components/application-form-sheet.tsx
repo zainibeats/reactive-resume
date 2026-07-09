@@ -120,11 +120,11 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 		orpc.applications.create.mutationOptions({
 			onSuccess: () => {
 				invalidate();
-				toast.success(t`Application added to your pipeline.`);
+				toast.success(t`Job saved.`);
 				setForm(emptyForm());
 				onOpenChange(false);
 			},
-			onError: () => toast.error(t`Couldn't add the application. Please try again.`),
+			onError: () => toast.error(t`Couldn't save the job. Please try again.`),
 		}),
 	);
 
@@ -132,7 +132,7 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 		orpc.applications.update.mutationOptions({
 			onSuccess: () => {
 				invalidate();
-				toast.success(t`Application updated.`);
+				toast.success(t`Saved job updated.`);
 				onOpenChange(false);
 			},
 			onError: () => toast.error(t`Couldn't save your changes. Please try again.`),
@@ -187,12 +187,12 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent side="right" className="w-full gap-0 data-[side=right]:sm:max-w-lg">
 				<SheetHeader>
-					<SheetTitle>{isEditing ? <Trans>Edit application</Trans> : <Trans>Add application</Trans>}</SheetTitle>
+					<SheetTitle>{isEditing ? <Trans>Edit saved job</Trans> : <Trans>Add job</Trans>}</SheetTitle>
 					<SheetDescription>
 						{isEditing ? (
-							<Trans>Update this application's details.</Trans>
+							<Trans>Update this saved job and posting details.</Trans>
 						) : (
-							<Trans>Track a job you're applying to and link the resume you sent.</Trans>
+							<Trans>Save a posting, link a resume, and tailor a copy when the fit looks right.</Trans>
 						)}
 					</SheetDescription>
 				</SheetHeader>
@@ -354,7 +354,7 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 						<Trans>Cancel</Trans>
 					</Button>
 					<Button type="button" disabled={!form.company.trim() || !form.role.trim() || pending} onClick={submit}>
-						{isEditing ? <Trans>Save changes</Trans> : <Trans>Add to pipeline</Trans>}
+						{isEditing ? <Trans>Save changes</Trans> : <Trans>Save job</Trans>}
 					</Button>
 				</SheetFooter>
 			</SheetContent>

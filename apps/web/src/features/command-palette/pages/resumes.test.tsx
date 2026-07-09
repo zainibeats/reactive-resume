@@ -96,7 +96,7 @@ function TestCommandPalette() {
 describe("ResumesCommandGroup", () => {
 	it.each([
 		["resumes", "", "Create a new resume"],
-		["applications", "{ArrowDown}", "New Application"],
+		["applications", "{ArrowDown}", "Add Job"],
 	])("opens the %s list page from the root palette with Enter", async (page, keys, createLabel) => {
 		mockUseQueryData((entity) => {
 			if (entity === "resumes") return [{ id: "resume-1", name: "Evil Apricot Pike", slug: "apricot" }];
@@ -117,7 +117,7 @@ describe("ResumesCommandGroup", () => {
 
 	it.each([
 		["resumes", "", "Create a new resume", "Evil Apricot Pike"],
-		["applications", "{ArrowDown}", "New Application", "Umbrella"],
+		["applications", "{ArrowDown}", "Add Job", "Umbrella"],
 	])("keeps arrow-key navigation active on the %s list page", async (_page, keys, createLabel, itemLabel) => {
 		mockUseQueryData((entity) => {
 			if (entity === "resumes") return [{ id: "resume-1", name: "Evil Apricot Pike", slug: "apricot" }];
@@ -234,7 +234,7 @@ describe("ResumesCommandGroup", () => {
 });
 
 describe("NavigationCommandGroup", () => {
-	it("shows application navigation items", () => {
+	it("shows job search navigation items", () => {
 		render(
 			<I18nProvider i18n={i18n}>
 				<Command>
@@ -245,11 +245,11 @@ describe("NavigationCommandGroup", () => {
 			</I18nProvider>,
 		);
 
-		expect(screen.getByText("Applications")).toBeInTheDocument();
-		expect(screen.getByText("New Application")).toBeInTheDocument();
+		expect(screen.getByText("Job Search")).toBeInTheDocument();
+		expect(screen.getByText("Add Job")).toBeInTheDocument();
 	});
 
-	it("navigates to the new application destination", () => {
+	it("navigates to the new saved job destination", () => {
 		render(
 			<I18nProvider i18n={i18n}>
 				<Command>
@@ -260,7 +260,7 @@ describe("NavigationCommandGroup", () => {
 			</I18nProvider>,
 		);
 
-		fireEvent.click(screen.getByText("New Application"));
+		fireEvent.click(screen.getByText("Add Job"));
 		expect(mocks.navigate).toHaveBeenCalledWith({ to: "/dashboard/applications", search: { create: true } });
 	});
 });

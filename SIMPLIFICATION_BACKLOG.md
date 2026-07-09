@@ -138,6 +138,7 @@ Completed change:
 - Removed hover/tap animation from the destructive account deletion action.
 - Removed the external translation-contribution call to action from owner preferences.
 - Reduced the optional API-key page to key management by removing its hosted documentation promo and decorative motion.
+- Removed the remaining hosted API documentation card and list animations from the API-key page.
 - Kept state-transition animation where it communicates an actual authentication or profile state change.
 
 References:
@@ -306,6 +307,34 @@ References:
 
 - `apps/web/src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx:33`
 - `apps/web/src/routes/dashboard/resumes/-components/menus/context-menu.tsx:33`
+
+### Remove the job application tracker - Done
+
+The dashboard included a separate job application tracker with board/table/insights views, CSV import, document
+attachments, application-specific AI actions, API endpoints, MCP tools, and a dedicated database table. That expanded the
+product into a job-search CRM instead of a focused self-hosted resume creator.
+
+Completed change:
+
+- Removed the application tracker route, feature UI, command-palette entries, API router, DTOs, schema exports, and tests.
+- Removed application-specific MCP tools and static server-card metadata while keeping resume-focused MCP support.
+- Removed the application database schema and added a migration that drops the old `application` table.
+- Cleaned stale application tracker messages out of the Lingui catalogs.
+- Removed unused job-search rate-limit buckets that only supported the deleted tracker surface.
+- Kept local AI setup simple by making LM Studio an explicit local OpenAI-compatible provider and restoring agent request
+  timeouts.
+- Removed stale public docs, API reference entries, and MCP guide copy for the deleted application tracker.
+- Removed the orphaned platform-statistics service left behind by earlier marketing endpoint removal.
+
+References:
+
+- `apps/web/src/routes/dashboard/applications/index.tsx`
+- `apps/web/src/features/applications`
+- `packages/api/src/features/applications`
+- `packages/mcp/src/tools.ts`
+- `docs/docs.json`
+- `docs/spec.json`
+- `migrations/20260709110711_workable_lady_ursula/migration.sql`
 
 ## Medium Refactors
 

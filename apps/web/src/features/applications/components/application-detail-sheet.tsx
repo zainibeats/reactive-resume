@@ -112,10 +112,10 @@ export function ApplicationDetailSheet({ application, onOpenChange, onEdit }: Pr
 		orpc.applications.delete.mutationOptions({
 			onSuccess: () => {
 				invalidate();
-				toast.success(t`Application deleted.`);
+				toast.success(t`Saved job deleted.`);
 				onOpenChange(false);
 			},
-			onError: () => toast.error(t`Couldn't delete the application.`),
+			onError: () => toast.error(t`Couldn't delete the saved job.`),
 		}),
 	);
 
@@ -314,9 +314,16 @@ export function ApplicationDetailSheet({ application, onOpenChange, onEdit }: Pr
 						className="ms-auto text-destructive"
 						disabled={remove.isPending}
 						onClick={async () => {
-							const confirmed = await confirm(t`Delete this application?`, {
-								description: t`"${current.role} · ${current.company}" and its full timeline will be permanently deleted. This can't be undone.`,
-								confirmText: t`Delete`,
+							const confirmed = await confirm(<Trans>Delete this saved job?</Trans>, {
+								description: (
+									<span>
+										<strong>
+											{current.role} · {current.company}
+										</strong>{" "}
+										<Trans>and its full timeline will be permanently deleted. This can't be undone.</Trans>
+									</span>
+								),
+								confirmText: <Trans>Delete</Trans>,
 							});
 							if (confirmed) remove.mutate({ id: current.id });
 						}}

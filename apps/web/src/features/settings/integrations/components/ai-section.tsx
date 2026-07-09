@@ -135,6 +135,13 @@ const providerOptions: AIProviderOption[] = [
 		defaultModel: "llama3.1",
 	},
 	{
+		value: "lmstudio",
+		label: "LM Studio",
+		keywords: ["lmstudio", "local", "openai-compatible"],
+		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.lmstudio,
+		defaultModel: "",
+	},
+	{
 		value: "openai-compatible",
 		label: t`OpenAI-compatible`,
 		keywords: ["compatible", "custom", "gateway"],

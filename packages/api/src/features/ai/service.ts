@@ -89,6 +89,9 @@ const ZIP_CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50;
 const ZIP_END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054b50;
 const ZIP_STORED_METHOD = 0;
 const ZIP_DEFLATED_METHOD = 8;
+const REMOTE_AI_REQUEST_TIMEOUT_MS = 120_000;
+const LOCAL_AI_REQUEST_TIMEOUT_MS = 300_000;
+const AI_STREAM_CHUNK_TIMEOUT_MS = 60_000;
 
 export function getModel(input: GetModelInput) {
 	const { provider, model, apiKey } = input;
@@ -121,6 +124,7 @@ export function getModel(input: GetModelInput) {
 
 			return ollama.languageModel(model);
 		})
+		.with("lmstudio", () => createOpenAICompatible({ name: "lmstudio", apiKey, baseURL }).languageModel(model))
 		.exhaustive();
 }
 
@@ -128,6 +132,15 @@ export function getAgentModel(input: GetModelInput) {
 	if (!supportsProviderNativeWebSearch(input)) return getModel(input);
 
 	return createOpenAI({ apiKey: input.apiKey, baseURL: resolveAiBaseUrl(input) }).responses(input.model);
+}
+
+export function getAiRequestTimeout(input: Pick<GetModelInput, "provider" | "baseURL">) {
+	const isLocalProvider = input.provider === "ollama" || input.provider === "lmstudio";
+
+	return {
+		totalMs: isLocalProvider ? LOCAL_AI_REQUEST_TIMEOUT_MS : REMOTE_AI_REQUEST_TIMEOUT_MS,
+		chunkMs: AI_STREAM_CHUNK_TIMEOUT_MS,
+	};
 }
 
 const aiCredentialsSchema = z.object({

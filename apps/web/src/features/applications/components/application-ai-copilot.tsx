@@ -120,7 +120,7 @@ export function ApplicationAiCopilot({ application }: Props) {
 		orpc.applications.ai.tailorResume.mutationOptions({
 			onSuccess: (result) => {
 				invalidate();
-				toast.success(t`Created "${result.name}" and linked it to this application.`);
+				toast.success(t`Created "${result.name}" and linked it to this saved job.`);
 			},
 			onError: (error) => toast.error(error.message || t`Tailoring failed.`),
 		}),
@@ -144,7 +144,7 @@ export function ApplicationAiCopilot({ application }: Props) {
 					<SparkleIcon weight="fill" className="size-3" />
 				</span>
 				<span className="font-medium text-sm">
-					<Trans>Application Copilot</Trans>
+					<Trans>Job Fit</Trans>
 				</span>
 			</header>
 
