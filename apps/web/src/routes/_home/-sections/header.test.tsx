@@ -42,8 +42,10 @@ describe("Header", () => {
 	it("renders a homepage link with the brand icon", () => {
 		const { container } = renderHeader();
 		const home = Array.from(container.querySelectorAll("a")).find((a) => a.getAttribute("href") === "/");
+		const icons = Array.from(home?.querySelectorAll("img") ?? []);
 		expect(home).toBeDefined();
 		expect(home?.getAttribute("aria-label")).toBe("Reactive Resume - Go to homepage");
+		expect(icons.map((icon) => icon.getAttribute("src"))).toEqual(["/icon/dark.svg", "/icon/light.svg"]);
 	});
 
 	it("renders a dashboard link with the documented aria-label", () => {
