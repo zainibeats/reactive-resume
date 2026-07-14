@@ -4,6 +4,7 @@ import {
 	CaretDownIcon,
 	CheckCircleIcon,
 	CircleNotchIcon,
+	CodeIcon,
 	CopySimpleIcon,
 	DownloadSimpleIcon,
 	HouseSimpleIcon,
@@ -16,6 +17,7 @@ import {
 } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 import { match } from "ts-pattern";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -39,6 +41,7 @@ import { getResumeErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useBuilderSidebar } from "../-store/sidebar";
 import { BuilderAiAssistant } from "./ai-assistant";
+import { EditJsonDialog } from "./edit-json-dialog";
 import { BuilderVersionHistory } from "./version-history";
 
 export function BuilderHeader() {
@@ -170,6 +173,7 @@ function BuilderHeaderDropdown() {
 
 	const resume = useCurrentResume();
 	const patchResume = usePatchResume();
+	const [isJsonEditorOpen, setIsJsonEditorOpen] = useState(false);
 	const id = resume.id;
 	const name = resume.name;
 	const slug = resume.slug;
@@ -235,38 +239,46 @@ function BuilderHeaderDropdown() {
 	};
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger
-				render={
-					<Button size="icon" variant="ghost" aria-label={t`Resume options`}>
-						<CaretDownIcon />
-					</Button>
-				}
-			/>
+		<>
+			<DropdownMenu>
+				<DropdownMenuTrigger
+					render={
+						<Button size="icon" variant="ghost" aria-label={t`Resume options`}>
+							<CaretDownIcon />
+						</Button>
+					}
+				/>
 
-			<DropdownMenuContent>
-				<DropdownMenuItem disabled={isLocked} onClick={handleUpdate}>
-					<PencilSimpleLineIcon className="me-2" />
-					<Trans>Edit details</Trans>
-				</DropdownMenuItem>
+				<DropdownMenuContent>
+					<DropdownMenuItem disabled={isLocked} onClick={handleUpdate}>
+						<PencilSimpleLineIcon className="me-2" />
+						<Trans>Edit details</Trans>
+					</DropdownMenuItem>
 
-				<DropdownMenuItem onClick={handleDuplicate}>
-					<CopySimpleIcon className="me-2" />
-					<Trans>Duplicate</Trans>
-				</DropdownMenuItem>
+					<DropdownMenuItem disabled={isLocked} onClick={() => setIsJsonEditorOpen(true)}>
+						<CodeIcon className="me-2" />
+						Edit JSON
+					</DropdownMenuItem>
 
-				<DropdownMenuItem onClick={handleToggleLock}>
-					{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}
-					{isLocked ? <Trans>Unlock</Trans> : <Trans>Lock</Trans>}
-				</DropdownMenuItem>
+					<DropdownMenuItem onClick={handleDuplicate}>
+						<CopySimpleIcon className="me-2" />
+						<Trans>Duplicate</Trans>
+					</DropdownMenuItem>
 
-				<DropdownMenuSeparator />
+					<DropdownMenuItem onClick={handleToggleLock}>
+						{isLocked ? <LockSimpleOpenIcon className="me-2" /> : <LockSimpleIcon className="me-2" />}
+						{isLocked ? <Trans>Unlock</Trans> : <Trans>Lock</Trans>}
+					</DropdownMenuItem>
 
-				<DropdownMenuItem variant="destructive" disabled={isLocked} onClick={handleDelete}>
-					<TrashSimpleIcon className="me-2" />
-					<Trans>Delete</Trans>
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+					<DropdownMenuSeparator />
+
+					<DropdownMenuItem variant="destructive" disabled={isLocked} onClick={handleDelete}>
+						<TrashSimpleIcon className="me-2" />
+						<Trans>Delete</Trans>
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+			<EditJsonDialog data={resume.data} open={isJsonEditorOpen} onOpenChange={setIsJsonEditorOpen} />
+		</>
 	);
 }
