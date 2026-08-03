@@ -14,6 +14,27 @@ describe("ExperienceSection", () => {
 	});
 });
 
+describe("ItemTitle", () => {
+	it("does not make inline title links bold unless mainEntryBold is enabled", () => {
+		expect(source).toContain("if (!bold) return <Link src={inlineWebsiteUrl}>{children}</Link>;");
+	});
+
+	it("wires the bold toggle into every section that exposes it", () => {
+		const sections = ["ExperienceSection", "EducationSection", "ProjectsSection", "CertificationsSection"];
+
+		for (const section of sections) {
+			const block = source.match(new RegExp(`const ${section} = [\\s\\S]*?\\n};`))?.[0];
+			expect(block).toContain("bold={item.mainEntryBold ?? false}");
+		}
+	});
+
+	it("uses the skill bold toggle for the skill name", () => {
+		const block = source.match(/const SkillsSection = [\s\S]*?\n};/)?.[0];
+
+		expect(block).toContain("<MainEntryText bold={item.mainEntryBold ?? false}>{item.name}</MainEntryText>");
+	});
+});
+
 describe("SectionShell", () => {
 	it("keeps section and heading style rules when section heading icons are hidden", () => {
 		expect(source).toContain("<View style={composeStyles(sectionStyle, sectionRuleStyle)} {...breakProps}>");
