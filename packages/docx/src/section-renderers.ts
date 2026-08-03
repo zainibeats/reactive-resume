@@ -160,7 +160,7 @@ function renderExperience(section: Sections["experience"], colorHex: string): Pa
 
 	for (const item of items) {
 		if (item.roles && item.roles.length > 0) {
-			paragraphs.push(titleAndSubtitle(item.company, "", item.period));
+			paragraphs.push(titleAndSubtitle(item.company, "", item.period, item.mainEntryBold ?? false));
 
 			const loc = locationAndPeriod(item.location, "");
 			if (loc) paragraphs.push(loc);
@@ -180,7 +180,7 @@ function renderExperience(section: Sections["experience"], colorHex: string): Pa
 				}
 			}
 		} else {
-			paragraphs.push(titleAndSubtitle(item.company, item.position, item.period));
+			paragraphs.push(titleAndSubtitle(item.company, item.position, item.period, item.mainEntryBold ?? false));
 
 			const loc = locationAndPeriod(item.location, "");
 			if (loc) paragraphs.push(loc);
@@ -206,7 +206,7 @@ function renderEducation(section: Sections["education"], colorHex: string): Para
 
 	for (const item of items) {
 		const degreeArea = [item.degree, item.area].filter(Boolean).join(", ");
-		paragraphs.push(titleAndSubtitle(item.school, degreeArea, item.period));
+		paragraphs.push(titleAndSubtitle(item.school, degreeArea, item.period, item.mainEntryBold ?? false));
 
 		if (item.grade) {
 			paragraphs.push(
@@ -237,7 +237,7 @@ function renderProjects(section: Sections["projects"], colorHex: string): Paragr
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
 
 	for (const item of items) {
-		paragraphs.push(titleAndSubtitle(item.name, "", item.period));
+		paragraphs.push(titleAndSubtitle(item.name, "", item.period, item.mainEntryBold ?? false));
 
 		if (item.description) {
 			paragraphs.push(...htmlToParagraphs(item.description, getHtmlStyle()));
@@ -258,7 +258,7 @@ function renderSkills(section: Sections["skills"], colorHex: string): Paragraph[
 	const baseRun = getBaseRun();
 
 	for (const item of items) {
-		const children: TextRun[] = [new TextRun({ text: item.name, bold: true, ...baseRun })];
+		const children: TextRun[] = [new TextRun({ text: item.name, bold: item.mainEntryBold ?? false, ...baseRun })];
 
 		if (item.proficiency) {
 			children.push(new TextRun({ text: ` — ${item.proficiency}`, ...baseRun }));
@@ -341,7 +341,7 @@ function renderCertifications(section: Sections["certifications"], colorHex: str
 	const paragraphs: Paragraph[] = [sectionHeading(section.title, colorHex)];
 
 	for (const item of items) {
-		paragraphs.push(titleAndSubtitle(item.title, item.issuer, item.date));
+		paragraphs.push(titleAndSubtitle(item.title, item.issuer, item.date, item.mainEntryBold ?? false));
 
 		if (item.description) {
 			paragraphs.push(...htmlToParagraphs(item.description, getHtmlStyle()));

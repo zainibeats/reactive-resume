@@ -173,3 +173,139 @@ describe("setRenderConfig", () => {
 		setRenderConfig(baseConfig);
 	});
 });
+
+type DocxNode = { rootKey?: string; root?: unknown };
+
+const asNodes = (value: unknown): DocxNode[] => (Array.isArray(value) ? (value as DocxNode[]) : []);
+
+const findNode = (node: unknown, rootKey: string): DocxNode | undefined => {
+	if (!node || typeof node !== "object") return undefined;
+	const candidate = node as DocxNode;
+	if (candidate.rootKey === rootKey) return candidate;
+
+	for (const child of asNodes(candidate.root)) {
+		const found = findNode(child, rootKey);
+		if (found) return found;
+	}
+
+	return undefined;
+};
+
+/**
+ * Finds the run (`w:r`) whose text (`w:t`) is `text`, then reports whether it is bold.
+ * The docx library emits `<w:b/>` with an empty body for bold, and `<w:b w:val="false"/>`
+ * for explicitly-unbold, so an empty `w:b` body is the discriminator.
+ */
+const isRunBold = (paragraphs: readonly unknown[], text: string): boolean => {
+	for (const paragraph of paragraphs) {
+		for (const run of asNodes((paragraph as DocxNode).root)) {
+			if (run.rootKey !== "w:r") continue;
+			const textNode = findNode(run, "w:t");
+			if (!asNodes(textNode?.root).some((part) => (part as unknown) === text)) continue;
+
+			const boldNode = findNode(findNode(run, "w:rPr"), "w:b");
+			return boldNode !== undefined && asNodes(boldNode.root).length === 0;
+		}
+	}
+
+	throw new Error(`No run found containing the text "${text}"`);
+};
+
+// This fork renders main entry headings unbold by default and exposes a per-item "Bold"
+// checkbox (`mainEntryBold`). DOCX export must agree with the PDF renderer, which reads
+// `item.mainEntryBold ?? false` in packages/pdf/src/templates/shared/sections.tsx.
+describe("mainEntryBold in DOCX export", () => {
+	const itemSection = <T extends SectionType>(type: T, item: unknown): ResumeData["sections"][T] =>
+		({ ...emptySection(type), items: [item] }) as ResumeData["sections"][T];
+
+	const noWebsite = { url: "", label: "", inlineLink: false };
+	const baseItem = { id: "item-1", hidden: false, website: noWebsite, description: "" };
+
+	const cases = [
+		{
+			label: "experience company",
+			type: "experience" as const,
+			text: "Analytical Engines",
+			item: { ...baseItem, company: "Analytical Engines", position: "Engineer", location: "", period: "", roles: [] },
+		},
+		{
+			label: "experience company with role progression",
+			type: "experience" as const,
+			text: "Analytical Engines",
+			item: {
+				...baseItem,
+				company: "Analytical Engines",
+				position: "Engineer",
+				location: "",
+				period: "",
+				roles: [{ id: "role-1", position: "Senior Engineer", period: "1843", description: "" }],
+			},
+		},
+		{
+			label: "education school",
+			type: "education" as const,
+			text: "University of London",
+			item: {
+				...baseItem,
+				school: "University of London",
+				degree: "BSc",
+				area: "",
+				grade: "",
+				location: "",
+				period: "",
+			},
+		},
+		{
+			label: "project name",
+			type: "projects" as const,
+			text: "Difference Engine",
+			item: { ...baseItem, name: "Difference Engine", period: "" },
+		},
+		{
+			label: "certification title",
+			type: "certifications" as const,
+			text: "Certified Analyst",
+			item: { ...baseItem, title: "Certified Analyst", issuer: "Institute", date: "" },
+		},
+		{
+			label: "skill name",
+			type: "skills" as const,
+			text: "Mathematics",
+			item: { ...baseItem, name: "Mathematics", icon: "", iconColor: "", proficiency: "", level: 0, keywords: [] },
+		},
+	];
+
+	it.each(cases)("leaves the $label unbold by default", ({ type, text, item }) => {
+		const paragraphs = renderBuiltInSection(type, itemSection(type, item), HEX);
+
+		expect(isRunBold(paragraphs, text)).toBe(false);
+	});
+
+	it.each(cases)("bolds the $label when mainEntryBold is enabled", ({ type, text, item }) => {
+		const paragraphs = renderBuiltInSection(type, itemSection(type, { ...item, mainEntryBold: true }), HEX);
+
+		expect(isRunBold(paragraphs, text)).toBe(true);
+	});
+
+	it("keeps headings without the toggle bold, and award titles unbold", () => {
+		const publication = renderBuiltInSection(
+			"publications",
+			itemSection("publications", { ...baseItem, title: "On Computable Numbers", publisher: "LMS", date: "" }),
+			HEX,
+		);
+		const reference = renderBuiltInSection(
+			"references",
+			itemSection("references", { ...baseItem, name: "Charles Babbage", role: "", email: "", phone: "" }),
+			HEX,
+		);
+		const award = renderBuiltInSection(
+			"awards",
+			itemSection("awards", { ...baseItem, title: "Turing Award", awarder: "ACM", date: "" }),
+			HEX,
+		);
+
+		expect(isRunBold(publication, "On Computable Numbers")).toBe(true);
+		expect(isRunBold(reference, "Charles Babbage")).toBe(true);
+		expect(isRunBold(award, "Turing Award")).toBe(false);
+	});
+});
