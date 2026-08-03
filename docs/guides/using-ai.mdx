@@ -31,10 +31,17 @@ In the **AI Providers** section, fill out the **Add Provider** form. The form is
 | Field | Description |
 | --- | --- |
 | **Label** | A name that helps you recognize the provider, such as `Work OpenAI` or `Personal OpenRouter`. |
-| **Provider** | The provider type, such as OpenAI, Anthropic Claude, Google Gemini, Vercel AI Gateway, OpenRouter, Ollama, or OpenAI-compatible. |
-| **API Key** | The key Reactive Resume should use when sending AI requests to that provider. |
-| **Model** *(advanced)* | The exact model name expected by that provider. |
-| **Base URL** *(advanced)* | The provider endpoint. Leave the default unless you use a gateway, proxy, local provider, or OpenAI-compatible endpoint. |
+| **Provider** | The provider type. Self-hosted options (LM Studio, Ollama, OpenAI-compatible) are grouped at the top of the list, followed by hosted providers such as OpenAI, Anthropic Claude, Google Gemini, Vercel AI Gateway, and OpenRouter. |
+| **API Key** | The key Reactive Resume should use when sending AI requests to that provider. Optional for LM Studio, Ollama, and OpenAI-compatible endpoints that accept unauthenticated requests. |
+| **Model** *(advanced)* | The exact model name expected by that provider. LM Studio and OpenAI-compatible endpoints have no default, so enter the model ID your server serves. |
+| **Base URL** *(advanced)* | The provider endpoint. Leave the default unless you use a gateway, proxy, local provider, or OpenAI-compatible endpoint. LM Studio defaults to `http://localhost:1234/v1` and Ollama to `http://localhost:11434/api`; point them at your host if the server runs elsewhere. |
+
+<Note>
+  Private and `http://` endpoints are accepted out of the box for the LM Studio and Ollama provider types. Any other
+  provider type — including OpenAI-compatible — needs `FLAG_ALLOW_UNSAFE_AI_BASE_URL=true` before it can reach a
+  private or loopback address. For Ollama's hosted service, set the base URL to `https://ollama.com/api` and add your
+  API key.
+</Note>
 
 Click **Save Provider** when the form is complete. Reactive Resume tests the connection automatically as part of the save, so you'll see a success or failure status immediately without a separate click.
 

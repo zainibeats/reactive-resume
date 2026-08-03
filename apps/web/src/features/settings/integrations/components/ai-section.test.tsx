@@ -10,7 +10,7 @@ type MutationName = "create" | "test" | "update" | "delete";
 type MockProvider = {
 	id: string;
 	label: string;
-	provider: "openai";
+	provider: "openai" | "lmstudio";
 	model: string;
 	baseURL: string;
 	enabled: boolean;
@@ -142,7 +142,7 @@ describe("AISettingsSection", () => {
 		mutations.delete.mockReset();
 	});
 
-	it("offers popular AI SDK providers and labels Ollama as cloud-hosted", () => {
+	it("offers popular AI SDK providers alongside self-hosted ones", () => {
 		renderSection();
 
 		for (const label of [
@@ -155,12 +155,57 @@ describe("AISettingsSection", () => {
 			"Fireworks",
 			"Cerebras",
 			"Perplexity",
-			"Ollama Cloud",
+			"LM Studio",
+			"Ollama",
+			"OpenAI-compatible",
 		]) {
 			expect(screen.getByRole("option", { name: label })).toBeInTheDocument();
 		}
+	});
 
-		expect(screen.queryByRole("option", { name: "Ollama" })).not.toBeInTheDocument();
+	it("lists self-hosted providers first so they stay visible in the dropdown", () => {
+		renderSection();
+
+		const labels = screen.getAllByRole("option").map((option) => option.textContent);
+		expect(labels.slice(0, 3)).toEqual(["LM Studio", "Ollama", "OpenAI-compatible"]);
+	});
+
+	it("saves a self-hosted provider without an API key", async () => {
+		const created = provider({ label: "LM Studio", provider: "lmstudio", apiKeyPreview: "No key" });
+		mutations.create.mockResolvedValue(created);
+		mutations.test.mockResolvedValue({ ...created, enabled: true, testStatus: "success" });
+
+		renderSection();
+
+		fireEvent.change(screen.getByLabelText("Provider"), { target: { value: "lmstudio" } });
+		fireEvent.change(screen.getByLabelText("Model"), { target: { value: "qwen3-8b" } });
+
+		const saveButton = screen.getByRole("button", { name: /save & test provider/i });
+		expect(saveButton).not.toBeDisabled();
+
+		fireEvent.click(saveButton);
+
+		await waitFor(() => expect(mutations.create).toHaveBeenCalled());
+		expect(mutations.create).toHaveBeenCalledWith({
+			label: "LM Studio",
+			provider: "lmstudio",
+			model: "qwen3-8b",
+			baseURL: "http://localhost:1234/v1",
+			apiKey: "",
+		});
+	});
+
+	it("requires a base URL for OpenAI-compatible endpoints", () => {
+		renderSection();
+
+		fireEvent.change(screen.getByLabelText("Provider"), { target: { value: "openai-compatible" } });
+		fireEvent.change(screen.getByLabelText("Model"), { target: { value: "local-model" } });
+
+		expect(screen.getByRole("button", { name: /save & test provider/i })).toBeDisabled();
+
+		fireEvent.change(screen.getByLabelText("Base URL"), { target: { value: "https://gateway.example.com/v1" } });
+
+		expect(screen.getByRole("button", { name: /save & test provider/i })).not.toBeDisabled();
 	});
 
 	it("uses the save-and-test result as the connected provider row", async () => {
