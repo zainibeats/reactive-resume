@@ -8,7 +8,7 @@ import { CheckCircleIcon, KeyIcon, PlusIcon, TrashIcon, WarningCircleIcon, XCirc
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { AI_PROVIDER_DEFAULT_BASE_URLS } from "@reactive-resume/ai/types";
+import { AI_PROVIDER_DEFAULT_BASE_URLS, isApiKeyOptional } from "@reactive-resume/ai/types";
 import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
@@ -28,9 +28,38 @@ type ProviderRowProps = {
 	provider: SavedProvider;
 };
 
+// Self-hosted options are listed first so they stay visible without scrolling the provider dropdown.
+const SELF_HOSTED_GROUP = { value: "self-hosted", label: t`Local & self-hosted` };
+const HOSTED_GROUP = { value: "hosted", label: t`Hosted providers` };
+
 const providerOptions: AIProviderOption[] = [
 	{
+		value: "lmstudio",
+		label: "LM Studio",
+		group: SELF_HOSTED_GROUP,
+		keywords: ["lmstudio", "lm studio", "local", "openai-compatible"],
+		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.lmstudio,
+		defaultModel: "",
+	},
+	{
+		value: "ollama",
+		label: t`Ollama`,
+		group: SELF_HOSTED_GROUP,
+		keywords: ["ollama", "local", "cloud"],
+		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.ollama,
+		defaultModel: "llama3.1",
+	},
+	{
+		value: "openai-compatible",
+		label: t`OpenAI-compatible`,
+		group: SELF_HOSTED_GROUP,
+		keywords: ["compatible", "custom", "gateway", "llama.cpp", "vllm"],
+		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS["openai-compatible"],
+		defaultModel: "",
+	},
+	{
 		value: "openai",
+		group: HOSTED_GROUP,
 		label: t`OpenAI`,
 		keywords: ["openai", "gpt", "chatgpt"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.openai,
@@ -38,6 +67,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "anthropic",
+		group: HOSTED_GROUP,
 		label: t`Anthropic Claude`,
 		keywords: ["anthropic", "claude", "ai"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.anthropic,
@@ -45,6 +75,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "gemini",
+		group: HOSTED_GROUP,
 		label: t`Google Gemini`,
 		keywords: ["gemini", "google"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.gemini,
@@ -52,6 +83,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "vercel-ai-gateway",
+		group: HOSTED_GROUP,
 		label: t`Vercel AI Gateway`,
 		keywords: ["vercel", "gateway", "ai"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS["vercel-ai-gateway"],
@@ -59,6 +91,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "openrouter",
+		group: HOSTED_GROUP,
 		label: t`OpenRouter`,
 		keywords: ["openrouter", "router"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.openrouter,
@@ -66,6 +99,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "mistral",
+		group: HOSTED_GROUP,
 		label: t`Mistral AI`,
 		keywords: ["mistral", "magistral"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.mistral,
@@ -73,6 +107,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "cohere",
+		group: HOSTED_GROUP,
 		label: t`Cohere`,
 		keywords: ["cohere", "command"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.cohere,
@@ -80,6 +115,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "xai",
+		group: HOSTED_GROUP,
 		label: t`xAI Grok`,
 		keywords: ["xai", "grok"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.xai,
@@ -87,6 +123,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "groq",
+		group: HOSTED_GROUP,
 		label: t`Groq`,
 		keywords: ["groq", "llama"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.groq,
@@ -94,6 +131,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "deepseek",
+		group: HOSTED_GROUP,
 		label: t`DeepSeek`,
 		keywords: ["deepseek"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.deepseek,
@@ -101,6 +139,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "togetherai",
+		group: HOSTED_GROUP,
 		label: t`Together.ai`,
 		keywords: ["together", "togetherai", "llama"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.togetherai,
@@ -108,6 +147,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "fireworks",
+		group: HOSTED_GROUP,
 		label: t`Fireworks`,
 		keywords: ["fireworks", "llama", "deepseek"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.fireworks,
@@ -115,6 +155,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "cerebras",
+		group: HOSTED_GROUP,
 		label: t`Cerebras`,
 		keywords: ["cerebras", "llama"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.cerebras,
@@ -122,31 +163,11 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "perplexity",
+		group: HOSTED_GROUP,
 		label: t`Perplexity`,
 		keywords: ["perplexity", "sonar"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.perplexity,
 		defaultModel: "sonar-pro",
-	},
-	{
-		value: "ollama",
-		label: t`Ollama Cloud`,
-		keywords: ["ollama", "cloud"],
-		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.ollama,
-		defaultModel: "llama3.1",
-	},
-	{
-		value: "lmstudio",
-		label: "LM Studio",
-		keywords: ["lmstudio", "local", "openai-compatible"],
-		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.lmstudio,
-		defaultModel: "",
-	},
-	{
-		value: "openai-compatible",
-		label: t`OpenAI-compatible`,
-		keywords: ["compatible", "custom", "gateway"],
-		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS["openai-compatible"],
-		defaultModel: "",
 	},
 ];
 
@@ -319,6 +340,7 @@ function CreateProviderForm() {
 	const queryClient = useQueryClient();
 	const [form, setForm] = useState(emptyForm);
 	const [result, setResult] = useState<SaveResult | null>(null);
+	const [advancedOpen, setAdvancedOpen] = useState(false);
 	const selectedOption = useMemo(
 		() => providerOptions.find((option) => option.value === form.provider),
 		[form.provider],
@@ -337,10 +359,14 @@ function CreateProviderForm() {
 	);
 	const isSaving = isCreating || isTesting;
 
-	// Model/label are prefilled from provider defaults, so step 1 (Provider + API Key) is enough to save.
+	// Model/label/base URL are prefilled from provider defaults, so most providers only need a key to save.
 	const model = form.model.trim();
+	const baseURL = form.baseURL.trim();
+	const apiKey = form.apiKey.trim();
 	const label = form.label.trim() || String(selectedOption?.label ?? form.provider);
-	const canSave = Boolean(form.apiKey.trim() && model);
+	// Self-hosted servers usually run without credentials, but they always need an explicit endpoint.
+	const apiKeyOptional = isApiKeyOptional(form.provider);
+	const canSave = Boolean(model && baseURL && (apiKeyOptional || apiKey));
 
 	const save = async () => {
 		setResult(null);
@@ -349,8 +375,8 @@ function CreateProviderForm() {
 				label,
 				provider: form.provider,
 				model,
-				baseURL: form.baseURL.trim(),
-				apiKey: form.apiKey.trim(),
+				baseURL,
+				apiKey,
 			});
 
 			// Test on save: verify the connection immediately instead of leaving it to a manual step.
@@ -373,7 +399,7 @@ function CreateProviderForm() {
 				message: getOrpcErrorMessage(error, {
 					byCode: {
 						PRECONDITION_FAILED: t`AI providers require REDIS_URL and ENCRYPTION_SECRET to be configured.`,
-						BAD_REQUEST: t`Invalid AI provider configuration.`,
+						BAD_REQUEST: t`Invalid AI provider configuration. Private or http:// endpoints are only allowed for LM Studio and Ollama.`,
 					},
 					fallback: t`Failed to save AI provider.`,
 				}),
@@ -413,7 +439,7 @@ function CreateProviderForm() {
 
 				<div className="space-y-2">
 					<Label htmlFor="ai-api-key">
-						<Trans>API Key</Trans>
+						{apiKeyOptional ? <Trans>API Key (optional)</Trans> : <Trans>API Key</Trans>}
 					</Label>
 					<Input
 						id="ai-api-key"
@@ -427,9 +453,18 @@ function CreateProviderForm() {
 						data-bwignore="true"
 						data-1p-ignore="true"
 					/>
+					{apiKeyOptional ? (
+						<p className="text-muted-foreground text-xs">
+							<Trans>Leave this empty if your server does not require a key.</Trans>
+						</p>
+					) : null}
 				</div>
 
-				<details className="rounded-md border bg-background/50 px-3 py-2 [&_summary]:cursor-pointer">
+				<details
+					open={advancedOpen || !baseURL}
+					onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+					className="rounded-md border bg-background/50 px-3 py-2 [&_summary]:cursor-pointer"
+				>
 					<summary className="font-medium text-muted-foreground text-sm">
 						<Trans>Advanced</Trans>
 					</summary>
@@ -455,7 +490,7 @@ function CreateProviderForm() {
 								id="ai-model"
 								value={form.model}
 								onChange={(event) => setForm((current) => ({ ...current, model: event.target.value }))}
-								placeholder={t`gpt-4.1`}
+								placeholder={selectedOption?.defaultModel || t`Model ID served by your endpoint`}
 								autoCorrect="off"
 								autoCapitalize="off"
 								spellCheck="false"

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const envMock = vi.hoisted(() => ({
 	FLAG_ALLOW_UNSAFE_AI_BASE_URL: false,
@@ -6,7 +6,14 @@ const envMock = vi.hoisted(() => ({
 
 vi.mock("@reactive-resume/env/server", () => ({ env: envMock }));
 
-const { resolveAiBaseUrl } = await import("./url-policy");
+// Test files in this package share a module cache (isolate: false), so re-import the policy per test to
+// make sure it reads this file's env mock instead of one left behind by a sibling test file.
+let resolveAiBaseUrl: typeof import("./url-policy").resolveAiBaseUrl;
+
+beforeEach(async () => {
+	vi.resetModules();
+	({ resolveAiBaseUrl } = await import("./url-policy"));
+});
 
 describe("AI provider base URL policy", () => {
 	it("allows public HTTPS provider URLs", () => {

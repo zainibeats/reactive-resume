@@ -39,7 +39,14 @@ export const AI_PROVIDER_DEFAULT_BASE_URLS: Record<AIProvider, string> = {
 	fireworks: "https://api.fireworks.ai/inference/v1",
 	cerebras: "https://api.cerebras.ai/v1",
 	perplexity: "https://api.perplexity.ai",
-	ollama: "https://ollama.com/api",
+	ollama: "http://localhost:11434/api",
 	lmstudio: "http://localhost:1234/v1",
 	"openai-compatible": "",
 };
+
+// Local servers and unauthenticated gateways answer without credentials, so an empty API key is valid for them.
+const API_KEY_OPTIONAL_PROVIDERS = new Set<AIProvider>(["ollama", "lmstudio", "openai-compatible"]);
+
+export function isApiKeyOptional(provider: AIProvider) {
+	return API_KEY_OPTIONAL_PROVIDERS.has(provider);
+}
