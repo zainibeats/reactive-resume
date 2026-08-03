@@ -18,6 +18,12 @@ Reactive Resume should move toward a personal resume builder for an individual o
 - When simplifying existing features, keep resume creation, editing, import/export, PDF/DOCX generation, templates, privacy, and ownership as the central product surface.
 - If a requested change could be implemented as either a personal workflow or a multi-user/business workflow, choose the personal workflow by default and document any tradeoff.
 
+### Prerequisites
+
+- **Node.js 24** (matches Dockerfile `ARG NODE_VERSION=24`). Use `nvm install 24 && nvm use 24` if needed.
+- **Docker** is required to run PostgreSQL. Start it with `sudo dockerd &` if the daemon isn't running.
+- **pnpm 11.17.0** is managed via corepack (`corepack enable`).
+
 ### Codebase map
 
 - `apps/web` owns TanStack Start routes, Vite config, PWA setup, oRPC browser client wiring, web features, and the resume builder UI.

@@ -43,7 +43,7 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
 		cancelText: undefined,
 	});
 
-	const confirm = React.useCallback(async (title: React.ReactNode, options?: ConfirmOptions): Promise<boolean> => {
+	const confirm = React.useCallback((title: React.ReactNode, options?: ConfirmOptions): Promise<boolean> => {
 		return new Promise<boolean>((resolve) => {
 			setState({
 				open: true,

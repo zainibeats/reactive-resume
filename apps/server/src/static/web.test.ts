@@ -1,6 +1,11 @@
 import fs from "node:fs/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({
+	env: { APP_URL: "https://rxresu.me" },
+	serveStatic: vi.fn((_options?: unknown) => vi.fn()),
+}));
+
 vi.mock("node:fs", () => ({
 	existsSync: vi.fn(() => true),
 }));
@@ -12,10 +17,25 @@ vi.mock("node:fs/promises", () => ({
 }));
 
 vi.mock("@hono/node-server/serve-static", () => ({
-	serveStatic: vi.fn(() => vi.fn()),
+	serveStatic: mocks.serveStatic,
 }));
 
+vi.mock("@reactive-resume/env/server", () => ({
+	env: mocks.env,
+}));
+
+type StaticOptions = {
+	onFound?: (
+		path: string,
+		context: {
+			req: { path: string };
+			header: (name: string, value: string) => void;
+		},
+	) => void | Promise<void>;
+};
+
 const { handleWebApp } = await import("./web");
+const staticOptions = mocks.serveStatic.mock.calls[0]?.[0] as StaticOptions | undefined;
 
 describe("web app fallback classification", () => {
 	beforeEach(() => {
@@ -32,6 +52,46 @@ describe("web app fallback classification", () => {
 		expect(await response.text()).toBe("<html>app</html>");
 	});
 
+	it("serves the root shell without hosted-service SEO metadata", async () => {
+		vi.mocked(fs.readFile).mockResolvedValue(`
+			<!doctype html>
+			<html>
+				<head>
+					<title>Reactive Resume</title>
+				</head>
+				<body><div id="app"></div></body>
+			</html>
+		`);
+
+		const response = await handleWebApp(new Request("http://server.internal/?utm_source=search"));
+		const html = await response.text();
+
+		expect(html).toContain('<div id="app"></div>');
+		expect(html).not.toContain('rel="canonical"');
+		expect(html).not.toContain('id="reactive-resume-structured-data"');
+		expect(html).not.toContain("og:image");
+		expect(html).not.toContain("/videos/timelapse-v1.webp");
+	});
+
+	it("caches versioned homepage media immutably", async () => {
+		const headers = new Headers();
+
+		await staticOptions?.onFound?.("", {
+			req: { path: "/videos/timelapse-v1.mp4" },
+			header: (name, value) => headers.set(name, value),
+		});
+
+		expect(headers.get("Cache-Control")).toBe("public, max-age=31536000, immutable");
+
+		const unversionedHeaders = new Headers();
+		await staticOptions?.onFound?.("", {
+			req: { path: "/videos/timelapse.mp4" },
+			header: (name, value) => unversionedHeaders.set(name, value),
+		});
+
+		expect(unversionedHeaders.get("Cache-Control")).toBeNull();
+	});
+
 	it.each(["/", "/alice/resume"])("sets framing and report-only CSP security headers on %s", async (pathname) => {
 		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
 
@@ -41,18 +101,17 @@ describe("web app fallback classification", () => {
 		expect(response.headers.get("Content-Security-Policy-Report-Only")).toContain("frame-ancestors 'none'");
 	});
 
-	it.each([
-		"/auth/login",
-		"/dashboard",
-		"/builder/resume-1",
-	])("serves noindex shell for known app prefix %s", async (pathname) => {
-		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
+	it.each(["/auth/login", "/dashboard", "/builder/resume-1"])(
+		"serves noindex shell for known app prefix %s",
+		async (pathname) => {
+			const response = await handleWebApp(new Request(`https://example.com${pathname}`));
 
-		expect(response.status).toBe(200);
-		expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
-		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, follow");
-		expect(await response.text()).toBe("<html>app</html>");
-	});
+			expect(response.status).toBe(200);
+			expect(response.headers.get("Content-Type")).toBe("text/html; charset=UTF-8");
+			expect(response.headers.get("X-Robots-Tag")).toBe("noindex, follow");
+			expect(await response.text()).toBe("<html>app</html>");
+		},
+	);
 
 	it.each(["/agent", "/agent/thread-1", "/templates"])("returns a 404 for removed app route %s", async (pathname) => {
 		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
@@ -88,19 +147,18 @@ describe("web app fallback classification", () => {
 		expect(fs.readFile).not.toHaveBeenCalled();
 	});
 
-	it.each([
-		"/api/foo",
-		"/mcp/foo",
-		"/uploads/foo",
-	])("does not treat reserved two-segment path %s as a public resume", async (pathname) => {
-		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
+	it.each(["/api/foo", "/mcp/foo", "/uploads/foo"])(
+		"does not treat reserved two-segment path %s as a public resume",
+		async (pathname) => {
+			const response = await handleWebApp(new Request(`https://example.com${pathname}`));
 
-		expect(response.status).toBe(404);
-		expect(response.headers.get("Content-Type")).toBe("text/plain; charset=UTF-8");
-		expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
-		expect(await response.text()).toBe("Not Found");
-		expect(fs.readFile).not.toHaveBeenCalled();
-	});
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Content-Type")).toBe("text/plain; charset=UTF-8");
+			expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
+			expect(await response.text()).toBe("Not Found");
+			expect(fs.readFile).not.toHaveBeenCalled();
+		},
+	);
 
 	it("returns plain 404 for missing asset-looking paths", async () => {
 		const response = await handleWebApp(new Request("https://example.com/assets/missing.css"));

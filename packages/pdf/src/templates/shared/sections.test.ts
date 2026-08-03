@@ -15,8 +15,16 @@ describe("ExperienceSection", () => {
 });
 
 describe("ItemTitle", () => {
-	it("does not make inline title links bold unless mainEntryBold is enabled", () => {
-		expect(source).toContain("if (!bold) return <Link src={inlineWebsiteUrl}>{children}</Link>;");
+	it("renders award titles without the bold style", () => {
+		expect(source).toContain("const ItemTitle = ({ children, website, field, bold = true }: ItemTitleProps)");
+		expect(source).toContain('<ItemTitle field="title" website={item.website} bold={false}>');
+	});
+
+	it("keeps the semantic field binding in both bold and unbold headings", () => {
+		const block = source.match(/const MainEntryText = [\s\S]*?\n};/)?.[0];
+
+		expect(block).toContain("<Bold semanticField={field} style={composeStyles(style)}>");
+		expect(block).toContain("<Text semanticField={field} style={composeStyles(style)}>");
 	});
 
 	it("wires the bold toggle into every section that exposes it", () => {
@@ -31,13 +39,16 @@ describe("ItemTitle", () => {
 	it("uses the skill bold toggle for the skill name", () => {
 		const block = source.match(/const SkillsSection = [\s\S]*?\n};/)?.[0];
 
-		expect(block).toContain("<MainEntryText bold={item.mainEntryBold ?? false}>{item.name}</MainEntryText>");
+		expect(block).toContain('<MainEntryText bold={item.mainEntryBold ?? false} field="name" style={{ flex: 1 }}>');
 	});
 });
 
 describe("SectionShell", () => {
 	it("keeps section and heading style rules when section heading icons are hidden", () => {
-		expect(source).toContain("<View style={composeStyles(sectionStyle, sectionRuleStyle)} {...breakProps}>");
+		expect(source).toContain(
+			"const resolvedSectionStyle = composeStyles(sectionStyle, sectionRuleStyle, resolved.style)",
+		);
+		expect(source).toContain("<View style={resolvedSectionStyle} {...flowProps}>");
 		expect(source).toContain("<Heading style={composeStyles(sectionHeadingStyle, sectionHeadingRuleStyle)}>");
 	});
 

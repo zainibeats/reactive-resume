@@ -12,7 +12,7 @@ import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Toaster } from "@reactive-resume/ui/components/sonner";
 import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
 import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
@@ -40,6 +40,7 @@ const tagline = "A free and open-source resume builder";
 const title = `${appName} — ${tagline}`;
 const description =
 	"Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume.";
+const iconContextValue: IconProps = { size: 16, weight: "regular" };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	component: RootComponent,
@@ -85,8 +86,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootComponent() {
 	const { theme, locale, queryClient } = Route.useRouteContext();
 	const dir = isRTL(locale) ? "rtl" : "ltr";
-
-	const iconContextValue = useMemo<IconProps>(() => ({ size: 16, weight: "regular" }), []);
 
 	useEffect(() => {
 		document.documentElement.lang = locale;

@@ -24,16 +24,16 @@ describe("useConfirm", () => {
 		const { result } = renderHook(() => useConfirm(), { wrapper });
 
 		let promise!: Promise<boolean>;
-		await act(async () => {
+		await act(() => {
 			promise = result.current("Are you sure?");
 		});
 		expect(promise).toBeInstanceOf(Promise);
 	});
 
-	it("renders React nodes in the title and description", async () => {
+	it("renders React nodes in the title and description", () => {
 		const { result } = renderHook(() => useConfirm(), { wrapper });
 
-		await act(async () => {
+		act(() => {
 			void result.current(<span>Delete resume?</span>, {
 				description: (
 					<>
@@ -51,7 +51,7 @@ describe("useConfirm", () => {
 		const { result } = renderHook(() => useConfirm(), { wrapper });
 
 		let promise!: Promise<boolean>;
-		await act(async () => {
+		await act(() => {
 			promise = result.current("Heading");
 		});
 
@@ -61,7 +61,7 @@ describe("useConfirm", () => {
 		const buttons = Array.from(document.body.querySelectorAll<HTMLButtonElement>("button"));
 		const cancel = buttons.find((b) => /cancel/i.test(b.textContent ?? ""));
 
-		await act(async () => {
+		await act(() => {
 			(cancelBtn as HTMLButtonElement | null)?.click() ?? cancel?.click();
 		});
 
@@ -72,14 +72,14 @@ describe("useConfirm", () => {
 		const { result } = renderHook(() => useConfirm(), { wrapper });
 
 		let promise!: Promise<boolean>;
-		await act(async () => {
+		await act(() => {
 			promise = result.current("Heading", { confirmText: "Yes" });
 		});
 
 		const buttons = Array.from(document.body.querySelectorAll<HTMLButtonElement>("button"));
 		const yes = buttons.find((b) => /yes/i.test(b.textContent ?? ""));
 
-		await act(async () => {
+		await act(() => {
 			yes?.click();
 		});
 

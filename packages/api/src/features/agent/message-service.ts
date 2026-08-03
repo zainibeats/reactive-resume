@@ -536,7 +536,7 @@ function buildThreadTitle(message: UIMessage, fallback: string) {
 	return text.length > 60 ? `${text.slice(0, 57)}...` : text;
 }
 
-export async function listThreadMessages(input: { threadId: string; userId: string }) {
+export function listThreadMessages(input: { threadId: string; userId: string }) {
 	return db
 		.select()
 		.from(schema.agentMessage)

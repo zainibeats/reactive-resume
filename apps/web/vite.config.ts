@@ -45,6 +45,17 @@ export default defineConfig({
 	},
 
 	plugins: [
+		{
+			name: "cloudflare-rocket-loader-bootstrap",
+			transformIndexHtml: {
+				order: "post",
+				handler: (html) =>
+					html.replace(
+						/<script\b(?=[^>]*\btype="module")(?=[^>]*\bsrc="\/assets\/[^"]+")(?![^>]*\bdata-cfasync=)[^>]*>/,
+						(script) => script.replace('src="', 'data-cfasync="false" src="'),
+					),
+			},
+		},
 		devtools(),
 		tailwindcss(),
 		tanstackRouter({

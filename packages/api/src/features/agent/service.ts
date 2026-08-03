@@ -332,20 +332,11 @@ function uniqueAttachmentIds(ids: unknown) {
 		throw new ORPCError("BAD_REQUEST", { message: "Attachment IDs must be unique." });
 	}
 
-	if (unique.size > MAX_ATTACHMENTS_PER_MESSAGE) {
-		throw new ORPCError("BAD_REQUEST", { message: "Too many attachments for one message." });
-	}
-
-	return Array.from(unique);
-}
-
-function normalizeAttachmentIds(ids: unknown) {
-	const unique = uniqueAttachmentIds(ids);
-	return unique;
+	return [...unique];
 }
 
 async function getUnlinkedMessageAttachments(input: { ids: unknown; threadId: string; userId: string }) {
-	const ids = normalizeAttachmentIds(input.ids);
+	const ids = uniqueAttachmentIds(input.ids);
 	if (ids.length === 0) return [];
 
 	const attachments = await db
@@ -406,9 +397,9 @@ async function linkAttachmentsToMessage(input: {
 	}
 }
 
-async function readAttachmentModelInputs(attachments: AgentAttachmentRecord[]): Promise<AttachmentModelInput[]> {
+function readAttachmentModelInputs(attachments: AgentAttachmentRecord[]): Promise<AttachmentModelInput[]> {
 	const storage = getStorageService();
-	const inputs = await Promise.all(
+	return Promise.all(
 		attachments.map(async (attachment) => {
 			const stored = await storage.read(attachment.storageKey);
 			if (!stored) {
@@ -418,8 +409,6 @@ async function readAttachmentModelInputs(attachments: AgentAttachmentRecord[]): 
 			return { attachment, data: stored.data };
 		}),
 	);
-
-	return inputs;
 }
 
 function attachModelPartsToLatestUserMessage(
@@ -643,7 +632,7 @@ function buildThreadTitle(message: UIMessage, fallback: string) {
 	return text.length > 60 ? `${text.slice(0, 57)}...` : text;
 }
 
-async function listThreadMessages(input: { threadId: string; userId: string }) {
+function listThreadMessages(input: { threadId: string; userId: string }) {
 	return db
 		.select()
 		.from(schema.agentMessage)

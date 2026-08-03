@@ -31,8 +31,6 @@ const reservedPublicResumeSegments = new Set([
 	"templates",
 ]);
 
-export const serveWebDistStatic = serveStatic({ root: staticRoot });
-
 function isAssetPath(pathname: string): boolean {
 	return pathname.split("/").pop()?.includes(".") ?? false;
 }
@@ -59,6 +57,15 @@ const BASE_SECURITY_HEADERS = {
 	"Content-Security-Policy-Report-Only":
 		"default-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
 };
+
+export const serveWebDistStatic = serveStatic({
+	root: staticRoot,
+	onFound: (_path, context) => {
+		if (/^\/videos\/.*-v\d+\.(?:mp4|webp)$/.test(context.req.path)) {
+			context.header("Cache-Control", "public, max-age=31536000, immutable");
+		}
+	},
+});
 
 function getFallbackResponseHeaders(pathname: string) {
 	if (pathname === "/") return { "Content-Type": "text/html; charset=UTF-8", ...BASE_SECURITY_HEADERS };
@@ -98,5 +105,6 @@ export async function handleWebApp(request: Request) {
 	if (isHead) return new Response(null, { status: 200, headers });
 
 	const html = await fs.readFile(indexHtmlPath, "utf-8");
+
 	return new Response(html, { headers });
 }

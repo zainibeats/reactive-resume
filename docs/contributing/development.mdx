@@ -4,7 +4,7 @@ description: "Set up a local development environment for Reactive Resume with pn
 ---
 
 <Info>
-  **Prerequisites**: - [Node.js](https://nodejs.org/) v24 - [pnpm](https://pnpm.io/) v11.1.2 through Corepack -
+  **Prerequisites**: - [Node.js](https://nodejs.org/) v24 - [pnpm](https://pnpm.io/) v11.17.0 through Corepack -
   [Docker](https://docs.docker.com/get-docker/) and Docker Compose - [Git](https://git-scm.com/)
 </Info>
 
@@ -244,23 +244,36 @@ pnpm run typecheck
 <AccordionGroup>
 	<Accordion title="Port 3000 or 3001 is already in use">
 		The Vite web server uses `PORT` (default `3000`), and the Hono server uses `SERVER_PORT` (default `3001`).
-		Either stop the conflicting process or choose alternate ports: ```bash PORT=3002 SERVER_PORT=3003 pnpm dev ```
+		Either stop the conflicting process or choose alternate ports:
+		```bash
+		PORT=3002 SERVER_PORT=3003 pnpm dev
+		```
 	</Accordion>
 
-    <Accordion title="Database connection refused">
-    	Ensure Docker containers are running: ```bash docker compose -f compose.dev.yml ps docker compose -f compose.dev.yml
-    	up -d ``` Check that PostgreSQL is healthy and accessible on port 5432.
-    </Accordion>
+	<Accordion title="Database connection refused">
+		Ensure Docker containers are running:
+		```bash
+		docker compose -f compose.dev.yml ps
+		docker compose -f compose.dev.yml up -d
+		```
+		Check that PostgreSQL is healthy and accessible on port 5432.
+	</Accordion>
 
     <Accordion title="Local storage errors">
 	Verify the repository's `data` directory is writable by the process running the server. Set `LOCAL_STORAGE_PATH` to an
 	absolute writable directory only when the default location is unsuitable.
     </Accordion>
 
-    <Accordion title="Type errors after pulling changes">
-    	The route tree may need regeneration. Run the dev server which auto-generates routes: ```bash pnpm run dev ``` Or
-    	run type checking to see specific errors: ```bash pnpm run typecheck ```
-    </Accordion>
+	<Accordion title="Type errors after pulling changes">
+		The route tree may need regeneration. Run the dev server which auto-generates routes:
+		```bash
+		pnpm run dev
+		```
+		Or run type checking to see specific errors:
+		```bash
+		pnpm run typecheck
+		```
+	</Accordion>
 
 </AccordionGroup>
 

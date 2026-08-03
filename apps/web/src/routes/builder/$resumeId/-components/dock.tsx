@@ -13,7 +13,6 @@ import {
 } from "@phosphor-icons/react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { m } from "motion/react";
-import { useCallback, useMemo } from "react";
 import { useControls, useTransformComponent } from "react-zoom-pan-pinch";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -68,15 +67,8 @@ export function BuilderDock({ pageLayout, onTogglePageLayout }: BuilderDockProps
 		redo();
 	});
 
-	const publicUrl = useMemo(() => {
-		if (!session?.user.username || !resumeSlug) return "";
-		return `${window.location.origin}/${session.user.username}/${resumeSlug}`;
-	}, [session?.user.username, resumeSlug]);
-
-	const onCopyUrl = useCallback(async () => {
-		await copyToClipboard(publicUrl);
-		toast.success(t`A link to your resume has been copied to clipboard.`);
-	}, [publicUrl, copyToClipboard]);
+	const publicUrl =
+		session?.user.username && resumeSlug ? `${window.location.origin}/${session.user.username}/${resumeSlug}` : "";
 
 	return (
 		<div className="fixed inset-x-0 bottom-20 flex items-center justify-center md:bottom-4">
@@ -98,7 +90,14 @@ export function BuilderDock({ pageLayout, onTogglePageLayout }: BuilderDockProps
 					title={t`Toggle page stacking`}
 					onClick={onTogglePageLayout}
 				/>
-				<DockIcon icon={LinkSimpleIcon} title={t`Copy URL`} onClick={() => onCopyUrl()} />
+				<DockIcon
+					icon={LinkSimpleIcon}
+					title={t`Copy URL`}
+					onClick={async () => {
+						await copyToClipboard(publicUrl);
+						toast.success(t`A link to your resume has been copied to clipboard.`);
+					}}
+				/>
 			</m.div>
 		</div>
 	);
