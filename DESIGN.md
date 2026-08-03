@@ -154,6 +154,8 @@ Reactive Resume is moving toward a personal resume builder for an individual own
 
 The first screen should help a person start, import, or continue a resume quickly. Avoid marketing-first first visits, enterprise-oriented onboarding, and decorative pages that delay the core builder workflow. Public-facing pages can explain the project, but the primary experience is the resume editor and its export/share flow.
 
+This repo periodically merges upstream (amruthpillai/reactive-resume), which does not share this product direction. See the "Fork divergence from upstream" section in `AGENTS.md` for the concrete, file-level list of what's been removed, kept intentionally different, or added beyond upstream (marketing home sections, the standalone `/agent` route, the `mainEntryBold` bold toggle, the restored JSON editor, single-owner auth, etc.) — treat that list as the source of truth before assuming an upstream page or component belongs back in this design.
+
 ## Overview
 
 Reactive Resume is a monochrome, content-first design system for a personal resume builder. The visual identity prioritizes readability and unobtrusiveness — the user's resume content is always the hero, never the chrome around it.

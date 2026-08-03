@@ -18,6 +18,33 @@ Reactive Resume should move toward a personal resume builder for an individual o
 - When simplifying existing features, keep resume creation, editing, import/export, PDF/DOCX generation, templates, privacy, and ownership as the central product surface.
 - If a requested change could be implemented as either a personal workflow or a multi-user/business workflow, choose the personal workflow by default and document any tradeoff.
 
+### Fork divergence from upstream (amruthpillai/reactive-resume)
+
+This repo periodically merges `upstream/main` (github.com/amruthpillai/reactive-resume). Upstream is a multi-user, marketing-forward SaaS product; this fork is a single-owner personal tool. An agent doing an upstream merge has a structural blind spot here: a 3-way merge has no way to know that a file upstream reintroduces was deliberately deleted on purpose, so **treat every item below as intentional unless the user says otherwise, and re-verify it after every upstream merge** rather than trusting that a clean merge preserved it.
+
+**Removed entirely (do not silently reintroduce from an upstream merge):**
+
+- Marketing home-page sections: donate, faq, features, footer, prefooter, sponsors, statistics, template gallery teaser, testimonials (`apps/web/src/routes/_home/-sections/*`), the hero timelapse video/poster, `github-stars-button`, `copyright`, `donation-toast`, `spotlight` animation components, and `robots.txt`/`sitemap.xml`/`funding.json`.
+- Homepage SEO/structured-data injection (JSON-LD graph, OG/Twitter meta, canonical link) and the `/templates/$` gallery route.
+- The standalone `/agent` route workspace (thread sidebar, `agent/new`, `agent/$threadId`, `new-thread-setup.tsx`, `thread-sidebar.tsx`, `route.tsx`). The AI assistant instead lives **inline inside the builder** as `apps/web/src/routes/builder/$resumeId/-components/ai-assistant.tsx`, which renders the shared `AgentChat` component at `apps/web/src/routes/agent/-components/agent-chat.tsx`. The underlying `packages/api/src/features/agent/*` service layer is shared and present in both; only the standalone page shell was removed.
+- Platform statistics endpoints (`packages/api/src/features/statistics/*` and its MCP tool) — this is a self-hosted single-owner instance, not a hosted service with aggregate metrics to report.
+- The MCP application tools (`list_applications`, `read_application`, `create_application`, `update_application`, `delete_application`, `import_applications`, `autofill_application_from_job`, `score_application_match`, `tailor_resume_for_application`, `draft_application_message`, etc. — see `packages/mcp/src/mcp-tool-names.ts`). The Applications / job-search feature itself is **kept** as a normal oRPC-backed dashboard surface (`apps/web/src/features/applications/*`, `apps/web/src/routes/dashboard/applications`); it is just not exposed over MCP.
+- Upstream's competitor-comparison marketing docs (`docs/comparisons/reactive-resume-vs-*.mdx`) and SEO/AEO content-planning docs under `docs/superpowers/{plans,specs}`. See `SIMPLIFICATION_BACKLOG.md` for the running log of this kind of removal.
+- `dashClient`/`adminClient` Better Auth plugins (`apps/web/src/libs/auth/client.ts`) — no admin dashboard, no org/team management.
+
+**Behavior kept intentionally different from upstream:**
+
+- **Single-owner auth** (`packages/auth/src/single-owner.ts`) — no open multi-user signup, no teams/orgs/roles.
+- **`mainEntryBold` per-item toggle, default unbold.** Company/school/project name/certification title/skill name render **unbold by default**, with an explicit "Bold" checkbox per item to opt in. Upstream instead treats these as unconditional "Bold hosts" (always bold, no toggle) and only exempts award titles. Touches: `packages/schema/src/resume/data.ts` (field), `packages/pdf/src/templates/shared/sections.tsx` (`MainEntryText`/`ItemTitle` primitives), and the item dialogs under `apps/web/src/dialogs/resume/sections/*.tsx` (checkbox UI). **Known gap:** `packages/docx/src/section-renderers.ts` does not read `mainEntryBold` at all — DOCX export always bolds these fields (except awards, which upstream's unbold fix already covers). This predates the latest merge and has not been fixed; flag it rather than assuming DOCX and PDF agree.
+- **Resume JSON editor is restored** (`apps/web/src/routes/builder/$resumeId/-components/edit-json-dialog.tsx`, opened from the builder header). Upstream removed direct JSON editing in favor of guided forms plus the Semantic CSS stylesheet editor; this fork keeps both the guided forms *and* a raw JSON editing escape hatch.
+- **Legacy→Semantic CSS converter carve-out** (`packages/pdf/src/semantic/legacy-converter.ts`, `scizorBoldColorSelector`/`TOGGLE_BOLD_SECTION_TYPES`): the converter does not apply Scizor's "Bold-after-text" color restoration to experience/education/projects/certifications/skills headings, because in this fork those are `mainEntryBold`-toggle-driven rather than unconditional Bold hosts. If upstream reworks this converter again, re-check that this carve-out still exists — a clean text-level merge can silently drop it.
+
+**Added beyond upstream:**
+
+- **`lmstudio` AI provider** (LM Studio), on top of upstream's provider list — see `AI_PROVIDERS` in `packages/ai/src/types.ts`. Ollama and OpenAI-compatible providers also carry fork-specific usability fixes (clearing failed agent runs, handling large prompts) not present upstream.
+
+**Before merging a new `upstream/main`**, explicitly re-diff these areas rather than trusting a clean 3-way merge: `packages/pdf/src/templates/shared/sections.tsx` (ItemTitle/Bold/MainEntryText), `packages/pdf/src/semantic/legacy-converter.ts` (Scizor carve-out), `apps/web/src/routes/builder/$resumeId/-sidebar/right/sections/custom-styles*` (Semantic CSS vs. any reintroduced GUI panel), `packages/mcp/src/mcp-tool-names.ts` (application/statistics tools), `packages/api/src/features/statistics/*`, `apps/web/src/routes/agent/*` and `-components/ai-assistant.tsx`, `packages/ai/src/types.ts` (provider enum), `packages/auth/src/config.ts` and `single-owner.ts`, `apps/web/src/routes/_home/*` (home sections), and `docs/docs.json` (comparisons nav group). Ask the user before reintroducing anything in the "Removed entirely" list above, even if upstream's version looks improved.
+
 ### Prerequisites
 
 - **Node.js 24** (matches Dockerfile `ARG NODE_VERSION=24`). Use `nvm install 24 && nvm use 24` if needed.
