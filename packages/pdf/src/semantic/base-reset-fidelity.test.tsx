@@ -152,8 +152,10 @@ describe("PDF semantic base and reset fidelity", () => {
 		expect(await finalOnyxCompanyStyle("initial")).toMatchObject({ fontWeight: undefined });
 	});
 
+	// The "Bold" toggle resolves to a real bold weight rather than the heaviest body weight (500
+	// here), so `revert` has to restore 700 for the declared base to match what Onyx renders.
 	it("restores Onyx's local company weight with revert", async () => {
-		expect(await finalOnyxCompanyStyle()).toMatchObject({ fontWeight: "500" });
-		expect(await finalOnyxCompanyStyle("revert")).toMatchObject({ fontWeight: "500" });
+		expect(await finalOnyxCompanyStyle()).toMatchObject({ fontWeight: 700 });
+		expect(await finalOnyxCompanyStyle("revert")).toMatchObject({ fontWeight: 700 });
 	});
 });

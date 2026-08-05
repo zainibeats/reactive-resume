@@ -23,8 +23,14 @@ describe("ItemTitle", () => {
 	it("keeps the semantic field binding in both bold and unbold headings", () => {
 		const block = source.match(/const MainEntryText = [\s\S]*?\n};/)?.[0];
 
-		expect(block).toContain("<Bold semanticField={field} style={composeStyles(style)}>");
+		expect(block).toContain("<Bold semanticField={field} style={composeStyles(mainEntryBoldStyle, style)}>");
 		expect(block).toContain("<Text semanticField={field} style={composeStyles(style)}>");
+	});
+
+	it("renders the bold toggle at a real bold weight instead of the heaviest body weight", () => {
+		const block = source.match(/const MainEntryText = [\s\S]*?\n};/)?.[0];
+
+		expect(block).toContain('useTemplateStyle("mainEntryBold")');
 	});
 
 	it("wires the bold toggle into every section that exposes it", () => {

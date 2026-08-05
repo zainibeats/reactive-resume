@@ -674,9 +674,11 @@ const SectionItemHeader = ({ children }: SectionItemHeaderProps) => {
 
 /** Renders a main entry heading, honoring the per-item "Bold" toggle. */
 const MainEntryText = ({ bold, children, field, style }: MainEntryTextProps) => {
+	const mainEntryBoldStyle = useTemplateStyle("mainEntryBold");
+
 	if (bold) {
 		return (
-			<Bold semanticField={field} style={composeStyles(style)}>
+			<Bold semanticField={field} style={composeStyles(mainEntryBoldStyle, style)}>
 				{children}
 			</Bold>
 		);

@@ -14,6 +14,16 @@ type BaseTemplateStylesInput = {
 };
 
 /**
+ * Lowest weight that resolves to a genuine bold face. `registerFonts` always registers 700 for
+ * the body family, so requesting it never falls back to a lighter file.
+ */
+const REAL_BOLD_FONT_WEIGHT = 700;
+
+/** The heavier of the author's heaviest body weight and a real bold weight. */
+export const resolveMainEntryBoldWeight = (fontWeights: readonly string[]) =>
+	Math.max(REAL_BOLD_FONT_WEIGHT, ...fontWeights.map(Number).filter(Number.isFinite));
+
+/**
  * Returns the ~20 byte-identical style slots shared by all 15 templates as plain objects.
  * Each template spreads the result into its own StyleSheet.create() call and overrides only
  * the slots that differ (heading fontWeight, bold fallback, inline gap, picture extras, etc.).
@@ -85,6 +95,18 @@ export function createBaseTemplateStyles({
 		/** Default fallback "600". scizor overrides to "700". */
 		bold: {
 			fontWeight: metadata.typography.body.fontWeights.at(-1) ?? "600",
+		} satisfies Style,
+
+		/**
+		 * Weight for the per-item "Bold" toggle (`mainEntryBold`), applied on top of `bold`.
+		 *
+		 * `bold` follows the heaviest weight the author selected for body text, which is 500 by
+		 * default and collapses onto the body weight when a single weight is selected — so checking
+		 * "Bold" produced little or no visible change. The toggle is an explicit "make this bold"
+		 * intent, so it resolves to a real bold face, matching the DOCX export which writes true bold.
+		 */
+		mainEntryBold: {
+			fontWeight: resolveMainEntryBoldWeight(metadata.typography.body.fontWeights),
 		} satisfies Style,
 
 		richParagraph: {

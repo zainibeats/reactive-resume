@@ -1,6 +1,7 @@
 import type { ResolvedNodeStyle, SemanticNode } from "@reactive-resume/resume/stylesheet";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
+import { resolveMainEntryBoldWeight } from "../templates/shared/base-template-styles";
 
 export type BuildPdfBaseStylesInput = {
 	data: ResumeData;
@@ -36,11 +37,45 @@ type SectionBreaks = {
 	startOnNewPage?: boolean;
 };
 
-const resolveSectionBreaks = (data: ResumeData, id: string | undefined): SectionBreaks | undefined => {
-	if (!id) return {};
+type SectionWithItems = SectionBreaks & {
+	items?: readonly { id: string; mainEntryBold?: boolean | undefined }[] | undefined;
+};
+
+const resolveSection = (data: ResumeData, id: string | undefined): SectionWithItems | undefined => {
+	if (!id) return undefined;
 	if (id === "summary") return data.summary;
 	if (id in data.sections) return data.sections[id as keyof typeof data.sections];
 	return data.customSections.find((section) => section.id === id);
+};
+
+/**
+ * Heading fields that carry the per-item "Bold" toggle (`mainEntryBold`), by section type.
+ *
+ * Every other `primary-text` field is unconditionally bold, but these five render unbold by
+ * default. The declared base weight has to follow the toggle so `revert` restores what the
+ * template actually renders instead of snapping to the wrong weight.
+ */
+const MAIN_ENTRY_BOLD_FIELDS: Readonly<Record<string, string>> = {
+	experience: "company",
+	education: "school",
+	projects: "name",
+	certifications: "title",
+	skills: "name",
+};
+
+/** Section/item ancestry carried down the tree walk so field nodes can find their own item. */
+type ItemContext = {
+	sectionId?: string | undefined;
+	sectionType?: string | undefined;
+	itemId?: string | undefined;
+};
+
+const isMainEntryBoldField = (node: SemanticNode, context: ItemContext): boolean =>
+	context.sectionType !== undefined && MAIN_ENTRY_BOLD_FIELDS[context.sectionType] === node.attributes.name;
+
+const isMainEntryBold = (data: ResumeData, context: ItemContext): boolean => {
+	const items = resolveSection(data, context.sectionId)?.items;
+	return items?.find((item) => item.id === context.itemId)?.mainEntryBold ?? false;
 };
 
 const pageSize = (format: ResumeData["metadata"]["page"]["format"]) => {
@@ -59,8 +94,19 @@ export function buildPdfBaseStyles({
 	const bodyWeight = body.fontWeights[0] ?? "400";
 	const boldWeight = body.fontWeights.at(-1) ?? "600";
 	const headingWeight = heading.fontWeights.at(-1) ?? "600";
+	const mainEntryBoldWeight = resolveMainEntryBoldWeight(body.fontWeights);
 
-	const visit = (node: SemanticNode) => {
+	const resolveTextWeight = (node: SemanticNode, context: ItemContext) => {
+		if (headingKinds.has(node.kind)) return headingWeight;
+		if (isMainEntryBoldField(node, context)) {
+			return isMainEntryBold(data, context) ? mainEntryBoldWeight : bodyWeight;
+		}
+		if (node.roles.includes("primary-text") || node.kind === "strong") return boldWeight;
+
+		return bodyWeight;
+	};
+
+	const visit = (node: SemanticNode, context: ItemContext) => {
 		const style: Record<string, string | number> = {};
 		const structural: ResolvedNodeStyle["structural"] = {};
 
@@ -76,11 +122,7 @@ export function buildPdfBaseStyles({
 		if (textKinds.has(node.kind)) {
 			style.color = data.metadata.design.colors.text;
 			style["font-size"] = headingKinds.has(node.kind) ? heading.fontSize : body.fontSize;
-			style["font-weight"] = headingKinds.has(node.kind)
-				? headingWeight
-				: node.roles.includes("primary-text") || node.kind === "strong"
-					? boldWeight
-					: bodyWeight;
+			style["font-weight"] = resolveTextWeight(node, context);
 			style["line-height"] = headingKinds.has(node.kind) ? heading.lineHeight : body.lineHeight;
 		}
 
@@ -104,7 +146,7 @@ export function buildPdfBaseStyles({
 		}
 
 		if (node.kind === "section") {
-			const section = resolveSectionBreaks(data, node.id);
+			const section = resolveSection(data, node.id);
 			if (section?.keepTogether) structural.breakInside = "avoid";
 			if (section?.startOnNewPage) structural.breakBefore = "page";
 		}
@@ -115,9 +157,16 @@ export function buildPdfBaseStyles({
 			hidden: false,
 			order: 0,
 		});
-		for (const child of node.children) visit(child);
+
+		const childContext =
+			node.kind === "section"
+				? { ...context, sectionId: node.id, sectionType: node.attributes.type }
+				: node.kind === "item"
+					? { ...context, itemId: node.id }
+					: context;
+		for (const child of node.children) visit(child, childContext);
 	};
 
-	visit(tree);
+	visit(tree, {});
 	return Object.freeze(result);
 }

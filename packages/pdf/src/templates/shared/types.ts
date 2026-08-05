@@ -53,6 +53,7 @@ export type TemplateStyleSlots = {
 	link?: TemplateStyleSlot;
 	small?: TemplateStyleSlot;
 	bold?: TemplateStyleSlot;
+	mainEntryBold?: TemplateStyleSlot;
 	richParagraph?: TemplateStyleSlot;
 	richListItemRow?: TemplateStyleSlot;
 	richListItemMarker?: TemplateStyleSlot;
