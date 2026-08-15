@@ -10,7 +10,7 @@ const field = (sheet: Locator, label: string) =>
 
 async function openApplications(page: Page) {
 	await page.goto("/dashboard/applications");
-	await expect(page.getByRole("heading", { name: "Applications" })).toBeVisible();
+	await expect(page.getByRole("heading", { name: "Job Search" })).toBeVisible();
 }
 
 test("adds an application and logs stage changes and notes", async ({ authPage: page }) => {
@@ -19,16 +19,16 @@ test("adds an application and logs stage changes and notes", async ({ authPage: 
 	const note = "Follow up with the hiring manager after the screen.";
 
 	await openApplications(page);
-	await page.getByRole("button", { name: "Add application" }).click();
+	await page.getByRole("button", { name: "Add job" }).click();
 
-	const sheet = page.getByRole("dialog", { name: "Add application" });
+	const sheet = page.getByRole("dialog", { name: "Add job" });
 	await field(sheet, "Company").fill(company);
 	await field(sheet, "Role / title").fill(role);
 	await field(sheet, "Location").fill("Remote");
 	await field(sheet, "Salary range").fill("$180k");
 	await field(sheet, "Source").fill("Referral");
 	await field(sheet, "Notes").fill("Submitted through a referral.");
-	await sheet.getByRole("button", { name: "Add to pipeline" }).click();
+	await sheet.getByRole("button", { name: "Save job" }).click();
 
 	const card = page.getByRole("button", { name: new RegExp(`${role}.*${company}`) }).first();
 	await expect(card).toBeVisible();
@@ -74,7 +74,7 @@ test("imports applications from CSV and archives them from the table view", asyn
 	await expect(page.getByText("1 selected")).toBeVisible();
 	await page.getByRole("button", { name: "Archive" }).click();
 
-	await expect(page.getByText("No applications match your filters.")).toBeVisible();
+	await expect(page.getByText("No saved jobs match your filters.")).toBeVisible();
 	await page.getByRole("button", { name: "Archived (1)" }).click();
 	await expect(page.getByRole("button", { name: new RegExp(`${role}.*${company}`) }).first()).toBeVisible();
 });
