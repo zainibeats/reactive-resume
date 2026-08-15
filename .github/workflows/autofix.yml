@@ -1,4 +1,4 @@
-name: autofix.ci
+name: Code Quality
 
 on:
   pull_request:
@@ -12,12 +12,15 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  autofix:
+  quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Check for merge conflict markers
         run: |
@@ -32,17 +35,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: "lts/*"
+          node-version: "24"
           cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Remove Unused Dependencies
-        run: pnpm knip --fix
+      - name: Lint and Format Check
+        run: pnpm exec biome check .
 
-      - name: Lint and Format
-        run: pnpm check
+      - name: Markdown Check
+        run: pnpm exec markdownlint-cli2
 
-      - name: Autofix
-        uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8
+      - name: Workflow Check
+        run: pnpm exec github-actionlint -shellcheck= -pyflakes=
+
+      - name: Typecheck
+        run: pnpm typecheck
