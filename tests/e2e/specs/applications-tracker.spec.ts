@@ -10,7 +10,7 @@ const field = (sheet: Locator, label: string) =>
 
 async function openApplications(page: Page) {
 	await page.goto("/dashboard/applications");
-	await expect(page.getByText("Job Search", { exact: true })).toBeVisible();
+	await expect(page.getByRole("heading", { name: "Job Search" })).toBeVisible();
 }
 
 test("adds an application and logs stage changes and notes", async ({ authPage: page }) => {
