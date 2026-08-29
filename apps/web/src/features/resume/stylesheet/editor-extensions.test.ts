@@ -67,7 +67,9 @@ describe("Semantic CSS editor extensions", () => {
 		const propertyLabels = await getSemanticCssCompletionLabels("section {\n\tco", 13, metadata);
 		const variableSource = "resume { --brand-accent: #f00; color: var(--br";
 		const variableLabels = await getSemanticCssCompletionLabels(variableSource, variableSource.length, metadata);
-		const systemLabels = await getSemanticCssCompletionLabels("--resume-", 5, metadata);
+		// The cursor has to sit at the end of the typed prefix; mid-token it reads as a selector context.
+		const systemSource = "--resume-";
+		const systemLabels = await getSemanticCssCompletionLabels(systemSource, systemSource.length, metadata);
 		const directiveLabels = await getSemanticCssCompletionLabels("@", 1, metadata);
 
 		expect(selectorLabels).toEqual(

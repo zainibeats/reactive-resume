@@ -13,7 +13,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
-import { Toaster } from "@reactive-resume/ui/components/sonner";
+import { Toaster } from "@reactive-resume/ui/components/toast";
 import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
 import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
 import { DialogManager } from "@/dialogs/manager";
@@ -38,8 +38,9 @@ type RouterContext = {
 const appName = "Reactive Resume";
 const tagline = "A free and open-source resume builder";
 const title = `${appName} — ${tagline}`;
+// Keep under ~120 characters so Google's mobile SERP snippet is not truncated at 3 lines.
 const description =
-	"Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume.";
+	"Free, open-source resume builder. Create, update, and share your resume, with no ads and no paywall.";
 const iconContextValue: IconProps = { size: 16, weight: "regular" };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -111,7 +112,7 @@ function RootComponent() {
 
 													<DialogManager />
 													<CommandPalette />
-													<Toaster richColors position="bottom-right" />
+													<Toaster />
 
 													{import.meta.env.DEV && <BreakpointIndicator />}
 												</PromptDialogProvider>

@@ -13,7 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
 import { orpc } from "@/libs/orpc/client";
 import { applicationsListQueryKey } from "../queries";
@@ -113,22 +113,22 @@ export function ApplicationAiCopilot({ application }: Props) {
 	const matchScore = useMutation(
 		orpc.applications.ai.matchScore.mutationOptions({
 			onSuccess: invalidate,
-			onError: (error) => toast.error(error.message || t`Match scoring failed.`),
+			onError: (error) => toast.add({ type: "error", description: error.message || t`Match scoring failed.` }),
 		}),
 	);
 	const tailorResume = useMutation(
 		orpc.applications.ai.tailorResume.mutationOptions({
 			onSuccess: (result) => {
 				invalidate();
-				toast.success(t`Created "${result.name}" and linked it to this saved job.`);
+				toast.add({ type: "success", description: t`Created "${result.name}" and linked it to this saved job.` });
 			},
-			onError: (error) => toast.error(error.message || t`Tailoring failed.`),
+			onError: (error) => toast.add({ type: "error", description: error.message || t`Tailoring failed.` }),
 		}),
 	);
 	const draftMessage = useMutation(
 		orpc.applications.ai.draftMessage.mutationOptions({
 			onSuccess: (result, variables) => setDraft({ kind: variables.kind, text: result.text }),
-			onError: (error) => toast.error(error.message || t`Drafting failed.`),
+			onError: (error) => toast.add({ type: "error", description: error.message || t`Drafting failed.` }),
 		}),
 	);
 
@@ -152,7 +152,7 @@ export function ApplicationAiCopilot({ application }: Props) {
 			<div className="px-3.5 py-3">
 				{!canScore ? (
 					<p className="rounded-lg bg-muted/50 p-2.5 text-muted-foreground text-xs">
-						<Trans>Link a resume and add a job description (Edit) to score your fit and tailor a copy.</Trans>
+						<Trans>Link a resume and paste the job description (Edit) to score your fit and tailor a copy.</Trans>
 					</p>
 				) : score == null ? (
 					<button
@@ -245,7 +245,7 @@ export function ApplicationAiCopilot({ application }: Props) {
 								className="inline-flex items-center gap-1 text-muted-foreground text-xs hover:text-foreground"
 								onClick={() => {
 									void navigator.clipboard.writeText(draft.text);
-									toast.success(t`Copied to clipboard.`);
+									toast.add({ type: "success", description: t`Copied to clipboard.` });
 								}}
 							>
 								<CopyIcon className="size-3.5" /> <Trans>Copy</Trans>

@@ -4,12 +4,12 @@ import { ORPCError } from "@orpc/client";
 import { EyeIcon, EyeSlashIcon, LockOpenIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useToggle } from "usehooks-ts";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useAppForm } from "@/libs/tanstack-form";
@@ -35,18 +35,18 @@ export function ResumePasswordPage({ redirectPath }: Props) {
 		defaultValues: { password: "" },
 		validators: { onSubmit: formSchema },
 		onSubmit: ({ value, formApi }) => {
-			const toastId = toast.loading(t`Verifying password...`);
+			const toastId = toast.add({ type: "loading", description: t`Verifying password...` });
 
 			verifyPassword(
 				{ username, slug, password: value.password },
 				{
 					onSuccess: () => {
-						toast.dismiss(toastId);
+						toast.close(toastId);
 						void navigate({ to: redirectPath, replace: true });
 					},
 					onError: (error) => {
 						if (error instanceof ORPCError && error.code === "INVALID_PASSWORD") {
-							toast.dismiss(toastId);
+							toast.close(toastId);
 							formApi.setFieldMeta("password", (meta) => ({
 								...meta,
 								isTouched: true,
@@ -57,16 +57,17 @@ export function ResumePasswordPage({ redirectPath }: Props) {
 								},
 							}));
 						} else {
-							toast.error(
-								getReadableErrorMessage(
+							toast.add({
+								type: "error",
+								description: getReadableErrorMessage(
 									error,
 									t({
 										comment: "Fallback toast when resume password verification fails unexpectedly",
 										message: "Failed to verify the password. Please try again.",
 									}),
 								),
-								{ id: toastId },
-							);
+								id: toastId,
+							});
 						}
 					},
 				},
@@ -78,11 +79,11 @@ export function ResumePasswordPage({ redirectPath }: Props) {
 		<>
 			<div className="space-y-4 text-center">
 				<h1 className="font-semibold text-2xl tracking-tight">
-					<Trans>The resume you are trying to access is password protected</Trans>
+					<Trans>This resume is password protected</Trans>
 				</h1>
 
 				<div className="text-muted-foreground leading-relaxed">
-					<Trans>Please enter the password shared with you by the owner of the resume to continue.</Trans>
+					<Trans>Enter the password the resume owner shared with you.</Trans>
 				</div>
 			</div>
 

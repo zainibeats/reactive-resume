@@ -1,4 +1,4 @@
-import type { Download, Locator, Page, TestInfo } from "@playwright/test";
+import type { Locator, Page, TestInfo } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { updateSemanticCssFixture } from "./db";
 import { ACTIVE_PREVIEW_PAGE_SELECTOR, activePreviewPageSelector, readPreviewPageDataUrl } from "./preview";
@@ -12,7 +12,6 @@ const EMPTY_SEMANTIC_STYLESHEET = {
 type SemanticStylesheetSeed = {
 	mode: "semantic";
 	source: { languageVersion: number; text: string };
-	applied: { languageVersion: number; text: string };
 };
 
 export const PORTABLE_STYLESHEET = `@version 1;
@@ -85,7 +84,6 @@ export async function seedSemanticCssResume(
 		stylesheet = {
 			mode: "semantic",
 			source: EMPTY_SEMANTIC_STYLESHEET,
-			applied: EMPTY_SEMANTIC_STYLESHEET,
 		},
 	}: {
 		basicsName?: string;
@@ -104,7 +102,7 @@ export async function seedSemanticCssResume(
 	});
 	await page.reload();
 	await openSemanticCssEditor(page);
-	await waitForStylesheetStatus(page, "Applied");
+	await waitForStylesheetStatus(page, "Valid");
 }
 
 export async function openSemanticCssEditor(page: Page) {
@@ -125,7 +123,7 @@ export function readStylesheetSource(page: Page) {
 	);
 }
 
-export async function waitForStylesheetStatus(page: Page, status: string) {
+async function waitForStylesheetStatus(page: Page, status: string) {
 	await expect(page.getByText(status, { exact: true }).filter({ visible: true }).last()).toBeVisible({
 		timeout: 30_000,
 	});
@@ -135,7 +133,7 @@ export async function activateStylesheet(page: Page) {
 	const button = page.getByRole("button", { name: "Activate Semantic CSS" });
 	await expect(button).toBeEnabled({ timeout: 30_000 });
 	await button.click();
-	await waitForStylesheetStatus(page, "Applied");
+	await waitForStylesheetStatus(page, "Valid");
 }
 
 async function firstPreviewPage(page: Page, selector = ACTIVE_PREVIEW_PAGE_SELECTOR): Promise<Locator> {
@@ -179,13 +177,4 @@ export async function switchTemplate(page: Page, template: string) {
 		await page.keyboard.press("Escape");
 	}
 	await waitForStablePreview(page, targetPreview);
-}
-
-export async function downloadPdf(page: Page): Promise<Download> {
-	await page.getByRole("button", { name: "Download options" }).click();
-	const dialog = page.getByRole("dialog", { name: "Download" });
-	await expect(dialog).toBeVisible();
-	const download = page.waitForEvent("download");
-	await dialog.getByRole("button", { name: "Download PDF" }).click();
-	return download;
 }

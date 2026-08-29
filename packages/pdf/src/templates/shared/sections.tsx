@@ -19,11 +19,11 @@ import type {
 	VolunteerItem,
 } from "@reactive-resume/schema/resume/data";
 import type { IconName } from "phosphor-icons-react-pdf/dynamic";
-import type { ReactElement, ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { CombinedTextName } from "../../semantic/node-keys";
 import type { StyleInput, TemplatePlacement } from "./styles";
 import type { CustomItemSection, ItemSection } from "./types";
-import { Children, cloneElement, createContext, Fragment, isValidElement, use } from "react";
+import { Children, createContext, Fragment, isValidElement, use } from "react";
 import { View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { getResumeSectionIcon } from "../../section-icon";
@@ -42,6 +42,7 @@ import {
 	useSemanticSectionNodeKey,
 } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
+import { ITEM_HEADER_ROW_PART_KEYS } from "../../semantic/shared-parts";
 import { getSectionItemRows, getSectionItemsLayout, shouldUseSectionTimeline } from "./columns";
 import { getWebsiteDisplayText } from "./contact";
 import {
@@ -74,7 +75,7 @@ import { createRtlStyleHelpers } from "./rtl";
 import { getInlineItemWebsiteUrl, shouldRenderSeparateItemWebsite } from "./section-links";
 import { hasSplitRowText } from "./split-row";
 import { getSectionStyleRuleContext } from "./style-rules";
-import { composeStyles } from "./styles";
+import { composeStyles, mergeStyles } from "./styles";
 
 type SectionItemsContextValue = {
 	itemStyle: StyleInput;
@@ -533,21 +534,19 @@ const SectionItem = ({ itemId, children, style }: SectionItemProps) => {
 	);
 };
 
-const InlineItemHeader = ({
-	leading,
-	middle,
-	trailing,
-	nodeKey,
-}: InlineItemHeaderProps & { nodeKey?: string | undefined }) => {
+/**
+ * The single-line variant of an item header. `SectionItemHeader` owns the `item-header` node and
+ * its resolved style, so this only lays the three slots out and addresses their template parts
+ * against the surrounding item-header key.
+ */
+const InlineItemHeader = ({ leading, middle, trailing }: InlineItemHeaderProps) => {
 	const inlineItemHeaderStyle = useTemplateStyle("inlineItemHeader");
 	const leadingStyle = useTemplateStyle("inlineItemHeaderLeading");
 	const middleStyle = useTemplateStyle("inlineItemHeaderMiddle");
 	const trailingStyle = useTemplateStyle("inlineItemHeaderTrailing");
 
-	const resolved = useResolvedNode(nodeKey);
+	const nodeKey = useSemanticNodeKey();
 	const renderedChildKeys = useRenderedChildKeys(nodeKey);
-	const visible = useSemanticNodeVisible(nodeKey);
-	if (!visible) return null;
 	const parts = [
 		{
 			nodeKey: semanticTemplatePartNodeKey(nodeKey, "inline-item-header-leading") ?? "inline-item-header-leading",
@@ -590,11 +589,7 @@ const InlineItemHeader = ({
 		},
 	];
 
-	return (
-		<View {...resolvedPdfFlowProps(resolved)} style={composeStyles(inlineItemHeaderStyle, resolved.style)}>
-			{projectRenderedChildren(renderedChildKeys, parts)}
-		</View>
-	);
+	return <View style={composeStyles(inlineItemHeaderStyle)}>{projectRenderedChildren(renderedChildKeys, parts)}</View>;
 };
 
 const stackedSidebarSplitRowStyle = {
@@ -619,55 +614,65 @@ const useSectionSplitRowStyle = () => {
 	);
 };
 
+type ItemHeaderRowProps = {
+	children: ReactNode;
+	style: StyleInput;
+};
+
+/**
+ * React PDF lays a `Text` out once, at the width it is first measured at, and reuses those lines
+ * afterwards. `flex-wrap: nowrap` asks Yoga to shrink the title so the date fits beside it, and the
+ * cached lines keep the wider layout, so the title's glyphs run over the date. A zero flex basis
+ * makes the title's first measurement its final width, so it wraps inside its own box instead.
+ */
+const nowrapItemTitleStyle = { flexGrow: 1, flexBasis: 0 } satisfies Style;
+const wrappingItemTitleStyle = {} satisfies Style;
+
+/** True while rendering inside an item header row a stylesheet turned into a single line. */
+const ItemHeaderRowNowrapContext = createContext(false);
+
+/**
+ * The title/date row inside a section item header, exposed to Semantic CSS as
+ * `template-part[name="item-header-row"]`.
+ *
+ * It has to be addressable on its own: the row carries `flex-wrap: wrap`, so a long title pushes
+ * the trailing date onto its own line, and `item-header` selects the box around the row rather than
+ * the row itself. The owning item-header key comes from the surrounding provider.
+ */
+const ItemHeaderRow = ({ children, style }: ItemHeaderRowProps) => {
+	const ownerNodeKey = useSemanticNodeKey();
+	const resolved = useResolvedNode(semanticTemplatePartNodeKey(ownerNodeKey, ...ITEM_HEADER_ROW_PART_KEYS));
+	// Same order the rendered row composes in, so a template that ships `nowrap` counts too.
+	const { flexWrap } = mergeStyles(style, resolved.style);
+
+	return (
+		<SemanticTemplatePartView partKeys={ITEM_HEADER_ROW_PART_KEYS} style={composeStyles(style)}>
+			<ItemHeaderRowNowrapContext.Provider value={flexWrap === "nowrap"}>
+				{children}
+			</ItemHeaderRowNowrapContext.Provider>
+		</SemanticTemplatePartView>
+	);
+};
+
+/**
+ * The box around an item's header rows, exposed to Semantic CSS as `item-header`.
+ *
+ * It always renders its own `Div`, whatever shape the section's header markup has, so a resolved
+ * `item-header` style covers every header row of every section on every template. `Div` rather than
+ * `View` because the header rows keep the row gap they used to get from the item box around them.
+ */
 const SectionItemHeader = ({ children }: SectionItemHeaderProps) => {
 	const itemNodeKey = useSemanticNodeKey();
 	const itemHeaderNodeKey = itemNodeKey ? semanticNodeKeys.itemHeader(itemNodeKey) : undefined;
-	const resolved = useResolvedNode(itemHeaderNodeKey);
-	const mainItemHeaderBorder = useTemplateFeature("mainItemHeaderBorder");
 	const sectionItemHeaderStyle = useTemplateStyle("sectionItemHeader");
 	const exists = useSemanticNodeExists(itemHeaderNodeKey);
-	const visible = useSemanticNodeVisible(itemHeaderNodeKey);
 	if (!exists) return <>{children}</>;
-	if (!visible) return null;
-
-	if (!mainItemHeaderBorder) {
-		const bindFirstExistingView = (node: ReactNode): [ReactNode, boolean] => {
-			if (!isValidElement(node)) return [node, false];
-			if (node.type === InlineItemHeader) {
-				const inline = node as ReactElement<InlineItemHeaderProps & { nodeKey?: string | undefined }>;
-				return [cloneElement(inline, { nodeKey: itemHeaderNodeKey }), true];
-			}
-			if (node.type === View) {
-				const view = node as ReactElement<{ style?: StyleInput }>;
-				return [
-					cloneElement(view, {
-						...resolvedPdfFlowProps(resolved),
-						style: composeStyles(view.props.style, resolved.style),
-					}),
-					true,
-				];
-			}
-			if (node.type !== Fragment) return [node, false];
-
-			let bound = false;
-			const fragment = node as ReactElement<{ children?: ReactNode }>;
-			const nextChildren = Children.map(fragment.props.children, (child) => {
-				if (bound) return child;
-				const [next, didBind] = bindFirstExistingView(child);
-				bound = didBind;
-				return next;
-			});
-			return [cloneElement(fragment, {}, nextChildren), bound];
-		};
-		const [boundChildren] = bindFirstExistingView(children);
-		return <SemanticNodeKeyProvider nodeKey={itemHeaderNodeKey}>{boundChildren}</SemanticNodeKeyProvider>;
-	}
 
 	return (
 		<SemanticNodeKeyProvider nodeKey={itemHeaderNodeKey}>
-			<View {...resolvedPdfFlowProps(resolved)} style={composeStyles(sectionItemHeaderStyle, resolved.style)}>
+			<Div nodeKey={itemHeaderNodeKey} style={composeStyles(sectionItemHeaderStyle)}>
 				{children}
-			</View>
+			</Div>
 		</SemanticNodeKeyProvider>
 	);
 };
@@ -693,8 +698,9 @@ const MainEntryText = ({ bold, children, field, style }: MainEntryTextProps) => 
 
 const ItemTitle = ({ children, website, field, bold = true }: ItemTitleProps) => {
 	const inlineWebsiteUrl = getInlineItemWebsiteUrl(website);
+	const style = use(ItemHeaderRowNowrapContext) ? nowrapItemTitleStyle : wrappingItemTitleStyle;
 	const title = (
-		<MainEntryText bold={bold} field={field}>
+		<MainEntryText bold={bold} field={field} style={style}>
 			{children}
 		</MainEntryText>
 	);
@@ -702,7 +708,7 @@ const ItemTitle = ({ children, website, field, bold = true }: ItemTitleProps) =>
 	if (!inlineWebsiteUrl) return title;
 
 	return (
-		<Link semanticRole="inline-website" src={inlineWebsiteUrl}>
+		<Link style={style} semanticRole="inline-website" src={inlineWebsiteUrl}>
 			{title}
 		</Link>
 	);
@@ -1139,14 +1145,14 @@ const ProjectsSection = ({ sectionId = "projects", sectionData }: ItemSectionPro
 				{items.map((item) => (
 					<SectionItem key={item.id} itemId={item.id}>
 						<SectionItemHeader>
-							<View style={composeStyles(splitRowStyle)}>
+							<ItemHeaderRow style={composeStyles(splitRowStyle)}>
 								<ItemTitle bold={item.mainEntryBold ?? false} field="name" website={item.website}>
 									{item.name}
 								</ItemTitle>
 								<Text semanticField="period" style={composeStyles(alignEndStyle)}>
 									{item.period}
 								</Text>
-							</View>
+							</ItemHeaderRow>
 						</SectionItemHeader>
 
 						<RichText semanticField="description">{item.description}</RichText>
@@ -1183,7 +1189,7 @@ const SkillsSection = ({ sectionId = "skills", sectionData }: ItemSectionProps<S
 						</SectionItemHeader>
 
 						<View>
-							<Text semanticField="proficiency">{item.proficiency}</Text>
+							{hasSplitRowText(item.proficiency) && <Text semanticField="proficiency">{item.proficiency}</Text>}
 							<Small semanticField="keywords">{item.keywords.join(", ")}</Small>
 						</View>
 
@@ -1262,14 +1268,14 @@ const AwardsSection = ({ sectionId = "awards", sectionData }: ItemSectionProps<A
 				{items.map((item) => (
 					<SectionItem key={item.id} itemId={item.id}>
 						<SectionItemHeader>
-							<View style={composeStyles(splitRowStyle, awardTitleDateRowStyle)}>
+							<ItemHeaderRow style={composeStyles(splitRowStyle, awardTitleDateRowStyle)}>
 								<ItemTitle field="title" website={item.website} bold={false}>
 									{item.title}
 								</ItemTitle>
 								<Text semanticField="date" style={composeStyles(alignEndStyle)}>
 									{item.date}
 								</Text>
-							</View>
+							</ItemHeaderRow>
 							<Text semanticField="awarder">{item.awarder}</Text>
 						</SectionItemHeader>
 						<RichText semanticField="description">{item.description}</RichText>
@@ -1300,14 +1306,14 @@ const CertificationsSection = ({
 				{items.map((item) => (
 					<SectionItem key={item.id} itemId={item.id}>
 						<SectionItemHeader>
-							<View style={composeStyles(splitRowStyle)}>
+							<ItemHeaderRow style={composeStyles(splitRowStyle)}>
 								<ItemTitle bold={item.mainEntryBold ?? false} field="title" website={item.website}>
 									{item.title}
 								</ItemTitle>
 								<Text semanticField="date" style={composeStyles(alignEndStyle)}>
 									{item.date}
 								</Text>
-							</View>
+							</ItemHeaderRow>
 							<Text semanticField="issuer">{item.issuer}</Text>
 						</SectionItemHeader>
 
@@ -1336,14 +1342,14 @@ const PublicationsSection = ({ sectionId = "publications", sectionData }: ItemSe
 				{items.map((item) => (
 					<SectionItem key={item.id} itemId={item.id}>
 						<SectionItemHeader>
-							<View style={composeStyles(splitRowStyle)}>
+							<ItemHeaderRow style={composeStyles(splitRowStyle)}>
 								<ItemTitle field="title" website={item.website}>
 									{item.title}
 								</ItemTitle>
 								<Text semanticField="date" style={composeStyles(alignEndStyle)}>
 									{item.date}
 								</Text>
-							</View>
+							</ItemHeaderRow>
 
 							<Text semanticField="publisher">{item.publisher}</Text>
 						</SectionItemHeader>

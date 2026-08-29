@@ -9,7 +9,7 @@ import {
 	ReadCvLogoIcon,
 	ShieldCheckIcon,
 	UserCircleIcon,
-	WarningIcon,
+	UserGearIcon,
 } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/components/avatar";
@@ -72,9 +72,9 @@ const settingsSidebarItems = [
 		href: "/dashboard/settings/integrations",
 	},
 	{
-		icon: <WarningIcon />,
-		label: msg`Danger Zone`,
-		href: "/dashboard/settings/danger-zone",
+		icon: <UserGearIcon />,
+		label: msg`Account`,
+		href: "/dashboard/settings/account",
 	},
 ] as const satisfies SidebarItem[];
 

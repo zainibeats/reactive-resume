@@ -92,25 +92,23 @@ export const TOOL_META = {
 		inputSchema: z.object({ id: resumeIdSchema }),
 		annotations: READ_IDEMPOTENT,
 	},
-	[T.getResumeAnalysis]: {
-		title: "Get Resume Analysis",
-		description: [
-			"Returns the latest saved AI analysis for a resume (scorecard, strengths, suggestions), if any.",
-			"Analyses are created from the Reactive Resume web app AI flow, not from MCP.",
-			`Returns JSON or a short message if none exists. Use \`${T.listResumes}\` to find resume IDs.`,
-		].join("\n"),
-		inputSchema: z.object({ id: resumeIdSchema }),
-		annotations: READ_IDEMPOTENT,
-	},
 	[T.downloadResumePdf]: {
 		title: "Download Resume PDF",
 		description: [
-			"Create a short-lived authenticated URL for downloading a resume as a PDF.",
+			"Create a short-lived authenticated URL for downloading a resume or its visible cover letter as a PDF.",
 			"The URL expires in 10 minutes and should be used immediately.",
-			"Returns JSON containing: resumeId, name, downloadUrl, expiresAt, expiresInSeconds, contentType.",
+			"Set target to `cover-letter` to export the visible cover letter separately; omit it (or use `resume`) for the resume.",
+			"Returns JSON containing: resumeId, target, name, downloadUrl, expiresAt, expiresInSeconds, contentType.",
 			`Use \`${T.listResumes}\` first to find valid IDs.`,
 		].join("\n"),
-		inputSchema: z.object({ id: resumeIdSchema }),
+		inputSchema: z.object({
+			id: resumeIdSchema,
+			target: z
+				.enum(["resume", "cover-letter"])
+				.optional()
+				.default("resume")
+				.describe("Document to export. Default: resume."),
+		}),
 		annotations: READ_NON_IDEMPOTENT,
 	},
 	[T.createResume]: {
@@ -144,7 +142,7 @@ export const TOOL_META = {
 			"Create a new resume from a full ResumeData JSON object (e.g. an exported file from Reactive Resume).",
 			"A random name and slug are assigned automatically, like the web importer.",
 			`For small edits to an existing resume, prefer \`${T.patchResume}\` instead of re-importing.`,
-			"Large payloads may exceed MCP client message limits — in that case, use the web UI or the HTTP API.",
+			"Large payloads may exceed MCP client message limits; in that case, use the web UI or the HTTP API.",
 		].join("\n"),
 		inputSchema: z.object({
 			data: z
@@ -193,7 +191,7 @@ export const TOOL_META = {
 			"",
 			"Important: HTML content fields (description, summary.content) must use valid HTML.",
 			"New items must include a valid UUID as `id` and `hidden: false`.",
-			`Locked resumes cannot be patched — use \`${T.unlockResume}\` first.`,
+			`Locked resumes cannot be patched; use \`${T.unlockResume}\` first.`,
 		].join("\n"),
 		inputSchema: z.object({
 			id: resumeIdSchema,
@@ -205,7 +203,7 @@ export const TOOL_META = {
 		title: "Update Resume (metadata)",
 		description: [
 			"Update resume metadata only: display name, URL slug, tags, and/or public visibility.",
-			"Does not change section content — use JSON Patch via the patch tool for body edits.",
+			"Does not change section content; use JSON Patch via the patch tool for body edits.",
 			`Locked resumes cannot be updated; use \`${T.unlockResume}\` first.`,
 			"Password protection cannot be set or removed via MCP; use the web app for that.",
 			"",
@@ -230,7 +228,7 @@ export const TOOL_META = {
 		description: [
 			"Permanently delete a resume and all its associated files (screenshots, PDFs).",
 			"",
-			`This action is IRREVERSIBLE. Locked resumes cannot be deleted — use \`${T.unlockResume}\` first.`,
+			`This action is IRREVERSIBLE. Locked resumes cannot be deleted; use \`${T.unlockResume}\` first.`,
 			`Consider using \`${T.duplicateResume}\` to create a backup before deleting.`,
 		].join("\n"),
 		inputSchema: z.object({ id: resumeIdSchema }),
@@ -241,7 +239,7 @@ export const TOOL_META = {
 		description: [
 			"Lock a resume to prevent any modifications.",
 			"",
-			`When locked, a resume cannot be edited (${T.patchResume}, ${T.updateResume}), or deleted.`,
+			`When locked, a resume cannot be edited (${T.patchResume}, ${T.updateResume}) or deleted.`,
 			"Useful for protecting finalized resumes from accidental changes.",
 			`Use \`${T.unlockResume}\` to re-enable editing.`,
 		].join("\n"),

@@ -82,6 +82,10 @@ export const account = pg.pgTable(
 			.$defaultFn(() => generateId()),
 		accountId: pg.text("account_id").notNull(),
 		providerId: pg.text("provider_id").notNull().default("credential"),
+		// Better Auth 1.7 scopes account identity to (issuer, accountId) rather than providerId.
+		// Real OIDC issuers are stored verbatim; providers without one get a synthetic
+		// `local:`/`local:oauth:` namespace. See migrations/*_account_issuer for the backfill.
+		issuer: pg.text("issuer").notNull(),
 		userId: pg
 			.text("user_id")
 			.notNull()
@@ -104,7 +108,7 @@ export const account = pg.pgTable(
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date()),
 	},
-	(t) => [pg.index().on(t.userId)],
+	(t) => [pg.index().on(t.userId), pg.uniqueIndex("account_issuer_account_id_unique_idx").on(t.issuer, t.accountId)],
 );
 
 export const verification = pg.pgTable(
@@ -240,6 +244,11 @@ export const jwks = pg.pgTable("jwks", {
 	privateKey: pg.text("private_key").notNull(),
 	createdAt: pg.timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 	expiresAt: pg.timestamp("expires_at", { withTimezone: true }),
+	// Better Auth 1.7 added `alg` and `crv` to the jwt plugin's jwks model. Both are optional to
+	// the plugin, but the Drizzle adapter rejects a model whose columns it cannot find, so every
+	// session verification throws until they exist. Existing rows keep NULL and stay valid.
+	alg: pg.text("alg"),
+	crv: pg.text("crv"),
 });
 
 export const oauthClient = pg.pgTable(

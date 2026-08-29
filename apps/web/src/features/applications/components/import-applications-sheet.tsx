@@ -3,7 +3,6 @@ import { Trans } from "@lingui/react/macro";
 import { CheckCircleIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Label } from "@reactive-resume/ui/components/label";
@@ -16,6 +15,7 @@ import {
 	SheetTitle,
 } from "@reactive-resume/ui/components/sheet";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { orpc } from "@/libs/orpc/client";
 import { mapCsvToApplications, parseCsv } from "../csv";
 import { applicationsListQueryKey } from "../queries";
@@ -51,12 +51,12 @@ export function ImportApplicationsSheet({ open, onOpenChange }: Props) {
 				void queryClient.invalidateQueries({ queryKey: applicationsListQueryKey() });
 				void queryClient.invalidateQueries({ queryKey: orpc.applications.stats.queryKey() });
 				void queryClient.invalidateQueries({ queryKey: orpc.applications.tags.queryKey() });
-				toast.success(t`Imported ${result.imported} application(s).`);
+				toast.add({ type: "success", description: t`Imported ${result.imported} application(s).` });
 				setText("");
 				resetFile();
 				onOpenChange(false);
 			},
-			onError: () => toast.error(t`Import failed. Check the CSV and try again.`),
+			onError: () => toast.add({ type: "error", description: t`Import failed. Check the CSV and try again.` }),
 		}),
 	);
 
@@ -125,8 +125,8 @@ export function ImportApplicationsSheet({ open, onOpenChange }: Props) {
 							{overflow > 0 && (
 								<p className="mt-1.5 text-amber-600 text-xs dark:text-amber-500">
 									<Trans>
-										Only the first {MAX_IMPORT} rows import at once — {overflow} left out. Split the file to import the
-										rest.
+										Only the first {MAX_IMPORT} rows import at once, leaving out {overflow}. Split the file to import
+										the rest.
 									</Trans>
 								</p>
 							)}

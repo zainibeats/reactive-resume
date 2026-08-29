@@ -52,7 +52,7 @@ const companyWeights = async (fontWeights: string[], mode: StylesheetMode, fontF
 		experienceItem("unbold", "Plain Engines", false),
 	];
 	const stylesheet = { languageVersion: 1, text: "@version 1;" };
-	data.metadata.stylesheet = { mode, source: stylesheet, applied: stylesheet };
+	data.metadata.stylesheet = { mode, source: stylesheet };
 
 	const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
 	const instance = pdf(element);

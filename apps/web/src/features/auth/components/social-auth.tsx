@@ -4,30 +4,14 @@ import { Trans } from "@lingui/react/macro";
 import { FingerprintIcon, GithubLogoIcon, GoogleLogoIcon, LinkedinLogoIcon, VaultIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Skeleton } from "@reactive-resume/ui/components/skeleton";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
 import { authClient } from "@/libs/auth/client";
 import { orpc } from "@/libs/orpc/client";
 
-type SocialAuthProps = {
-	requestSignUp?: boolean;
-};
-
-type SocialSignInOptions = {
-	provider: string;
-	callbackURL: string;
-	requestSignUp?: true;
-};
-
-function getSocialSignInOptions(provider: string, requestSignUp: boolean): SocialSignInOptions {
-	const options: SocialSignInOptions = { provider, callbackURL: "/dashboard" };
-	if (requestSignUp) options.requestSignUp = true;
-	return options;
-}
-
-export function SocialAuth({ requestSignUp = false }: SocialAuthProps) {
+export function SocialAuth() {
 	const { data: providers = {}, isLoading } = useQuery(orpc.auth.providers.list.queryOptions());
 
 	return (
@@ -42,7 +26,7 @@ export function SocialAuth({ requestSignUp = false }: SocialAuthProps) {
 				<hr className="flex-1" />
 			</div>
 
-			{isLoading ? <SocialAuthSkeleton /> : <SocialAuthButtons providers={providers} requestSignUp={requestSignUp} />}
+			{isLoading ? <SocialAuthSkeleton /> : <SocialAuthButtons providers={providers} />}
 		</>
 	);
 }
@@ -60,27 +44,28 @@ function SocialAuthSkeleton() {
 
 type SocialAuthButtonsProps = {
 	providers: RouterOutput["auth"]["providers"]["list"];
-	requestSignUp: boolean;
 };
 
-function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps) {
+function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
 	const router = useRouter();
 
 	const runSignIn = async (fn: () => Promise<{ error: { message?: string } | null }>) => {
-		const toastId = toast.loading(t`Signing in...`);
+		const toastId = toast.add({ type: "loading", description: t`Signing in...` });
 		const { error } = await fn();
 		if (error) {
-			toast.error(
-				error.message ||
+			toast.add({
+				type: "error",
+				description:
+					error.message ||
 					t({
 						comment: "Fallback toast when sign-in fails without an error message",
 						message: "Failed to sign in. Please try again.",
 					}),
-				{ id: toastId },
-			);
+				id: toastId,
+			});
 			return;
 		}
-		toast.dismiss(toastId);
+		toast.close(toastId);
 		await router.invalidate();
 	};
 
@@ -90,8 +75,8 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 				variant="secondary"
 				onClick={() =>
 					runSignIn(() =>
-						authClient.signIn.oauth2({
-							providerId: "custom",
+						authClient.signIn.social({
+							provider: "custom",
 							callbackURL: "/dashboard",
 						}),
 					)
@@ -112,7 +97,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 			</Button>
 
 			<Button
-				onClick={() => runSignIn(() => authClient.signIn.social(getSocialSignInOptions("google", requestSignUp)))}
+				onClick={() => runSignIn(() => authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" }))}
 				className={cn(
 					"hidden flex-1 bg-[#4285F4] text-white hover:bg-[#4285F4]/80",
 					"google" in providers && "inline-flex",
@@ -123,7 +108,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 			</Button>
 
 			<Button
-				onClick={() => runSignIn(() => authClient.signIn.social(getSocialSignInOptions("github", requestSignUp)))}
+				onClick={() => runSignIn(() => authClient.signIn.social({ provider: "github", callbackURL: "/dashboard" }))}
 				className={cn(
 					"hidden flex-1 bg-[#2b3137] text-white hover:bg-[#2b3137]/80",
 					"github" in providers && "inline-flex",
@@ -134,7 +119,7 @@ function SocialAuthButtons({ providers, requestSignUp }: SocialAuthButtonsProps)
 			</Button>
 
 			<Button
-				onClick={() => runSignIn(() => authClient.signIn.social(getSocialSignInOptions("linkedin", requestSignUp)))}
+				onClick={() => runSignIn(() => authClient.signIn.social({ provider: "linkedin", callbackURL: "/dashboard" }))}
 				className={cn(
 					"hidden flex-1 bg-[#0A66C2] text-white hover:bg-[#0A66C2]/80",
 					"linkedin" in providers && "inline-flex",

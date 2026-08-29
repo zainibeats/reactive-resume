@@ -7,6 +7,7 @@ import {
 	getPdfFallbackFontFamilies,
 	getWebFontSource,
 	isStandardPdfFontFamily,
+	resolveBoldFontWeight,
 	resolveLegacyFontAlias,
 	sortFontWeights,
 } from "@reactive-resume/fonts";
@@ -159,6 +160,14 @@ const arabicRegex = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-ﻼ]/;
 const hebrewRegex = /[֐-׿יִ-ﭏ]/;
 const thaiRegex = /[฀-๿]/;
 
+// Emoji: regional indicators (flags) are NOT Extended_Pictographic, so union
+// them explicitly with the pictographic property (#3321). Keycap sequences
+// (e.g. "1\uFE0F\u20E3") carry no pictographic codepoint either — their
+// discriminator is the combining enclosing keycap U+20E3, unioned here for the
+// same reason: without it, keycap-only content falls back to a font without
+// the enclosure mark and renders garbled.
+const emojiRegex = /[\u{1F1E6}-\u{1F1FF}]|\u{20E3}|\p{Extended_Pictographic}/u;
+
 const scriptDetectors: { script: Script; regex: RegExp }[] = [
 	{ script: "hangul", regex: hangulRegex },
 	{ script: "kana", regex: kanaRegex },
@@ -166,6 +175,7 @@ const scriptDetectors: { script: Script; regex: RegExp }[] = [
 	{ script: "arabic", regex: arabicRegex },
 	{ script: "hebrew", regex: hebrewRegex },
 	{ script: "thai", regex: thaiRegex },
+	{ script: "emoji", regex: emojiRegex },
 ];
 
 const collectScripts = (value: unknown, scripts: Set<Script>): void => {
@@ -228,6 +238,11 @@ export const registerFonts = (
 	const headingFontFamily = pdfTypography.heading.fontFamily;
 	const bodyRange = getFontWeightRange(pdfTypography.body.fontWeights);
 	const headingRange = getFontWeightRange(pdfTypography.heading.fontWeights);
+	// Bold styles resolve to the family's true Bold face when one exists
+	// (#3310), which can be heavier than the stored weight range (e.g.
+	// ["400", "600"] for Open Sans) — make sure that face is registered or
+	// @react-pdf/renderer would silently fall back to the nearest one.
+	const bodyBoldWeight = resolveBoldFontWeight(bodyFontFamily, pdfTypography.body.fontWeights);
 
 	const registerFont = (family: string, weight: number, italic = false) => {
 		if (isStandardPdfFontFamily(family)) return;
@@ -247,7 +262,10 @@ export const registerFonts = (
 	for (const italic of [false, true]) {
 		registerFont(bodyFontFamily, bodyRange.lowest, italic);
 		registerFont(bodyFontFamily, bodyRange.highest, italic);
+		// The mainEntryBold slot resolves to max(700, heaviest authored weight); 700 is registered
+		// unconditionally so that face always exists, and anything heavier is bodyRange.highest above.
 		registerFont(bodyFontFamily, 700, italic);
+		if (bodyBoldWeight) registerFont(bodyFontFamily, Number(bodyBoldWeight), italic);
 		registerFont(headingFontFamily, headingRange.lowest, italic);
 		registerFont(headingFontFamily, headingRange.highest, italic);
 	}
@@ -266,10 +284,12 @@ export const registerFonts = (
 	const bodyFallbacks = getPdfFallbackFontFamilies(bodyFontFamily, { locale, scripts: fallbackScripts });
 	const headingFallbacks = getPdfFallbackFontFamilies(headingFontFamily, { locale, scripts: fallbackScripts });
 
-	const registerFallbacks = (families: string[], ranges: FontWeightRange[]) => {
-		const weights = new Set(ranges.flatMap(({ lowest, highest }) => [lowest, highest]));
-
+	const registerFallbacks = (families: string[], ranges: FontWeightRange[], storedWeights: readonly string[]) => {
 		for (const family of families) {
+			const weights = new Set(ranges.flatMap(({ lowest, highest }) => [lowest, highest]));
+			const fallbackBoldWeight = resolveBoldFontWeight(family, storedWeights);
+			if (fallbackBoldWeight) weights.add(Number(fallbackBoldWeight));
+
 			for (const weight of weights) {
 				registerFont(family, weight, false);
 				registerFont(family, weight, true);
@@ -282,10 +302,10 @@ export const registerFonts = (
 		bodyFallbacks.every((family, index) => family === headingFallbacks[index]);
 
 	if (sameStack) {
-		registerFallbacks(bodyFallbacks, [bodyRange, headingRange]);
+		registerFallbacks(bodyFallbacks, [bodyRange, headingRange], pdfTypography.body.fontWeights);
 	} else {
-		registerFallbacks(bodyFallbacks, [bodyRange]);
-		registerFallbacks(headingFallbacks, [headingRange]);
+		registerFallbacks(bodyFallbacks, [bodyRange], pdfTypography.body.fontWeights);
+		registerFallbacks(headingFallbacks, [headingRange], pdfTypography.heading.fontWeights);
 	}
 
 	// Latin-only path: no fallback registered, return as-is.

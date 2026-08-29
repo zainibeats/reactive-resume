@@ -64,6 +64,7 @@ export function createAgentThreadsService({
 					workingResumeId: schema.agentThread.workingResumeId,
 					title: schema.agentThread.title,
 					status: schema.agentThread.status,
+					reviewPatches: schema.agentThread.reviewPatches,
 					activeRunId: schema.agentThread.activeRunId,
 					activeStreamId: schema.agentThread.activeStreamId,
 					activeRunStartedAt: schema.agentThread.activeRunStartedAt,

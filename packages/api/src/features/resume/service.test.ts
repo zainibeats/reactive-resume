@@ -32,8 +32,6 @@ vi.mock("@reactive-resume/db/schema", () => ({
 		isPublic: "is_public",
 		isLocked: "is_locked",
 		password: "password",
-		stylesheetRevision: "stylesheet_revision",
-		renderDataVersion: "render_data_version",
 		updatedAt: "updated_at",
 		createdAt: "created_at",
 	},
@@ -58,7 +56,6 @@ vi.mock("@reactive-resume/db/schema", () => ({
 		label: "label",
 		createdAt: "created_at",
 	},
-	resumeAnalysis: { resumeId: "resume_id", analysis: "analysis" },
 	user: { id: "id", username: "username" },
 }));
 vi.mock("drizzle-orm", () => ({
@@ -112,14 +109,7 @@ const createSemanticResumeData = (): ResumeData => {
 	data.metadata.stylesheet = {
 		mode: "semantic",
 		source: { languageVersion: 1, text: "@version 1;\n" },
-		applied: { languageVersion: 1, text: "@version 1;\n" },
 	};
-	return data;
-};
-
-const createStylesheetResumeData = (mode: "legacy" | "semantic"): ResumeData => {
-	const data = createSemanticResumeData();
-	if (data.metadata.stylesheet) data.metadata.stylesheet.mode = mode;
 	return data;
 };
 
@@ -183,7 +173,7 @@ const createResumeRow = (data: ResumeData, updatedAt = new Date()) => ({
 });
 
 const createRestoreHarness = (currentData: ResumeData, restoredData: ResumeData) => {
-	const currentRow = { ...createResumeRow(currentData), stylesheetRevision: 3 };
+	const currentRow = createResumeRow(currentData);
 	const versionLookup = {
 		from: () => ({
 			innerJoin: () => ({ where: () => Promise.resolve([{ data: restoredData }]) }),
@@ -206,8 +196,6 @@ const createRestoreHarness = (currentData: ResumeData, restoredData: ResumeData)
 		{
 			data: currentData,
 			isLocked: false,
-			stylesheetRevision: 3,
-			renderDataVersion: 7,
 			updatedAt: currentRow.updatedAt,
 		},
 	]);
@@ -249,7 +237,7 @@ it("imports", () => {
 });
 
 describe("create", () => {
-	it("copies stylesheet content while leaving both concurrency versions at database defaults", async () => {
+	it("copies stylesheet content", async () => {
 		const data = createSemanticResumeData();
 		const values = vi.fn((_input: unknown) => Promise.resolve());
 		dbMock.insert.mockReturnValueOnce({ values });
@@ -270,8 +258,6 @@ describe("create", () => {
 				}),
 			}),
 		);
-		expect(values.mock.calls[0]?.[0]).not.toHaveProperty("stylesheetRevision");
-		expect(values.mock.calls[0]?.[0]).not.toHaveProperty("renderDataVersion");
 	});
 
 	it("rejects renderer-unsafe data from direct and duplicate callers before insertion", async () => {
@@ -357,139 +343,44 @@ describe("versions.snapshot", () => {
 });
 
 describe("versions.restore", () => {
-	it.each([
-		{ name: "changed render data", changeRenderData: true, expectedRenderDataVersion: 8 },
-		{ name: "notes-only data", changeRenderData: false, expectedRenderDataVersion: undefined },
-	])(
-		"preserves canonical stylesheet state and snapshots the returned data for $name",
-		async ({ changeRenderData, expectedRenderDataVersion }) => {
-			const currentData = createSemanticResumeData();
-			const restoredData: ResumeData = structuredClone(defaultResumeData);
-			if (changeRenderData) {
-				restoredData.basics.name = "Restored Name";
-				restoredData.metadata.stylesheet = {
+	it("normalizes a historical applied stylesheet while restoring its canonical source", async () => {
+		const currentData = createSemanticResumeData();
+		const restoredData = createSemanticResumeData();
+		const source = { languageVersion: 1, text: "@version 1;\nname { color: blue; }\n" };
+		const legacyRestoredData = {
+			...restoredData,
+			metadata: {
+				...restoredData.metadata,
+				stylesheet: {
 					mode: "semantic",
-					source: { languageVersion: 1, text: "@version 1;\nsection { color: #123456; }\n" },
-					applied: { languageVersion: 1, text: "@version 1;\nsection { color: #123456; }\n" },
-				};
-			} else {
-				restoredData.metadata.notes = "Restored private note";
-				restoredData.metadata.stylesheet = structuredClone(currentData.metadata.stylesheet);
-			}
-
-			const { set, snapshotValues } = createRestoreHarness(currentData, restoredData);
-			const prepareData = vi.fn(async ({ data }: { data: ResumeData }) => data);
-
-			const result = await resumeService.versions.restore({
-				resumeId: "r1",
-				versionId: "v1",
-				userId: "u1",
-				prepareData,
-			});
-
-			expect(set).toHaveBeenCalledTimes(1);
-			expect(prepareData).toHaveBeenCalledWith({ data: restoredData, stylesheetRevision: 3 });
-			expect(result.data.metadata.stylesheet).toEqual(restoredData.metadata.stylesheet);
-			const updateValues = set.mock.calls[0]?.[0];
-			expect(updateValues).toHaveProperty("stylesheetRevision", 4);
-			if (expectedRenderDataVersion === undefined) {
-				expect(updateValues).not.toHaveProperty("renderDataVersion");
-			} else {
-				expect(updateValues).toHaveProperty("renderDataVersion", expectedRenderDataVersion);
-			}
-			expect(snapshotValues).toHaveBeenNthCalledWith(1, {
-				resumeId: "r1",
-				userId: "u1",
-				data: currentData,
-				label: "Before restore",
-			});
-			expect(snapshotValues).toHaveBeenNthCalledWith(2, {
-				resumeId: "r1",
-				userId: "u1",
-				data: result.data,
-				label: "Restored version",
-			});
-		},
-	);
-
-	it.each([
-		{ currentMode: "legacy" as const, historicalMode: "semantic" as const },
-		{ currentMode: "semantic" as const, historicalMode: "legacy" as const },
-	])(
-		"does not increment render-data version for a stylesheet-only $currentMode to $historicalMode restore",
-		async ({ currentMode, historicalMode }) => {
-			const currentData = createStylesheetResumeData(currentMode);
-			const restoredData = structuredClone(currentData);
-			if (restoredData.metadata.stylesheet) restoredData.metadata.stylesheet.mode = historicalMode;
-			const { set } = createRestoreHarness(currentData, restoredData);
-
-			await resumeService.versions.restore({
-				resumeId: "r1",
-				versionId: "v1",
-				userId: "u1",
-				prepareData: ({ data }) => Promise.resolve(data),
-			});
-
-			expect(set.mock.calls[0]?.[0]).toEqual(
-				expect.objectContaining({
-					data: expect.objectContaining({
-						metadata: expect.objectContaining({
-							stylesheet: expect.objectContaining({ mode: historicalMode }),
-						}),
-					}),
-					stylesheetRevision: 4,
-				}),
-			);
-			expect(set.mock.calls[0]?.[0]).not.toHaveProperty("renderDataVersion");
-		},
-	);
-
-	it("increments render-data version for a real restored content change", async () => {
-		const currentData = createStylesheetResumeData("semantic");
-		const restoredData = structuredClone(currentData);
-		restoredData.basics.name = "Historical Name";
-		const { set } = createRestoreHarness(currentData, restoredData);
-
-		await resumeService.versions.restore({
-			resumeId: "r1",
-			versionId: "v1",
-			userId: "u1",
-			prepareData: ({ data }) => Promise.resolve(data),
-		});
-
-		expect(set.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ stylesheetRevision: 4, renderDataVersion: 8 }));
-	});
-
-	it("increments render-data version when active restored legacy rules change", async () => {
-		const currentData = createStylesheetResumeData("legacy");
-		const restoredData = structuredClone(currentData);
-		restoredData.metadata.styleRules = [
-			{
-				id: "restored-rule",
-				label: "Restored",
-				enabled: true,
-				target: { scope: "global" },
-				slots: { heading: { color: "#123456" } },
+					source,
+					applied: { languageVersion: 1, text: "@version 1;\nname { color: red; }\n" },
+				},
 			},
-		];
-		const { set } = createRestoreHarness(currentData, restoredData);
+		} as unknown as ResumeData;
+		const { set } = createRestoreHarness(currentData, legacyRestoredData);
 
-		await resumeService.versions.restore({
+		const result = await resumeService.versions.restore({
 			resumeId: "r1",
 			versionId: "v1",
 			userId: "u1",
-			prepareData: ({ data }) => Promise.resolve(data),
 		});
 
-		expect(set.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ stylesheetRevision: 4, renderDataVersion: 8 }));
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					metadata: expect.objectContaining({ stylesheet: { mode: "semantic", source } }),
+				}),
+			}),
+		);
+		expect(result.data.metadata.stylesheet).toEqual({ mode: "semantic", source });
 	});
 
-	it("rejects a currently locked resume before version lookup, preparation, or snapshots", async () => {
+	it("rejects a currently locked resume before version lookup or snapshots", async () => {
 		const callOrder: string[] = [];
 		const currentRow = {
-			...createResumeRow(createStylesheetResumeData("semantic")),
+			...createResumeRow(createSemanticResumeData()),
 			isLocked: true,
-			stylesheetRevision: 3,
 		};
 		const currentLookup = {
 			from: () => ({
@@ -504,7 +395,7 @@ describe("versions.restore", () => {
 				innerJoin: () => ({
 					where: () => {
 						callOrder.push("versionLookup");
-						return Promise.resolve([{ data: createStylesheetResumeData("semantic") }]);
+						return Promise.resolve([{ data: createSemanticResumeData() }]);
 					},
 				}),
 			}),
@@ -512,65 +403,43 @@ describe("versions.restore", () => {
 		dbMock.select.mockImplementation((selection: Record<string, unknown>) =>
 			Object.hasOwn(selection, "isLocked") ? currentLookup : versionLookup,
 		);
-		const prepareData = vi.fn(() => {
-			callOrder.push("prepareData");
-			return Promise.reject(
-				Object.assign(new Error("runner unavailable"), { code: "SEMANTIC_STYLESHEET_UNAVAILABLE" }),
-			);
-		});
-
 		await expect(
 			resumeService.versions.restore({
 				resumeId: "r1",
 				versionId: "v1",
 				userId: "u1",
-				prepareData,
 			}),
 		).rejects.toMatchObject({ code: "RESUME_LOCKED" });
 
 		expect(callOrder).toEqual(["getById"]);
-		expect(prepareData).not.toHaveBeenCalled();
 		expect(dbMock.insert).not.toHaveBeenCalled();
 		expect(dbMock.transaction).not.toHaveBeenCalled();
 	});
 
-	it("rejects a renderer-unsafe historical snapshot before preparation, snapshots, or update", async () => {
+	it("rejects a renderer-unsafe historical snapshot before snapshots or update", async () => {
 		const currentData = createSemanticResumeData();
 		const { set, snapshotValues } = createRestoreHarness(currentData, createRendererUnsafeResumeData());
-		const prepareData = vi.fn(async ({ data }: { data: ResumeData }) => data);
-
 		await expect(
 			resumeService.versions.restore({
 				resumeId: "r1",
 				versionId: "v1",
 				userId: "u1",
-				prepareData,
 			}),
 		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR", status: 500 });
 
-		expect(prepareData).not.toHaveBeenCalled();
 		expect(snapshotValues).not.toHaveBeenCalled();
 		expect(set).not.toHaveBeenCalled();
 		expect(dbMock.transaction).not.toHaveBeenCalled();
 	});
 
-	it("normalizes a valid historical snapshot before preparation and persistence", async () => {
+	it("normalizes a valid historical snapshot before persistence", async () => {
 		const currentData = createSemanticResumeData();
 		const restoredData = createOverlappingRendererSafeResumeData();
 		const { set } = createRestoreHarness(currentData, restoredData);
-		const prepareData = vi.fn(async ({ data }: { data: ResumeData }) => data);
-
 		await resumeService.versions.restore({
 			resumeId: "r1",
 			versionId: "v1",
 			userId: "u1",
-			prepareData,
-		});
-
-		expect(prepareData.mock.calls[0]?.[0].data.customSections[0]?.items[0]).toMatchObject({
-			content: "<p>Renderer-irrelevant overlap must survive.</p>",
-			roles: [],
-			website: { url: "", label: "", inlineLink: false },
 		});
 		expect(set.mock.calls[0]?.[0].data.customSections[0]?.items[0]).toMatchObject({
 			content: "<p>Renderer-irrelevant overlap must survive.</p>",
@@ -582,9 +451,7 @@ describe("versions.restore", () => {
 
 describe("update", () => {
 	it("throws RESUME_LOCKED when the pre-read reports the resume is locked", async () => {
-		const select = createLockedSelectChain([
-			{ data: defaultResumeData, isLocked: true, renderDataVersion: 0, updatedAt: new Date() },
-		]);
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: true, updatedAt: new Date() }]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
 			callback({ select: () => select.chain }),
 		);
@@ -607,9 +474,7 @@ describe("update", () => {
 			updatedAt: new Date("2026-01-01T00:00:00Z"),
 			hasPassword: false,
 		};
-		const select = createLockedSelectChain([
-			{ data: defaultResumeData, isLocked: false, renderDataVersion: 0, updatedAt: row.updatedAt },
-		]);
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false, updatedAt: row.updatedAt }]);
 		const update = createUpdateChain([row]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
 			callback({ select: () => select.chain, update: () => update.chain }),
@@ -624,9 +489,7 @@ describe("update", () => {
 	});
 
 	it("throws NOT_FOUND when the UPDATE ... RETURNING matches no row", async () => {
-		const select = createLockedSelectChain([
-			{ data: defaultResumeData, isLocked: false, renderDataVersion: 0, updatedAt: new Date() },
-		]);
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false, updatedAt: new Date() }]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
 			callback({ select: () => select.chain, update: () => createUpdateChain([]).chain }),
 		);
@@ -637,9 +500,7 @@ describe("update", () => {
 	});
 
 	it("maps a resume_slug_user_id_unique violation to RESUME_SLUG_ALREADY_EXISTS", async () => {
-		const select = createLockedSelectChain([
-			{ data: defaultResumeData, isLocked: false, renderDataVersion: 0, updatedAt: new Date() },
-		]);
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false, updatedAt: new Date() }]);
 		const update = {
 			set: () => ({
 				where: () => ({
@@ -660,14 +521,14 @@ describe("update", () => {
 		});
 	});
 
-	it("preserves the server stylesheet and increments render-data version once for visual changes", async () => {
+	it("persists the stylesheet supplied through the ordinary update path", async () => {
 		const serverData = createSemanticResumeData();
-		const clientData: ResumeData = structuredClone(defaultResumeData);
-		clientData.basics.name = "Changed";
+		const clientData = createSemanticResumeData();
+		if (clientData.metadata.stylesheet) {
+			clientData.metadata.stylesheet.source.text = "@version 1;\nname { color: blue; }\n";
+		}
 		const row = createResumeRow(clientData);
-		const select = createLockedSelectChain([
-			{ data: serverData, isLocked: false, renderDataVersion: 3, updatedAt: row.updatedAt },
-		]);
+		const select = createLockedSelectChain([{ data: serverData, isLocked: false, updatedAt: row.updatedAt }]);
 		const update = createUpdateChain([row]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
 			callback({ select: () => select.chain, update: () => update.chain }),
@@ -678,35 +539,14 @@ describe("update", () => {
 		expect(update.set).toHaveBeenCalledWith(
 			expect.objectContaining({
 				data: expect.objectContaining({
-					metadata: expect.objectContaining({ stylesheet: serverData.metadata.stylesheet }),
+					metadata: expect.objectContaining({ stylesheet: clientData.metadata.stylesheet }),
 				}),
-				renderDataVersion: 4,
 			}),
 		);
 	});
 
-	it("does not increment render-data version for notes-only changes", async () => {
-		const serverData: ResumeData = structuredClone(defaultResumeData);
-		const clientData: ResumeData = structuredClone(defaultResumeData);
-		clientData.metadata.notes = "private note";
-		const row = createResumeRow(clientData);
-		const select = createLockedSelectChain([
-			{ data: serverData, isLocked: false, renderDataVersion: 3, updatedAt: row.updatedAt },
-		]);
-		const update = createUpdateChain([row]);
-		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
-			callback({ select: () => select.chain, update: () => update.chain }),
-		);
-
-		await resumeService.update({ id: "r1", userId: "u1", data: clientData, skipAutoSnapshot: true });
-
-		expect(update.set).toHaveBeenCalledWith(expect.not.objectContaining({ renderDataVersion: expect.anything() }));
-	});
-
 	it("rejects renderer-unsafe data before updating the JSONB column", async () => {
-		const select = createLockedSelectChain([
-			{ data: defaultResumeData, isLocked: false, renderDataVersion: 3, updatedAt: new Date() },
-		]);
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false, updatedAt: new Date() }]);
 		const update = createUpdateChain([createResumeRow(defaultResumeData)]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
 			callback({ select: () => select.chain, update: () => update.chain }),
@@ -727,9 +567,7 @@ describe("update", () => {
 
 	it("persists normalized renderer-safe overlapping data", async () => {
 		const clientData = createOverlappingRendererSafeResumeData();
-		const select = createLockedSelectChain([
-			{ data: defaultResumeData, isLocked: false, renderDataVersion: 3, updatedAt: new Date() },
-		]);
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false, updatedAt: new Date() }]);
 		const update = createUpdateChain([createResumeRow(clientData)]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
 			callback({ select: () => select.chain, update: () => update.chain }),
@@ -766,12 +604,7 @@ describe("patch", () => {
 		slots: { heading: { color: "#000000" } },
 	};
 
-	const createPatchTx = (existing: {
-		data: ResumeData;
-		isLocked: boolean;
-		renderDataVersion: number;
-		updatedAt: Date;
-	}) => {
+	const createPatchTx = (existing: { data: ResumeData; isLocked: boolean; updatedAt: Date }) => {
 		const lockedSelect = createLockedSelectChain([existing]);
 		const row = createResumeRow(existing.data, existing.updatedAt);
 		const update = createUpdateChain([row]);
@@ -788,69 +621,37 @@ describe("patch", () => {
 		return { tx, update };
 	};
 
-	it.each([
-		{
-			name: "stylesheet descendant target",
-			op: "replace" as const,
-			path: "/metadata/stylesheet/source/text",
-			value: "@version 1;\nresume { color: red; }\n",
-		},
-		{
-			name: "stylesheet descendant copy source",
-			op: "copy" as const,
-			from: "/metadata/stylesheet/applied~1text",
-			path: "/metadata/notes",
-		},
-		{
-			name: "exact stylesheet move source",
-			op: "move" as const,
-			from: "/metadata/stylesheet",
-			path: "/metadata/notes",
-		},
-		{
-			name: "root target",
-			op: "replace" as const,
-			path: "",
-			value: defaultResumeData,
-		},
-		{
-			name: "metadata ancestor target",
-			op: "replace" as const,
-			path: "/metadata",
-			value: defaultResumeData.metadata,
-		},
-		{
-			name: "root copy source",
-			op: "copy" as const,
-			from: "",
-			path: "/metadata/notes",
-		},
-		{
-			name: "metadata ancestor move source",
-			op: "move" as const,
-			from: "/metadata",
-			path: "/metadata/notes",
-		},
-	])("rejects $name before applying it", async ({ name: _name, ...operation }) => {
+	it("persists stylesheet source through the ordinary patch path", async () => {
 		const data = createSemanticResumeData();
 		const { tx, update } = createPatchTx({
 			data,
 			isLocked: false,
-			renderDataVersion: 2,
 			updatedAt: new Date(),
 		});
 
-		await expect(
-			resumeService.patchInTransaction(tx as never, {
-				id: "r1",
-				userId: "u1",
-				operations: [operation],
-			}),
-		).rejects.toMatchObject({
-			code: "INVALID_PATCH_OPERATIONS",
-			message: expect.stringContaining("server-owned stylesheet"),
+		await resumeService.patchInTransaction(tx as never, {
+			id: "r1",
+			userId: "u1",
+			operations: [
+				{
+					op: "replace",
+					path: "/metadata/stylesheet/source/text",
+					value: "@version 1;\nname { color: blue; }\n",
+				},
+			],
 		});
-		expect(update.set).not.toHaveBeenCalled();
+
+		expect(update.set).toHaveBeenCalledWith({
+			data: expect.objectContaining({
+				metadata: expect.objectContaining({
+					stylesheet: {
+						mode: "semantic",
+						source: { languageVersion: 1, text: "@version 1;\nname { color: blue; }\n" },
+					},
+				}),
+			}),
+			revision: expect.anything(),
+		});
 	});
 
 	it.each([
@@ -871,7 +672,6 @@ describe("patch", () => {
 		const { tx, update } = createPatchTx({
 			data,
 			isLocked: false,
-			renderDataVersion: 2,
 			updatedAt: new Date(),
 		});
 
@@ -891,55 +691,11 @@ describe("patch", () => {
 		expect(update.set).not.toHaveBeenCalled();
 	});
 
-	it("rejects legacy style-rule changes while semantic mode is active", async () => {
+	it("persists legacy style-rule changes through the ordinary patch path", async () => {
 		const data = createSemanticResumeData();
 		const { tx, update } = createPatchTx({
 			data,
 			isLocked: false,
-			renderDataVersion: 2,
-			updatedAt: new Date(),
-		});
-
-		await expect(
-			resumeService.patchInTransaction(tx as never, {
-				id: "r1",
-				userId: "u1",
-				operations: [{ op: "add", path: "/metadata/styleRules/-", value: styleRule }],
-			}),
-		).rejects.toMatchObject({
-			code: "INVALID_PATCH_OPERATIONS",
-			message: expect.stringContaining("Legacy style rules"),
-		});
-		expect(update.set).not.toHaveBeenCalled();
-	});
-
-	it.each(["", "/metadata"])("rejects semantic style-rule changes through ancestor path %j", async (path) => {
-		const data = createSemanticResumeData();
-		const changedMetadata = { ...data.metadata, styleRules: [styleRule] };
-		const value = path === "" ? { ...data, metadata: changedMetadata } : changedMetadata;
-		const { tx, update } = createPatchTx({
-			data,
-			isLocked: false,
-			renderDataVersion: 2,
-			updatedAt: new Date(),
-		});
-
-		await expect(
-			resumeService.patchInTransaction(tx as never, {
-				id: "r1",
-				userId: "u1",
-				operations: [{ op: "replace", path, value }],
-			}),
-		).rejects.toMatchObject({ code: "INVALID_PATCH_OPERATIONS" });
-		expect(update.set).not.toHaveBeenCalled();
-	});
-
-	it("allows legacy style-rule changes and increments render-data version once", async () => {
-		const data: ResumeData = structuredClone(defaultResumeData);
-		const { tx, update } = createPatchTx({
-			data,
-			isLocked: false,
-			renderDataVersion: 5,
 			updatedAt: new Date(),
 		});
 
@@ -948,8 +704,10 @@ describe("patch", () => {
 			userId: "u1",
 			operations: [{ op: "add", path: "/metadata/styleRules/-", value: styleRule }],
 		});
-
-		expect(update.set).toHaveBeenCalledWith(expect.objectContaining({ renderDataVersion: 6 }));
+		expect(update.set).toHaveBeenCalledWith({
+			data: expect.objectContaining({ metadata: expect.objectContaining({ styleRules: [styleRule] }) }),
+			revision: expect.anything(),
+		});
 	});
 
 	it("allows a harmless sibling operation below metadata while preserving the server stylesheet", async () => {
@@ -957,7 +715,6 @@ describe("patch", () => {
 		const { tx, update } = createPatchTx({
 			data,
 			isLocked: false,
-			renderDataVersion: 5,
 			updatedAt: new Date(),
 		});
 

@@ -18,7 +18,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { toast } from "sonner";
 import { match } from "ts-pattern";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -28,6 +27,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@reactive-resume/ui/components/dropdown-menu";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { useDialogStore } from "@/dialogs/store";
 import {
 	useCurrentBuilderResumeSelector,
@@ -209,7 +209,7 @@ function BuilderHeaderDropdown() {
 					});
 				},
 				onError: (error) => {
-					toast.error(getResumeErrorMessage(error));
+					toast.add({ type: "error", description: getResumeErrorMessage(error) });
 				},
 			},
 		);
@@ -222,17 +222,17 @@ function BuilderHeaderDropdown() {
 
 		if (!confirmation) return;
 
-		const toastId = toast.loading(t`Deleting your resume...`);
+		const toastId = toast.add({ type: "loading", description: t`Deleting your resume...` });
 
 		deleteResume(
 			{ id },
 			{
 				onSuccess: () => {
-					toast.success(t`Your resume has been deleted successfully.`, { id: toastId });
+					toast.add({ type: "success", description: t`Your resume has been deleted.`, id: toastId });
 					void navigate({ to: "/dashboard/resumes", search: { sort: "lastUpdatedAt", tags: [] } });
 				},
 				onError: (error) => {
-					toast.error(getResumeErrorMessage(error), { id: toastId });
+					toast.add({ type: "error", description: getResumeErrorMessage(error), id: toastId });
 				},
 			},
 		);

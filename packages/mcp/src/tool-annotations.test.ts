@@ -33,7 +33,6 @@ describe("tool annotations", () => {
 			MCP_TOOL_NAME.listResumes,
 			MCP_TOOL_NAME.listResumeTags,
 			MCP_TOOL_NAME.getResume,
-			MCP_TOOL_NAME.getResumeAnalysis,
 			MCP_TOOL_NAME.getResumeStatistics,
 		];
 		for (const name of readOnlyTools) {
@@ -83,8 +82,8 @@ describe("tool annotations", () => {
 	});
 
 	it("declares no tools as open-world", () => {
-		for (const { annotations } of Object.values(TOOL_META)) {
-			expect(annotations.openWorldHint).toBe(false);
+		for (const [name, { annotations }] of Object.entries(TOOL_META)) {
+			expect(annotations.openWorldHint, name).toBe(false);
 		}
 	});
 });

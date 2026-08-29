@@ -7,10 +7,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { debounce, isEqual } from "es-toolkit";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 import { immer } from "zustand/middleware/immer";
 import { create } from "zustand/react";
-import { refreshStylesheetStore } from "@/features/resume/stylesheet/store";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { orpc, streamClient } from "@/libs/orpc/client";
 
 export type Resume = {
@@ -26,7 +25,7 @@ export type Resume = {
 };
 
 // Mirrors the server-side ResumeUpdatedEvent discriminator (packages/api resume/events.ts).
-type ResumeUpdateMutation = "sync" | "create" | "update" | "patch" | "lock" | "password" | "delete" | "stylesheet";
+type ResumeUpdateMutation = "sync" | "create" | "update" | "patch" | "lock" | "password" | "delete";
 type ResumeUpdateEvent = { mutation: ResumeUpdateMutation };
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -64,7 +63,7 @@ type Runtime = {
 	hasPendingLocalChanges: boolean;
 	isSaving: boolean;
 	pendingResume?: Resume;
-	syncErrorToastId?: string | number;
+	syncErrorToastId?: string;
 	syncResume: ReturnType<typeof debounce<(resume: Resume) => void>>;
 	beforeUnloadHandler?: () => void;
 	deferredRemoteResume?: Resume;
@@ -93,7 +92,7 @@ function resetHistoryRuntime() {
 	historyCanCoalesce = false;
 }
 
-let lockedToastId: string | number | undefined;
+let lockedToastId: string | undefined;
 
 function getResumeQueryKey(id: string): QueryKey {
 	return orpc.resume.getById.queryOptions({ input: { id } }).queryKey as QueryKey;
@@ -127,7 +126,7 @@ function externalUpdateMessage(mutation: ResumeUpdateMutation): string {
 }
 
 function notifyExternalUpdate(mutation: ResumeUpdateMutation) {
-	toast.info(externalUpdateMessage(mutation), { id: "resume-external-update" });
+	toast.add({ type: "info", description: externalUpdateMessage(mutation), id: "resume-external-update" });
 }
 
 // #54: applies a remote update that was deferred because the user was typing.
@@ -215,7 +214,7 @@ async function flushResumeSave(id: string) {
 		}
 
 		if (runtime.syncErrorToastId !== undefined) {
-			toast.dismiss(runtime.syncErrorToastId);
+			toast.close(runtime.syncErrorToastId);
 			runtime.syncErrorToastId = undefined;
 		}
 	} catch (error: unknown) {
@@ -224,9 +223,11 @@ async function flushResumeSave(id: string) {
 		runtime.pendingResume ??= submitted;
 		runtime.hasPendingLocalChanges = true;
 		useResumeStore.getState().setSaveStatus("error");
-		runtime.syncErrorToastId = toast.error(t`Your latest changes could not be saved.`, {
+		runtime.syncErrorToastId = toast.add({
+			type: "error",
+			description: t`Your latest changes could not be saved.`,
 			id: runtime.syncErrorToastId,
-			duration: Number.POSITIVE_INFINITY,
+			timeout: 0,
 		});
 	} finally {
 		runtime.isSaving = false;
@@ -418,7 +419,9 @@ export const useResumeStore = create<ResumeStore>()(
 			if (!currentResume) return;
 
 			if (currentResume.isLocked) {
-				lockedToastId = toast.error(t`This resume is locked and cannot be updated.`, {
+				lockedToastId = toast.add({
+					type: "error",
+					description: t`This resume is locked and cannot be updated.`,
 					id: lockedToastId,
 				});
 				return;
@@ -473,7 +476,11 @@ function applyHistoryStep(get: StoreGet, set: ImmerSet, direction: "undo" | "red
 	if (!currentResume) return;
 
 	if (currentResume.isLocked) {
-		lockedToastId = toast.error(t`This resume is locked and cannot be updated.`, { id: lockedToastId });
+		lockedToastId = toast.add({
+			type: "error",
+			description: t`This resume is locked and cannot be updated.`,
+			id: lockedToastId,
+		});
 		return;
 	}
 
@@ -616,14 +623,9 @@ export function useBuilderResumeUpdateSubscription() {
 			if (!resumeId) return;
 
 			bindRuntimeQueryClient(resumeId, queryClient);
-			if (event.mutation === "stylesheet") {
-				await refreshStylesheetStore(resumeId);
-				return;
-			}
 			const resume = (await orpc.resume.getById.call({ id: resumeId })) as Resume;
 
 			queryClient.setQueryData(getResumeQueryKey(resumeId), resume);
-			await refreshStylesheetStore(resumeId, resume.data);
 
 			if (hasPendingLocalChanges(resumeId)) {
 				useResumeStore.getState().mergeResumeMetadata(resume);

@@ -18,15 +18,22 @@ type GeneratedSpecView = {
 	>;
 };
 
-async function generateSpec() {
-	process.env.APP_URL ??= "https://rxresu.me";
-	process.env.DATABASE_URL ??= "postgresql://localhost/reactive_resume_test";
-	process.env.AUTH_SECRET ??= "openapi-generator-test-process-only";
+// Building the spec walks every router and resume JSON schema, which costs seconds. It is
+// deterministic and every test here only reads it, so generate it once for the whole file —
+// regenerating per test made the first case time out under a loaded machine.
+let specPromise: ReturnType<typeof generateOnce> | undefined;
+
+async function generateOnce() {
 	const { generateOpenApiSpec } = await import("./generator");
 	return generateOpenApiSpec({
 		appUrl: "https://rxresu.me",
 		version: "9.8.7",
 	});
+}
+
+function generateSpec() {
+	specPromise ??= generateOnce();
+	return specPromise;
 }
 
 function getRequestSchema(spec: GeneratedSpecView, path: string, method: string) {

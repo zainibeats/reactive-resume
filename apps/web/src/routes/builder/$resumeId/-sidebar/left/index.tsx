@@ -4,12 +4,12 @@ import { Trans } from "@lingui/react/macro";
 import { LockSimpleIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { Fragment, useCallback, useRef } from "react";
-import { toast } from "sonner";
 import { match } from "ts-pattern";
 import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/components/avatar";
 import { Button } from "@reactive-resume/ui/components/button";
 import { ScrollArea } from "@reactive-resume/ui/components/scroll-area";
 import { Separator } from "@reactive-resume/ui/components/separator";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@reactive-resume/ui/components/tooltip";
 import { getInitials } from "@reactive-resume/utils/string";
 import { useCurrentResume, useIsResumeLocked, usePatchResume } from "@/features/resume/builder/draft";
@@ -98,7 +98,7 @@ function LockBanner() {
 					});
 				},
 				onError: (error) => {
-					toast.error(getResumeErrorMessage(error));
+					toast.add({ type: "error", description: getResumeErrorMessage(error) });
 				},
 			},
 		);

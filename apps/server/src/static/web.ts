@@ -19,6 +19,13 @@ function resolveWebDistPath() {
 const staticRoot = resolveWebDistPath();
 const indexHtmlPath = `${staticRoot}/index.html`;
 const noindexShellPrefixes = ["/auth", "/dashboard", "/builder"];
+/**
+ * App pages the SPA owns that search engines should index.
+ *
+ * Without an entry here the fallback below returns 404 for the path in production — the dev Vite
+ * server serves the shell for anything, so this failure only ever shows up once deployed.
+ */
+const indexableAppPaths = new Set<string>();
 const reservedPublicResumeSegments = new Set([
 	"api",
 	"mcp",
@@ -29,6 +36,7 @@ const reservedPublicResumeSegments = new Set([
 	"builder",
 	"agent",
 	"templates",
+	"ats-checker",
 ]);
 
 function isAssetPath(pathname: string): boolean {
@@ -68,7 +76,9 @@ export const serveWebDistStatic = serveStatic({
 });
 
 function getFallbackResponseHeaders(pathname: string) {
-	if (pathname === "/") return { "Content-Type": "text/html; charset=UTF-8", ...BASE_SECURITY_HEADERS };
+	if (pathname === "/" || indexableAppPaths.has(pathname)) {
+		return { "Content-Type": "text/html; charset=UTF-8", ...BASE_SECURITY_HEADERS };
+	}
 	if (isNoindexShellPath(pathname) || isPublicResumePath(pathname)) {
 		return {
 			"Content-Type": "text/html; charset=UTF-8",

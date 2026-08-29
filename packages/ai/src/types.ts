@@ -50,3 +50,25 @@ const API_KEY_OPTIONAL_PROVIDERS = new Set<AIProvider>(["ollama", "lmstudio", "o
 export function isApiKeyOptional(provider: AIProvider) {
 	return API_KEY_OPTIONAL_PROVIDERS.has(provider);
 }
+
+// Brand names, used when a message has to name the provider outside a translated UI string. Every
+// such message opens with this value, so the generic fallback is capitalised to match.
+export const AI_PROVIDER_DISPLAY_NAMES: Record<AIProvider, string> = {
+	openai: "OpenAI",
+	anthropic: "Anthropic",
+	gemini: "Google Gemini",
+	"vercel-ai-gateway": "Vercel AI Gateway",
+	openrouter: "OpenRouter",
+	mistral: "Mistral",
+	cohere: "Cohere",
+	xai: "xAI",
+	groq: "Groq",
+	deepseek: "DeepSeek",
+	togetherai: "Together AI",
+	fireworks: "Fireworks AI",
+	cerebras: "Cerebras",
+	perplexity: "Perplexity",
+	ollama: "Ollama",
+	lmstudio: "LM Studio",
+	"openai-compatible": "The provider",
+};

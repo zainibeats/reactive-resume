@@ -1,6 +1,7 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { DialogProps } from "../store";
 import type { ImportType } from "./import.utils";
+import type { ResumeJsonFormat } from "./parse-json";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { DownloadSimpleIcon, FileIcon, UploadSimpleIcon } from "@phosphor-icons/react";
@@ -8,11 +9,7 @@ import { useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 import z from "zod";
-import { parseJSONResume } from "@reactive-resume/import/json-resume";
-import { parseReactiveResumeJSON } from "@reactive-resume/import/reactive-resume-json";
-import { parseReactiveResumeV4JSON } from "@reactive-resume/import/reactive-resume-v4-json";
 import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -25,14 +22,17 @@ import {
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Spinner } from "@reactive-resume/ui/components/spinner";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { Combobox } from "@/components/ui/combobox";
 import { useHasUsableAiProvider } from "@/features/settings/integrations/hooks/use-has-usable-ai-provider";
+import { useConfirm } from "@/hooks/use-confirm";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { client, orpc } from "@/libs/orpc/client";
 import { useAppForm } from "@/libs/tanstack-form";
 import { useDialogStore } from "../store";
 import { detectJsonImportType } from "./import.utils";
+import { parseResumeJson } from "./parse-json";
 
 const formSchema = z.discriminatedUnion("type", [
 	z.object({
@@ -120,6 +120,7 @@ async function detectImportType(file: File): Promise<ImportType> {
 }
 
 export function ImportResumeDialog(_: DialogProps<"resume.import">) {
+	const confirm = useConfirm();
 	const navigate = useNavigate();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 
@@ -140,23 +141,21 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 
 			setIsImporting(true);
 
-			const toastId = toast.loading(t`Importing your resume...`, {
+			const toastId = toast.add({
+				type: "loading",
+				title: t`Importing your resume...`,
 				description: t`This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page.`,
 			});
 
 			try {
 				let data: ResumeData | undefined;
 
-				if (value.type === "json-resume-json") {
-					data = parseJSONResume(await value.file.text());
-				}
-
-				if (value.type === "reactive-resume-json") {
-					data = parseReactiveResumeJSON(await value.file.text());
-				}
-
-				if (value.type === "reactive-resume-v4-json") {
-					data = parseReactiveResumeV4JSON(await value.file.text());
+				if (
+					value.type === "json-resume-json" ||
+					value.type === "reactive-resume-json" ||
+					value.type === "reactive-resume-v4-json"
+				) {
+					data = parseResumeJson(await value.file.text(), value.type as ResumeJsonFormat);
 				}
 
 				if (value.type === "pdf") {
@@ -199,12 +198,19 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 				}
 
 				const id = await importResume({ data });
-				toast.success(t`Your resume has been imported successfully.`, { id: toastId, description: null });
+				toast.add({
+					type: "success",
+					title: null,
+					description: t`Your resume has been imported.`,
+					id: toastId,
+				});
 				closeDialog();
 				void navigate({ to: "/builder/$resumeId", params: { resumeId: id } });
 			} catch (error: unknown) {
-				toast.error(
-					getOrpcErrorMessage(error, {
+				toast.add({
+					type: "error",
+					title: null,
+					description: getOrpcErrorMessage(error, {
 						byCode: {
 							BAD_REQUEST: t({
 								comment: "Error shown when AI parsing returns invalid resume structure during import",
@@ -220,8 +226,8 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 							message: "An unknown error occurred while importing your resume.",
 						}),
 					}),
-					{ id: toastId, description: null },
-				);
+					id: toastId,
+				});
 			} finally {
 				setIsImporting(false);
 			}
@@ -248,6 +254,31 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 	// #6: only warn about unsaved changes once a file has actually been chosen — not on a bare type selection.
 	useFormBlocker(form, { shouldBlock: () => Boolean(file) });
 
+	// The provider link navigates away while this dialog stays mounted over the new page, so the
+	// unsaved-changes guard (which only runs on a close attempt) fires far too late. Confirm first,
+	// then close and navigate ourselves.
+	const onSetUpProvider = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+		// Modifier and middle clicks open a new tab: the user is not leaving this page, so let the
+		// browser handle the link and keep the dialog exactly as it is.
+		if (event.defaultPrevented || event.button !== 0) return;
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+		event.preventDefault();
+
+		if (file) {
+			const confirmed = await confirm(t`Leave to set up an AI provider?`, {
+				description: t`You'll be taken to the Integrations page. The file you selected won't be imported.`,
+				confirmText: t`Leave`,
+				cancelText: t`Stay`,
+			});
+
+			if (!confirmed) return;
+		}
+
+		closeDialog();
+		await navigate({ to: "/dashboard/settings/integrations" });
+	};
+
 	return (
 		<DialogContent>
 			<DialogHeader>
@@ -257,8 +288,8 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 				</DialogTitle>
 				<DialogDescription>
 					<Trans>
-						Continue where you left off by importing an existing resume you created using Reactive Resume or any another
-						resume builder. Supported formats include PDF, Microsoft Word, as well as JSON files from Reactive Resume.
+						Continue where you left off by importing a resume you built in Reactive Resume or another resume builder.
+						Supported formats are PDF, Microsoft Word, and JSON files from Reactive Resume or JSON Resume.
 					</Trans>
 				</DialogDescription>
 			</DialogHeader>
@@ -370,7 +401,7 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 								/>
 								{!field.state.value && (
 									<p className="text-muted-foreground text-xs">
-										<Trans>We couldn't detect the format automatically — please choose it above.</Trans>
+										<Trans>We couldn't detect the format automatically. Choose it above.</Trans>
 									</p>
 								)}
 								<FormMessage errors={field.state.meta.errors} />
@@ -388,7 +419,11 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 							size="sm"
 							variant="secondary"
 							nativeButton={false}
-							render={<Link to="/dashboard/settings/integrations">{t`Set up a provider`}</Link>}
+							render={
+								<Link to="/dashboard/settings/integrations" onClick={onSetUpProvider}>
+									{t`Set up a provider`}
+								</Link>
+							}
 						/>
 					</div>
 				)}

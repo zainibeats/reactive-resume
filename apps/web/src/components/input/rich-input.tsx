@@ -38,7 +38,6 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { EditorContent, EditorContext, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { match } from "ts-pattern";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -51,6 +50,7 @@ import {
 	DropdownMenuTrigger,
 } from "@reactive-resume/ui/components/dropdown-menu";
 import { PopoverHeader, PopoverTitle, PopoverTrigger } from "@reactive-resume/ui/components/popover";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { Toggle } from "@reactive-resume/ui/components/toggle";
 import { isDarkColor } from "@reactive-resume/utils/color";
 import { cn } from "@reactive-resume/utils/style";
@@ -309,7 +309,7 @@ function useEditorToolbarState(editor: Editor) {
 				// Link
 				isLink: ctx.editor.isActive("link") ?? false,
 				setLink: async () => {
-					const url = await prompt(t`Please enter the URL you want to link to:`, {
+					const url = await prompt(t`Enter the URL you want to link to:`, {
 						defaultValue: "https://",
 					});
 
@@ -319,7 +319,9 @@ function useEditorToolbarState(editor: Editor) {
 					}
 
 					if (!z.url({ protocol: /^https?$/ }).safeParse(url).success) {
-						toast.error(t`The URL you entered is not valid.`, {
+						toast.add({
+							type: "error",
+							title: t`The URL you entered is not valid.`,
 							description: t`Valid URLs must start with http:// or https://.`,
 						});
 						return;

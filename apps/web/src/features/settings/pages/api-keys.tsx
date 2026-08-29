@@ -2,8 +2,8 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { KeyIcon, PlusIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Button } from "@reactive-resume/ui/components/button";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { useDialogStore } from "@/dialogs/store";
 import { useConfirm } from "@/hooks/use-confirm";
 import { authClient } from "@/libs/auth/client";
@@ -22,13 +22,13 @@ export function ApiKeysSettingsPage() {
 
 			return data.apiKeys
 				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-				.filter((key) => !!key.expiresAt && key.expiresAt.getTime() > Date.now());
+				.filter((key) => !key.expiresAt || key.expiresAt.getTime() > Date.now());
 		},
 	});
 
 	const onDelete = async (id: string) => {
 		const confirmation = await confirm(t`Are you sure you want to delete this API key?`, {
-			description: t`The API key will no longer be able to access your data after deletion. This action cannot be undone.`,
+			description: t`Once deleted, the key can no longer access your data. This cannot be undone.`,
 			confirmText: t({
 				comment: "API key deletion confirmation dialog confirm action in settings",
 				message: "Delete",
@@ -41,25 +41,26 @@ export function ApiKeysSettingsPage() {
 
 		if (!confirmation) return;
 
-		const toastId = toast.loading(t`Deleting your API key...`);
+		const toastId = toast.add({ type: "loading", description: t`Deleting your API key...` });
 
 		const { error } = await authClient.apiKey.delete({ keyId: id });
 
 		if (error) {
-			toast.error(
-				getReadableErrorMessage(
+			toast.add({
+				type: "error",
+				description: getReadableErrorMessage(
 					error,
 					t({
 						comment: "Fallback toast when deleting an API key fails",
 						message: "Failed to delete the API key. Please try again.",
 					}),
 				),
-				{ id: toastId },
-			);
+				id: toastId,
+			});
 			return;
 		}
 
-		toast.success(t`The API key has been deleted successfully.`, { id: toastId });
+		toast.add({ type: "success", description: t`The API key has been deleted.`, id: toastId });
 		void queryClient.invalidateQueries({ queryKey: ["auth", "api-keys"] });
 	};
 
@@ -83,7 +84,11 @@ export function ApiKeysSettingsPage() {
 							<div className="flex-1 space-y-1">
 								<p className="font-mono text-xs">{key.start}...</p>
 								<div className="text-muted-foreground text-xs">
-									<Trans>Expires on {key.expiresAt?.toLocaleDateString()}</Trans>
+									{key.expiresAt ? (
+										<Trans>Expires on {key.expiresAt.toLocaleDateString()}</Trans>
+									) : (
+										<Trans>Never expires</Trans>
+									)}
 								</div>
 							</div>
 

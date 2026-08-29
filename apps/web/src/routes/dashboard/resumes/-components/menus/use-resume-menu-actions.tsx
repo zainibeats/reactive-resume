@@ -12,7 +12,7 @@ import {
 	TrashSimpleIcon,
 } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { useDialogStore } from "@/dialogs/store";
 import { useConfirm } from "@/hooks/use-confirm";
 import { getResumeErrorMessage } from "@/libs/error-message";
@@ -49,7 +49,7 @@ export function useResumeMenuActions(resume: Resume) {
 			{ id: resume.id, isLocked: !resume.isLocked },
 			{
 				onError: (error) => {
-					toast.error(getResumeErrorMessage(error));
+					toast.add({ type: "error", description: getResumeErrorMessage(error) });
 				},
 			},
 		);
@@ -68,16 +68,16 @@ export function useResumeMenuActions(resume: Resume) {
 
 		if (!confirmation) return;
 
-		const toastId = toast.loading(t`Deleting your resume...`);
+		const toastId = toast.add({ type: "loading", description: t`Deleting your resume...` });
 
 		deleteResume(
 			{ id: resume.id },
 			{
 				onSuccess: () => {
-					toast.success(t`Your resume has been deleted successfully.`, { id: toastId });
+					toast.add({ type: "success", description: t`Your resume has been deleted successfully.`, id: toastId });
 				},
 				onError: (error) => {
-					toast.error(getResumeErrorMessage(error), { id: toastId });
+					toast.add({ type: "error", description: getResumeErrorMessage(error), id: toastId });
 				},
 			},
 		);

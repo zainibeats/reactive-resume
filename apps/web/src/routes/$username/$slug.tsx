@@ -2,6 +2,7 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { RouterOutput } from "@/libs/orpc/client";
 import { ORPCError } from "@orpc/client";
 import { createFileRoute, lazyRouteComponent, notFound, redirect } from "@tanstack/react-router";
+import { getResumeSocialMeta } from "@reactive-resume/resume/social-meta";
 import { orpc } from "@/libs/orpc/client";
 import { createNoindexFollowMeta, createResumeSocialMeta, getCanonicalRootUrl } from "@/libs/seo";
 
@@ -25,23 +26,22 @@ export const Route = createFileRoute("/$username/$slug")({
 			return { meta: [{ title: `${name} - Reactive Resume` }, createNoindexFollowMeta()] };
 		}
 
-		const { basics, summary, metadata } = resume.data;
-		const socialTitle = basics.headline ? `${name} — ${basics.headline}` : name;
-		const summaryText = summary.content
-			.replace(/<[^>]+>/g, " ")
-			.replace(/\s+/g, " ")
-			.trim();
-		const description = summaryText || basics.headline || name;
+		const social = getResumeSocialMeta(resume.data, resume.name || "Resume");
 
 		const base = getCanonicalRootUrl(typeof window === "undefined" ? undefined : window.location.origin);
 		const canonicalUrl = `${base}${params.username}/${params.slug}`;
-		const imageUrl = `${base}templates/jpg/${metadata.template}.jpg`;
+		const imageUrl = `${base}templates/jpg/${social.template}.jpg`;
 
 		return {
 			meta: [
-				{ title: `${name} - Reactive Resume` },
+				{ title: `${social.name} - Reactive Resume` },
 				createNoindexFollowMeta(),
-				...createResumeSocialMeta({ canonicalUrl, title: socialTitle, description, imageUrl }),
+				...createResumeSocialMeta({
+					canonicalUrl,
+					title: social.title,
+					description: social.description,
+					imageUrl,
+				}),
 			],
 			links: [{ rel: "canonical", href: canonicalUrl }],
 		};

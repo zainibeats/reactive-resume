@@ -65,6 +65,9 @@ export function createApp() {
 	app.on(["GET", "HEAD"], "/sitemap.xml", (c) => handleSitemap({ head: c.req.method === "HEAD" }));
 	app.on(["GET", "HEAD"], "/llms.txt", (c) => handleLlms({ head: c.req.method === "HEAD" }));
 
+	// Must precede the static middleware: serveStatic resolves "/" to dist/index.html and would
+	// return it verbatim, skipping the OpenGraph/Twitter/canonical/JSON-LD injection in handleWebApp.
+	app.on(["GET", "HEAD"], "/", (c) => handleWebApp(c.req.raw));
 	app.use("/*", serveWebDistStatic);
 	app.on(["GET", "HEAD"], "/*", (c) => handleWebApp(c.req.raw));
 

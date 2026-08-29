@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	env: { APP_URL: "https://rxresu.me" },
 	serveStatic: vi.fn((_options?: unknown) => vi.fn()),
+	getPublicResumeSocialMeta: vi.fn(),
+}));
+
+vi.mock("@reactive-resume/api/features/resume/social-meta", () => ({
+	getPublicResumeSocialMeta: mocks.getPublicResumeSocialMeta,
 }));
 
 vi.mock("node:fs", () => ({
@@ -41,6 +46,7 @@ describe("web app fallback classification", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(fs.readFile).mockResolvedValue("<html>app</html>");
+		mocks.getPublicResumeSocialMeta.mockResolvedValue(null);
 	});
 
 	it("serves the shell for the root app route without noindex", async () => {

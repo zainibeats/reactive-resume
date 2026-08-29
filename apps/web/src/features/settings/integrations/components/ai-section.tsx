@@ -14,8 +14,7 @@ import {
 	XCircleIcon,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useMemo, useState } from "react";
 import { AI_PROVIDER_DEFAULT_BASE_URLS, isApiKeyOptional } from "@reactive-resume/ai/types";
 import { Badge } from "@reactive-resume/ui/components/badge";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -23,6 +22,7 @@ import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Spinner } from "@reactive-resume/ui/components/spinner";
 import { Switch } from "@reactive-resume/ui/components/switch";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
 import { Combobox } from "@/components/ui/combobox";
 import { useHasUsableAiProvider } from "@/features/settings/integrations/hooks/use-has-usable-ai-provider";
@@ -221,6 +221,36 @@ function providerLabel(provider: AIProvider) {
 	return providerOptions.find((option) => option.value === provider)?.label ?? provider;
 }
 
+// A provider test can legitimately take tens of seconds against a cold local model. Without a sense
+// of time passing, a bare spinner reads as a freeze, so start narrating the wait once it gets long.
+const SHOW_ELAPSED_AFTER_SECONDS = 5;
+const STILL_WAITING_AFTER_SECONDS = 20;
+
+function useElapsedSeconds(isRunning: boolean) {
+	const [seconds, setSeconds] = useState(0);
+
+	useEffect(() => {
+		if (!isRunning) {
+			setSeconds(0);
+			return;
+		}
+
+		const startedAt = Date.now();
+		const interval = setInterval(() => setSeconds(Math.floor((Date.now() - startedAt) / 1000)), 1000);
+
+		return () => clearInterval(interval);
+	}, [isRunning]);
+
+	return seconds;
+}
+
+function testingLabel(elapsedSeconds: number, provider: string) {
+	if (elapsedSeconds >= STILL_WAITING_AFTER_SECONDS) return t`Still waiting for ${provider}… ${elapsedSeconds}s`;
+	if (elapsedSeconds >= SHOW_ELAPSED_AFTER_SECONDS) return t`Testing… ${elapsedSeconds}s`;
+
+	return null;
+}
+
 function upsertProvider(providers: SavedProvider[] | undefined, provider: SavedProvider) {
 	if (!providers) return [provider];
 	if (!providers.some((entry) => entry.id === provider.id)) return [...providers, provider];
@@ -245,6 +275,8 @@ function ProviderRow({ provider }: ProviderRowProps) {
 	const { mutate: updateProvider, isPending: isUpdating } = useMutation(orpc.aiProviders.update.mutationOptions());
 	const { mutate: deleteProvider, isPending: isDeleting } = useMutation(orpc.aiProviders.delete.mutationOptions());
 	const isMutating = isTesting || isUpdating || isDeleting;
+	const testElapsedSeconds = useElapsedSeconds(isTesting);
+	const testLabel = testingLabel(testElapsedSeconds, String(providerLabel(provider.provider)));
 	const saveModel = () => {
 		const nextModel = model.trim();
 		if (!nextModel || nextModel === provider.model) {
@@ -259,7 +291,11 @@ function ProviderRow({ provider }: ProviderRowProps) {
 					setIsEditingModel(false);
 					void invalidate();
 				},
-				onError: (error) => toast.error(getOrpcErrorMessage(error, { fallback: t`Failed to update provider.` })),
+				onError: (error) =>
+					toast.add({
+						type: "error",
+						description: getOrpcErrorMessage(error, { fallback: t`Failed to update provider.` }),
+					}),
 			},
 		);
 	};
@@ -321,7 +357,10 @@ function ProviderRow({ provider }: ProviderRowProps) {
 								{
 									onSuccess: () => void invalidate(),
 									onError: (error) =>
-										toast.error(getOrpcErrorMessage(error, { fallback: t`Failed to update provider.` })),
+										toast.add({
+											type: "error",
+											description: getOrpcErrorMessage(error, { fallback: t`Failed to update provider.` }),
+										}),
 								},
 							)
 						}
@@ -340,14 +379,18 @@ function ProviderRow({ provider }: ProviderRowProps) {
 							{
 								onSuccess: (response) => {
 									if (response.testStatus === "success") {
-										toast.success(t`Provider connection verified.`);
+										toast.add({ type: "success", description: t`Provider connection verified.` });
 									} else {
-										toast.error(response.testError ?? t`Could not verify provider connection.`);
+										// The reason persists on the card below, so the toast only reports the outcome.
+										toast.add({ type: "error", description: t`Connection failed.` });
 									}
 									void invalidate();
 								},
 								onError: (error) => {
-									toast.error(getOrpcErrorMessage(error, { fallback: t`Could not verify provider connection.` }));
+									toast.add({
+										type: "error",
+										description: getOrpcErrorMessage(error, { fallback: t`Could not verify provider connection.` }),
+									});
 									void invalidate();
 								},
 							},
@@ -355,7 +398,7 @@ function ProviderRow({ provider }: ProviderRowProps) {
 					}
 				>
 					{isTesting ? <Spinner /> : provider.testStatus === "success" ? <CheckCircleIcon /> : <WarningCircleIcon />}
-					<Trans>Test</Trans>
+					{testLabel ?? <Trans>Test</Trans>}
 				</Button>
 
 				<Button
@@ -383,7 +426,10 @@ function ProviderRow({ provider }: ProviderRowProps) {
 							{
 								onSuccess: () => void invalidate(),
 								onError: (error) =>
-									toast.error(getOrpcErrorMessage(error, { fallback: t`Failed to delete provider.` })),
+									toast.add({
+										type: "error",
+										description: getOrpcErrorMessage(error, { fallback: t`Failed to delete provider.` }),
+									}),
 							},
 						)
 					}
@@ -422,6 +468,7 @@ function CreateProviderForm() {
 		orpc.aiProviders.test.mutationOptions({ meta: { noInvalidate: true } }),
 	);
 	const isSaving = isCreating || isTesting;
+	const testElapsedSeconds = useElapsedSeconds(isTesting);
 
 	// Model/label/base URL are prefilled from provider defaults, so most providers only need a key to save.
 	const model = form.model.trim();
@@ -449,7 +496,7 @@ function CreateProviderForm() {
 
 			if (tested.testStatus === "success") {
 				setForm(emptyForm);
-				setResult({ ok: true, message: t`Connection verified — provider is ready to use.` });
+				setResult({ ok: true, message: t`Connection verified. The provider is ready to use.` });
 			} else {
 				// ponytail: provider stays persisted on failure so it shows in the list; a re-save creates a new row.
 				setResult({
@@ -601,7 +648,13 @@ function CreateProviderForm() {
 			<div className="mt-4 flex justify-end">
 				<Button disabled={!canSave || isSaving} onClick={() => void save()}>
 					{isSaving ? <Spinner /> : <KeyIcon />}
-					{isTesting ? <Trans>Testing…</Trans> : <Trans>Save & Test Provider</Trans>}
+					{isTesting ? (
+						(testingLabel(testElapsedSeconds, String(selectedOption?.label ?? form.provider)) ?? (
+							<Trans>Testing…</Trans>
+						))
+					) : (
+						<Trans>Save & Test Provider</Trans>
+					)}
 				</Button>
 			</div>
 		</div>

@@ -2,11 +2,11 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ArrowLeftIcon, CheckIcon } from "@phosphor-icons/react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { toast } from "sonner";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { FormControl, FormItem, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { authClient } from "@/libs/auth/client";
 import { useAppForm } from "@/libs/tanstack-form";
 
@@ -30,15 +30,20 @@ function TwoFactorVerificationPage({ backupCode = false }: TwoFactorVerification
 		defaultValues: { code: "" },
 		validators: { onSubmit: backupCode ? backupCodeSchema : totpSchema },
 		onSubmit: async ({ value }) => {
-			const toastId = toast.loading(backupCode ? t`Verifying backup code...` : t`Verifying code...`);
+			const toastId = toast.add({
+				type: "loading",
+				description: backupCode ? t`Verifying backup code...` : t`Verifying code...`,
+			});
 			const code = backupCode ? `${value.code.slice(0, 5)}-${value.code.slice(5)}` : value.code;
 			const { error } = backupCode
 				? await authClient.twoFactor.verifyBackupCode({ code })
 				: await authClient.twoFactor.verifyTotp({ code });
 
 			if (error) {
-				toast.error(
-					error.message ||
+				toast.add({
+					type: "error",
+					description:
+						error.message ||
 						(backupCode
 							? t({
 									comment: "Fallback toast when verifying a backup two-factor authentication code fails",
@@ -48,12 +53,12 @@ function TwoFactorVerificationPage({ backupCode = false }: TwoFactorVerification
 									comment: "Fallback toast when verifying a two-factor authentication code fails",
 									message: "Failed to verify your code. Please try again.",
 								})),
-					{ id: toastId },
-				);
+					id: toastId,
+				});
 				return;
 			}
 
-			toast.dismiss(toastId);
+			toast.close(toastId);
 			await router.invalidate();
 			void navigate({ to: "/dashboard", replace: true });
 		},
@@ -117,7 +122,7 @@ function TwoFactorVerificationPage({ backupCode = false }: TwoFactorVerification
 								{backupCode ? (
 									<Trans comment="Secondary navigation button on backup-code verification screen">Go Back</Trans>
 								) : (
-									<Trans comment="Secondary navigation button on 2FA verification screen">Back to Login</Trans>
+									<Trans comment="Secondary navigation button on 2FA verification screen">Back to sign in</Trans>
 								)}
 							</Link>
 						}

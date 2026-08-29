@@ -4,12 +4,12 @@ import { ORPCError } from "@orpc/client";
 import { ClipboardIcon, LockSimpleIcon, LockSimpleOpenIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Switch } from "@reactive-resume/ui/components/switch";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { useCurrentResume, usePatchResume } from "@/features/resume/builder/draft";
 import { useConfirm } from "@/hooks/use-confirm";
 import { usePrompt } from "@/hooks/use-prompt";
@@ -33,7 +33,7 @@ export function SharingSectionBuilder() {
 
 	const onCopyUrl = useCallback(async () => {
 		await copyToClipboard(publicUrl);
-		toast.success(t`A link to your resume has been copied to clipboard.`);
+		toast.add({ type: "success", description: t`Resume link copied to clipboard.` });
 	}, [publicUrl, copyToClipboard]);
 
 	const onTogglePublic = useCallback(
@@ -45,15 +45,15 @@ export function SharingSectionBuilder() {
 				});
 			} catch (error) {
 				const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
-				toast.error(message);
+				toast.add({ type: "error", description: message });
 			}
 		},
 		[patchResume, resume.id, updateResume],
 	);
 
 	const onSetPassword = useCallback(async () => {
-		const value = await prompt(t`Protect your resume from unauthorized access with a password`, {
-			description: t`Anyone visiting the resume's public URL must enter this password to access it.`,
+		const value = await prompt(t`Protect your resume with a password`, {
+			description: t`Anyone who opens the public URL will need this password.`,
 			confirmText: t`Set Password`,
 			inputProps: {
 				type: "password",
@@ -64,19 +64,19 @@ export function SharingSectionBuilder() {
 		if (!value) return;
 
 		const password = value.trim();
-		if (!password) return toast.error(t`Password cannot be empty.`);
+		if (!password) return toast.add({ type: "error", description: t`Password cannot be empty.` });
 
-		const toastId = toast.loading(t`Enabling password protection...`);
+		const toastId = toast.add({ type: "loading", description: t`Enabling password protection...` });
 
 		try {
 			await setPassword({ id: resume.id, password });
 			patchResume((draft) => {
 				draft.hasPassword = true;
 			});
-			toast.success(t`Password protection has been enabled.`, { id: toastId });
+			toast.add({ type: "success", description: t`Password protection has been enabled.`, id: toastId });
 		} catch (error) {
 			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
-			toast.error(message, { id: toastId });
+			toast.add({ type: "error", description: message, id: toastId });
 		}
 	}, [patchResume, prompt, resume.id, setPassword]);
 
@@ -84,23 +84,23 @@ export function SharingSectionBuilder() {
 		if (!resume.hasPassword) return;
 
 		const confirmation = await confirm(t`Are you sure you want to remove password protection?`, {
-			description: t`Anyone who has the resume's public URL will be able to view and download your resume without entering a password.`,
+			description: t`Anyone with the public URL will be able to view and download your resume without a password.`,
 			confirmText: t`Confirm`,
 			cancelText: t`Cancel`,
 		});
 		if (!confirmation) return;
 
-		const toastId = toast.loading(t`Removing password protection...`);
+		const toastId = toast.add({ type: "loading", description: t`Removing password protection...` });
 
 		try {
 			await removePassword({ id: resume.id });
 			patchResume((draft) => {
 				draft.hasPassword = false;
 			});
-			toast.success(t`Password protection has been disabled.`, { id: toastId });
+			toast.add({ type: "success", description: t`Password protection has been disabled.`, id: toastId });
 		} catch (error) {
 			const message = error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`;
-			toast.error(message, { id: toastId });
+			toast.add({ type: "error", description: message, id: toastId });
 		}
 	}, [confirm, patchResume, removePassword, resume.hasPassword, resume.id]);
 
@@ -145,13 +145,10 @@ export function SharingSectionBuilder() {
 					<p className="text-muted-foreground">
 						{isPasswordProtected ? (
 							<Trans>
-								Your resume's public link is currently protected by a password. Share the password only with people you
-								trust.
+								Your resume's public URL is protected by a password. Share the password only with people you trust.
 							</Trans>
 						) : (
-							<Trans>
-								Optionally, set a password so that only people with the password can view your resume through the link.
-							</Trans>
+							<Trans>Set a password if you want only people who know it to open the public URL.</Trans>
 						)}
 					</p>
 

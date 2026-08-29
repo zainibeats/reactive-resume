@@ -2,7 +2,6 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { SectionTitleResolver } from "./section-title";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
-import { createPublicStyleProjection } from "./semantic/public-projection";
 
 const rendererMock = vi.hoisted(() => ({
 	pdf: vi.fn(() => ({
@@ -120,70 +119,12 @@ describe("createResumePdfBlob", () => {
 		await expect(promise).rejects.toThrow("renderer failed");
 	});
 
-	it("renders a source-free public projection through the semantic runtime", async () => {
-		const semanticData = structuredClone(sampleResumeData);
-		const applied = { languageVersion: 1, text: "@version 1;\nname { color: #123456; }\n" };
-		semanticData.metadata.stylesheet = { mode: "semantic", source: applied, applied };
-		const projection = await createPublicStyleProjection({ data: semanticData });
-		const publicData = structuredClone(semanticData);
-		delete publicData.metadata.stylesheet;
+	it("renders with base styles when the source is fatal", async () => {
+		const data = structuredClone(sampleResumeData);
+		data.metadata.stylesheet = { mode: "semantic", source: { languageVersion: 2, text: "@version 2;" } };
 		const { createResumePdfBlob } = await import("./browser");
 
-		await createResumePdfBlob({ data: publicData, publicStyleProjection: projection });
-
-		expect(rendererMock.pdf).toHaveBeenCalledWith(
-			expect.objectContaining({
-				props: expect.objectContaining({
-					data: publicData,
-					semanticRuntime: expect.objectContaining({
-						presentation: expect.objectContaining({
-							"page-1/region-header/header/name": { style: { color: "#123456" } },
-						}),
-					}),
-				}),
-			}),
-		);
-	});
-
-	it("returns semantic diagnostics without rendering an invalid applied source", async () => {
-		const data = structuredClone(sampleResumeData);
-		const invalid = { languageVersion: 1, text: "@version 1; section { color: ; }" };
-		data.metadata.stylesheet = { mode: "semantic", source: invalid, applied: invalid };
-		const { createResumePdfBlobResult } = await import("./browser");
-
-		const result = await createResumePdfBlobResult({ data });
-
-		expect(result).toMatchObject({
-			ok: false,
-			diagnostics: [expect.objectContaining({ severity: "error" })],
-		});
-		expect(rendererMock.pdf).not.toHaveBeenCalled();
-	});
-
-	it("rejects unchecked rendering instead of producing an unstyled PDF for semantic errors", async () => {
-		const data = structuredClone(sampleResumeData);
-		const invalid = { languageVersion: 1, text: "@version 1; section { color: ; }" };
-		data.metadata.stylesheet = { mode: "semantic", source: invalid, applied: invalid };
-		const { createResumePdfBlob } = await import("./browser");
-
-		await expect(createResumePdfBlob({ data })).rejects.toMatchObject({
-			cause: [expect.objectContaining({ severity: "error" })],
-		});
-		expect(rendererMock.pdf).not.toHaveBeenCalled();
-	});
-
-	it("accepts an optional prior semantic inspection on the result path", async () => {
-		const { createResumePdfBlobResult } = await import("./browser");
-		const inspection = {
-			presentation: {},
-			sourceTree: { key: "resume", kind: "resume", attributes: {}, roles: [], children: [] },
-			renderTree: { key: "resume", kind: "resume", attributes: {}, roles: [], children: [] },
-			diagnostics: [],
-		} as const;
-
-		const result = await createResumePdfBlobResult({ data: sampleResumeData, inspection });
-
-		expect(result).toMatchObject({ ok: true, diagnostics: [] });
+		await expect(createResumePdfBlob({ data })).resolves.toHaveProperty("type", "application/pdf");
 		expect(rendererMock.pdf).toHaveBeenCalledTimes(1);
 	});
 });

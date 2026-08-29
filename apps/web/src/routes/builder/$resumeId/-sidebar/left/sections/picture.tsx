@@ -13,7 +13,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import Cropper from "react-easy-crop";
-import { toast } from "sonner";
 import { pictureSchema } from "@reactive-resume/schema/resume/data";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -35,6 +34,7 @@ import {
 	InputGroupText,
 } from "@reactive-resume/ui/components/input-group";
 import { Slider } from "@reactive-resume/ui/components/slider";
+import { toast } from "@reactive-resume/ui/components/toast";
 import "react-easy-crop/react-easy-crop.css";
 import { ColorPicker } from "@/components/input/color-picker";
 import { useCurrentBuilderResumeSelector, useUpdateResumeData } from "@/features/resume/builder/draft";
@@ -490,26 +490,27 @@ function PictureSectionForm() {
 	};
 
 	const uploadPictureFile = (file: File) => {
-		const toastId = toast.loading(t`Uploading picture…`);
+		const toastId = toast.add({ type: "loading", description: t`Uploading picture…` });
 
 		uploadFile(file, {
 			onSuccess: ({ url }) => {
 				form.setFieldValue("url", url);
 				handleAutoSave();
-				toast.dismiss(toastId);
+				toast.close(toastId);
 				if (fileInputRef.current) fileInputRef.current.value = "";
 			},
 			onError: (error) => {
-				toast.error(
-					getReadableErrorMessage(
+				toast.add({
+					type: "error",
+					description: getReadableErrorMessage(
 						error,
 						t({
 							comment: "Fallback toast when uploading profile picture for resume fails",
 							message: "Failed to upload picture. Please try again.",
 						}),
 					),
-					{ id: toastId },
-				);
+					id: toastId,
+				});
 			},
 		});
 	};

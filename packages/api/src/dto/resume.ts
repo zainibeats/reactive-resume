@@ -1,18 +1,8 @@
-import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { createSelectSchema } from "drizzle-zod";
 import z from "zod";
 import * as schema from "@reactive-resume/db/schema";
 import { jsonPatchOperationSchema } from "@reactive-resume/resume/patch";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
-import { semanticStylesheetSchema, stylesheetSourceSchema } from "@reactive-resume/schema/resume/stylesheet";
-
-const importedResumeDataSchema = z.custom<ResumeData>((value) => {
-	if (typeof value !== "object" || value === null) return false;
-	const data = value as Record<string, unknown>;
-	if (typeof data.metadata !== "object" || data.metadata === null) return false;
-	const { stylesheet: _stylesheet, ...metadata } = data.metadata as Record<string, unknown>;
-	return resumeDataSchema.safeParse({ ...data, metadata }).success;
-});
 
 const resumeSchema = createSelectSchema(schema.resume, {
 	id: z.string().describe("The ID of the resume."),
@@ -37,60 +27,6 @@ const resumeSchema = createSelectSchema(schema.resume, {
 	userId: z.string().describe("The ID of the user who owns the resume."),
 	createdAt: z.date().describe("The date and time the resume was created."),
 	updatedAt: z.date().describe("The date and time the resume was last updated."),
-}).omit({ stylesheetRevision: true, renderDataVersion: true });
-
-const stylesheetMutationCommon = {
-	id: z.string().describe("The ID of the resume."),
-	expectedRevision: z.number().int().nonnegative(),
-	expectedRenderDataVersion: z.number().int().nonnegative(),
-	editGeneration: z.number().int().nonnegative(),
-};
-const stylesheetDiagnosticSchema = z.strictObject({
-	code: z.string(),
-	severity: z.enum(["error", "warning"]),
-	message: z.string(),
-	range: z.strictObject({
-		start: z.strictObject({
-			line: z.number().int().positive(),
-			column: z.number().int().positive(),
-			offset: z.number().int().nonnegative(),
-		}),
-		end: z.strictObject({
-			line: z.number().int().positive(),
-			column: z.number().int().positive(),
-			offset: z.number().int().nonnegative(),
-		}),
-	}),
-});
-const stylesheetStateSchema = z.strictObject({
-	stylesheet: semanticStylesheetSchema,
-	revision: z.number().int().nonnegative(),
-	renderDataVersion: z.number().int().nonnegative(),
-});
-const publicPdfPageSizeSchema = z.union([
-	z.enum(["A4", "LETTER"]),
-	z.strictObject({ width: z.number().finite(), height: z.number().finite().optional() }),
-]);
-const publicPdfNodePresentationSchema = z.strictObject({
-	style: z.record(z.string(), z.union([z.string(), z.number().finite(), z.null()])).optional(),
-	size: publicPdfPageSizeSchema.optional(),
-	break: z.boolean().optional(),
-	wrap: z.boolean().optional(),
-	fixed: z.boolean().optional(),
-	minPresenceAhead: z.number().finite().optional(),
-	orphans: z.number().finite().optional(),
-	widows: z.number().finite().optional(),
-	hidden: z.boolean().optional(),
-	order: z.number().int().nonnegative().optional(),
-});
-const publicStyleProjectionSchema = z.strictObject({
-	formatVersion: z.literal(1),
-	languageVersion: z.number().int().positive(),
-	semanticTreeVersion: z.literal(1),
-	registryFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
-	adapterFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
-	renderDataHash: z.string().regex(/^[a-f0-9]{64}$/),
-	nodes: z.record(z.string(), publicPdfNodePresentationSchema),
 });
 
 const resumeOutputSchema = resumeSchema
@@ -143,12 +79,7 @@ export const resumeDto = {
 				parentRevision: true,
 				parentData: true,
 			})
-			.extend({ name: z.string(), stylesheetMode: z.enum(["legacy", "semantic"]) }),
-	},
-
-	getStyleProjection: {
-		input: z.strictObject({ username: z.string(), slug: z.string() }),
-		output: publicStyleProjectionSchema,
+			.extend({ name: z.string() }),
 	},
 
 	create: {
@@ -159,7 +90,7 @@ export const resumeDto = {
 	},
 
 	import: {
-		input: z.object({ data: importedResumeDataSchema }),
+		input: z.object({ data: resumeDataSchema }),
 		output: z.string().describe("The ID of the imported resume."),
 	},
 
@@ -268,58 +199,6 @@ export const resumeDto = {
 			resumeId: z.string().describe("The ID of the resume to restore."),
 			versionId: z.string().describe("The ID of the version snapshot to restore."),
 		}),
-		output: z.strictObject({
-			resume: resumeOutputSchema,
-			stylesheetState: stylesheetStateSchema,
-		}),
-	},
-
-	stylesheet: {
-		errors: {
-			validation: z.strictObject({
-				diagnostics: z.array(stylesheetDiagnosticSchema),
-			}),
-			parity: z.strictObject({
-				mismatches: z.array(z.string()),
-			}),
-			revisionConflict: z.strictObject({
-				state: stylesheetStateSchema,
-			}),
-		},
-		getState: {
-			input: z.strictObject({ id: z.string().describe("The ID of the resume.") }),
-			output: stylesheetStateSchema,
-		},
-		mutate: {
-			input: z.discriminatedUnion("transition", [
-				z.strictObject({
-					...stylesheetMutationCommon,
-					transition: z.literal("edit_source"),
-					source: stylesheetSourceSchema,
-				}),
-				z.strictObject({
-					...stylesheetMutationCommon,
-					transition: z.literal("activate"),
-					source: stylesheetSourceSchema,
-				}),
-				z.strictObject({
-					...stylesheetMutationCommon,
-					transition: z.literal("deactivate"),
-				}),
-				z.strictObject({
-					...stylesheetMutationCommon,
-					transition: z.literal("restore_history"),
-					restore: z.strictObject({
-						mode: z.enum(["legacy", "semantic"]),
-						source: stylesheetSourceSchema,
-						applied: stylesheetSourceSchema,
-					}),
-				}),
-			]),
-			output: stylesheetStateSchema.extend({
-				editGeneration: z.number().int().nonnegative(),
-				diagnostics: z.array(stylesheetDiagnosticSchema),
-			}),
-		},
+		output: resumeOutputSchema,
 	},
 };

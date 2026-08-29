@@ -4,7 +4,6 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { PaletteIcon, SignOutIcon, TranslateIcon } from "@phosphor-icons/react";
 import { useRouter } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useIsClient } from "usehooks-ts";
 import {
 	DropdownMenu,
@@ -19,6 +18,7 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@reactive-resume/ui/components/dropdown-menu";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { useTheme } from "@/features/theme/provider";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
@@ -42,25 +42,26 @@ export function UserDropdownMenu({ children }: Props) {
 	};
 
 	const handleLogout = async () => {
-		const toastId = toast.loading(t`Signing out...`);
+		const toastId = toast.add({ type: "loading", description: t`Signing out...` });
 
 		await authClient.signOut({
 			fetchOptions: {
 				onSuccess: () => {
-					toast.dismiss(toastId);
+					toast.close(toastId);
 					void router.invalidate();
 				},
 				onError: ({ error }) => {
-					toast.error(
-						getReadableErrorMessage(
+					toast.add({
+						type: "error",
+						description: getReadableErrorMessage(
 							error,
 							t({
 								comment: "Fallback toast when signing out fails",
 								message: "Failed to sign out. Please try again.",
 							}),
 						),
-						{ id: toastId },
-					);
+						id: toastId,
+					});
 				},
 			},
 		});
@@ -113,7 +114,7 @@ export function UserDropdownMenu({ children }: Props) {
 
 				<DropdownMenuItem onClick={handleLogout}>
 					<SignOutIcon />
-					<Trans comment="User menu action to sign out of current account">Logout</Trans>
+					<Trans comment="User menu action to sign out of current account">Sign out</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

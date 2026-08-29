@@ -14,7 +14,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { toast } from "sonner";
 import { STAGES } from "@reactive-resume/schema/applications/data";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -28,6 +27,7 @@ import {
 import { Input } from "@reactive-resume/ui/components/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@reactive-resume/ui/components/sheet";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
+import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
 import { useConfirm } from "@/hooks/use-confirm";
 import { orpc } from "@/libs/orpc/client";
@@ -83,28 +83,28 @@ export function ApplicationDetailSheet({ application, onOpenChange, onEdit }: Pr
 	const update = useMutation(
 		orpc.applications.update.mutationOptions({
 			onSuccess: invalidate,
-			onError: () => toast.error(t`Something went wrong. Please try again.`),
+			onError: () => toast.add({ type: "error", description: t`Something went wrong. Please try again.` }),
 		}),
 	);
 
 	const addNote = useMutation(
 		orpc.applications.addNote.mutationOptions({
 			onSuccess: invalidate,
-			onError: () => toast.error(t`Couldn't save the note.`),
+			onError: () => toast.add({ type: "error", description: t`Couldn't save the note.` }),
 		}),
 	);
 
 	const updateTimelineEntry = useMutation(
 		orpc.applications.updateTimelineEntry.mutationOptions({
 			onSuccess: invalidate,
-			onError: () => toast.error(t`Couldn't update the timeline entry.`),
+			onError: () => toast.add({ type: "error", description: t`Couldn't update the timeline entry.` }),
 		}),
 	);
 
 	const deleteTimelineEntry = useMutation(
 		orpc.applications.deleteTimelineEntry.mutationOptions({
 			onSuccess: invalidate,
-			onError: () => toast.error(t`Couldn't delete the timeline entry.`),
+			onError: () => toast.add({ type: "error", description: t`Couldn't delete the timeline entry.` }),
 		}),
 	);
 
@@ -112,10 +112,10 @@ export function ApplicationDetailSheet({ application, onOpenChange, onEdit }: Pr
 		orpc.applications.delete.mutationOptions({
 			onSuccess: () => {
 				invalidate();
-				toast.success(t`Saved job deleted.`);
+				toast.add({ type: "success", description: t`Saved job deleted.` });
 				onOpenChange(false);
 			},
-			onError: () => toast.error(t`Couldn't delete the saved job.`),
+			onError: () => toast.add({ type: "error", description: t`Couldn't delete the saved job.` }),
 		}),
 	);
 
