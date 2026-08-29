@@ -264,13 +264,112 @@ function isJsonPatchError(error: unknown): error is JsonPatchError {
 }
 
 /**
- * Converts a `JsonPatchError` into a clean `ResumePatchError` that omits the document tree.
+ * Error codes whose message is worth expanding with where the pointer actually broke.
+ * A bare "path does not exist" leaves the caller guessing which segment was wrong.
  */
-function toResumePatchError(error: JsonPatchError): ResumePatchError {
+const pathResolutionErrorCodes = new Set([
+	"OPERATION_PATH_UNRESOLVABLE",
+	"OPERATION_FROM_UNRESOLVABLE",
+	"OPERATION_PATH_CANNOT_ADD",
+]);
+
+/** Upper bound on keys listed in a path error, so a wide item can't produce a runaway message. */
+const maxListedKeys = 20;
+
+function getJsonPointerSegments(path: string): string[] {
+	if (path === "" || !path.startsWith("/")) return [];
+
+	return path.slice(1).split("/").map(decodeJsonPointerSegment);
+}
+
+function buildJsonPointer(segments: string[]): string {
+	return segments.length === 0 ? "" : `/${segments.map(encodeJsonPointerSegment).join("/")}`;
+}
+
+/**
+ * Describes what a container holds -- keys or length, never values. Resume content is
+ * personal data and must not travel in error messages (see `ResumePatchError`).
+ */
+function describeContainer(value: unknown): string {
+	if (Array.isArray(value)) return `which is an array of ${value.length} items`;
+
+	if (isRecord(value)) {
+		const keys = Object.keys(value);
+		if (keys.length === 0) return "which is an object with no keys";
+
+		const listed = keys.slice(0, maxListedKeys);
+		const remaining = keys.length - listed.length;
+		return `with keys: ${listed.join(", ")}${remaining > 0 ? `, and ${remaining} more` : ""}`;
+	}
+
+	return value === null
+		? "which is null, not an object or array"
+		: `which is a ${typeof value}, not an object or array`;
+}
+
+/**
+ * Explains where a JSON Pointer stopped resolving: the deepest path that exists, what it
+ * holds, and -- when the failing segment names a real root-level key -- the likely intent.
+ *
+ * The suggestion is deliberately shallow (root-level only). A full-tree search can offer a
+ * confidently wrong path deep in the document, which is worse than offering none.
+ */
+function describeUnresolvablePath(document: unknown, path: string): string {
+	const segments = getJsonPointerSegments(path);
+	if (segments.length === 0) return "";
+
+	let current: unknown = document;
+	let depth = 0;
+
+	for (const segment of segments) {
+		const next = Array.isArray(current) ? current[Number(segment)] : isRecord(current) ? current[segment] : undefined;
+
+		if (next === undefined) break;
+
+		current = next;
+		depth += 1;
+	}
+
+	// The whole pointer resolved; the failure was about the operation, not the path.
+	if (depth === segments.length) return "";
+
+	const existingPath = depth === 0 ? "the document root" : buildJsonPointer(segments.slice(0, depth));
+	const detail = ` The deepest existing path is ${existingPath}, ${describeContainer(current)}.`;
+
+	const failingSegment = segments[depth];
+	if (depth === 0 || failingSegment === undefined || !isRecord(document) || !(failingSegment in document)) {
+		return detail;
+	}
+
+	const suggested = buildJsonPointer([failingSegment, ...segments.slice(depth + 1)]);
+	const resolves =
+		getValueAtJsonPointer(document, suggested) !== undefined ||
+		getValueAtJsonPointer(document, getJsonPointerParent(suggested)) !== undefined;
+
+	return resolves ? `${detail} Did you mean ${suggested}?` : detail;
+}
+
+/**
+ * Converts a `JsonPatchError` into a clean `ResumePatchError` that omits the document tree.
+ *
+ * `document` is used only to describe where a pointer stopped resolving -- keys and lengths,
+ * never values.
+ */
+function toResumePatchError(error: JsonPatchError, document: unknown): ResumePatchError {
 	const code = error.name;
-	const message = patchErrorMessages[code] ?? error.message;
 	const index = error.index ?? 0;
 	const operation = error.operation as Operation;
+	const baseMessage = patchErrorMessages[code] ?? error.message;
+
+	let message = baseMessage;
+
+	if (pathResolutionErrorCodes.has(code) && operation) {
+		const pointer = code === "OPERATION_FROM_UNRESOLVABLE" && "from" in operation ? operation.from : operation.path;
+
+		if (typeof pointer === "string") {
+			message = `${baseMessage} Path: ${pointer}.${describeUnresolvablePath(document, pointer)}`;
+		}
+	}
 
 	return new ResumePatchError(code, message, index, operation);
 }
@@ -297,7 +396,7 @@ function toResumePatchError(error: JsonPatchError): ResumePatchError {
 export function applyResumePatches(data: ResumeData, operations: Operation[]): ResumeData {
 	// Validate operations structurally before applying.
 	const validationError = jsonpatch.validate(operations, data);
-	if (validationError) throw toResumePatchError(validationError);
+	if (validationError) throw toResumePatchError(validationError, data);
 
 	// Apply operations. applyPatch throws on `test` failures.
 	let patched: ResumeData;
@@ -306,7 +405,7 @@ export function applyResumePatches(data: ResumeData, operations: Operation[]): R
 		const result = jsonpatch.applyPatch(data, operations, false, false);
 		patched = result.newDocument;
 	} catch (error: unknown) {
-		if (isJsonPatchError(error)) throw toResumePatchError(error);
+		if (isJsonPatchError(error)) throw toResumePatchError(error, data);
 		throw error;
 	}
 

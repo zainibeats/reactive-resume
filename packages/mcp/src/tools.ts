@@ -32,7 +32,7 @@ function errorMessage(error: unknown): string {
 function errorHint(error: unknown): string {
 	if (!(error instanceof ORPCError)) return "";
 
-	const { unlockResume, listResumes } = MCP_TOOL_NAME;
+	const { unlockResume, listResumes, getResume } = MCP_TOOL_NAME;
 	const { code, status } = error;
 
 	// Check codes before statuses: RESUME_SLUG_ALREADY_EXISTS is thrown with status 400.
@@ -42,6 +42,8 @@ function errorHint(error: unknown): string {
 		return `\n\nHint: Not found. Check the ID — \`${listResumes}\` returns valid ones.`;
 	if (code === "FORBIDDEN" || status === 403)
 		return "\n\nHint: Permission denied. This account cannot access that record.";
+	if (code === "INVALID_PATCH_OPERATIONS")
+		return `\n\nHint: The operations matched the tool's schema, but a path did not resolve against the document. The message above names the deepest path that exists -- use \`${getResume}\` to confirm the current structure.`;
 	if (status === 400) return "\n\nHint: Invalid request. Check the input parameters against the tool's schema.";
 	return "";
 }

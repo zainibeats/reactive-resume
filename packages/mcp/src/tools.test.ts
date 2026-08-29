@@ -1,6 +1,7 @@
 // biome-ignore-all lint/style/noNonNullAssertion: These tests assert registered tool names before exercising handlers.
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ORPCError } from "@orpc/server";
 
 const mocks = vi.hoisted(() => ({
 	resolveUserFromRequestHeaders: vi.fn(),
@@ -164,5 +165,27 @@ describe("registerTools", () => {
 
 	it("keeps the tool name stable", () => {
 		expect(MCP_TOOL_NAME.downloadResumePdf).toBe("download_resume_pdf");
+	});
+
+	it("points a failed patch at the document structure rather than the tool schema", async () => {
+		clientMock.resume.patch.mockRejectedValueOnce(
+			new ORPCError("INVALID_PATCH_OPERATIONS", {
+				status: 400,
+				message: "Cannot perform the operation at a path that does not exist. Path: /sections/summary/content.",
+			}),
+		);
+
+		const { server, registered } = makeFakeServer();
+		registerTools(server as never, clientMock as never, new Headers());
+
+		const tool = registered.find((item) => item.name === "apply_resume_patch")!;
+		const result = await tool.handler({
+			id: "resume-1",
+			operations: [{ op: "replace", path: "/sections/summary/content", value: "x" }],
+		});
+
+		expect(result.isError).toBe(true);
+		expect(result.content[0]?.text).toContain("deepest path that exists");
+		expect(result.content[0]?.text).not.toContain("Check the input parameters against the tool's schema");
 	});
 });

@@ -164,6 +164,79 @@ describe("applyResumePatches", () => {
 		).toThrow(ResumePatchError);
 	});
 
+	it("names the deepest existing path and its keys when a path is unresolvable", () => {
+		try {
+			applyResumePatches(defaultResumeData, [{ op: "replace", path: "/sections/summary/content", value: "x" }]);
+			expect.unreachable();
+		} catch (error) {
+			const { message } = error as ResumePatchError;
+			expect(message).toContain("/sections/summary/content");
+			expect(message).toContain("The deepest existing path is /sections");
+			expect(message).toContain("experience");
+		}
+	});
+
+	it("suggests the root-level path when a section-prefixed path is used by mistake", () => {
+		try {
+			applyResumePatches(defaultResumeData, [{ op: "replace", path: "/sections/summary/content", value: "x" }]);
+			expect.unreachable();
+		} catch (error) {
+			expect((error as ResumePatchError).message).toContain("Did you mean /summary/content?");
+		}
+	});
+
+	it("describes the document root when the first segment is unresolvable", () => {
+		try {
+			applyResumePatches(defaultResumeData, [{ op: "replace", path: "/does/not/exist", value: "x" }]);
+			expect.unreachable();
+		} catch (error) {
+			const { message } = error as ResumePatchError;
+			expect(message).toContain("The deepest existing path is the document root");
+			expect(message).toContain("summary");
+		}
+	});
+
+	it("omits a suggestion when no similarly named path exists", () => {
+		try {
+			applyResumePatches(defaultResumeData, [{ op: "replace", path: "/does/not/exist", value: "x" }]);
+			expect.unreachable();
+		} catch (error) {
+			expect((error as ResumePatchError).message).not.toContain("Did you mean");
+		}
+	});
+
+	it("reports item count instead of keys when the deepest existing path is an array", () => {
+		try {
+			applyResumePatches(defaultResumeData, [
+				{ op: "replace", path: "/sections/experience/items/0/company", value: "x" },
+			]);
+			expect.unreachable();
+		} catch (error) {
+			expect((error as ResumePatchError).message).toContain("which is an array of 0 items");
+		}
+	});
+
+	it("truncates the key list when the deepest existing path has many keys", () => {
+		const wideItem = {
+			id: "01a04cc7-b96f-749a-81eb-49a3c1dd5df8",
+			...Object.fromEntries(Array.from({ length: 25 }, (_, index) => [`field${index}`, ""])),
+		};
+		const data = {
+			...defaultResumeData,
+			sections: {
+				...defaultResumeData.sections,
+				experience: { ...defaultResumeData.sections.experience, items: [wideItem] },
+			},
+		} as unknown as ResumeData;
+
+		try {
+			applyResumePatches(data, [{ op: "replace", path: "/sections/experience/items/0/missing/deep", value: "x" }]);
+			expect.unreachable();
+		} catch (error) {
+			expect((error as ResumePatchError).message).toMatch(/\d+ more/);
+		}
+	});
+
 	it("throws ResumePatchError for failed test op", () => {
 		try {
 			applyResumePatches(defaultResumeData, [{ op: "test", path: "/basics/name", value: "wrong-value" }]);

@@ -452,12 +452,12 @@ const pageLayoutSchema = z.object({
 	main: z
 		.array(z.string())
 		.describe(
-			"The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections).",
+			"The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). These are layout identifiers, not JSON Pointers: `summary` is stored at `/summary`, custom sections at `/customSections`, and the rest under `/sections/<id>`.",
 		),
 	sidebar: z
 		.array(z.string())
 		.describe(
-			"The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections).",
+			"The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). These are layout identifiers, not JSON Pointers: `summary` is stored at `/summary`, custom sections at `/customSections`, and the rest under `/sections/<id>`.",
 		),
 });
 
@@ -676,8 +676,12 @@ export const resumeDataSchema = z.looseObject({
 	basics: basicsSchema.describe(
 		"Basic information about the author, such as name, email, phone, location, and website",
 	),
-	summary: summarySchema.describe("Summary section of the resume, useful for a short bio or introduction"),
-	sections: sectionsSchema.describe("Various sections of the resume, such as experience, education, projects, etc."),
+	summary: summarySchema.describe(
+		"Summary section of the resume, useful for a short bio or introduction. Stored at the document root as `/summary`, not under `/sections`, even though the page layout lists it alongside the section IDs.",
+	),
+	sections: sectionsSchema.describe(
+		"Various sections of the resume, such as experience, education, projects, etc. Does not include `summary`, which lives at the document root.",
+	),
 	customSections: customSectionsSchema.describe(
 		"Custom sections of the resume, such as a custom section for notes, etc.",
 	),
