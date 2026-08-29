@@ -23,6 +23,8 @@ export type Resume = {
 	updatedAt: Date;
 	hasPassword?: boolean;
 	isPublic?: boolean;
+	/** Set when this resume was created as a child of another resume; drives the parent-update review UI. */
+	parentId?: string | null;
 };
 
 // Mirrors the server-side ResumeUpdatedEvent discriminator (packages/api resume/events.ts).

@@ -30,6 +30,9 @@ export function getResumeErrorMessage(error: unknown): string {
 		byCode: {
 			RESUME_SLUG_ALREADY_EXISTS: "A resume with this slug already exists.",
 			RESUME_LOCKED: "This resume is locked. Unlock it first to make changes.",
+			RESUME_HAS_NO_PARENT: "This resume is not linked to a parent resume.",
+			RESUME_PARENT_NOT_FOUND: "The parent resume no longer exists.",
+			RESUME_SYNC_CONFLICT: "Some updates overlap your own edits. Select them again to replace your version.",
 		},
 		fallback: "Something went wrong. Please try again.",
 	});

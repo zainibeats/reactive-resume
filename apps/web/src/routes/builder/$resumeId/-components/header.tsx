@@ -7,6 +7,7 @@ import {
 	CodeIcon,
 	CopySimpleIcon,
 	DownloadSimpleIcon,
+	GitBranchIcon,
 	HouseSimpleIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
@@ -42,6 +43,7 @@ import { orpc } from "@/libs/orpc/client";
 import { useBuilderSidebar } from "../-store/sidebar";
 import { BuilderAiAssistant } from "./ai-assistant";
 import { EditJsonDialog } from "./edit-json-dialog";
+import { BuilderParentUpdates } from "./parent-updates";
 import { BuilderVersionHistory } from "./version-history";
 
 export function BuilderHeader() {
@@ -88,6 +90,7 @@ export function BuilderHeader() {
 				{isLocked && <LockSimpleIcon className="ms-2 text-muted-foreground" />}
 				<SaveStatusIndicator />
 				<BuilderAiAssistant resumeId={resumeId} />
+				<BuilderParentUpdates resumeId={resumeId} />
 				<BuilderVersionHistory resumeId={resumeId} />
 				<BuilderHeaderDropdown />
 			</div>
@@ -191,6 +194,10 @@ function BuilderHeaderDropdown() {
 		openDialog("resume.duplicate", { id, name, slug, tags, shouldRedirect: true });
 	};
 
+	const handleDerive = () => {
+		openDialog("resume.derive", { id, name, slug, tags, shouldRedirect: true });
+	};
+
 	const handleToggleLock = async () => {
 		if (!isLocked) {
 			const confirmation = await confirm(t`Are you sure you want to lock this resume?`, {
@@ -263,6 +270,11 @@ function BuilderHeaderDropdown() {
 					<DropdownMenuItem onClick={handleDuplicate}>
 						<CopySimpleIcon className="me-2" />
 						<Trans>Duplicate</Trans>
+					</DropdownMenuItem>
+
+					<DropdownMenuItem onClick={handleDerive}>
+						<GitBranchIcon className="me-2" />
+						<Trans>Create child resume</Trans>
 					</DropdownMenuItem>
 
 					<DropdownMenuItem onClick={handleToggleLock}>
