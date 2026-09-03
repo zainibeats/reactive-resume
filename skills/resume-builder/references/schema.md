@@ -59,7 +59,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `basics.customFields[].icon` | `string` | yes | — | The icon to display for the custom field. Must be a valid icon name from @phosphor-icons/web icon set, or an empty string to hide. Default to '' (empty string) when unsure which icons are available. |
 | `basics.customFields[].text` | `string` | yes | — | The text to display for the custom field. |
 | `basics.customFields[].link` | `string` | no | default: "" | If the custom field should be a link, the URL to link to. |
-| `summary` | `object` | yes | — | Summary section of the resume, useful for a short bio or introduction |
+| `summary` | `object` | yes | — | Summary section of the resume, useful for a short bio or introduction. Stored at the document root as `/summary`, not under `/sections`, even though the page layout lists it alongside the section IDs. |
 | `summary.title` | `string` | yes | — | The title of the summary of the resume. |
 | `summary.icon` | `string` | no | default: "" | Phosphor icon name to display before the summary section title in the PDF output. Empty string uses the default summary icon; 'none' hides the icon. |
 | `summary.columns` | `integer` | no | minimum: 1; maximum: 6; default: 1 | The number of columns the summary should span across. |
@@ -67,7 +67,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `summary.keepTogether` | `boolean` | no | default: false | If true, the summary is kept on a single page instead of splitting across a page break. |
 | `summary.startOnNewPage` | `boolean` | no | default: false | If true, the summary always begins on a new page. |
 | `summary.content` | `string` | yes | — | The content of the summary of the resume. This should be a HTML-formatted string. |
-| `sections` | `object` | yes | — | Various sections of the resume, such as experience, education, projects, etc. |
+| `sections` | `object` | yes | — | Various sections of the resume, such as experience, education, projects, etc. Does not include `summary`, which lives at the document root. |
 | `sections.profiles` | `object` | yes | — | The section to display the profiles of the author. |
 | `sections.profiles.title` | `string` | yes | — | The title of the section. |
 | `sections.profiles.icon` | `string` | no | default: "" | Phosphor icon name to display before the section title in the PDF output. Empty string uses the default section icon; 'none' hides the icon. |
@@ -596,9 +596,9 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `metadata.layout.pages` | `array` | yes | — | The pages to display in the layout. |
 | `metadata.layout.pages[]` | `object` | — | — | — |
 | `metadata.layout.pages[].fullWidth` | `boolean` | yes | — | Whether the layout of the page should be full width. If true, the main column will span the entire width of the page. This means that there should be no items in the sidebar column. |
-| `metadata.layout.pages[].main` | `array` | yes | — | The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). |
+| `metadata.layout.pages[].main` | `array` | yes | — | The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). These are layout identifiers, not JSON Pointers: `summary` is stored at `/summary`, custom sections at `/customSections`, and the rest under `/sections/<id>`. |
 | `metadata.layout.pages[].main[]` | `string` | — | — | — |
-| `metadata.layout.pages[].sidebar` | `array` | yes | — | The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). |
+| `metadata.layout.pages[].sidebar` | `array` | yes | — | The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). These are layout identifiers, not JSON Pointers: `summary` is stored at `/summary`, custom sections at `/customSections`, and the rest under `/sections/<id>`. |
 | `metadata.layout.pages[].sidebar[]` | `string` | — | — | — |
 | `metadata.page` | `object` | yes | — | The page settings of the resume. Determines the margins, format, and locale of the resume. |
 | `metadata.page.gapX` | `number` | yes | minimum: 0 | The horizontal gap between the sections of the page, defined in points (pt). |

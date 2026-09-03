@@ -348,7 +348,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 				"hidden",
 				"content"
 			],
-			"description": "Summary section of the resume, useful for a short bio or introduction"
+			"description": "Summary section of the resume, useful for a short bio or introduction. Stored at the document root as `/summary`, not under `/sections`, even though the page layout lists it alongside the section IDs."
 		},
 		"sections": {
 			"type": "object",
@@ -1698,7 +1698,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 				"volunteer",
 				"references"
 			],
-			"description": "Various sections of the resume, such as experience, education, projects, etc."
+			"description": "Various sections of the resume, such as experience, education, projects, etc. Does not include `summary`, which lives at the document root."
 		},
 		"customSections": {
 			"type": "array",
@@ -3380,14 +3380,14 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"items": {
 											"type": "string"
 										},
-										"description": "The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections)."
+										"description": "The items to display in the main column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). These are layout identifiers, not JSON Pointers: `summary` is stored at `/summary`, custom sections at `/customSections`, and the rest under `/sections/<id>`."
 									},
 									"sidebar": {
 										"type": "array",
 										"items": {
 											"type": "string"
 										},
-										"description": "The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections)."
+										"description": "The items to display in the sidebar column of the page. A string array of section IDs (experience, education, projects, skills, languages, interests, awards, certifications, publications, volunteer, references, profiles, summary or UUIDs for custom sections). These are layout identifiers, not JSON Pointers: `summary` is stored at `/summary`, custom sections at `/customSections`, and the rest under `/sections/<id>`."
 									}
 								},
 								"required": [
