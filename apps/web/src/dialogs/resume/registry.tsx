@@ -1,5 +1,5 @@
 import type { AnyDialogRendererEntry } from "../renderer-registry";
-import { CreateResumeDialog, DuplicateResumeDialog, UpdateResumeDialog } from ".";
+import { CreateResumeDialog, DeriveResumeDialog, DuplicateResumeDialog, UpdateResumeDialog } from ".";
 import { ImportResumeDialog } from "./import";
 import { CreateAwardDialog, UpdateAwardDialog } from "./sections/award";
 import { CreateCertificationDialog, UpdateCertificationDialog } from "./sections/certification";
@@ -22,6 +22,7 @@ export const resumeDialogRenderers: readonly AnyDialogRendererEntry[] = [
 	{ type: "resume.create", render: () => <CreateResumeDialog /> },
 	{ type: "resume.update", render: ({ data }) => <UpdateResumeDialog data={data} /> },
 	{ type: "resume.duplicate", render: ({ data }) => <DuplicateResumeDialog data={data} /> },
+	{ type: "resume.derive", render: ({ data }) => <DeriveResumeDialog data={data} /> },
 	{ type: "resume.import", render: () => <ImportResumeDialog /> },
 	{ type: "resume.template.gallery", render: () => <TemplateGalleryDialog /> },
 	{ type: "resume.sections.profiles.create", render: ({ data }) => <CreateProfileDialog data={data} /> },
