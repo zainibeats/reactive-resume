@@ -12,7 +12,9 @@ test("unset root mode retains marketing and ordinary app entry points", async ({
 	test.skip(Boolean(rootId), "Run once with ROOT_RESUME_ID unset, then restart with an e2e- ID.");
 	await page.goto("/");
 	await expect(page.getByRole("main")).toHaveAttribute("id", "main-content");
-	await expect(page.locator('script[type="application/ld+json"]')).not.toHaveCount(0);
+	// This fork removed the homepage JSON-LD graph, so the marketing shell emits none
+	// (AGENTS.md "Removed entirely"; `_home/-index.test.ts` pins the missing `scripts` entry).
+	await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
 	expect((await request.get("/api/health")).ok()).toBe(true);
 	await page.goto("/auth/login");
 	await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
