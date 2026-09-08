@@ -617,7 +617,7 @@ function CreateProviderForm() {
 								type="url"
 								value={form.baseURL}
 								onChange={(event) => setForm((current) => ({ ...current, baseURL: event.target.value }))}
-								placeholder={selectedOption?.defaultBaseURL || t`https://gateway.example.com/v1`}
+								placeholder={selectedOption?.defaultBaseURL || "https://gateway.example.com/v1"}
 								autoCorrect="off"
 								autoCapitalize="off"
 								spellCheck="false"

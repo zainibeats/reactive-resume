@@ -3,6 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	CopySimpleIcon,
 	FolderOpenIcon,
+	GitBranchIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
 	PencilSimpleLineIcon,
@@ -24,7 +25,7 @@ type Props = {
 };
 
 export function ResumeContextMenu({ resume, children }: Props) {
-	const { handleDelete, handleDuplicate, handleToggleLock, handleUpdate } = useResumeMenuActions(resume);
+	const { handleDelete, handleDerive, handleDuplicate, handleToggleLock, handleUpdate } = useResumeMenuActions(resume);
 
 	return (
 		<ContextMenu>
@@ -50,6 +51,11 @@ export function ResumeContextMenu({ resume, children }: Props) {
 				<ContextMenuItem onClick={handleDuplicate}>
 					<CopySimpleIcon />
 					<Trans comment="Resume card context menu action to create a copy">Duplicate</Trans>
+				</ContextMenuItem>
+
+				<ContextMenuItem onClick={handleDerive}>
+					<GitBranchIcon />
+					<Trans comment="Resume card context menu action to create a linked child resume">Create child resume</Trans>
 				</ContextMenuItem>
 
 				<ContextMenuItem onClick={handleToggleLock}>

@@ -164,7 +164,7 @@ async function applyResumePatchTx(
 	let patchedData: ResumeData;
 
 	try {
-		patchedData = applyResumePatches(existing.data, input.operations);
+		patchedData = applyResumePatches(parseStoredResumeData(existing.data), input.operations);
 	} catch (error) {
 		if (error instanceof ResumePatchError) {
 			throw new ORPCError("INVALID_PATCH_OPERATIONS", {
@@ -205,6 +205,7 @@ async function applyResumePatchTx(
 			parentRevision: schema.resume.parentRevision,
 			isPublic: schema.resume.isPublic,
 			isLocked: schema.resume.isLocked,
+			showDownloadButtons: schema.resume.showDownloadButtons,
 			updatedAt: schema.resume.updatedAt,
 			hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 		});
@@ -238,6 +239,39 @@ const tags = {
 };
 
 const statistics = {
+	recordDownload: async (input: {
+		username: string;
+		slug: string;
+		requestHeaders: Headers;
+		currentUserId?: string;
+	}): Promise<boolean> => {
+		const [resume] = await db
+			.select({
+				id: schema.resume.id,
+				userId: schema.resume.userId,
+				isPublic: schema.resume.isPublic,
+				passwordHash: schema.resume.password,
+			})
+			.from(schema.resume)
+			.innerJoin(schema.user, eq(schema.resume.userId, schema.user.id))
+			.where(and(eq(schema.resume.slug, input.slug), eq(schema.user.username, input.username)));
+
+		if (!resume) throw new ORPCError("NOT_FOUND");
+		const viewer = input.currentUserId ? { id: input.currentUserId } : null;
+		assertCanView(resume, viewer);
+		if (resume.passwordHash && !hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)) {
+			throw new ORPCError("NEED_PASSWORD", {
+				status: 401,
+				data: { username: input.username, slug: input.slug },
+			});
+		}
+
+		if (shouldCountForStatistics(resume, viewer)) {
+			await statistics.increment({ id: resume.id, downloads: true });
+		}
+		return true;
+	},
+
 	getById: async (input: { id: string; userId: string }) => {
 		const [statistics] = await db
 			.select({
@@ -347,6 +381,7 @@ function toSharedResumeResponse(
 		data: ResumeData;
 		isPublic: boolean;
 		isLocked: boolean;
+		showDownloadButtons: boolean;
 	},
 	hasPassword: boolean,
 ) {
@@ -358,6 +393,7 @@ function toSharedResumeResponse(
 		data: resume.data,
 		isPublic: resume.isPublic,
 		isLocked: resume.isLocked,
+		showDownloadButtons: resume.showDownloadButtons,
 		hasPassword,
 	};
 }
@@ -535,6 +571,7 @@ export const resumeService = {
 				tags: schema.resume.tags,
 				isPublic: schema.resume.isPublic,
 				isLocked: schema.resume.isLocked,
+				showDownloadButtons: schema.resume.showDownloadButtons,
 				revision: schema.resume.revision,
 				parentId: schema.resume.parentId,
 				parentRevision: schema.resume.parentRevision,
@@ -571,6 +608,7 @@ export const resumeService = {
 				parentRevision: schema.resume.parentRevision,
 				isPublic: schema.resume.isPublic,
 				isLocked: schema.resume.isLocked,
+				showDownloadButtons: schema.resume.showDownloadButtons,
 				updatedAt: schema.resume.updatedAt,
 				hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 			})
@@ -582,7 +620,14 @@ export const resumeService = {
 		return resume;
 	},
 
-	getBySlug: async (input: { username: string; slug: string; requestHeaders: Headers; currentUserId?: string }) => {
+	getBySlug: async (input: {
+		username: string;
+		slug: string;
+		requestHeaders: Headers;
+		currentUserId?: string;
+		requirePublic?: boolean;
+		expectedResumeId?: string;
+	}) => {
 		const [resume] = await db
 			.select({
 				id: schema.resume.id,
@@ -593,6 +638,7 @@ export const resumeService = {
 				data: schema.resume.data,
 				isPublic: schema.resume.isPublic,
 				isLocked: schema.resume.isLocked,
+				showDownloadButtons: schema.resume.showDownloadButtons,
 				passwordHash: schema.resume.password,
 				hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 			})
@@ -600,7 +646,12 @@ export const resumeService = {
 			.innerJoin(schema.user, eq(schema.resume.userId, schema.user.id))
 			.where(and(eq(schema.resume.slug, input.slug), eq(schema.user.username, input.username)));
 
-		if (!resume) throw new ORPCError("NOT_FOUND");
+		if (
+			!resume ||
+			(input.requirePublic && !resume.isPublic) ||
+			(input.expectedResumeId && resume.id !== input.expectedResumeId)
+		)
+			throw new ORPCError("NOT_FOUND");
 
 		const viewer = input.currentUserId ? { id: input.currentUserId } : null;
 		assertCanView(resume, viewer);
@@ -877,6 +928,7 @@ export const resumeService = {
 					parentRevision: schema.resume.parentRevision,
 					isPublic: schema.resume.isPublic,
 					isLocked: schema.resume.isLocked,
+					showDownloadButtons: schema.resume.showDownloadButtons,
 					updatedAt: schema.resume.updatedAt,
 					hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 				});
@@ -941,6 +993,7 @@ export const resumeService = {
 					parentRevision: schema.resume.parentRevision,
 					isPublic: schema.resume.isPublic,
 					isLocked: schema.resume.isLocked,
+					showDownloadButtons: schema.resume.showDownloadButtons,
 					updatedAt: schema.resume.updatedAt,
 					hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 				});
@@ -969,6 +1022,7 @@ export const resumeService = {
 		tags?: string[];
 		data?: ResumeData;
 		isPublic?: boolean;
+		showDownloadButtons?: boolean;
 		skipAutoSnapshot?: boolean;
 	}) => {
 		const resume = await db
@@ -991,6 +1045,7 @@ export const resumeService = {
 					...(input.tags !== undefined ? { tags: input.tags } : {}),
 					...(normalizedData ? { data: normalizedData } : {}),
 					...(input.isPublic !== undefined ? { isPublic: input.isPublic } : {}),
+					...(input.showDownloadButtons !== undefined ? { showDownloadButtons: input.showDownloadButtons } : {}),
 				};
 
 				const [updated] = await tx
@@ -1014,6 +1069,7 @@ export const resumeService = {
 						parentRevision: schema.resume.parentRevision,
 						isPublic: schema.resume.isPublic,
 						isLocked: schema.resume.isLocked,
+						showDownloadButtons: schema.resume.showDownloadButtons,
 						updatedAt: schema.resume.updatedAt,
 						hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 					});

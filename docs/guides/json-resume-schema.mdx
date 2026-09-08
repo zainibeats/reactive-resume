@@ -160,6 +160,15 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					"type": "boolean",
 					"description": "Whether to hide the picture from the resume."
 				},
+				"fit": {
+					"default": "cover",
+					"description": "How the picture fits its frame: cover crops overflow, while contain preserves the whole image.",
+					"type": "string",
+					"enum": [
+						"cover",
+						"contain"
+					]
+				},
 				"url": {
 					"type": "string",
 					"description": "The URL to the picture to display on the resume. Prefer local app-served paths (for example /uploads/...) populated via upload."
@@ -288,7 +297,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"required": [
 							"id",
 							"icon",
-							"text"
+							"text",
+							"link"
 						]
 					},
 					"description": "The custom fields to display on the resume."
@@ -328,6 +338,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					"type": "boolean",
 					"description": "Whether to hide the summary from the resume."
 				},
+				"showHeading": {
+					"default": true,
+					"description": "Whether to show the summary heading, icon, and decoration while retaining summary content.",
+					"type": "boolean"
+				},
 				"keepTogether": {
 					"default": false,
 					"description": "If true, the summary is kept on a single page instead of splitting across a page break.",
@@ -345,7 +360,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 			},
 			"required": [
 				"title",
+				"icon",
+				"columns",
 				"hidden",
+				"keepTogether",
+				"startOnNewPage",
 				"content"
 			],
 			"description": "Summary section of the resume, useful for a short bio or introduction. Stored at the document root as `/summary`, not under `/sections`, even though the page layout lists it alongside the section IDs."
@@ -375,6 +394,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -442,7 +466,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									}
 								},
@@ -450,8 +475,10 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"id",
 									"hidden",
 									"icon",
+									"iconColor",
 									"network",
-									"username"
+									"username",
+									"website"
 								]
 							},
 							"description": "The items to display in the profiles section."
@@ -459,7 +486,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the profiles of the author."
@@ -486,6 +517,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -556,7 +592,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -603,7 +640,9 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"position",
 									"location",
 									"period",
-									"description"
+									"website",
+									"description",
+									"roles"
 								]
 							},
 							"description": "The items to display in the experience section."
@@ -611,7 +650,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the experience of the author."
@@ -638,6 +681,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -716,7 +764,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -733,6 +782,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"grade",
 									"location",
 									"period",
+									"website",
 									"description"
 								]
 							},
@@ -741,7 +791,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the education of the author."
@@ -768,6 +822,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -830,7 +889,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -843,6 +903,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"hidden",
 									"name",
 									"period",
+									"website",
 									"description"
 								]
 							},
@@ -851,12 +912,17 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the projects of the author."
 				},
 				"skills": {
+					"description": "The section to display the skills of the author.",
 					"type": "object",
 					"properties": {
 						"title": {
@@ -878,6 +944,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -944,19 +1015,43 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"id",
 									"hidden",
 									"icon",
+									"iconColor",
 									"name",
-									"proficiency"
+									"proficiency",
+									"level",
+									"keywords"
 								]
 							},
 							"description": "The items to display in the skills section."
+						},
+						"keywordLayout": {
+							"default": "inline",
+							"description": "How skill keywords are displayed: inline separated by commas, or one bullet per keyword.",
+							"type": "string",
+							"enum": [
+								"inline",
+								"list"
+							]
+						},
+						"layout": {
+							"default": "default",
+							"description": "The layout style for skill items. 'inline' places item fields next to name",
+							"type": "string",
+							"enum": [
+								"default",
+								"inline"
+							]
 						}
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
-					],
-					"description": "The section to display the skills of the author."
+					]
 				},
 				"languages": {
 					"type": "object",
@@ -980,6 +1075,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1025,7 +1125,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"id",
 									"hidden",
 									"language",
-									"fluency"
+									"fluency",
+									"level"
 								]
 							},
 							"description": "The items to display in the languages section."
@@ -1033,7 +1134,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the languages of the author."
@@ -1060,6 +1165,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1111,7 +1221,9 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"id",
 									"hidden",
 									"icon",
-									"name"
+									"iconColor",
+									"name",
+									"keywords"
 								]
 							},
 							"description": "The items to display in the interests section."
@@ -1119,7 +1231,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the interests of the author."
@@ -1146,6 +1262,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1208,7 +1329,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -1222,6 +1344,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"title",
 									"awarder",
 									"date",
+									"website",
 									"description"
 								]
 							},
@@ -1230,7 +1353,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the awards of the author."
@@ -1257,6 +1384,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1323,7 +1455,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -1337,6 +1470,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"title",
 									"issuer",
 									"date",
+									"website",
 									"description"
 								]
 							},
@@ -1345,7 +1479,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the certifications of the author."
@@ -1372,6 +1510,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1434,7 +1577,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -1448,6 +1592,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"title",
 									"publisher",
 									"date",
+									"website",
 									"description"
 								]
 							},
@@ -1456,7 +1601,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the publications of the author."
@@ -1483,6 +1632,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1545,7 +1699,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"description": {
@@ -1559,6 +1714,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"organization",
 									"location",
 									"period",
+									"website",
 									"description"
 								]
 							},
@@ -1567,7 +1723,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the volunteer experience of the author."
@@ -1594,6 +1754,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						"hidden": {
 							"type": "boolean",
 							"description": "Whether to hide the section from the resume."
+						},
+						"showHeading": {
+							"default": true,
+							"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+							"type": "boolean"
 						},
 						"keepTogether": {
 							"default": false,
@@ -1652,7 +1817,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										},
 										"required": [
 											"url",
-											"label"
+											"label",
+											"inlineLink"
 										]
 									},
 									"phone": {
@@ -1669,6 +1835,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 									"hidden",
 									"name",
 									"position",
+									"website",
 									"phone",
 									"description"
 								]
@@ -1678,7 +1845,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"title",
+						"icon",
+						"columns",
 						"hidden",
+						"keepTogether",
+						"startOnNewPage",
 						"items"
 					],
 					"description": "The section to display the references of the author."
@@ -1727,6 +1898,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -1737,6 +1913,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -1781,7 +1958,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -1810,6 +1991,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -1820,6 +2006,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -1859,7 +2046,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -1888,6 +2079,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -1898,6 +2094,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -1963,7 +2160,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										}
 									},
@@ -1971,8 +2169,10 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"id",
 										"hidden",
 										"icon",
+										"iconColor",
 										"network",
-										"username"
+										"username",
+										"website"
 									],
 									"additionalProperties": {}
 								},
@@ -1981,7 +2181,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2010,6 +2214,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2020,6 +2229,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2088,7 +2298,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -2135,7 +2346,9 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"position",
 										"location",
 										"period",
-										"description"
+										"website",
+										"description",
+										"roles"
 									],
 									"additionalProperties": {}
 								},
@@ -2144,7 +2357,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2173,6 +2390,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2183,6 +2405,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2259,7 +2482,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -2276,6 +2500,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"grade",
 										"location",
 										"period",
+										"website",
 										"description"
 									],
 									"additionalProperties": {}
@@ -2285,7 +2510,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2314,6 +2543,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2324,6 +2558,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2384,7 +2619,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -2397,6 +2633,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"hidden",
 										"name",
 										"period",
+										"website",
 										"description"
 									],
 									"additionalProperties": {}
@@ -2406,7 +2643,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2435,6 +2676,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2444,6 +2690,15 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"default": false,
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
+							},
+							"keywordLayout": {
+								"default": "inline",
+								"description": "How skill keywords are displayed: inline separated by commas, or one bullet per keyword.",
+								"type": "string",
+								"enum": [
+									"inline",
+									"list"
+								]
 							},
 							"id": {
 								"type": "string",
@@ -2509,8 +2764,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"id",
 										"hidden",
 										"icon",
+										"iconColor",
 										"name",
-										"proficiency"
+										"proficiency",
+										"level",
+										"keywords"
 									],
 									"additionalProperties": {}
 								},
@@ -2519,7 +2777,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2548,6 +2810,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2558,6 +2825,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2601,7 +2869,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"id",
 										"hidden",
 										"language",
-										"fluency"
+										"fluency",
+										"level"
 									],
 									"additionalProperties": {}
 								},
@@ -2610,7 +2879,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2639,6 +2912,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2649,6 +2927,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2698,7 +2977,9 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"id",
 										"hidden",
 										"icon",
-										"name"
+										"iconColor",
+										"name",
+										"keywords"
 									],
 									"additionalProperties": {}
 								},
@@ -2707,7 +2988,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2736,6 +3021,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2746,6 +3036,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2806,7 +3097,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -2820,6 +3112,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"title",
 										"awarder",
 										"date",
+										"website",
 										"description"
 									],
 									"additionalProperties": {}
@@ -2829,7 +3122,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2858,6 +3155,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2868,6 +3170,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -2932,7 +3235,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -2946,6 +3250,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"title",
 										"issuer",
 										"date",
+										"website",
 										"description"
 									],
 									"additionalProperties": {}
@@ -2955,7 +3260,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -2984,6 +3293,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -2994,6 +3308,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -3054,7 +3369,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -3068,6 +3384,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"title",
 										"publisher",
 										"date",
+										"website",
 										"description"
 									],
 									"additionalProperties": {}
@@ -3077,7 +3394,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -3106,6 +3427,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -3116,6 +3442,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -3176,7 +3503,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"description": {
@@ -3190,6 +3518,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"organization",
 										"location",
 										"period",
+										"website",
 										"description"
 									],
 									"additionalProperties": {}
@@ -3199,7 +3528,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -3228,6 +3561,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"type": "boolean",
 								"description": "Whether to hide the section from the resume."
 							},
+							"showHeading": {
+								"default": true,
+								"description": "Whether to show the section heading, icon, and decoration while retaining section content.",
+								"type": "boolean"
+							},
 							"keepTogether": {
 								"default": false,
 								"description": "If true, the section is kept on a single page instead of splitting across a page break.",
@@ -3238,6 +3576,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								"description": "If true, the section always begins on a new page.",
 								"type": "boolean"
 							},
+							"keywordLayout": {},
 							"id": {
 								"type": "string",
 								"description": "The unique identifier for the custom section. Usually generated as a UUID."
@@ -3294,7 +3633,8 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 											},
 											"required": [
 												"url",
-												"label"
+												"label",
+												"inlineLink"
 											]
 										},
 										"phone": {
@@ -3311,6 +3651,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 										"hidden",
 										"name",
 										"position",
+										"website",
 										"phone",
 										"description"
 									],
@@ -3321,7 +3662,11 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						},
 						"required": [
 							"title",
+							"icon",
+							"columns",
 							"hidden",
+							"keepTogether",
+							"startOnNewPage",
 							"id",
 							"type",
 							"items"
@@ -3400,6 +3745,7 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 						}
 					},
 					"required": [
+						"sidebarWidth",
 						"pages"
 					],
 					"description": "The layout of the resume. Determines the structure and arrangement of the sections on the resume."
@@ -3464,7 +3810,14 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					},
 					"required": [
 						"gapX",
-						"gapY"
+						"gapY",
+						"marginX",
+						"marginY",
+						"format",
+						"locale",
+						"hideLinkUnderline",
+						"hideIcons",
+						"hideSectionIcons"
 					],
 					"description": "The page settings of the resume. Determines the margins, format, and locale of the resume."
 				},
@@ -3573,7 +3926,10 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								}
 							},
 							"required": [
-								"fontFamily"
+								"fontFamily",
+								"fontWeights",
+								"fontSize",
+								"lineHeight"
 							],
 							"description": "The typography for the body of the resume."
 						},
@@ -3621,9 +3977,16 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 								}
 							},
 							"required": [
-								"fontFamily"
+								"fontFamily",
+								"fontWeights",
+								"fontSize",
+								"lineHeight"
 							],
 							"description": "The typography for the headings of the resume."
+						},
+						"hyphenation": {
+							"description": "Enable automatic PDF hyphenation using the resume language. Currently supports German. Defaults to false.",
+							"type": "boolean"
 						}
 					},
 					"required": [
@@ -3637,7 +4000,6 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 					"description": "Personal notes for the resume. Can be used to add any additional information or instructions for the resume. These notes are not displayed on the resume, they are only visible to the author of the resume when editing the resume. This should be a HTML-formatted string."
 				},
 				"styleRules": {
-					"default": [],
 					"description": "Structured style rules that target semantic resume sections and slots for React PDF rendering.",
 					"type": "array",
 					"items": {}
@@ -3679,11 +4041,13 @@ The full JSON Schema for Reactive Resume follows. You can also fetch the latest 
 				}
 			},
 			"required": [
+				"template",
 				"layout",
 				"page",
 				"design",
 				"typography",
-				"notes"
+				"notes",
+				"styleRules"
 			],
 			"description": "Metadata for the resume, such as template, layout, typography, etc. This section describes the overall design and appearance of the resume."
 		}

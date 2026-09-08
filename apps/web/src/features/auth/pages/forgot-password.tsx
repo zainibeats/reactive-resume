@@ -94,10 +94,7 @@ export function ForgotPasswordPage() {
 									<Input
 										type="email"
 										autoComplete="email"
-										placeholder={t({
-											comment: "Example email placeholder on forgot-password form",
-											message: "john.doe@example.com",
-										})}
+										placeholder="john.doe@example.com"
 										name={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}

@@ -48,6 +48,8 @@ export function useResumeMenuActions(resume: Resume) {
 	return {
 		handleDelete,
 		handleDuplicate: () => openDialog("resume.duplicate", resume),
+		// Deriving records parent lineage on the new resume; it is not a plain duplicate.
+		handleDerive: () => openDialog("resume.derive", resume),
 		handleToggleLock,
 		handleUpdate: () => openDialog("resume.update", resume),
 	};

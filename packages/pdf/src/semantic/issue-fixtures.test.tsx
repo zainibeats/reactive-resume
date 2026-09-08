@@ -42,6 +42,11 @@ const mergedStyle = (node: HostNode | undefined): Record<string, unknown> =>
 const containsStyle = (node: HostNode, property: string, value: unknown): boolean =>
 	mergedStyle(node)[property] === value || (node.children ?? []).some((child) => containsStyle(child, property, value));
 
+const nodesWithStyle = (node: HostNode, property: string, value: unknown): HostNode[] => [
+	...(mergedStyle(node)[property] === value ? [node] : []),
+	...(node.children ?? []).flatMap((child) => nodesWithStyle(child, property, value)),
+];
+
 const textRuns = (node: HostNode): string[] => [
 	...(node.type === "TEXT" ? [nodeText(node)] : []),
 	...(node.children ?? []).flatMap((child) => textRuns(child)),
@@ -53,7 +58,11 @@ const buildIssueFixture = (): ResumeData => {
 	data.basics = {
 		...data.basics,
 		name: "Ada Lovelace",
+		headline: "Computing pioneer",
 		email: "ada@example.com",
+		phone: "+44 123",
+		location: "London",
+		customFields: [{ id: "custom-1", icon: "globe", text: "Ada Labs", link: "" }],
 	};
 	data.sections.experience.items = [
 		{
@@ -202,8 +211,12 @@ describe("semantic issue fixtures", () => {
 		const data = buildIssueFixture();
 		const stylesheet = source(`
 			@version 1;
-			header { background-color: #1e293b; }
+			header { background-color: #1e293b; padding: 10pt; }
 			name { color: white; }
+			headline { font-size: 14pt; }
+			contact-list { gap: 8pt; }
+			contact-item { padding: 1pt; }
+			icon { font-size: 16pt; }
 			link { text-decoration: none; }
 			section[type="experience"] field[name="company"] { font-weight: 400; }
 			section[type="skills"] field[name="name"] { font-weight: 400; }
@@ -216,13 +229,47 @@ describe("semantic issue fixtures", () => {
 		const document = instance.container.document as HostNode;
 
 		expect(mergedStyle(findText(document, "Ada Lovelace"))).toMatchObject({ color: "white" });
+		expect(mergedStyle(findText(document, "Computing pioneer"))).toMatchObject({ fontSize: 14 });
 		expect(mergedStyle(findText(document, "Analytical Engines"))).toMatchObject({ fontWeight: "400" });
 		expect(mergedStyle(findText(document, "TypeScript"))).toMatchObject({ fontWeight: "400" });
+		expect(mergedStyle(findPrimitive(document, "LINK", "ada@example.com")).paddingTop).toBe(1);
+		expect(mergedStyle(findPrimitive(document, "LINK", "+44 123")).paddingTop).toBe(1);
+		expect(nodesWithStyle(document, "fontSize", 16).some(({ type }) => type === "SVG")).toBe(true);
 		expect(mergedStyle(findPrimitive(document, "LINK", "ada@example.com"))).toMatchObject({
 			textDecoration: "none",
 		});
 		expect(containsStyle(document, "backgroundColor", "#1e293b")).toBe(true);
+		expect(containsStyle(document, "paddingTop", 10)).toBe(true);
+		expect(containsStyle(document, "rowGap", 8)).toBe(true);
 		expect(containsStyle(document, "opacity", 0.2)).toBe(true);
+	});
+
+	it("hides section heading decoration without hiding section content", async () => {
+		const data = buildIssueFixture();
+		data.sections.experience.showHeading = false;
+		const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
+		const instance = pdf(element);
+		await vi.waitFor(() => expect(instance.container.document).not.toBeNull());
+		const document = instance.container.document as HostNode;
+
+		expect(findText(document, "Experience")).toBeUndefined();
+		expect(findText(document, "Analytical Engines")).toBeDefined();
+	});
+
+	it("characterizes section-heading display:none as a CSS alternative", async () => {
+		const data = buildIssueFixture();
+		data.metadata.page.hideSectionIcons = false;
+		data.metadata.stylesheet = {
+			mode: "semantic",
+			source: source('@version 1; section[id="experience"] section-heading { display: none; }'),
+		};
+		const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
+		const instance = pdf(element);
+		await vi.waitFor(() => expect(instance.container.document).not.toBeNull());
+		const document = instance.container.document as HostNode;
+
+		expect(findText(document, "Experience")).toBeUndefined();
+		expect(findText(document, "Analytical Engines")).toBeDefined();
 	});
 
 	it("unbolds only the final skill-name primitive and preserves the experience title weight (#2223)", async () => {
@@ -239,6 +286,21 @@ describe("semantic issue fixtures", () => {
 
 		expect(mergedStyle(findText(document, "TypeScript"))).toMatchObject({ fontWeight: "400" });
 		expect(mergedStyle(findText(document, "Analytical Engines")).fontWeight).not.toBe("400");
+	});
+
+	it("preserves the first character of a section heading with a leading text padding (#3380)", async () => {
+		const data = buildIssueFixture();
+		data.sections.experience.title = "Experience";
+		data.metadata.page.hideSectionIcons = false;
+
+		const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
+		const instance = pdf(element);
+		await vi.waitFor(() => expect(instance.container.document).not.toBeNull());
+		const document = instance.container.document as HostNode;
+		const heading = findText(document, "Experience");
+
+		expect(heading).toBeDefined();
+		expect(mergedStyle(heading).paddingLeft).toBe(1);
 	});
 
 	it("renders descriptor filtering and stable item order instead of remapping raw arrays", async () => {

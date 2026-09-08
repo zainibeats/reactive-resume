@@ -8,7 +8,7 @@ msgstr ""
 "Language: ne\n"
 "Project-Id-Version: reactive-resume\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-08-27 07:41\n"
+"PO-Revision-Date: 2026-09-06 19:36\n"
 "Last-Translator: \n"
 "Language-Team: Nepali\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -19,18 +19,15 @@ msgstr ""
 "X-Crowdin-File-ID: 545\n"
 
 #. placeholder {0}: application.role
-#. placeholder {0}: current.role
 #. placeholder {1}: application.company
-#. placeholder {1}: current.company
 #: src/features/applications/components/application-actions-menu.tsx
-#: src/features/applications/components/application-detail-sheet.tsx
 msgid "\"{0} · {1}\" and its full timeline will be permanently deleted. This can't be undone."
 msgstr "\"{0} · {1}\" र यसको पूरा टाइमलाइन स्थायी रूपमा मेटिनेछ। यो पूर्ववत गर्न सकिँदैन।"
 
-#: src/routes/_home/-sections/footer.tsx
-#: src/routes/_home/-sections/hero.tsx
-msgid "(opens in new tab)"
-msgstr "(नयाँ ट्याबमा खुल्छ)"
+#. placeholder {0}: selected.length
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "{0, plural, one {# application to export} other {# applications to export}}"
+msgstr "{0, plural, one {निर्यात गर्न # आवेदन} other {निर्यात गर्न # अनुप्रयोगहरू}}"
 
 #. placeholder {0}: section.items.length
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
@@ -53,23 +50,28 @@ msgstr "{0} आवेदनहरू ट्र्याक गरियो"
 msgid "{0} characters"
 msgstr "{0} वर्णहरू"
 
+#. placeholder {0}: parsed.contactsSkipped
+#: src/features/applications/components/import-applications-sheet.tsx
+msgid "{0} contact(s) skipped (invalid email or missing Contact Name). Those applications still import."
+msgstr "{0} सम्पर्क(हरू) छोडियो (अमान्य इमेल वा सम्पर्क नाम छुटेको)। ती अनुप्रयोगहरू अझै आयात गर्छन्।"
+
 #. placeholder {0}: report.passedChecks
 #. placeholder {1}: report.applicableChecks
 #: src/features/ats-checker/report/score-header.tsx
 msgid "{0} of {1} applicable checks passed"
-msgstr "{1} मध्ये {0} लागू हुने चेक पास भयो"
+msgstr "{0} मध्ये {1} लागू हुने चेक पास भयो"
 
 #. placeholder {0}: category.passedChecks
 #. placeholder {1}: category.applicableChecks
 #: src/features/ats-checker/report/report-view.tsx
 msgid "{0} of {1} applicable checks passed."
-msgstr "{1} मध्ये {0} लागू हुने चेक पास भयो।"
+msgstr "{0} मध्ये {1} लागू हुने चेक पास भयो।"
 
 #. placeholder {0}: jd.matchedCount
 #. placeholder {1}: jd.totalTerms
 #: src/features/ats-checker/report/jd-coverage.tsx
 msgid "{0} of {1} terms found"
-msgstr "{1} मध्ये {0} शब्द भेटिए"
+msgstr "{0} मध्ये {1} शब्द भेटिए"
 
 #. placeholder {0}: importable.length
 #: src/features/applications/components/import-applications-sheet.tsx
@@ -88,8 +90,8 @@ msgstr "{0} छोडियो"
 
 #. placeholder {0}: parsed.skipped
 #: src/features/applications/components/import-applications-sheet.tsx
-msgid "{0} skipped (missing company/role)"
-msgstr "{0} छोडियो (कम्पनी/भूमिका छुटेको)"
+msgid "{0} skipped (invalid or missing data)"
+msgstr "{0} छोडियो (अमान्य वा हराएको डाटा)"
 
 #. placeholder {0}: findings.length
 #: src/features/ats-checker/report/report-view.tsx
@@ -119,24 +121,19 @@ msgstr "{label} पछिल्ला ३० दिनमा"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "{passedRules} of {totalRules} checks passed"
-msgstr "{totalRules} चेकहरू मध्ये {passedRules} पास भयो"
+msgstr "{passedRules} चेकहरू मध्ये {totalRules} पास भयो"
 
 #: src/libs/resume/ats.ts
 msgid "{sectionTitle} · Item {itemNumber}"
 msgstr "{sectionTitle} · वस्तु {itemNumber}"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "<0>Finally,</0><1>A free and open-source resume builder</1>"
-msgstr "<0>अन्ततः,</0><1>निःशुल्क र खुला-स्रोत बायोडाटा निर्माण गर्ने साधन</1>"
-
-#: src/routes/_home/-sections/faq.tsx
-msgctxt "Home page FAQ section heading with each word visually separated into individual spans"
-msgid "<0>Frequently</0><1>Asked</1><2>Questions</2>"
-msgstr "<0>प्रायः</0><1>सोधिने</1><2>प्रश्नहरू</2>"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "<0>Thank you for using Reactive Resume. I build this app mostly in my spare time, with help from open-source contributors around the world.</0><1>If it has been useful to you and you'd like to keep it free and open for everyone, please consider donating. Any amount helps.</1>"
 msgstr "<0>Reactive Resume प्रयोग गर्नुभएकोमा धन्यवाद। यो एप म प्रायः आफ्नो फुर्सदको समयमा बनाउँछु, संसारभरका खुला-स्रोत योगदानकर्ताहरूको सहयोगमा।</0><1>यो तपाईंलाई उपयोगी भएको छ र यसलाई सबैका लागि निःशुल्क तथा खुला राख्न चाहनुहुन्छ भने, कृपया दान गर्ने विचार गर्नुहोस्। जतिसुकै सानो रकमले पनि सहयोग पुग्छ।</1>"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "1 Column / Inline"
+msgstr "1 स्तम्भ / इनलाइन"
 
 #: src/dialogs/api-key/create.tsx
 msgid "1 month"
@@ -145,10 +142,6 @@ msgstr "१ महिना"
 #: src/dialogs/api-key/create.tsx
 msgid "1 year"
 msgstr "१ वर्ष"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "15 Templates"
-msgstr "15 ढाँचाहरू"
 
 #: src/dialogs/api-key/create.tsx
 msgid "3 months"
@@ -174,9 +167,9 @@ msgstr "मिति दायरा धेरैजसो सफ्टवेय
 msgid "A font is referenced but not embedded."
 msgstr "फन्टलाई सन्दर्भ गरिएको छ तर एम्बेड गरिएको छैन।"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "A free and open-source resume builder that makes it easy to create, update, and share your resume."
-msgstr "निःशुल्क र खुला-स्रोत बायोडाटा निर्माण गर्ने साधन, जसले तपाईंको बायोडाटा बनाउन, अद्यावधिक गर्न र सेयर गर्न सजिलो बनाउँछ।"
+#: src/routes/_home/-sections/hero.tsx
+msgid "A free and open-source resume builder"
+msgstr ""
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "A friendly nudge for the recruiter"
@@ -194,10 +187,6 @@ msgstr "खाली अवधि समस्या होइन। चाह�
 msgid "A link points somewhere other than the address it shows."
 msgstr "लिङ्कले देखाइएको ठेगानाभन्दा फरक ठाउँतिर देखाउँछ।"
 
-#: src/routes/_home/-sections/testimonials.tsx
-msgid "A lot of people have written to me over the years about how Reactive Resume helped them, and I never get tired of reading those emails. If you have a story to share, write to me at <0>{email}</0>."
-msgstr "Reactive Resume ले उनीहरूलाई कसरी सघायो भन्ने बारे वर्षौंदेखि धेरै मानिसहरूले मलाई लेखेका छन्, र ती इमेल पढ्दा म कहिल्यै थाक्दिनँ। तपाईंसँग सुनाउने कुनै कथा छ भने, मलाई <0>{email}</0> मा लेख्नुहोस्।"
-
 #: src/features/ats-checker/messages.ts
 msgid "A numeric date reads differently in different countries."
 msgstr "अंकात्मक मिति फरक देशहरूमा फरक तरिकाले पढिन्छ।"
@@ -205,14 +194,6 @@ msgstr "अंकात्मक मिति फरक देशहरूमा
 #: src/features/ats-checker/messages.ts
 msgid "A page is rotated."
 msgstr "एउटा पृष्ठ घुमाइएको छ।"
-
-#: src/components/ui/copyright.tsx
-msgid "A passion project by <0>Amruth Pillai</0>."
-msgstr "<0>Amruth Pillai</0> द्वारा बनाइएको एउटा जोश र लगनको परियोजना।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "A range of designs to choose from, with more on the way."
-msgstr "छान्नका लागि विभिन्न डिजाइनहरू, अझै थपिँदै छन्।"
 
 #: src/features/ats-checker/parse-preview.tsx
 msgid "A resume laid out for a human reader, with a photo, headings and columns"
@@ -234,9 +215,9 @@ msgstr "वेब ठेगाना https:// बिना लेखिएको
 msgid "A4"
 msgstr "A4"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Access your resumes and data programmatically using the API."
-msgstr "API प्रयोग गरेर प्रोग्रामिङमार्फत आफ्ना बायोडाटा र डाटामा पहुँच पाउनुहोस्।"
+#: src/features/auth/pages/consent.tsx
+msgid "Access your account through the API, including reading and changing your resumes and job applications."
+msgstr "API मार्फत तपाइँको खाता पहुँच गर्नुहोस्, तपाइँको रिजुमेहरू र जागिरका आवेदनहरू पढ्ने र परिवर्तन गर्ने सहित।"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -268,10 +249,6 @@ msgstr "थप्नुहोस्"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Add a custom field"
 msgstr "अनुकूल (custom) फाँट थप्नुहोस्"
-
-#: src/routes/dashboard/applications/index.tsx
-msgid "Add a job you're applying to and link the resume you sent. Move it across the board as you hear back."
-msgstr "तपाईंले आवेदन दिइरहनुभएको काम थप्नुहोस् र पठाएको बायोडाटा लिङ्क गर्नुहोस्। जवाफ आउँदै जाँदा त्यसलाई बोर्डमा अगाडि सार्दै जानुहोस्।"
 
 #: src/components/input/chip-input.tsx
 msgid "Add a keyword..."
@@ -367,13 +344,7 @@ msgstr "एक प्रविष्टि थप्नुहोस्, वा �
 msgid "Add and test a provider before starting an agent thread."
 msgstr "एजेन्ट थ्रेड सुरु गर्नु अघि प्रदायक थप्नुहोस् र परीक्षण गर्नुहोस्।"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Add another layer of protection to your account."
-msgstr "आफ्नो खातामा सुरक्षाको अर्को तह थप्नुहोस्।"
-
-#: src/features/applications/components/application-form-sheet.tsx
 #: src/features/command-palette/pages/navigation.tsx
-#: src/routes/dashboard/applications/index.tsx
 msgid "Add application"
 msgstr "आवेदन थप्नुहोस्"
 
@@ -388,6 +359,17 @@ msgstr "सम्पर्क थप्नुहोस्"
 #: src/features/ats-checker/messages.ts
 msgid "Add figures where you have them: volumes, percentages, timeframes, team sizes."
 msgstr "भएसम्म अंक थप्नुहोस्: परिमाण, प्रतिशत, समयावधि, टिमको आकार।"
+
+#: src/features/applications/components/application-form-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Add job"
+msgstr ""
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "Add Job"
+msgstr ""
 
 #: src/components/input/chip-input.tsx
 msgid "Add keyword"
@@ -430,10 +412,6 @@ msgstr "खण्डहरूबीच केही खाली ठाउँ �
 msgid "Add tag"
 msgstr "ट्याग थप्नुहोस्"
 
-#: src/features/applications/components/application-form-sheet.tsx
-msgid "Add to pipeline"
-msgstr "पाइपलाइनमा थप्नुहोस्"
-
 #: src/features/ats-checker/messages.ts
 msgid "Add two or three lines at the top describing what you do."
 msgstr "माथि तपाईंले के गर्नुहुन्छ भनेर वर्णन गर्ने दुई वा तीन लाइन थप्नुहोस्।"
@@ -441,6 +419,10 @@ msgstr "माथि तपाईंले के गर्नुहुन्छ
 #: src/libs/resume/ats.ts
 msgid "Add your full name under Basics."
 msgstr "आधारभूत अन्तर्गत आफ्नो पूरा नाम थप्नुहोस्।"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Added"
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Adjust the resume for a remote-first role that values async communication and ownership."
@@ -462,30 +444,13 @@ msgstr "अफ्रिकान्स"
 msgid "Against the job description"
 msgstr "काम विवरणसँग तुलना"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Agent"
-msgstr "एजेन्ट"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Agent ready"
 msgstr "एजेन्ट तयार छ"
 
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Agents"
-msgstr "एजेन्टहरू"
-
 #: src/dialogs/resume/import.tsx
 msgid "AI"
 msgstr "AI"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "AI agent setup is unavailable right now. Please try again in a moment."
-msgstr "एआई एजेन्ट सेटअप अहिले उपलब्ध छैन। कृपया केही बेरमा फेरि प्रयास गर्नुहोस्।"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "AI agent setup is unavailable until REDIS_URL and ENCRYPTION_SECRET are configured."
-msgstr "REDIS_URL र ENCRYPTION_SECRET कन्फिगर नभएसम्म AI एजेन्ट सेटअप उपलब्ध हुँदैन।"
 
 #: src/routes/builder/$resumeId/-components/ai-assistant.tsx
 msgid "AI assistant"
@@ -518,6 +483,14 @@ msgstr "AI प्रदायकहरूलाई REDIS_URL र ENCRYPTION_SECR
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "अल्बानियन"
+
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "All applications (including archived)"
+msgstr "सबै अनुप्रयोगहरू (संग्रहित सहित)"
+
+#: src/features/auth/pages/consent.tsx
+msgid "Allow access"
+msgstr "पहुँच अनुमति दिनुहोस्"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Allow Public Access"
@@ -552,9 +525,9 @@ msgstr "एउटा अप्रत्याशित त्रुटिले 
 msgid "An unknown error occurred while importing your resume."
 msgstr "तपाईंको बायोडाटा आयात गर्दा एउटा अज्ञात त्रुटि भयो।"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "And many more..."
-msgstr "र यस्ता थुप्रै..."
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "and its full timeline will be permanently deleted. This can't be undone."
+msgstr ""
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Answer in your own words"
@@ -568,28 +541,27 @@ msgstr "एन्थ्रोपिक क्लोड"
 msgid "Any tag"
 msgstr "कुनै पनि ट्याग"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+#: src/features/resume/builder/password-dialog.tsx
 msgid "Anyone who opens the public URL will need this password."
 msgstr "सार्वजनिक URL खोल्ने जो कोहीलाई पनि यो पासवर्ड चाहिन्छ।"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Anyone with the link can view and download the resume."
-msgstr "जससँग पनि लिङ्क छ, उसले बायोडाटा हेर्न र डाउनलोड गर्न सक्छ।"
+msgid "Anyone with the link can view the resume."
+msgstr "लिङ्क भएका जो कोहीले पुन: सुरु हेर्न सक्छन्।"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Anyone with the public URL will be able to view and download your resume without a password."
-msgstr "सार्वजनिक URL भएको जोसुकैले पासवर्डबिना नै तपाईंको बायोडाटा हेर्न र डाउनलोड गर्न सक्नेछन्।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "API Access"
-msgstr "API पहुँच"
+msgid "Anyone with the public URL will be able to view your resume without a password."
+msgstr "सार्वजनिक URL भएका जो कोहीले पासवर्ड बिना नै तपाईंको रिजुमे हेर्न सक्षम हुनेछन्।"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "API Key"
 msgstr "API Key"
 
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "API Key (optional)"
+msgstr ""
+
 #: src/features/command-palette/pages/navigation.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/settings/api-keys.tsx
 msgid "API Keys"
 msgstr "API Keys"
@@ -598,43 +570,32 @@ msgstr "API Keys"
 msgid "API keys are encrypted on the server and never shown again after saving."
 msgstr "API कुञ्जीहरू सर्भरमा इन्क्रिप्ट गरिएका हुन्छन् र बचत गरेपछि फेरि कहिल्यै देखाइँदैनन्।"
 
-#: src/features/settings/pages/api-keys.tsx
-msgid "API Reference"
-msgstr "API सन्दर्भ (Reference)"
-
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "App"
 msgstr "एप"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Application"
+msgstr "आवेदन"
 
 #: src/features/applications/components/application-actions-menu.tsx
 msgid "Application actions"
 msgstr "आवेदन कार्यहरू"
 
-#: src/features/applications/components/application-form-sheet.tsx
-msgid "Application added to your pipeline."
-msgstr "तपाईंको पाइपलाइनमा आवेदन थपियो।"
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Application date from"
+msgstr "बाट आवेदन मिति"
 
-#: src/features/applications/components/application-ai-copilot.tsx
-msgid "Application Copilot"
-msgstr "आवेदन सहपायलट"
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Application date to"
+msgstr "को लागी आवेदन मिति"
 
 #: src/features/applications/components/application-actions-menu.tsx
-#: src/features/applications/components/application-detail-sheet.tsx
 msgid "Application deleted."
 msgstr "आवेदन मेटाइयो।"
 
-#: src/routes/_home/-sections/statistics.tsx
-msgid "Application Statistics"
-msgstr "आवेदन तथ्याङ्क"
-
-#: src/features/applications/components/application-form-sheet.tsx
-msgid "Application updated."
-msgstr "आवेदन अद्यावधिक गरियो।"
-
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-#: src/routes/dashboard/applications/index.tsx
 msgid "Applications"
 msgstr "आवेदनहरू"
 
@@ -646,6 +607,10 @@ msgstr "समयसँगै आवेदनहरू"
 msgid "Applications sent per week (last 8 weeks)"
 msgstr "प्रति हप्ता पठाइएका आवेदनहरू (पछिल्ला 8 हप्ता)"
 
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Applications to export"
+msgstr "निर्यात गर्न आवेदनहरू"
+
 #: src/features/applications/components/table-view.tsx
 msgid "Applied"
 msgstr "आवेदन गरियो"
@@ -653,6 +618,10 @@ msgstr "आवेदन गरियो"
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Applied on"
 msgstr "मा लागू गरियो"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Apply selected"
+msgstr ""
 
 #: src/routes/agent/-components/patch-approval-card.tsx
 msgid "Approve"
@@ -670,7 +639,6 @@ msgstr "अरबी"
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/table-view.tsx
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Archive"
 msgstr "अभिलेख गर्नुहोस्"
 
@@ -732,19 +700,9 @@ msgstr "यो बायोडाटा बारे केहि सोध्�
 msgid "Aspect Ratio"
 msgstr "आकार अनुपात (Aspect Ratio)"
 
-#: src/routes/_home/-sections/sponsors.tsx
-msgid "Atlas Cloud supports Reactive Resume as a project sponsor. If your company would like to sponsor the project, email <0>{sponsorshipEmail}</0>."
-msgstr "एटलस क्लाउडले परियोजना प्रायोजकको रूपमा प्रतिक्रियाशील रिजुमेलाई समर्थन गर्दछ। यदि तपाईंको कम्पनीले परियोजनालाई प्रायोजन गर्न चाहन्छ भने, <0>{sponsorshipEmail}मा इमेल गर्नुहोस्।</0> ।"
-
 #: src/libs/resume/section.tsx
 msgid "ATS Check"
 msgstr "ATS चेक"
-
-#: src/routes/_home/-sections/features.tsx
-#: src/routes/_home/ats-checker.tsx
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "ATS Checker"
-msgstr "ATS चेकर"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -758,6 +716,10 @@ msgstr "रेजुमे फाइल संलग्न गर्नुहो
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Attach files"
 msgstr "फाइलहरू संलग्न गर्नुहोस्"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Attach PDF"
+msgstr "PDF संलग्न गर्नुहोस्"
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Attachment"
@@ -776,10 +738,6 @@ msgstr "प्रमाणीकरण"
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Auto-fill failed."
 msgstr "स्वतः भर्न असफल भयो।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Available in multiple languages. If you want to help translate, head over to Crowdin."
-msgstr "धेरै भाषामा उपलब्ध। अनुवादमा सहयोग गर्न चाहनुहुन्छ भने, Crowdin मा जानुहोस्।"
 
 #: src/features/ats-checker/messages.ts
 msgid "Avoid heavy letter-spacing effects, then re-export."
@@ -804,10 +762,6 @@ msgstr "अजरबैजानी"
 #: src/features/auth/pages/error.tsx
 msgid "Back to authentication settings"
 msgstr "प्रमाणीकरण सेटिङमा फर्कनुहोस्"
-
-#: src/routes/agent/-components/thread-sidebar.tsx
-msgid "Back to resumes"
-msgstr "रिजुमेमा फर्कनुहोस्"
 
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
@@ -840,10 +794,6 @@ msgstr "बंगाली"
 msgid "Best for applications, sharing, and printing."
 msgstr "आवेदनहरू, साझेदारी, र मुद्रणका लागि उत्तम।"
 
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Blank draft"
-msgstr "खाली मस्यौदा"
-
 #: src/features/ats-checker/messages.ts
 msgid "Blocker"
 msgstr "अवरोधक"
@@ -858,6 +808,11 @@ msgid "Body"
 msgstr "मुख्य लेख (Body)"
 
 #: src/components/input/rich-input.tsx
+#: src/dialogs/resume/sections/certification.tsx
+#: src/dialogs/resume/sections/education.tsx
+#: src/dialogs/resume/sections/experience.tsx
+#: src/dialogs/resume/sections/project.tsx
+#: src/dialogs/resume/sections/skill.tsx
 msgid "Bold"
 msgstr "बोल्ड"
 
@@ -888,26 +843,19 @@ msgstr "बुल्गेरियन"
 
 #: src/features/applications/components/table-view.tsx
 msgid "Bulk delete failed. Please try again."
-msgstr "बल्क मेटाउन असफल भयो। कृपया फेरि प्रयास गर्नुहोस्।"
+msgstr "बल्क मेटाउनुहोस् failed। कृपया again प्रयास गर्नुहोस्।"
 
 #: src/features/applications/components/table-view.tsx
 msgid "Bulk update failed. Please try again."
-msgstr "बल्क अपडेट असफल भयो। कृपया फेरि प्रयास गर्नुहोस्।"
+msgstr "बल्क अपडेट failed। कृपया again प्रयास गर्नुहोस्।"
 
 #: src/components/input/rich-input.tsx
 msgid "Bullet List"
 msgstr "बुलेट सूची"
 
-#. Tagline shown in app footer/about area
-#: src/components/ui/copyright.tsx
-#: src/routes/_home/-sections/features.tsx
-#: src/routes/_home/-sections/prefooter.tsx
-msgid "By the community, for the community."
-msgstr "समुदायबाट, समुदायकै लागि।"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Can I export my resume to PDF?"
-msgstr "के म आफ्नो बायोडाटा PDF मा निर्यात गर्न सक्छु?"
+#: src/routes/builder/$resumeId/-sidebar/left/shared/skill-keyword-layout-menu.tsx
+msgid "Bulleted list"
+msgstr "बुलेट गरिएको सूची"
 
 #. API key deletion confirmation dialog cancel action in settings
 #. Account deletion confirmation dialog cancel action in account settings
@@ -921,7 +869,9 @@ msgstr "के म आफ्नो बायोडाटा PDF मा निर
 #: src/dialogs/resume/sections/section-item-dialog.tsx
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/applications/components/export-applications-sheet.tsx
 #: src/features/applications/components/import-applications-sheet.tsx
+#: src/features/resume/builder/password-dialog.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
 #: src/features/settings/pages/account.tsx
 #: src/features/settings/pages/api-keys.tsx
@@ -965,24 +915,23 @@ msgstr "भाषा बदल्नुहोस्"
 msgid "Change language to…"
 msgstr "भाषा परिवर्तन गर्नुहोस्…"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Change the colors, fonts, and design to suit you."
-msgstr "रङ, फन्ट र डिजाइन आफ्नो रुचिअनुसार बदल्नुहोस्।"
-
 #: src/features/command-palette/pages/preferences/index.tsx
 msgid "Change theme to…"
 msgstr "विषयवस्तुलाई… मा परिवर्तन गर्नुहोस्"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Changed"
+msgstr ""
 
 #: src/dialogs/resume/index.tsx
 msgid "Changed your mind? Rename your resume to something more descriptive."
 msgstr "सोच बदल्नुभयो? आफ्नो बायोडाटालाई झन् वर्णनात्मक नाम दिनुहोस्।"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Changelog"
-msgstr "परिवर्तन विवरण"
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Changes are shared between your library and the resume builder."
+msgstr "तपाईंको पुस्तकालय र रिजुमे बिल्डरबीच परिवर्तनहरू साझा गरिन्छ।"
 
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/$threadId.tsx
 msgid "Chat"
 msgstr "कुराकानी"
 
@@ -1022,6 +971,10 @@ msgstr "मस्यौदा जाँच गर्दै"
 msgid "Checking…"
 msgstr "जाँच गर्दै…"
 
+#: src/dialogs/resume/index.tsx
+msgid "Child resume created successfully."
+msgstr ""
+
 #: src/libs/locale.ts
 msgid "Chinese (Simplified)"
 msgstr "चिनियाँ (सरल)"
@@ -1030,9 +983,9 @@ msgstr "चिनियाँ (सरल)"
 msgid "Chinese (Traditional)"
 msgstr "चिनियाँ (परम्परागत)"
 
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Choose a model and resume draft."
-msgstr "एउटा मोडेल र बायोडाटा मस्यौदा छान्नुहोस्।"
+#: src/features/cover-letters/library.tsx
+msgid "Choose a cover letter"
+msgstr "कभर लेटर छान्नुहोस्"
 
 #: src/features/ats-checker/uploader.tsx
 msgid "Choose a PDF"
@@ -1044,13 +997,26 @@ msgstr "PDF छान्नुहोस्"
 msgid "Choose a preset or custom shade."
 msgstr "प्रीसेट वा अनुकूलित शेड छान्नुहोस्।"
 
-#: src/routes/agent/-components/new-thread-setup.tsx
+#: src/features/cover-letters/editor-dialog.tsx
+#: src/features/cover-letters/library.tsx
 msgid "Choose a resume"
 msgstr "बायोडाटा छनौट गर्नुहोस्"
+
+#: src/dialogs/resume/sections/cover-letter.tsx
+msgid "Choose a saved cover letter"
+msgstr "सुरक्षित गरिएको कभर लेटर छान्नुहोस्"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Choose an application"
+msgstr "एउटा अनुप्रयोग छान्नुहोस्"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/export.tsx
 msgid "Choose PDF, DOCX, Markdown, or JSON. Export your resume and cover letter separately when available."
 msgstr "PDF, DOCX, Markdown, वा JSON छान्नुहोस्। उपलब्ध भएमा आफ्नो बायोडाटा र कभर लेटर छुट्टाछुट्टै निर्यात गर्नुहोस्।"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Choose which changes made to the parent resume to bring into this one."
+msgstr ""
 
 #: src/components/level/combobox.tsx
 msgid "Circle"
@@ -1074,6 +1040,15 @@ msgstr "चयन खाली गर्नुहोस्"
 #: src/dialogs/resume/import.tsx
 msgid "Click here to select a file to import"
 msgstr "आयात गर्न फाइल छान्न यहाँ क्लिक गर्नुहोस्"
+
+#: src/features/auth/pages/consent.tsx
+msgid "Client ID"
+msgstr "ग्राहक आईडी"
+
+#: src/features/cover-letters/editor-dialog.tsx
+#: src/features/cover-letters/editor.tsx
+msgid "Close"
+msgstr "बन्द गर्नुहोस्"
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Close AI assistant"
@@ -1103,9 +1078,9 @@ msgstr "आदेश प्यालेट"
 msgid "Command Palette - {currentPage}"
 msgstr "आदेश प्यालेट - {currentPage}"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Community"
-msgstr "समुदाय"
+#: src/routes/dashboard/resumes/index.tsx
+msgid "Compact"
+msgstr "संक्षिप्त"
 
 #: src/dialogs/resume/sections/experience.tsx
 #: src/features/applications/components/application-form-sheet.tsx
@@ -1124,10 +1099,6 @@ msgstr "कम्पनी A–Z"
 msgid "Compare this resume against this job posting URL and update the keywords without overselling anything."
 msgstr "यो बायोडाटालाई यो कामको पोस्टिङ URL सँग तुलना गर्नुहोस् र केही कुरालाई बढाइचढाइ नगरी किवर्डहरू अद्यावधिक गर्नुहोस्।"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Completely free, forever, no hidden costs."
-msgstr "पूरी रूपमा निःशुल्क, सधैंका लागि, कुनै लुका लागत छैन।"
-
 #: src/features/ats-checker/messages.ts
 msgid "Compress or remove large images to keep uploads quick."
 msgstr "अपलोड छिटो राख्न ठूला तस्बिरहरू कम्प्रेस गर्नुहोस् वा हटाउनुहोस्।"
@@ -1141,10 +1112,22 @@ msgstr "अपलोड छिटो राख्न ठूला तस्ब�
 msgid "Confirm"
 msgstr "यकिन गर्नुहोस्"
 
+#: src/features/resume/builder/password-dialog.tsx
+msgid "Confirm Password"
+msgstr "पासवर्ड पुष्टि गर्नुहोस्"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Conflict"
+msgstr ""
+
 #. Authentication settings action to link a social login provider
 #: src/features/settings/authentication/components/social-provider.tsx
 msgid "Connect"
 msgstr "जोड्नुहोस्"
+
+#: src/features/auth/pages/consent.tsx
+msgid "Connect an application"
+msgstr "एप्लिकेसन जडान गर्नुहोस्"
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Connect your own AI provider to get a review of the writing. The checks above need no provider and no account."
@@ -1174,8 +1157,13 @@ msgstr "सम्पर्क विवरण"
 msgid "Contacts"
 msgstr "सम्पर्कहरू"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Contain"
+msgstr "नियन्त्रण गर्नुहोस्"
+
 #: src/dialogs/resume/sections/cover-letter.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
+#: src/features/cover-letters/editor.tsx
 msgid "Content"
 msgstr "सामग्री"
 
@@ -1191,6 +1179,7 @@ msgstr "सामग्री ग्रिडमा सजाइएको छ।
 msgid "Continue"
 msgstr "जारी राख्नुहोस्"
 
+#: src/routes/_home/-sections/hero.tsx
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Continue where you left off"
@@ -1223,6 +1212,10 @@ msgstr "क्लिपबोर्डमा प्रतिलिपि गर�
 msgid "Copy"
 msgstr "प्रतिलिपि गर्नुहोस्"
 
+#: src/features/cover-letters/library.tsx
+msgid "Copy an existing letter from a resume"
+msgstr "बायोडाटाबाट अवस्थित पत्रको प्रतिलिपि गर्नुहोस्"
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Copy and store these backup codes in case you lose your device."
 msgstr "यदि तपाईंले आफ्नो यन्त्र गुमाउनु भयो भने प्रयोग गर्नको लागि यी ब्याकअप कोडहरू प्रतिलिपि गरी सुरक्षित रूपमा राख्नुहोस्।"
@@ -1231,9 +1224,17 @@ msgstr "यदि तपाईंले आफ्नो यन्त्र ग�
 msgid "Copy Backup Codes"
 msgstr "ब्याकअप कोडहरू प्रतिलिपि गर्नुहोस्"
 
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Copy from resume"
+msgstr "बायोडाटाबाट प्रतिलिपि"
+
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Copy JSON"
 msgstr "JSON प्रतिलिपि गर्नुहोस्"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Copy saved to your cover-letter library."
+msgstr "प्रतिलिपि तपाईंको कभर-लेटर पुस्तकालयमा सुरक्षित गरियो।"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1252,10 +1253,6 @@ msgstr "पोस्टिंगबाट सम्पूर्ण काम व
 msgid "Copy the text out of the exported file and read it through; fix anything that arrives in the wrong place."
 msgstr "निर्यात गरिएको फाइलबाट पाठ प्रतिलिपि गरी पूरा पढ्नुहोस्; गलत ठाउँमा आउने कुनै पनि कुरा सुधार्नुहोस्।"
 
-#: src/dialogs/api-key/create.tsx
-msgid "Copy this secret key and use it in your applications to access your data."
-msgstr "यो गोप्य key प्रतिलिपि गरेर आफ्ना अनुप्रयोगहरूमा प्रयोग गर्नुहोस् ताकि तपाईंको डाटामा पहुँच गर्न सकियोस्।"
-
 #: src/routes/builder/$resumeId/-components/dock.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Copy URL"
@@ -1269,14 +1266,38 @@ msgstr "वर्ष सच्याउनुहोस्, वा चलिर�
 msgid "Correct the year, or write \"Present\" for ongoing work."
 msgstr "वर्ष सच्याउनुहोस्, वा जारी रहेको कामका लागि \"Present\" लेख्नुहोस्।"
 
+#: src/features/cover-letters/editor-dialog.tsx
+#: src/features/cover-letters/library.tsx
+msgid "Could not complete this action. Please try again."
+msgstr "यो कार्य पूरा गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
+
+#: src/features/auth/pages/consent.tsx
+msgid "Could not complete this connection. Restart the connection from your client and try again."
+msgstr "यो जडान पूरा गर्न सकिएन। आफ्नो क्लाइन्टबाट जडान पुनः सुरु गरी फेरि प्रयास गर्नुहोस्।"
+
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Could not copy to clipboard. Please copy the text manually."
+msgstr "क्लिपबोर्डमा प्रतिलिपि गर्न सकिएन। कृपया पाठ म्यानुअल रूपमा प्रतिलिपि गर्नुहोस्।"
+
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not generate the DOCX. Please try again."
 msgstr "DOCX बनाउन सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
 
 #: src/features/resume/export/use-resume-export.ts
-#: src/routes/agent/-components/resume-pane.tsx
 msgid "Could not generate the PDF. Please try again."
 msgstr "PDF बनाउन सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
+
+#: src/features/cover-letters/library.tsx
+msgid "Could not load cover letters."
+msgstr "कभर लेटरहरू लोड गर्न सकिएन।"
+
+#: src/features/cover-letters/library.tsx
+msgid "Could not load the selected resume."
+msgstr "चयन गरिएको रिजुमे लोड गर्न सकिएन।"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Could not load this cover letter."
+msgstr "यो कभर लेटर लोड गर्न सकिएन।"
 
 #: src/features/resume/export/use-resume-export.ts
 msgid "Could not prepare your resume for printing. Please try again."
@@ -1291,9 +1312,18 @@ msgstr "AI प्रदायकमा पहुँच गर्न सकिए
 msgid "Could not restore this patch."
 msgstr "यो प्याच पुनर्स्थापित गर्न सकिएन।"
 
+#: src/features/cover-letters/editor.tsx
+msgid "Could not save the cover letter. Please try again."
+msgstr "कभर लेटर सुरक्षित गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
+
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Could not set up two-factor authentication."
 msgstr "दुई-कारक प्रमाणीकरण सेटअप गर्न सकिएन।"
+
+#. placeholder {0}: unresolvedLabels.join(", ")
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "Could not sort these items; they stayed at the end: {0}."
+msgstr "यी वस्तुहरू क्रमबद्ध गर्न सकिएन; तिनीहरू अन्त्यमा रहे: {0}"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Could not verify provider connection."
@@ -1303,14 +1333,13 @@ msgstr "प्रदायक जडान प्रमाणित गर्न
 msgid "Could not verify the connection. Check the API key, model, and base URL."
 msgstr "जडान प्रमाणित गर्न सकिएन। API कुञ्जी, मोडेल र आधार URL जाँच गर्नुहोस्।"
 
-#: src/features/applications/components/application-form-sheet.tsx
-msgid "Couldn't add the application. Please try again."
-msgstr "आवेदन थप्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
-
 #: src/features/applications/components/application-actions-menu.tsx
-#: src/features/applications/components/application-detail-sheet.tsx
 msgid "Couldn't delete the application."
 msgstr "आवेदन मेटाउन सकिएन।"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Couldn't delete the saved job."
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Couldn't delete the timeline entry."
@@ -1324,13 +1353,17 @@ msgstr "आवेदन सार्न सकिएन। कृपया फ�
 msgid "Couldn't save"
 msgstr "सुरक्षित गर्न सकिएन"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Couldn't save the job. Please try again."
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Couldn't save the note."
 msgstr "नोट सुरक्षित गर्न सकिएन।"
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Couldn't save your changes. Please try again."
-msgstr "तपाईंका परिवर्तनहरू सुरक्षित गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
+msgstr "तपाईंका परिवर्तनहरू सुरक्षित गर्न सकिएन। कृपया again प्रयास गर्नुहोस्।"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Couldn't update the timeline entry."
@@ -1338,7 +1371,7 @@ msgstr "समयरेखा प्रविष्टि अद्यावध�
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Couldn't upload the file. Please try again."
-msgstr "फाइल अपलोड गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"
+msgstr "फाइल अपलोड गर्न सकिएन। कृपया again प्रयास गर्नुहोस्।"
 
 #: src/features/applications/components/insights-view.tsx
 msgid "Count by source"
@@ -1348,8 +1381,13 @@ msgstr "स्रोत द्वारा गणना"
 msgid "Counted separately from the parse score. Coverage does not predict anything."
 msgstr "यसको गणना पार्स अंकभन्दा छुट्टै हुन्छ। कभरेजले केही कुराको पूर्वानुमान गर्दैन।"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Cover"
+msgstr "आवरण"
+
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/application-form-sheet.tsx
+#: src/features/cover-letters/library.tsx
 #: src/features/resume/export/download-dialog.tsx
 msgid "Cover letter"
 msgstr "आवरण पत्र"
@@ -1366,6 +1404,11 @@ msgstr "कभर लेटर"
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Cover letter draft"
 msgstr "आवरण पत्र मस्यौदा"
+
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/cover-letters.tsx
+msgid "Cover Letters"
+msgstr "आवेदन पत्रहरू"
 
 #. Create API key dialog submit action
 #: src/dialogs/api-key/create.tsx
@@ -1385,6 +1428,7 @@ msgstr "आवरण पत्र मस्यौदा"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/features/cover-letters/library.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Create"
 msgstr "बनाउनुहोस्"
@@ -1392,6 +1436,10 @@ msgstr "बनाउनुहोस्"
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Create a copy tuned to this job"
 msgstr "यो कामको लागि ट्युन गरिएको प्रतिलिपि बनाउनुहोस्"
+
+#: src/dialogs/resume/index.tsx
+msgid "Create a linked child resume that can review and merge future updates from this parent."
+msgstr ""
 
 #: src/features/auth/pages/register.tsx
 msgid "Create a new account"
@@ -1452,6 +1500,7 @@ msgstr "नयाँ सिफारिस (reference) बनाउनुहो�
 
 #: src/dialogs/resume/index.tsx
 #: src/features/command-palette/pages/resumes.tsx
+#: src/routes/_home/-sections/hero.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Create a new resume"
@@ -1473,13 +1522,18 @@ msgstr "नयाँ स्वयंसेवी अनुभव बनाउन
 msgid "Create a Sample Resume"
 msgstr "नमूना बायोडाटा बनाउनुहोस्"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Create as many resumes as you want."
-msgstr "जति चाहनुहुन्छ त्यति बायोडाटा बनाउनुहोस्।"
+#. Resume card context menu action to create a linked child resume
+#. Resume card dropdown action to create a linked child resume
+#: src/dialogs/resume/index.tsx
+#: src/routes/builder/$resumeId/-components/header.tsx
+#: src/routes/dashboard/resumes/-components/menus/context-menu.tsx
+#: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
+msgid "Create child resume"
+msgstr ""
 
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Create from scratch"
-msgstr "सुरुबाट सिर्जना गर्नुहोस्"
+#: src/features/cover-letters/library.tsx
+msgid "Create cover letter"
+msgstr "कभर लेटर बनाउनुहोस्"
 
 #. Call-to-action link from login page to account registration page
 #: src/features/auth/pages/login.tsx
@@ -1491,18 +1545,18 @@ msgstr "अहिले एउटा सिर्जना गर्नुहो
 msgid "Create resume with options"
 msgstr "विकल्पहरूसहित रिजुमे सिर्जना गर्नुहोस्"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Create, customize, and share your resume. Reactive Resume is open source, it doesn't track you, and it stays free."
-msgstr "आफ्नो बायोडाटा बनाउनुहोस्, मनपर्दो बनाउनुहोस् र सेयर गर्नुहोस्। Reactive Resume खुला-स्रोत हो, यसले तपाईंलाई ट्र्याक गर्दैन, र यो निःशुल्क नै रहन्छ।"
-
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Created"
 msgstr "बनाइएको मिति"
 
 #. placeholder {0}: result.name
 #: src/features/applications/components/application-ai-copilot.tsx
-msgid "Created \"{0}\" and linked it to this application."
-msgstr "\"{0}\" सिर्जना गरी यो आवेदनमा लिङ्क गरियो।"
+msgid "Created \"{0}\" and linked it to this saved job."
+msgstr ""
+
+#: src/dialogs/resume/index.tsx
+msgid "Creating child resume..."
+msgstr ""
 
 #: src/dialogs/api-key/create.tsx
 msgid "Creating your API key..."
@@ -1513,12 +1567,20 @@ msgid "Creating your resume..."
 msgstr "तपाईंको बायोडाटा बनाउँदै..."
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Crop and Upload"
+msgstr "छाँट्नुहोस् र अपलोड गर्नुहोस्"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Crop picture"
 msgstr "तस्बिर क्रप गर्नुहोस्"
 
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "CSV data"
 msgstr "CSV डाटा"
+
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Current filters"
+msgstr "हालको फिल्टरहरू"
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Current Password"
@@ -1527,6 +1589,10 @@ msgstr "हालको पासवर्ड"
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Current stage"
 msgstr "हालको चरण"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
+msgid "Currently available for German resumes. Uses the language set in Page."
+msgstr "हाल जर्मन रिजुमेहरूका लागि उपलब्ध छ। पृष्ठमा सेट गरिएको भाषा प्रयोग गर्दछ।"
 
 #: src/components/input/color-picker.tsx
 msgid "Custom"
@@ -1563,14 +1629,6 @@ msgstr "डार्क"
 msgid "Dark theme"
 msgstr "डार्क थिम"
 
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Dashboard"
-msgstr "ड्यासबोर्ड"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Data Security"
-msgstr "डाटा सुरक्षा"
-
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
 #: src/dialogs/resume/sections/publication.tsx
@@ -1590,10 +1648,6 @@ msgstr "मितिहरू"
 msgid "Decrease indent"
 msgstr "इन्डेन्ट घटाउनुहोस्"
 
-#: src/routes/agent/-components/resume-pane.tsx
-msgid "Decrease zoom"
-msgstr "जुम घटाउनुहोस्"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Deep check"
 msgstr "गहिरो जाँच"
@@ -1601,6 +1655,10 @@ msgstr "गहिरो जाँच"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "DeepSeek"
 msgstr "डीपसिक"
+
+#: src/features/cover-letters/library.tsx
+msgid "Default template"
+msgstr "पूर्वनिर्धारित ढाँचा"
 
 #: src/dialogs/resume/sections/education.tsx
 msgid "Degree"
@@ -1615,10 +1673,10 @@ msgstr "डिग्री"
 #: src/features/applications/components/application-actions-menu.tsx
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/table-view.tsx
+#: src/features/cover-letters/editor-dialog.tsx
 #: src/features/settings/authentication/components/passkeys.tsx
 #: src/features/settings/pages/api-keys.tsx
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
@@ -1649,14 +1707,20 @@ msgid "Delete provider"
 msgstr "प्रदायक मेटाउनुहोस्"
 
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Delete this agent thread?"
 msgstr "यो एजेन्ट थ्रेड मेटाउने हो?"
 
 #: src/features/applications/components/application-actions-menu.tsx
-#: src/features/applications/components/application-detail-sheet.tsx
 msgid "Delete this application?"
 msgstr "यो आवेदन मेटाउने?"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Delete this cover letter?"
+msgstr "यो आवरण पत्र मेटाउनुहोस्?"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Delete this saved job?"
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Delete this timeline entry?"
@@ -1688,13 +1752,10 @@ msgstr "तपाईंको बायोडाटा मेटाउँदै.
 msgid "Denied, waiting for the agent…"
 msgstr "अस्वीकृत, एजेन्टको प्रतीक्षामा…"
 
+#: src/features/auth/pages/consent.tsx
 #: src/routes/agent/-components/patch-approval-card.tsx
 msgid "Deny"
 msgstr "अस्वीकार गर्नुहोस्"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Deploy it on your own servers using the Docker image."
-msgstr "Docker इमेज प्रयोग गरेर यसलाई आफ्नै सर्भरमा तैनाथ गर्नुहोस्।"
 
 #: src/features/ats-checker/messages.ts
 msgid "Describe each role with short bullets. Solid paragraphs are harder to skim and to segment."
@@ -1739,20 +1800,31 @@ msgstr "दुई-कारक प्रमाणीकरण अक्षम �
 msgid "Disabling two-factor authentication..."
 msgstr "दुई-कारक प्रमाणीकरण अक्षम पारिँदै..."
 
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Discard"
+msgstr "फाल्नुहोस्"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Discard unsaved changes?"
+msgstr "असुरक्षित परिवर्तनहरू फाल्ने?"
+
 #. Authentication settings action to unlink a connected social login provider
 #: src/features/settings/authentication/components/social-provider.tsx
 msgid "Disconnect"
 msgstr "विच्छेद गर्नुहोस्"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Discord"
-msgstr "डिस्कोर्ड"
-
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Dismiss"
 msgstr "खारेज गर्नुहोस्"
 
-#: src/routes/_home/-sections/footer.tsx
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Dismiss these updates?"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Dismiss updates"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Documentation"
 msgstr "प्रलेखन (Documentation)"
@@ -1765,17 +1837,9 @@ msgstr "कागजातहरू पठाइयो"
 msgid "Don't have an account? <0/>"
 msgstr "खाता छैन? <0/>"
 
-#: src/components/ui/donation-toast.tsx
-msgid "Donate"
-msgstr "दान गर्नुहोस्"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Donate to Reactive Resume"
 msgstr "Reactive Resume लाई दान गर्नुहोस्"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Donations pay for bug fixes, security updates, and the ordinary work of keeping the app running."
-msgstr "दानले नै बग सुधार, सुरक्षा अद्यावधिक र एप चलाइराख्ने दैनिक कामको खर्च धान्छ।"
 
 #: src/routes/agent/-components/tool-part-card.tsx
 msgid "Done"
@@ -1794,13 +1858,21 @@ msgstr "डाउनलोड गर्नुहोस्"
 msgid "Download a copy of all your data, including your profile and every resume, as a JSON file."
 msgstr "तपाईंको प्रोफाइल र प्रत्येक रिजुमे सहित तपाईंको सबै डेटाको प्रतिलिपि JSON फाइलको रूपमा डाउनलोड गर्नुहोस्।"
 
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Download application details, contacts, notes, and timeline history as CSV."
+msgstr "CSV को रूपमा आवेदन विवरणहरू, सम्पर्कहरू, नोटहरू, र टाइमलाइन इतिहास डाउनलोड गर्नुहोस्।"
+
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Download CSV"
+msgstr "CSV डाउनलोड गर्नुहोस्"
+
 #. Primary action in the builder header to open resume download options
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Download options"
 msgstr "डाउनलोड विकल्पहरू"
 
+#: src/features/cover-letters/editor-dialog.tsx
 #: src/features/resume/public/public-resume.tsx
-#: src/routes/agent/-components/resume-pane.tsx
 msgid "Download PDF"
 msgstr "PDF डाउनलोड गर्नुहोस्"
 
@@ -1818,7 +1890,7 @@ msgstr "अनुगमन ड्राफ्ट गर्नुहोस्"
 
 #: src/features/applications/components/application-ai-copilot.tsx
 msgid "Drafting failed."
-msgstr "ड्राफ्टिङ असफल भयो।"
+msgstr "ड्राफ्टिङ failed।"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Drag and drop sections here to move them between columns"
@@ -1835,6 +1907,7 @@ msgstr "सर्वनाम हटाएर क्रियाबाट सु
 #. Resume card context menu action to create a copy
 #. Resume card dropdown action to create a copy
 #: src/dialogs/resume/index.tsx
+#: src/features/cover-letters/editor-dialog.tsx
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
@@ -1842,10 +1915,6 @@ msgstr "सर्वनाम हटाएर क्रियाबाट सु
 #: src/routes/dashboard/resumes/-components/menus/dropdown-menu.tsx
 msgid "Duplicate"
 msgstr "नक्कल (Duplicate) गर्नुहोस्"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Duplicate as AI draft"
-msgstr "AI मस्यौदाका रूपमा प्रतिलिपि गर्नुहोस्"
 
 #: src/dialogs/resume/index.tsx
 msgid "Duplicate Resume"
@@ -1874,14 +1943,15 @@ msgstr "पहिलेका संस्करणहरू राखिन्�
 msgid "Edit"
 msgstr "सम्पादन गर्नुहोस्"
 
+#. placeholder {0}: letter.name
+#: src/features/cover-letters/library.tsx
+msgid "Edit {0}"
+msgstr "सम्पादन {0}"
+
 #. Screen reader label for button that edits a keyword chip. Variable is the current keyword text.
 #: src/components/input/chip-input.tsx
 msgid "Edit {chip}"
 msgstr "सम्पादन {chip}"
-
-#: src/features/applications/components/application-form-sheet.tsx
-msgid "Edit application"
-msgstr "आवेदन सम्पादन गर्नुहोस्"
 
 #. placeholder {0}: selectedColor.token.value
 #: src/features/resume/stylesheet/editor.tsx
@@ -1892,6 +1962,10 @@ msgstr "रङ सम्पादन गर्नुहोस् {0}"
 #: src/components/input/rich-input.tsx
 msgid "Edit content in fullscreen mode"
 msgstr "पूर्ण स्क्रिन मोडमा सामग्री सम्पादन गर्नुहोस्"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Edit cover letter"
+msgstr "आवरण पत्र सम्पादन गर्नुहोस्"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Edit date"
@@ -1921,6 +1995,10 @@ msgstr "मोडेल सम्पादन गर्नुहोस्"
 msgid "Edit note"
 msgstr "नोट सम्पादन गर्नुहोस्"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Edit saved job"
+msgstr ""
+
 #: src/features/resume/export/download-dialog.tsx
 msgid "Editable in Word, Google Docs, and Pages."
 msgstr "Word, Google Docs, र Pages मा सम्पादन योग्य।"
@@ -1942,6 +2020,10 @@ msgstr "शिक्षा"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 msgid "Email"
 msgstr "इमेल"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Email (optional)"
+msgstr "इमेल (ऐच्छिक)"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
@@ -1977,10 +2059,6 @@ msgstr "दुई-कारक प्रमाणीकरण सक्रिय
 msgid "Enabled"
 msgstr "सक्रिय गरिएको"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Enabling password protection..."
-msgstr "पासवर्ड सुरक्षा सक्रिय पारिँदै..."
-
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Enabling two-factor authentication…"
 msgstr "दुई-कारक प्रमाणीकरण सक्षम पार्दै…"
@@ -1993,6 +2071,10 @@ msgstr "अंग्रेजी"
 msgid "English (United Kingdom)"
 msgstr "अंग्रेजी (संयुक्त अधिराज्य)"
 
+#: src/features/cover-letters/editor.tsx
+msgid "Enter a name for this cover letter."
+msgstr "यस आवरण पत्रको लागि नाम प्रविष्ट गर्नुहोस्।"
+
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Enter a name for your passkey."
 msgstr "तपाईंको पासकीको लागि नाम प्रविष्ट गर्नुहोस्।"
@@ -2000,6 +2082,10 @@ msgstr "तपाईंको पासकीको लागि नाम प�
 #: src/features/auth/pages/reset-password.tsx
 msgid "Enter a new password for your account"
 msgstr "आफ्नो खाताका लागि नयाँ पासवर्ड हाल्नुहोस्"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Enter a valid email address."
+msgstr "मान्य इमेल ठेगाना प्रविष्ट गर्नुहोस्।"
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Enter one of your saved backup codes to access your account"
@@ -2041,14 +2127,6 @@ msgstr "त्रुटि"
 msgid "Every check passed. Nothing here should stop a parser from reading your resume."
 msgstr "हरेक चेक पास भयो। "
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Every contribution helps, however small.<0/>Thank you for your support!"
-msgstr "जतिसुकै सानो भए पनि हरेक योगदानले सहयोग पुर्‍याउँछ।<0/>तपाईंको साथका लागि धन्यवाद!"
-
-#: src/routes/_home/-sections/templates.tsx
-msgid "Every template has a different look, so pick the one that fits how you want to come across. Reactive Resume has 15 of them right now, with more on the way."
-msgstr "हरेक ढाँचाको रूप फरक हुन्छ, त्यसैले तपाईं आफूलाई जसरी प्रस्तुत गर्न चाहनुहुन्छ त्यसैसँग मिल्ने ढाँचा छान्नुहोस्। Reactive Resume मा अहिले 15 वटा ढाँचा छन्, अझै थपिँदै छन्।"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "फोकस मोडबाट बाहिर निस्कनुहोस्"
@@ -2076,6 +2154,14 @@ msgstr "{0} मा समाप्त हुन्छ"
 msgid "Export"
 msgstr "निर्यात"
 
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Export applications"
+msgstr "अनुप्रयोगहरू निर्यात गर्नुहोस्"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Export CSV"
+msgstr "CSV निर्यात गर्नुहोस्"
+
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Export Data"
 msgstr "डेटा निर्यात गर्नुहोस्"
@@ -2083,6 +2169,10 @@ msgstr "डेटा निर्यात गर्नुहोस्"
 #: src/features/ats-checker/messages.ts
 msgid "Export from the original document instead of scanning or screenshotting it."
 msgstr "स्क्यान वा स्क्रिनसट लिनुको सट्टा मूल कागजातबाट निर्यात गर्नुहोस्।"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Export JSON"
+msgstr "JSON निर्यात गर्नुहोस्"
 
 #: src/features/settings/pages/account.tsx
 msgid "Export my data"
@@ -2096,10 +2186,6 @@ msgstr "PNG निर्यात गर्नुहोस्"
 msgid "Export the resume as a text PDF rather than as an image or a scan."
 msgstr "बायोडाटालाई तस्बिर वा स्क्यानको सट्टा पाठ PDF को रूपमा निर्यात गर्नुहोस्।"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Export your resume to PDF in one click, with no waiting."
-msgstr "एउटै क्लिकमा आफ्नो बायोडाटा PDF मा निर्यात गर्नुहोस्, कुनै पर्खाइबिना।"
-
 #: src/features/applications/components/insights-view.tsx
 msgid "Exported pipeline-flow.png"
 msgstr "निर्यात गरिएको pipeline-flow.png"
@@ -2109,7 +2195,6 @@ msgid "Failed"
 msgstr "असफल भयो"
 
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Failed to archive thread."
 msgstr "थ्रेड अभिलेख गर्न असफल भयो।"
 
@@ -2138,7 +2223,6 @@ msgid "Failed to delete the API key. Please try again."
 msgstr "API कुञ्जी मेटाउन असफल भयो। कृपया फेरि प्रयास गर्नुहोस्।"
 
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Failed to delete thread."
 msgstr "थ्रेड मेटाउन असफल भयो।"
 
@@ -2217,10 +2301,6 @@ msgstr "साइन इन असफल भयो। कृपया पुन�
 msgid "Failed to sign out. Please try again."
 msgstr "निक्लन असफल भयो। कृपया फेरि प्रयास गर्नुहोस्।"
 
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Failed to start agent thread."
-msgstr "एजेन्ट थ्रेड सुरु गर्न असफल भयो।"
-
 #: src/routes/builder/$resumeId/-components/ai-assistant.tsx
 msgid "Failed to start the AI assistant."
 msgstr "AI सहायक सुरु गर्न असफल भयो।"
@@ -2278,10 +2358,6 @@ msgstr "तपाईंको कोड प्रमाणित गर्न �
 msgid "Fatal error"
 msgstr "गम्भीर त्रुटि"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Features"
-msgstr "विशेषताहरू"
-
 #: src/dialogs/resume/import.tsx
 msgid "File"
 msgstr "फाइल"
@@ -2314,6 +2390,10 @@ msgstr "फिनिस"
 msgid "Fireworks"
 msgstr "आतिशबाजी"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Fit"
+msgstr "फिट"
+
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Fit to view"
 msgstr "हेर्नको लागि उपयुक्त"
@@ -2321,10 +2401,6 @@ msgstr "हेर्नको लागि उपयुक्त"
 #: src/features/ats-checker/messages.ts
 msgid "Flatten the form so the text is part of the page."
 msgstr "फारामलाई फ्ल्याट गर्नुहोस् ताकि पाठ पृष्ठकै अंश बनोस्।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Flexibility"
-msgstr "लचिलोपन"
 
 #: src/dialogs/resume/sections/language.tsx
 msgid "Fluency"
@@ -2384,10 +2460,6 @@ msgstr "ढाँचा"
 msgid "Format stylesheet"
 msgstr "शैलीपाना ढाँचाबद्ध गर्नुहोस्"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Free"
-msgstr "निःशुल्क"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Free-form"
 msgstr "फ्री-फर्म"
@@ -2427,7 +2499,6 @@ msgid "Generate a random name"
 msgstr "अनियमित (random) नाम सिर्जना गर्नुहोस्"
 
 #: src/features/resume/export/use-resume-export.ts
-#: src/routes/agent/-components/resume-pane.tsx
 msgid "Generating your PDF..."
 msgstr "तपाईंको PDF बन्दैछ..."
 
@@ -2435,15 +2506,10 @@ msgstr "तपाईंको PDF बन्दैछ..."
 msgid "German"
 msgstr "जर्मन"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "Get Started"
-msgstr "सुरु गर्नुहोस्"
-
 #. Authentication provider display name in account settings
 #. Brand name label for GitHub social sign-in button
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
-#: src/routes/_home/-sections/footer.tsx
 msgid "GitHub"
 msgstr "गिटहब"
 
@@ -2490,10 +2556,6 @@ msgstr "गुगल"
 msgid "Google Gemini"
 msgstr "गुगल जेमिनी"
 
-#: src/features/settings/integrations/components/ai-section.tsx
-msgid "gpt-4.1"
-msgstr "जीपीटी-४.१"
-
 #: src/dialogs/resume/sections/education.tsx
 msgid "Grade"
 msgstr "ग्रेड"
@@ -2509,10 +2571,6 @@ msgstr "ग्रिड"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Groq"
 msgstr "ग्रोक"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Grow the Team"
-msgstr "टिम बढाउनुहोस्"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
@@ -2552,10 +2610,6 @@ msgstr "मुख्य शीर्षक (Headline)"
 msgid "Hebrew"
 msgstr "हिब्रु"
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Help me bring more experienced contributors on board, so the work doesn't rest on one maintainer."
-msgstr "थप अनुभवी योगदानकर्ताहरू भित्र्याउन मलाई सहयोग गर्नुहोस्, ताकि सबै काम एउटै मर्मतकर्तामाथि नअड्कियोस्।"
-
 #: src/features/settings/pages/preferences.tsx
 msgid "Help translate the app to your language"
 msgstr "एपलाई तपाईंको भाषामा अनुवाद गर्न मद्दत गर्नुहोस्"
@@ -2570,11 +2624,20 @@ msgstr "यहाँ तपाईंको नयाँ API key छ"
 msgid "Hidden"
 msgstr "लुकाइएको"
 
+#: src/features/resume/builder/section-recovery.tsx
+msgid "Hidden sections"
+msgstr "लुकेका खण्डहरू"
+
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Hide"
 msgstr "ल्यুকाउनुहोस्"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "Hide heading"
+msgstr "हेडिङ लुकाउनुहोस्"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Hide Icons"
@@ -2606,6 +2669,10 @@ msgstr "पासवर्ड लुकाउनुहोस्"
 msgid "Hide picture"
 msgstr "तस्वीर लुकाउनुहोस्"
 
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Hide preview"
+msgstr "पूर्वावलोकन लुकाउनुहोस्"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/page.tsx
 msgid "Hide Section Icons"
 msgstr "खण्ड आइकनहरू लुकाउनुहोस्"
@@ -2630,25 +2697,17 @@ msgstr "हिन्दी"
 msgid "Home"
 msgstr "गृह पृष्ठ"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "How do I share my resume?"
-msgstr "म आफ्नो बायोडाटा कसरी सेयर गर्ने?"
-
-#: src/features/settings/pages/api-keys.tsx
-msgid "How do I use the API?"
-msgstr "म API कसरी प्रयोग गर्ने?"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "How is my data protected?"
-msgstr "मेरो डाटा कसरी सुरक्षित हुन्छ?"
-
 #: src/features/settings/integrations/components/ai-section.tsx
-msgid "https://gateway.example.com/v1"
-msgstr "https://gateway.example.com/v1"
+msgid "Hosted providers"
+msgstr ""
 
 #: src/libs/locale.ts
 msgid "Hungarian"
 msgstr "हंगेरीयाली"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
+msgid "Hyphenation"
+msgstr "अल्पविराम विभાજक"
 
 #: src/components/level/combobox.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -2674,10 +2733,15 @@ msgid "Import {0}"
 msgstr "{0} आयात गर्नुहोस्"
 
 #: src/dialogs/resume/import.tsx
+#: src/routes/_home/-sections/hero.tsx
 #: src/routes/dashboard/resumes/-components/cards/import-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Import an existing resume"
 msgstr "पहिले नै भएको बायोडाटा आयात गर्नुहोस्"
+
+#: src/features/cover-letters/library.tsx
+msgid "Import cover letter JSON"
+msgstr "आवरण पत्र JSON आयात गर्नुहोस्"
 
 #: src/routes/dashboard/applications/index.tsx
 msgid "Import CSV"
@@ -2685,12 +2749,20 @@ msgstr "CSV आयात गर्नुहोस्"
 
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Import failed. Check the CSV and try again."
-msgstr "आयात असफल भयो। CSV जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस्।"
+msgstr "failed आयात गर्नुहोस्। CSV जाँच गर्नुहोस् र again प्रयास गर्नुहोस्।"
 
 #: src/features/applications/components/import-applications-sheet.tsx
 #: src/routes/dashboard/applications/index.tsx
 msgid "Import from CSV"
 msgstr "CSV बाट आयात गर्नुहोस्"
+
+#: src/dialogs/resume/sections/cover-letter.tsx
+msgid "Import from library"
+msgstr "पुस्तकालयबाट आयात गर्नुहोस्"
+
+#: src/features/cover-letters/library.tsx
+msgid "Import JSON"
+msgstr "JSON आयात गर्नुहोस्"
 
 #. placeholder {0}: result.imported
 #: src/features/applications/components/import-applications-sheet.tsx
@@ -2698,8 +2770,8 @@ msgid "Imported {0} application(s)."
 msgstr "आयातित {0} आवेदन(हरू)।"
 
 #: src/dialogs/resume/import.tsx
-msgid "Importing from PDF or Word requires a connected AI provider."
-msgstr "PDF वा Word बाट आयात गर्न जडान गरिएको AI प्रदायक चाहिन्छ।"
+msgid "Importing from Word requires a connected AI provider."
+msgstr "Word बाट आयात गर्न एक जडान भएको AI प्रदायक चाहिन्छ।"
 
 #: src/dialogs/resume/import.tsx
 msgid "Importing your resume..."
@@ -2730,10 +2802,6 @@ msgstr "दुई लाइन एकआपसमा नमिसियोस्
 msgid "Increase them so content stays inside the reliably read area."
 msgstr "तिनीहरूलाई बढाउनुहोस् ताकि सामग्री विश्वसनीय रूपमा पढ्ने क्षेत्र भित्र रहन्छ।"
 
-#: src/routes/agent/-components/resume-pane.tsx
-msgid "Increase zoom"
-msgstr "जुम बढाउनुहोस्"
-
 #: src/libs/locale.ts
 msgid "Indonesian"
 msgstr "इन्डोनेसियन"
@@ -2741,6 +2809,10 @@ msgstr "इन्डोनेसियन"
 #: src/libs/resume/section.tsx
 msgid "Information"
 msgstr "जानकारी"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/skill-keyword-layout-menu.tsx
+msgid "Inline"
+msgstr "इनलाइन"
 
 #: src/components/input/rich-input.tsx
 msgid "Inline Code"
@@ -2754,11 +2826,7 @@ msgstr "अन्तर्दृष्टिहरू"
 #. placeholder {1}: progress.pageCount
 #: src/features/ats-checker/tool.tsx
 msgid "Inspecting page {0} of {1}…"
-msgstr "{1} मध्ये {0} पृष्ठ जाँच्दै…"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Instant Generation"
-msgstr "तत्काल उत्पादन"
+msgstr "{0} मध्ये {1} पृष्ठ जाँच्दै…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
@@ -2773,16 +2841,8 @@ msgid "Interests"
 msgstr "रुचिहरू"
 
 #: src/features/settings/integrations/components/ai-section.tsx
-msgid "Invalid AI provider configuration."
-msgstr "अमान्य AI प्रदायक कन्फिगरेसन।"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Is Reactive Resume available in multiple languages?"
-msgstr "Reactive Resume विभिन्न भाषामा उपलब्ध छ कि?"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Is Reactive Resume really free?"
-msgstr "Reactive Resume साँच्चिकै निःशुल्क हो?"
+msgid "Invalid AI provider configuration. Private or http:// endpoints are only allowed for LM Studio and Ollama."
+msgstr ""
 
 #: src/dialogs/resume/sections/certification.tsx
 msgid "Issuer"
@@ -2800,10 +2860,6 @@ msgstr "इटालिक"
 msgid "Japanese"
 msgstr "जापानी"
 
-#: src/features/command-palette/pages/navigation.tsx
-msgid "Job"
-msgstr "काम"
-
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Job description"
 msgstr "काम विवरण"
@@ -2813,7 +2869,12 @@ msgstr "काम विवरण"
 msgid "Job description (optional)"
 msgstr "काम विवरण (वैकल्पिक)"
 
+#: src/features/applications/components/application-ai-copilot.tsx
+msgid "Job Fit"
+msgstr ""
+
 #: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/command-palette/pages/navigation.tsx
 msgid "Job posting"
 msgstr "नौकरी पोस्टिंग"
 
@@ -2821,11 +2882,22 @@ msgstr "नौकरी पोस्टिंग"
 msgid "Job posting link"
 msgstr "नौकरी पोस्टिंग लिङ्क"
 
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Job saved."
+msgstr ""
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/routes/dashboard/-components/sidebar.tsx
+#: src/routes/dashboard/applications/index.tsx
+msgid "Job Search"
+msgstr ""
+
 #: src/features/applications/components/insights-view.tsx
 msgid "Job search pipeline"
 msgstr "रोजगार खोज पाइपलाइन"
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
 msgid "Jobs"
 msgstr "जागिरहरू"
 
@@ -2842,17 +2914,6 @@ msgstr "जोन डो"
 #: src/features/settings/pages/profile.tsx
 msgid "john.doe"
 msgstr "जोन डू"
-
-#. Example email placeholder for login identifier field
-#. Example email placeholder on forgot-password form
-#. Example email placeholder on profile settings form
-#. Example email placeholder on registration form
-#: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
-#: src/features/auth/pages/register.tsx
-#: src/features/settings/pages/profile.tsx
-msgid "john.doe@example.com"
-msgstr "john.doe@example.com"
 
 #. Import source option for standard JSON Resume format
 #: src/dialogs/resume/import.tsx
@@ -2871,6 +2932,14 @@ msgstr "कन्नड"
 msgid "Keep a single address, so software does not have to guess which one to use."
 msgstr "एउटै ठेगाना राख्नुहोस्, ताकि कुन प्रयोग गर्ने भनेर सफ्टवेयरले अनुमान लगाउनु नपरोस्।"
 
+#: src/features/auth/pages/consent.tsx
+msgid "Keep access when you are not using the application."
+msgstr "तपाईंले एप प्रयोग नगर्दा पहुँच राख्नुहोस्।"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Keep editing"
+msgstr "सम्पादन गरिरहनुहोस्"
+
 #: src/features/ats-checker/messages.ts
 msgid "Keep it under 2.5 MB, usually by removing or shrinking images."
 msgstr "सामान्यतया तस्बिर हटाएर वा साना बनाएर यसलाई 2.5 MB भन्दा कम राख्नुहोस्।"
@@ -2886,6 +2955,10 @@ msgstr "बायोडाटाको सामग्रीलाई पाठ�
 #: src/features/ats-checker/messages.ts
 msgid "Keep running heads short, or drop them. They repeat in the extracted text too."
 msgstr "दोहोरिने शीर्षकहरू छोटो राख्नुहोस्, वा हटाउनुहोस्। ती निकालिएको पाठमा पनि दोहोरिन्छन्।"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Keep the posting, link a resume, score your fit, and create a tailored copy when you are ready to apply."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Keep them to roughly two lines, so a skim-reader finishes them."
@@ -2903,6 +2976,10 @@ msgstr "सँगै राख्नुहोस्"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Key"
 msgstr "कुञ्जी"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/skill-keyword-layout-menu.tsx
+msgid "Keyword layout"
+msgstr "कीवर्ड लेआउट"
 
 #: src/dialogs/resume/sections/interest.tsx
 #: src/dialogs/resume/sections/skill.tsx
@@ -2980,10 +3057,6 @@ msgstr "पाठलाई तेर्सो रूपमा सजाउनु
 msgid "Layout"
 msgstr "लेआउट"
 
-#: src/routes/_home/-sections/hero.tsx
-msgid "Learn More"
-msgstr "थप जान्नुहोस्"
-
 #: src/dialogs/resume/import.tsx
 #: src/hooks/use-form-blocker.tsx
 msgid "Leave"
@@ -2996,6 +3069,10 @@ msgstr "पृष्ठको वरिपरि कम्तीमा आधा
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
 msgid "Leave empty to reset the title to the original."
 msgstr "शीर्षकलाई मौलिक अवस्थामा फर्काउन खाली छोड्नुहोस्।"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Leave this empty if your server does not require a key."
+msgstr ""
 
 #: src/dialogs/resume/import.tsx
 msgid "Leave to set up an AI provider?"
@@ -3023,10 +3100,6 @@ msgstr "स्तर"
 #: src/components/level/display.tsx
 msgid "Level {level} of 5"
 msgstr "५ मध्ये {level} औं स्तर"
-
-#: src/components/ui/copyright.tsx
-msgid "Licensed under <0>MIT</0>."
-msgstr "<0>MIT</0> अन्तर्गत इजाजतपत्र (Licensed) प्राप्त।"
 
 #: src/features/ats-checker/messages.ts
 msgid "Ligatures can drop letters out of words such as \"workflow\"."
@@ -3072,7 +3145,6 @@ msgstr "लिङ्क गरिएको Reactive Resume"
 #. Brand name label for LinkedIn social sign-in button
 #: src/features/auth/components/social-auth.tsx
 #: src/features/settings/authentication/components/hooks.tsx
-#: src/routes/_home/-sections/footer.tsx
 msgid "LinkedIn"
 msgstr "लिङ्क्डइन"
 
@@ -3100,9 +3172,9 @@ msgstr "लिथुआनियन"
 msgid "Loading AI providers. Please try again in a moment."
 msgstr "AI प्रदायकहरू लोड गर्दै। कृपया केही बेरमा फेरि प्रयास गर्नुहोस्।"
 
-#: src/features/command-palette/pages/resumes.tsx
-msgid "Loading applications…"
-msgstr "आवेदनहरू लोड गर्दै…"
+#: src/features/auth/pages/consent.tsx
+msgid "Loading connection request..."
+msgstr "जडान अनुरोध लोड गर्दै..."
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 #: src/features/settings/integrations/components/ai-section.tsx
@@ -3110,18 +3182,20 @@ msgid "Loading providers…"
 msgstr "प्रदायकहरू लोड गर्दै…"
 
 #: src/features/command-palette/pages/resumes.tsx
-#: src/routes/agent/-components/new-thread-setup.tsx
 msgid "Loading resumes…"
 msgstr "रिजुमेहरू लोड गर्दै…"
 
 #: src/features/command-palette/pages/resumes.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
-msgid "Loading threads…"
-msgstr "थ्रेडहरू लोड गर्दै…"
+msgid "Loading saved jobs…"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "Loading…"
 msgstr "लोड हुँदै…"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Local & self-hosted"
+msgstr ""
 
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
@@ -3144,10 +3218,6 @@ msgstr "लक गर्नुहोस्"
 #: src/features/ats-checker/messages.ts
 msgid "Long stretches are set in capitals."
 msgstr "लामो खण्डहरू ठूला अक्षरमा लेखिएका छन्।"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Long-term Sustainability"
-msgstr "दीर्घकालीन दिगोपन (Sustainability)"
 
 #. Link to backup-code verification flow when authenticator app is unavailable
 #: src/features/auth/pages/verify-2fa.tsx
@@ -3221,10 +3291,6 @@ msgstr "मध्यम प्रभाव"
 msgid "Microsoft Word"
 msgstr "माइक्रोसफ्ट वर्ड"
 
-#: src/routes/agent/-components/resume-pane.tsx
-msgid "Missing working resume"
-msgstr "काम गर्ने बायोडाटा हराइरहेको छ"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Mistral AI"
 msgstr "मिस्ट्रल एआई"
@@ -3232,6 +3298,10 @@ msgstr "मिस्ट्रल एआई"
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Model"
 msgstr "मोडेल"
+
+#: src/features/settings/integrations/components/ai-section.tsx
+msgid "Model ID served by your endpoint"
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "More than one email address appears."
@@ -3284,10 +3354,6 @@ msgstr "आफ्नो इमेल र फोन नम्बर पहिल�
 msgid "Moved to"
 msgstr "यसमा सारियो"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Multilingual"
-msgstr "बहुभाषिक"
-
 #. Placeholder text for custom link URL field in resume builder
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom-fields.tsx
 msgid "Must start with https://"
@@ -3303,6 +3369,8 @@ msgstr "https:// बाटै सुरु गर्नुपर्छ।"
 #: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/ats-checker/parse-preview.tsx
 #: src/features/auth/pages/register.tsx
+#: src/features/cover-letters/editor.tsx
+#: src/features/cover-letters/library.tsx
 #: src/features/settings/pages/profile.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/basics.tsx
 #: src/routes/dashboard/resumes/index.tsx
@@ -3338,13 +3406,8 @@ msgid "New account sign-ups are currently disabled on this server."
 msgstr "यो सर्भरमा नयाँ खाता दर्ता हाल बन्द छ।"
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
 msgid "New Application"
 msgstr "नयाँ आवेदन"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "New features land regularly, so check back now and then."
-msgstr "नयाँ सुविधाहरू नियमित रूपमा थपिन्छन्, त्यसैले बेलाबेला फर्केर हेर्नुहोस्।"
 
 #: src/components/input/rich-input.tsx
 msgid "New Line"
@@ -3369,31 +3432,17 @@ msgstr "नयाँ खण्ड"
 msgid "New tag…"
 msgstr "नयाँ ट्याग…"
 
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
-msgid "New thread"
-msgstr "नयाँ थ्रेड"
-
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-msgid "New Thread"
-msgstr "नयाँ थ्रेड"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "No ads and no trackers, so nothing gets in your way."
-msgstr "कुनै विज्ञापन छैन र कुनै ट्र्याकर छैन, त्यसैले केहीले पनि तपाईंलाई अवरोध गर्दैन।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "No Advertising, No Tracking"
-msgstr "कुनै विज्ञापन छैन, कुनै ट्र्याकिङ छैन"
+#: src/features/cover-letters/library.tsx
+msgid "Next"
+msgstr "अर्को"
 
 #: src/routes/builder/$resumeId/-components/ai-assistant.tsx
 msgid "No AI provider connected"
 msgstr "कुनै पनि AI प्रदायक जोडिएको छैन"
 
-#: src/routes/dashboard/applications/index.tsx
-msgid "No applications match your filters."
-msgstr "कुनै पनि आवेदनहरू तपाईंको फिल्टरहरूसँग मेल खाँदैन।"
+#: src/dialogs/resume/import.tsx
+msgid "No AI provider is connected, so we will read the text out of the PDF here in your browser and fill in what we can recognize. Expect to tidy up the result."
+msgstr "कुनै पनि AI प्रदायक जडान गरिएको छैन, त्यसैले हामी यहाँ तपाईंको ब्राउजरमा PDF को पाठ पढ्नेछौं र हामीले चिन्न सक्ने कुराहरू भर्नेछौं। नतिजालाई व्यवस्थित गर्ने अपेक्षा गर्नुहोस्।"
 
 #: src/features/applications/components/insights-view.tsx
 msgid "No applications yet. Add a few to see your funnel and reply rates."
@@ -3411,6 +3460,10 @@ msgstr "त्यो खोजसँग मिल्ने कुनै कम�
 #: src/features/ats-checker/messages.ts
 msgid "No conventional section headings were found."
 msgstr "कुनै परम्परागत खण्ड शीर्षक फेला परेन।"
+
+#: src/features/cover-letters/library.tsx
+msgid "No cover letters found. Create one or import an existing letter."
+msgstr "कुनै आवरण पत्र फेला परेन। एउटा सिर्जना गर्नुहोस् वा अवस्थित पत्र आयात गर्नुहोस्।"
 
 #. Error shown when AI import endpoint returns no parsed resume data
 #: src/dialogs/resume/import.tsx
@@ -3433,10 +3486,6 @@ msgstr "कुनै इमेल ठेगाना फेला परेन�
 msgid "No lines look like a job title paired with an employer."
 msgstr "कुनै पनि लाइन काम शीर्षक र रोजगारदातासँग मिल्दो देखिँदैन।"
 
-#: src/routes/_home/ats-checker.tsx
-msgid "No one-page rule, and no treating a font or a career gap as a fault."
-msgstr "एक पृष्ठको कुनै नियम छैन, र फन्ट वा करियर अन्तरलाई त्रुटि मानिँदैन।"
-
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "No passkeys registered yet."
 msgstr "अहिलेसम्म कुनै पासकी दर्ता भएका छैनन्।"
@@ -3445,17 +3494,9 @@ msgstr "अहिलेसम्म कुनै पासकी दर्ता
 msgid "No phone number was found."
 msgstr "कुनै फोन नम्बर फेला परेन।"
 
-#: src/routes/_home/ats-checker.tsx
-msgid "No prediction of whether you will be rejected. No tool can do that."
-msgstr "तपाईं अस्वीकृत हुनुहुन्छ कि हुँदैन भन्ने पूर्वानुमान गरिँदैन। कुनै पनि साधनले त्यो गर्न सक्दैन।"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "No prior data"
 msgstr "पहिलेको कुनै डेटा छैन"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "No repeating the claim that most resumes are thrown out automatically."
-msgstr "धेरैजसो बायोडाटा स्वचालित रूपमा फ्याँकिन्छन् भन्ने दाबीको कुनै पुनरावृत्ति छैन।"
 
 #: src/components/ui/combobox.tsx
 msgid "No results found."
@@ -3473,6 +3514,10 @@ msgstr "तपाईंको खोजसँग मेल खाने कु�
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "No resumes yet."
 msgstr "अझै रिजुम छैन।"
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "No saved jobs match your filters."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/version-history.tsx
 msgid "No saved versions yet."
@@ -3497,10 +3542,6 @@ msgstr "परीक्षण गरिएको कुनै प्रदाय
 #: src/features/ats-checker/messages.ts
 msgid "No text could be read from this file."
 msgstr "यो फाइलबाट कुनै पाठ पढ्न सकिएन।"
-
-#: src/routes/agent/-components/thread-sidebar.tsx
-msgid "No threads yet."
-msgstr "अहिलेसम्म कुनै थ्रेड छैन।"
 
 #: src/features/ats-checker/messages.ts
 msgid "No work-experience section was found."
@@ -3534,6 +3575,7 @@ msgstr "के लेख्ने भनेर निश्चित हुन�
 msgid "Note"
 msgstr "नोट"
 
+#: src/features/applications/components/application-detail-sheet.tsx
 #: src/features/applications/components/application-form-sheet.tsx
 #: src/libs/resume/section.tsx
 msgid "Notes"
@@ -3560,20 +3602,16 @@ msgid "Odia"
 msgstr "ओडिया"
 
 #: src/features/settings/integrations/components/ai-section.tsx
-msgid "Ollama Cloud"
-msgstr "ओलामा क्लाउड"
+msgid "Ollama"
+msgstr ""
 
 #: src/features/settings/pages/api-keys.tsx
 msgid "Once deleted, the key can no longer access your data. This cannot be undone."
 msgstr "मेटाएपछि यो key ले तपाईंको डाटामा पहुँच गर्न सक्दैन। यो कार्य उल्ट्याउन सकिँदैन।"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "One-Click Sign-In"
-msgstr "एक-क्लिक साइन-इन"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Ongoing Maintenance"
-msgstr "निरन्तर मर्मत"
+#: src/features/auth/pages/consent.tsx
+msgid "Only allow applications you trust. This application will be able to:"
+msgstr "तपाईंले विश्वास गर्ने अनुप्रयोगहरूलाई मात्र अनुमति दिनुहोस्। यो अनुप्रयोग सक्षम हुनेछ:"
 
 #. Helper note explaining the keep-together limitation
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
@@ -3604,10 +3642,6 @@ msgstr "केवल सुरुका पृष्ठहरू जाँचि
 msgid "Open"
 msgstr "खोल्नुहोस्"
 
-#: src/routes/builder/$resumeId/-components/dock.tsx
-msgid "Open AI agent"
-msgstr "एआई एजेन्ट खोल्नुहोस्"
-
 #: src/routes/builder/$resumeId/-components/ai-assistant.tsx
 msgid "Open AI assistant"
 msgstr "एआई सहायक खोल्नुहोस्"
@@ -3621,17 +3655,9 @@ msgstr "इमेल क्लाइन्ट खोल्नुहोस्"
 msgid "Open focus mode"
 msgstr "फोकस मोड खोल्नुहोस्"
 
-#: src/routes/agent/-components/resume-pane.tsx
-msgid "Open in builder"
-msgstr "बिल्डरमा खोल्नुहोस्"
-
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Open Integrations Settings"
 msgstr "एकीकरण सेटिङहरू खोल्नुहोस्"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Open Source"
-msgstr "खुला-स्रोत"
 
 #: src/features/ats-checker/messages.ts
 msgid "Open the exported file and confirm you can select and copy every part of it."
@@ -3639,7 +3665,7 @@ msgstr "निर्यात गरिएको फाइल खोल्नु
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "OpenAI"
-msgstr "ओपनएआई"
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "OpenAI-compatible"
@@ -3654,8 +3680,6 @@ msgid "OpenRouter"
 msgstr "ओपनराउटर"
 
 #: src/features/resume/stylesheet/editor.tsx
-#: src/routes/_home/-sections/donate.tsx
-#: src/routes/_home/-sections/footer.tsx
 msgid "opens in new tab"
 msgstr "नयाँ ट्याबमा खुल्छ"
 
@@ -3666,10 +3690,6 @@ msgstr "एजेन्टका लागि वैकल्पिक टिप
 #: src/routes/agent/-components/patch-approval-card.tsx
 msgid "Optional note for the agent…"
 msgstr "एजेन्टका लागि वैकल्पिक टिप्पणी…"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "Optionally, which terms from a job posting already appear."
-msgstr "वैकल्पिक रूपमा, काम पोस्टिङका कुन शब्दहरू पहिल्यै देखिन्छन्।"
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 msgid "Options for {title}"
@@ -3692,6 +3712,10 @@ msgstr "क्रमबद्ध सूची"
 msgid "Organization"
 msgstr "संस्था"
 
+#: src/components/input/rich-input.tsx
+msgid "Original table formatting is preserved. This content is read-only because it cannot be edited safely."
+msgstr "मूल तालिका ढाँचा सुरक्षित छ। यो सामग्री पढ्ने मात्र हो किनभने यसलाई सुरक्षित रूपमा सम्पादन गर्न सकिँदैन।"
+
 #: src/features/ats-checker/report/score-header.tsx
 msgid "out of 100"
 msgstr "100 मध्ये"
@@ -3701,8 +3725,10 @@ msgid "Page"
 msgstr "पृष्ठ"
 
 #. Layout editor page label with 1-based page number
+#. placeholder {0}: Math.floor(offset / 20) + 1
 #. placeholder {0}: pageIndex + 1
 #. placeholder {0}: targetPageIndex + 1
+#: src/features/cover-letters/library.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
 msgid "Page {0}"
@@ -3715,6 +3741,18 @@ msgstr "अनुच्छेद"
 #: src/components/input/rich-input.tsx
 msgid "Paragraph and heading style"
 msgstr "अनुच्छेद र शीर्षक शैली"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Parent updates"
+msgstr ""
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Parent updates applied."
+msgstr ""
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Parent updates dismissed."
+msgstr ""
 
 #. Authentication provider display name in account settings
 #. Label for passkey sign-in button
@@ -3735,10 +3773,6 @@ msgstr "पासकी दर्ता भयो।"
 msgid "Passkeys"
 msgstr "पासकीहरू"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Passkeys & 2FA"
-msgstr "पासकी र २FA"
-
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -3748,18 +3782,15 @@ msgstr "पासकी र २FA"
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/resume-password.tsx
+#: src/features/resume/builder/password-dialog.tsx
 #: src/features/settings/authentication/components/hooks.tsx
 #: src/features/settings/authentication/components/password.tsx
 msgid "Password"
 msgstr "पासवर्ड"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
-msgid "Password cannot be empty."
-msgstr "पासवर्ड खाली हुन मिल्दैन।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Password Protection"
-msgstr "पासवर्ड सुरक्षा"
+#: src/features/resume/builder/password-dialog.tsx
+msgid "Password must be between 6 and 64 characters."
+msgstr "पासवर्ड ६ देखि ६४ अक्षरसम्मको हुनुपर्छ।"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Password protection has been disabled."
@@ -3769,13 +3800,17 @@ msgstr "पासवर्ड सुरक्षा अक्षम गरिए
 msgid "Password protection has been enabled."
 msgstr "पासवर्ड सुरक्षा सक्रिय गरिएको छ।"
 
+#: src/features/resume/builder/password-dialog.tsx
+msgid "Passwords do not match."
+msgstr "पासवर्डहरू मेल खाँदैनन्।"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx
 msgid "Paste a posting to see which of its terms already appear in your resume."
 msgstr "काम पोस्टिङ टाँस्नुहोस् र यसका कुन शब्द तपाईंको बायोडाटामा पहिल्यै छन् हेर्नुहोस्।"
 
 #: src/features/applications/components/import-applications-sheet.tsx
-msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source and Tags."
-msgstr "पङ्क्तिहरू टाँस्नुहोस् वा .csv अपलोड गर्नुहोस्। हामी कम्पनी, भूमिका, चरण, चरण मिति, तलब, स्रोत र ट्यागहरू जस्ता स्तम्भहरू नक्सा गर्छौं।"
+msgid "Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags, Contact Name, Contact Email and Contact Phone."
+msgstr "पङ्क्तिहरू टाँस्नुहोस् वा .csv अपलोड गर्नुहोस्। हामी कम्पनी, भूमिका, स्टेज, स्टेज मिति, तलब, स्रोत, ट्याग, सम्पर्क नाम, सम्पर्क इमेल र सम्पर्क फोन जस्ता स्तम्भहरू नक्सा गर्छौं।"
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Paste the full job description here…"
@@ -3813,11 +3848,13 @@ msgstr "प्याच फिर्ता गरियो"
 msgid "Patch rolled back."
 msgstr "प्याच फिर्ता गरियो।"
 
-#. File format label in import source selector
-#. File format label in import source selector
-#: src/dialogs/resume/import.tsx
-msgid "PDF"
-msgstr "पीडीएफ"
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "PDF snapshot attached to the application."
+msgstr "एप्लिकेसनमा संलग्न PDF स्न्यापसट।"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "PDFs already attached to applications will remain available."
+msgstr "एप्लिकेसनहरूमा पहिले नै संलग्न PDF हरू उपलब्ध रहनेछन्।"
 
 #: src/dialogs/resume/sections/education.tsx
 #: src/dialogs/resume/sections/experience.tsx
@@ -3840,9 +3877,9 @@ msgstr "फारसी"
 msgid "Phone"
 msgstr "फोन"
 
-#: src/routes/agent/index.tsx
-msgid "Pick a conversation from the sidebar, or start a new thread to work on a draft."
-msgstr "साइडबारबाट कुनै कुराकानी छान्नुहोस्, वा कुनै मस्यौदामा काम गर्न नयाँ थ्रेड सुरु गर्नुहोस्।"
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Phone (optional)"
+msgstr "फोन (वैकल्पिक)"
 
 #: src/features/resume/export/download-dialog.tsx
 msgid "Pick a format for your resume or cover letter."
@@ -3875,10 +3912,6 @@ msgstr "यसलाई लेआउट प्यानलबाट पृष्
 #: src/features/resume/export/download-dialog.tsx
 msgid "Plain text, for AI tools and quick edits."
 msgstr "सादा पाठ, AI साधन र छिटो सम्पादनका लागि।"
-
-#: src/components/ui/donation-toast.tsx
-msgid "Please support the project"
-msgstr "कृपया परियोजनालाई समर्थन गर्नुहोस्।"
 
 #: src/features/applications/components/file-attachment-field.tsx
 msgid "Please upload a PDF file."
@@ -3954,6 +3987,14 @@ msgstr "पूर्वावलोकन र निर्यात आधार
 msgid "Preview and export keep valid styles and ignore invalid styles."
 msgstr "पूर्वावलोकन र निर्यातले मान्य शैलीहरू राख्छन् र अमान्य शैलीहरूलाई बेवास्ता गर्छन्।"
 
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Preview PDF"
+msgstr "PDF पूर्वावलोकन गर्नुहोस्"
+
+#: src/features/cover-letters/library.tsx
+msgid "Previous"
+msgstr "अघिल्लो"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Primary Color"
 msgstr "मुख्य रङ"
@@ -3988,7 +4029,7 @@ msgstr "प्रगति बार (Progress Bar)"
 msgid "Projects"
 msgstr "परियोजनाहरू"
 
-#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+#: src/features/resume/builder/password-dialog.tsx
 msgid "Protect your resume with a password"
 msgstr "आफ्नो बायोडाटालाई पासवर्डले सुरक्षित गर्नुहोस्"
 
@@ -4013,10 +4054,6 @@ msgstr "प्रकाशनहरू"
 #: src/dialogs/resume/sections/publication.tsx
 msgid "Publisher"
 msgstr "प्रकाशक"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Put a password on your resume so only the people you give it to can read it."
-msgstr "आफ्नो बायोडाटामा पासवर्ड राख्नुहोस्, ताकि तपाईंले दिनुभएका मानिसहरूले मात्र त्यो पढ्न सकून्।"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4063,34 +4100,9 @@ msgstr "Reactive Resume - गृहपृष्ठमा जानुहोस�
 msgid "Reactive Resume (JSON)"
 msgstr "प्रतिक्रियाशील बायोडाटा (JSON)"
 
-#: src/routes/_home/-sections/prefooter.tsx
-msgid "Reactive Resume gets better because people give it their time. Contributors on GitHub build the features and fix the bugs, translators on Crowdin make it readable in other languages, and donors help keep development going. This project owes its progress to all of them."
-msgstr "मानिसहरूले आफ्नो समय दिने भएकाले नै Reactive Resume राम्रो हुँदै जान्छ। GitHub का योगदानकर्ताहरूले सुविधाहरू बनाउँछन् र बग सुधार्छन्, Crowdin का अनुवादकहरूले यसलाई अरू भाषामा पढ्न मिल्ने बनाउँछन्, र दाताहरूले विकास जारी राख्न सघाउँछन्। यो परियोजनाको प्रगति ती सबैको देन हो।"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Reactive Resume is a free and open-source project, maintained by me and a community of contributors. Your donations cover the running costs and keep development going."
-msgstr "Reactive Resume एउटा निःशुल्क र खुला-स्रोत परियोजना हो, जसलाई म र योगदानकर्ताहरूको समुदायले मिलेर चलाउँछौं। तपाईंको दानले सञ्चालन खर्च धान्छ र विकास जारी राख्छ।"
-
 #: src/routes/_home/-sections/hero.tsx
-msgid "Reactive Resume is a free and open-source resume builder that makes it easy to create, update, and share your resume."
-msgstr "Reactive Resume एउटा निःशुल्क र खुला-स्रोत बायोडाटा निर्माण गर्ने साधन हो, जसले तपाईंको बायोडाटा बनाउन, अद्यावधिक गर्न र सेयर गर्न सजिलो बनाउँछ।"
-
-#: src/components/ui/donation-toast.tsx
-msgid "Reactive Resume is free and open source. If it has helped you, please consider donating."
-msgstr "प्रतिक्रियाशील रिजुमे नि:शुल्क र खुला स्रोत हो। यदि यसले तपाईंलाई मद्दत गरेको छ भने, कृपया दान गर्ने विचार गर्नुहोस्।"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Reactive Resume is open source, private, and free. It shows no ads, doesn't track what you do, and doesn't lock features behind a paywall."
-msgstr "Reactive Resume खुला-स्रोत, निजी र निःशुल्क छ। यसले कुनै विज्ञापन देखाउँदैन, तपाईं के गर्नुहुन्छ भनेर ट्र्याक गर्दैन, र कुनै सुविधालाई पैसाको पर्खालपछाडि छेक्दैन।"
-
-#: src/routes/_home/-sections/sponsors.tsx
-msgid "Reactive Resume stays free, open-source, and independent because companies choose to support the work behind it. Their sponsorship helps fund hosting, maintenance, and continued development for the community."
-msgstr "प्रतिक्रियाशील रिजुमे नि:शुल्क, खुला स्रोत र स्वतन्त्र रहन्छ किनभने कम्पनीहरूले यसको पछाडिको कामलाई समर्थन गर्ने छनौट गर्छन्। तिनीहरूको प्रायोजनले समुदायको लागि होस्टिंग, मर्मतसम्भार र निरन्तर विकासको लागि कोष प्रदान गर्न मद्दत गर्दछ।"
-
-#. App version label in footer; includes semantic version variable
-#: src/components/ui/copyright.tsx
-msgid "Reactive Resume v<0>{__APP_VERSION__}</0>"
-msgstr "प्रतिक्रियाशील रिजुमे v<0>{__APP_VERSION__}</0>"
+msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
+msgstr ""
 
 #. Import source option for legacy Reactive Resume v4 JSON format
 #: src/dialogs/resume/import.tsx
@@ -4109,6 +4121,14 @@ msgstr "अनुकूलन शैलीहरू लागू गर्ने
 msgid "Read the resume"
 msgstr "बायोडाटा पढियो"
 
+#: src/features/auth/pages/consent.tsx
+msgid "Read your email address."
+msgstr "आफ्नो इमेल ठेगाना पढ्नुहोस्।"
+
+#: src/features/auth/pages/consent.tsx
+msgid "Read your profile information."
+msgstr "आफ्नो प्रोफाइल जानकारी पढ्नुहोस्।"
+
 #: src/features/ats-checker/messages.ts
 msgid "Readability"
 msgstr "पठनीयता"
@@ -4117,7 +4137,7 @@ msgstr "पठनीयता"
 #. placeholder {1}: progress.pageCount
 #: src/features/ats-checker/tool.tsx
 msgid "Reading page {0} of {1}…"
-msgstr "{1} मध्ये {0} पृष्ठ पढ्दै…"
+msgstr "{0} मध्ये {1} पृष्ठ पढ्दै…"
 
 #: src/features/applications/components/application-form-sheet.tsx
 msgid "Reading the posting…"
@@ -4136,6 +4156,7 @@ msgid "Ready to activate with warnings"
 msgstr "चेतावनी सहित सक्रिय गर्न तयार"
 
 #: src/dialogs/resume/sections/cover-letter.tsx
+#: src/features/cover-letters/editor.tsx
 msgid "Recipient"
 msgstr "प्राप्तकर्ता"
 
@@ -4168,6 +4189,10 @@ msgstr "द्वारा उल्लेख गरिएको ..., जोड 
 #: src/features/settings/authentication/components/passkeys.tsx
 msgid "Register New Device"
 msgstr "नयाँ उपकरण दर्ता गर्नुहोस्"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Reload latest version"
+msgstr "नवीनतम संस्करण पुन: लोड गर्नुहोस्"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Remember your password? <0/>"
@@ -4210,6 +4235,10 @@ msgstr "पासवर्ड हटाउनुहोस्"
 msgid "Remove tag"
 msgstr "ट्याग हटाउनुहोस्"
 
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Removed"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Removing password protection..."
 msgstr "पासवर्ड सुरक्षा हटाइँदैछ..."
@@ -4235,6 +4264,10 @@ msgstr "आफू अनुकूल क्षेत्र पुन: क्र�
 msgid "Repeated far more often than the posting itself uses them: {0}. Recruiters notice."
 msgstr "पोस्टिङले आफैँ प्रयोग गरेभन्दा धेरै पटक दोहोरिएको: {0}। भर्तीकर्ताले याद गर्छन्।"
 
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Replace"
+msgstr "प्रतिस्थापन गर्नुहोस्"
+
 #: src/features/ats-checker/messages.ts
 msgid "Replace icon fonts with plain text, then re-export."
 msgstr "आइकन फन्टलाई सादा पाठले बदल्नुहोस्, त्यसपछि पुनः निर्यात गर्नुहोस्।"
@@ -4243,13 +4276,17 @@ msgstr "आइकन फन्टलाई सादा पाठले बद�
 msgid "Replace tables with plain paragraphs and lists. Cells extract in storage order, not reading order."
 msgstr "तालिकाहरूलाई सादा अनुच्छेद र सूचीले बदल्नुहोस्। सेलहरू भण्डारण क्रममा निकालिन्छन्, पढ्ने क्रममा होइन।"
 
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Replace the attached cover letter?"
+msgstr "संलग्न कभर लेटर बदल्ने हो?"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Replace your own edits?"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Report a Bug"
 msgstr "बग (Bug) रिपोर्ट गर्नुहोस्"
-
-#: src/routes/_home/-sections/footer.tsx
-msgid "Report an issue"
-msgstr "समस्या रिपोर्ट गर्नुहोस्"
 
 #: src/features/settings/pages/profile.tsx
 msgid "Resend verification email"
@@ -4281,10 +4318,6 @@ msgstr "तपाईंको पासवर्ड रिसेट गर्न
 msgid "Resetting your password..."
 msgstr "तपाईंको पासवर्ड रिसेट हुँदैछ..."
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Resources"
-msgstr "स्रोतहरू"
-
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Restore"
 msgstr "पुनर्स्थापना गर्नुहोस्"
@@ -4299,8 +4332,6 @@ msgstr "यो संस्करण पुनर्स्थापित गर
 
 #: src/features/applications/components/application-form-sheet.tsx
 #: src/features/resume/export/download-dialog.tsx
-#: src/routes/agent/-components/resume-pane.tsx
-#: src/routes/agent/$threadId.tsx
 msgid "Resume"
 msgstr "बायोडाटा"
 
@@ -4339,12 +4370,13 @@ msgstr "फरक-फरक पेसा र रुचिका लागि ब
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/resumes.tsx
-#: src/routes/_home/-sections/statistics.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Resumes"
 msgstr "बायोडाटाहरू"
 
+#: src/features/cover-letters/editor-dialog.tsx
+#: src/features/cover-letters/library.tsx
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Retry"
 msgstr "पुन: प्रयास गर्नुहोस्"
@@ -4364,6 +4396,10 @@ msgstr "AI ले लेखन समीक्षा गर्नुहोस्
 #: src/routes/agent/-components/patch-approval-card.tsx
 msgid "Review this edit"
 msgstr "यो सम्पादन समीक्षा गर्नुहोस्"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Review updates from the parent resume"
+msgstr ""
 
 #: src/features/ats-checker/ai-review/ai-review-card.tsx
 msgid "Reviewing…"
@@ -4444,9 +4480,9 @@ msgstr "बचाउनुहोस्"
 msgid "Save & Test Provider"
 msgstr "सेभ र टेस्ट प्रदायक"
 
-#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
-msgid "Save & Upload"
-msgstr "बचत गर्नुहोस् र अपलोड गर्नुहोस्"
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Save a posting, link a resume, and tailor a copy when the fit looks right."
+msgstr ""
 
 #: src/features/ats-checker/messages.ts
 msgid "Save an unprotected copy, with no password and no permissions restrictions."
@@ -4472,21 +4508,60 @@ msgstr "परिवर्तनहरू बचत गर्नुहोस्"
 #: src/dialogs/resume/sections/skill.tsx
 #: src/dialogs/resume/sections/summary-item.tsx
 #: src/dialogs/resume/sections/volunteer.tsx
+#: src/features/cover-letters/editor.tsx
 #: src/features/settings/pages/profile.tsx
 msgid "Save Changes"
 msgstr "परिवर्तनहरू सुरक्षित गर्नुहोस्"
+
+#: src/features/cover-letters/editor.tsx
+msgid "Save changes before previewing, exporting, or changing styling."
+msgstr "पूर्वावलोकन, निर्यात, वा स्टाइल परिवर्तन गर्नु अघि परिवर्तनहरू बचत गर्नुहोस्।"
+
+#: src/features/cover-letters/library.tsx
+msgid "Save copy to library"
+msgstr "पुस्तकालयमा प्रतिलिपि बचत गर्नुहोस्"
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Save job"
+msgstr ""
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Save model"
 msgstr "मोडेल सेभ गर्नुहोस्"
 
+#: src/features/cover-letters/editor-dialog.tsx
+#: src/features/cover-letters/library.tsx
+msgid "Save resume changes before copying its content or styling."
+msgstr "यसको सामग्री वा स्टाइल प्रतिलिपि गर्नु अघि पुन: सुरु परिवर्तनहरू बचत गर्नुहोस्।"
+
 #: src/features/ats-checker/messages.ts
 msgid "Save the file with every page upright."
 msgstr "हरेक पृष्ठ सीधा राखेर फाइल सुरक्षित गर्नुहोस्।"
 
+#: src/routes/dashboard/applications/index.tsx
+msgid "Save your first job posting"
+msgstr ""
+
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saved"
 msgstr "सुरक्षित गरियो"
+
+#: src/features/applications/components/application-detail-sheet.tsx
+msgid "Saved job deleted."
+msgstr ""
+
+#: src/features/applications/components/application-form-sheet.tsx
+msgid "Saved job updated."
+msgstr ""
+
+#: src/features/command-palette/pages/navigation.tsx
+#: src/features/command-palette/pages/resumes.tsx
+msgid "Saved Jobs"
+msgstr ""
+
+#: src/features/resume/builder/draft.ts
+msgid "Saving is taking longer than expected. Your changes are still open."
+msgstr "बचतले सोचेभन्दा बढी समय लिइरहेको छ। तपाईंका परिवर्तनहरू अझै खुला छन्।"
 
 #: src/routes/builder/$resumeId/-components/header.tsx
 msgid "Saving…"
@@ -4508,18 +4583,18 @@ msgstr "मेरो फिट स्कोर गर्नुहोस्"
 msgid "Scoring your fit…"
 msgstr "आफ्नो फिट स्कोर गर्दै..."
 
-#: src/routes/dashboard/-components/sidebar.tsx
-msgid "Search"
-msgstr "खोज्नुहोस्"
-
-#: src/routes/dashboard/applications/index.tsx
-msgid "Search applications…"
-msgstr "खोज एपहरू…"
-
 #. Accessible label for command palette search input
 #: src/features/command-palette/index.tsx
 msgid "Search commands"
 msgstr "खोज आदेशहरू"
+
+#: src/features/cover-letters/library.tsx
+msgid "Search cover letters"
+msgstr "आवरण पत्र खोज्नुहोस्"
+
+#: src/features/cover-letters/library.tsx
+msgid "Search cover letters..."
+msgstr "आवरण पत्र खोज्नुहोस्..."
 
 #. Accessible label for icon picker search input
 #. Placeholder text in icon picker search input
@@ -4534,6 +4609,10 @@ msgstr "… खोज्नुहोस्"
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Search resumes..."
 msgstr "बायोडाटा खोज्नुहोस्..."
+
+#: src/routes/dashboard/applications/index.tsx
+msgid "Search saved jobs…"
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 msgid "Search..."
@@ -4566,34 +4645,23 @@ msgstr "खण्डहरू"
 msgid "See how this resume matches the posting"
 msgstr "यो रिजुमे पोस्टिङसँग कसरी मेल खान्छ हेर्नुहोस्"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "See what an applicant tracking system can read from your resume. Runs in your browser."
-msgstr "आवेदक ट्र्याकिङ प्रणालीले तपाईंको बायोडाटाबाट के पढ्न सक्छ हेर्नुहोस्। तपाईंको ब्राउजरमा चल्छ।"
-
 #. placeholder {0}: app.company
 #: src/features/applications/components/table-view.tsx
 msgid "Select {0}"
 msgstr "{0} चयन गर्नुहोस्"
 
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Select a resume"
-msgstr "बायोडाटा चयन गर्नुहोस्"
-
-#: src/routes/agent/index.tsx
-msgid "Select a thread"
-msgstr "थ्रेड चयन गर्नुहोस्"
-
 #: src/features/applications/components/table-view.tsx
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "सबै चयन गर्नुहोस्"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Select an agent model"
-msgstr "एजेन्ट मोडेल चयन गर्नुहोस्"
 
 #: src/features/settings/integrations/components/ai-provider-picker.tsx
 msgid "Select an AI provider"
 msgstr "एआई प्रदायक छान्नुहोस्"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Select none"
+msgstr ""
 
 #: src/components/ui/combobox.tsx
 msgid "Select..."
@@ -4602,10 +4670,6 @@ msgstr "छान्नुहोस्..."
 #: src/features/applications/components/table-view.tsx
 msgid "selected"
 msgstr "चयन गरियो"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Self-Host with Docker"
-msgstr "Docker प्रयोग गरेर आफैं होस्ट गर्नुहोस्"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -4627,6 +4691,10 @@ msgstr "पासवर्ड रिसेट इमेल पठाउनुह
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
 msgstr "पोर्टफोलियो र्‍यापरको सट्टा बायोडाटा नै पठाउनुहोस्।"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Sender details"
+msgstr "प्रेषक विवरण"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Sending password reset email..."
@@ -4652,6 +4720,7 @@ msgstr "सर्बियन"
 msgid "Set a password if you want only people who know it to open the public URL."
 msgstr "सार्वजनिक URL थाहा भएकाहरूले मात्र खोलून् भन्ने चाहनुहुन्छ भने पासवर्ड राख्नुहोस्।"
 
+#: src/features/resume/builder/password-dialog.tsx
 #: src/features/settings/authentication/components/password.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Set Password"
@@ -4669,20 +4738,11 @@ msgstr "प्रदायक सेटअप गर्नुहोस्"
 msgid "Set up an AI provider"
 msgstr "एआई प्रदायक सेटअप गर्नुहोस्"
 
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Set up an AI provider before starting a thread."
-msgstr "थ्रेड सुरु गर्नु अघि एआई प्रदायक सेटअप गर्नुहोस्।"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Set up an AI provider first."
-msgstr "पहिले कुनै AI प्रदायक सेटअप गर्नुहोस्।"
-
 #: src/routes/builder/$resumeId/-components/ai-assistant.tsx
 msgid "Set up an AI provider to chat about this resume and apply edits automatically."
 msgstr "यो रिजुमेको बारेमा कुराकानी गर्न र सम्पादनहरू स्वचालित रूपमा लागू गर्न एआई प्रदायक सेट अप गर्नुहोस्।"
 
 #: src/features/command-palette/pages/navigation.tsx
-#: src/routes/agent/-components/new-thread-setup.tsx
 #: src/routes/dashboard/-components/sidebar.tsx
 msgid "Settings"
 msgstr "सेटिङहरू"
@@ -4695,22 +4755,11 @@ msgstr "Authenticator एप सेटअप गर्नुहोस्"
 msgid "Shadow Width"
 msgstr "छायाँ चौडाइ"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "Share it with a public URL, put a password on that URL, or download the PDF and send it yourself."
-msgstr "यसलाई सार्वजनिक URL बाट सेयर गर्नुहोस्, त्यो URL मा पासवर्ड राख्नुहोस्, वा PDF डाउनलोड गरेर आफैं पठाउनुहोस्।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Share your resume with a public URL."
-msgstr "आफ्नो बायोडाटा सार्वजनिक URL बाट सेयर गर्नुहोस्।"
-
-#: src/routes/_home/-sections/features.tsx
-msgid "Shareable Links"
-msgstr "सेयर गर्न मिल्ने लिङ्कहरू"
-
 #: src/libs/resume/section.tsx
 msgid "Sharing"
 msgstr "सेयरिङ"
 
+#: src/features/resume/builder/section-recovery.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-item.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
@@ -4721,6 +4770,19 @@ msgstr "देखाउनुहोस्"
 #: src/features/applications/components/board.tsx
 msgid "Show {0} more"
 msgstr "{0} थप देखाउनुहोस्"
+
+#: src/features/resume/builder/section-recovery.tsx
+msgid "Show {title} section"
+msgstr "{title} खण्ड देखाउनुहोस्"
+
+#: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
+msgid "Show Download Buttons"
+msgstr "डाउनलोड बटनहरू देखाउनुहोस्"
+
+#: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "Show heading"
+msgstr "हेडिङ देखाउनुहोस्"
 
 #: src/dialogs/resume/sections/award.tsx
 #: src/dialogs/resume/sections/certification.tsx
@@ -4764,7 +4826,7 @@ msgstr "कभर लेटरमा उही पहिलो पृष्ठ�
 #. placeholder {1}: applications.length
 #: src/features/applications/components/table-view.tsx
 msgid "Showing {0} of {1}"
-msgstr "{1} को {0} देखाउँदै"
+msgstr "{0} को {1} देखाउँदै"
 
 #. Layout editor column label for the secondary sidebar area
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
@@ -4778,6 +4840,7 @@ msgstr "Sidebar चौडाइ"
 #. Primary action button label on login form
 #: src/features/ats-checker/ai-review/locked-card.tsx
 #: src/features/auth/pages/login.tsx
+#: src/routes/_home/-sections/hero.tsx
 msgid "Sign in"
 msgstr "साइन इन"
 
@@ -4797,10 +4860,6 @@ msgstr "अहिले लगइन गर्नुहोस्"
 msgid "Sign in to your account"
 msgstr "आफ्नो खातामा साइन इन गर्नुहोस्"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Sign in with GitHub, Google or a custom OAuth provider."
-msgstr "GitHub, Google वा कुनै अनुकूल OAuth प्रदायकमार्फत साइन इन गर्नुहोस्।"
-
 #. User menu action to sign out of current account
 #: src/features/user/dropdown-menu.tsx
 msgid "Sign out"
@@ -4815,6 +4874,10 @@ msgstr "साइन अप"
 #: src/features/auth/pages/error.tsx
 msgid "Sign-in didn't complete"
 msgstr "साइन इन पूरा भएन"
+
+#: src/features/auth/pages/consent.tsx
+msgid "Signed in as {email}"
+msgstr "{email} को रूपमा साइन इन"
 
 #: src/features/auth/components/social-auth.tsx
 #: src/features/auth/pages/login.tsx
@@ -4863,6 +4926,10 @@ msgstr "आकार"
 msgid "Skills"
 msgstr "सीपहरू"
 
+#: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
+msgid "Skip and Upload"
+msgstr "छोडेर अपलोड गर्नुहोस्"
+
 #: src/routes/_home/route.tsx
 #: src/routes/builder/$resumeId/-components/desktop-builder-shell.tsx
 #: src/routes/builder/$resumeId/-components/mobile-builder-shell.tsx
@@ -4910,6 +4977,10 @@ msgstr "केही लाइनहरू पढ्ने क्रम बा�
 msgid "Some parsers mishandle images, and photos are discouraged in some regions."
 msgstr "केही पार्सरहरूले तस्बिरहरूलाई गलत प्रयोग गर्छन्, र फोटोहरू केही क्षेत्रहरूमा निरुत्साहित हुन्छन्।"
 
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
+msgstr ""
+
 #: src/features/resume/stylesheet/status.tsx
 msgid "Some styles were ignored"
 msgstr "केही शैलीहरू बेवास्ता गरिए"
@@ -4940,6 +5011,7 @@ msgstr "तपाईंलाई साइन इन गर्दा केह�
 
 #: src/features/applications/components/application-actions-menu.tsx
 #: src/features/applications/components/application-detail-sheet.tsx
+#: src/features/resume/builder/password-dialog.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/sharing.tsx
 msgid "Something went wrong. Please try again."
 msgstr "केही समस्या भयो। कृपया पुनः प्रयास गर्नुहोस्।"
@@ -4948,6 +5020,10 @@ msgstr "केही समस्या भयो। कृपया पुन�
 #: src/routes/dashboard/resumes/index.tsx
 msgid "Sort by"
 msgstr "यसअनुसार क्रमबद्ध गर्नुहोस्"
+
+#: src/routes/builder/$resumeId/-sidebar/left/shared/section-menu.tsx
+msgid "Sort by date"
+msgstr "मिति अनुसार क्रमबद्ध गर्नुहोस्"
 
 #: src/routes/dashboard/applications/index.tsx
 msgid "Sort by…"
@@ -4959,7 +5035,6 @@ msgstr "यसअनुसार क्रमबद्ध गर्नुहो�
 msgid "Source"
 msgstr "स्रोत"
 
-#: src/routes/_home/-sections/footer.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Source Code"
 msgstr "स्रोत कोड"
@@ -4993,10 +5068,6 @@ msgstr "\"Mar 2022\" जस्तै महिनालाई अक्षरम
 msgid "Sponsors"
 msgstr "प्रायोजकहरू (Sponsors)"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Sponsorships"
-msgstr "प्रायोजनहरू"
-
 #. Preset button for setting picture aspect ratio to square
 #: src/components/level/combobox.tsx
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
@@ -5012,39 +5083,23 @@ msgstr "स्टेज"
 msgid "Stage date"
 msgstr "चरण मिति"
 
-#: src/components/input/github-stars-button.tsx
-msgid "Star us on GitHub (opens in new tab)"
-msgstr "GitHub मा हामीलाई स्टार दिनुहोस् (नयाँ ट्याबमा खुल्छ)"
-
-#. placeholder {0}: starCount.toLocaleString()
-#: src/components/input/github-stars-button.tsx
-msgid "Star us on GitHub, currently {0} stars (opens in new tab)"
-msgstr "GitHub मा हामीलाई स्टार दिनुहोस्, हाल {0} स्टार छ (नयाँ ट्याबमा खुल्छ)"
-
-#: src/routes/agent/$threadId.tsx
-msgid "Start a new thread"
-msgstr "नयाँ थ्रेड सुरु गर्नुहोस्"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Start a thread"
-msgstr "थ्रेड सुरु गर्नुहोस्"
-
 #: src/dialogs/resume/index.tsx
 msgid "Start building your resume by giving it a name."
 msgstr "नाम राखेर आफ्नो बायोडाटा बनाउन सुरु गर्नुहोस्।"
 
+#: src/routes/_home/-sections/hero.tsx
 #: src/routes/dashboard/resumes/-components/cards/create-card.tsx
 #: src/routes/dashboard/resumes/-components/list-view.tsx
 msgid "Start building your resume from scratch"
 msgstr "सुरुदेखि नयाँ बायोडाटा बनाउन सुरु गर्नुहोस्"
 
+#: src/features/applications/components/export-applications-sheet.tsx
+msgid "Start date must be on or before end date."
+msgstr "सुरु मिति अन्त्य मिति वा अघि हुनुपर्छ।"
+
 #: src/features/ats-checker/messages.ts
 msgid "Start each one with a concrete verb: built, led, reduced, migrated."
 msgstr "हरेकलाई ठोस क्रियाबाट सुरु गर्नुहोस्: बनाए, नेतृत्व गरे, घटाए, स्थानान्तरण गरे।"
-
-#: src/routes/agent/index.tsx
-msgid "Start new thread"
-msgstr "नयाँ थ्रेड सुरु गर्नुहोस्"
 
 #. Layout editor toggle that forces a section to begin on a new page
 #: src/routes/builder/$resumeId/-sidebar/right/sections/layout/pages.tsx
@@ -5054,10 +5109,6 @@ msgstr "नयाँ पृष्ठबाट सुरु गर्नुहो
 #: src/features/ats-checker/messages.ts
 msgid "Start the resume with your name on its own line."
 msgstr "बायोडाटालाई आफ्नो नामबाट छुट्टै लाइनमा सुरु गर्नुहोस्।"
-
-#: src/routes/agent/-components/new-thread-setup.tsx
-msgid "Start thread"
-msgstr "थ्रेड सुरु गर्नुहोस्"
 
 #: src/libs/resume/section.tsx
 msgid "Statistics"
@@ -5096,9 +5147,13 @@ msgstr "स्टाइलसिट सम्पादक"
 msgid "Stylesheet has fatal errors"
 msgstr "स्टाइलसिटमा गम्भीर त्रुटिहरू छन्"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "Subreddit"
-msgstr "सबरेडिट"
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Styling and sender details are copied. Future resume edits apply only when you refresh."
+msgstr "स्टाइलिङ र प्रेषक विवरणहरू प्रतिलिपि गरिएका छन्। तपाईंले रिफ्रेस गर्दा मात्र भविष्यको पुनःसुरु सम्पादनहरू लागू हुन्छन्।"
+
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Styling and sender details refreshed from the selected resume."
+msgstr "चयन गरिएको पुन: सुरुवातबाट स्टाइलिङ र प्रेषक विवरणहरू ताजा गरियो।"
 
 #: src/features/ats-checker/ai-review/ai-review-results.tsx
 msgid "Suggestions"
@@ -5112,10 +5167,6 @@ msgstr "सुझावहरू"
 #: src/routes/builder/$resumeId/-sidebar/left/sections/custom.tsx
 msgid "Summary"
 msgstr "सारांश"
-
-#: src/routes/_home/-sections/donate.tsx
-msgid "Support Reactive Resume"
-msgstr "Reactive Resume लाई समर्थन गर्नुहोस्"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Support the app by doing what you can!"
@@ -5185,6 +5236,8 @@ msgstr "तमिल"
 msgid "Telugu"
 msgstr "तेलुगु"
 
+#: src/features/cover-letters/editor-dialog.tsx
+#: src/features/cover-letters/library.tsx
 #: src/libs/resume/section.tsx
 msgid "Template"
 msgstr "ढाँचा (Template)"
@@ -5193,17 +5246,13 @@ msgstr "ढाँचा (Template)"
 msgid "Template Gallery"
 msgstr "ढाँचा ग्यालरी"
 
-#: src/routes/_home/-sections/templates.tsx
+#: src/routes/_home/-sections/hero.tsx
 msgid "Templates"
 msgstr "ढाँचाहरू"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Test"
 msgstr "परीक्षण"
-
-#: src/routes/_home/-sections/testimonials.tsx
-msgid "Testimonials"
-msgstr "अनुभव कथनहरू (Testimonials)"
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Testing…"
@@ -5233,10 +5282,6 @@ msgstr "पाठ हेडर वा फुटर क्षेत्रमा �
 #: src/libs/locale.ts
 msgid "Thai"
 msgstr "थाइ"
-
-#: src/routes/_home/-sections/sponsors.tsx
-msgid "Thank you to our sponsors"
-msgstr "हाम्रा प्रायोजकहरूलाई धन्यवाद"
 
 #: src/features/ats-checker/tool.tsx
 msgid "That file could not be read as a PDF."
@@ -5268,10 +5313,6 @@ msgid "The agent needs your input."
 msgstr "एजेन्टलाई तपाईंको सुझाव चाहिन्छ।"
 
 #: src/features/settings/pages/api-keys.tsx
-msgid "The API documentation shows how to connect Reactive Resume to your own applications. It covers the endpoints, the request format, and authentication."
-msgstr "API कागजातले Reactive Resume लाई आफ्नै अनुप्रयोगहरूसँग कसरी जोड्ने भन्ने देखाउँछ। यसमा एन्डपोइन्ट, अनुरोधको ढाँचा र प्रमाणीकरण समेटिएका छन्।"
-
-#: src/features/settings/pages/api-keys.tsx
 msgid "The API key has been deleted."
 msgstr "API Key मेटाइएको छ।"
 
@@ -5296,6 +5337,10 @@ msgstr "आयात गरिएको फाइललाई मान्य �
 msgid "The order the text is stored in disagrees badly with the order it reads in."
 msgstr "पाठ भण्डारण गरिएको क्रम यो पढिने क्रमसँग धेरै फरक छ।"
 
+#: src/features/cover-letters/library.tsx
+msgid "The original letter stays in your resume. Each copy can be edited independently."
+msgstr "मूल पत्र तपाईंको बायोडाटामा रहन्छ। प्रत्येक प्रतिलिपि स्वतन्त्र रूपमा सम्पादन गर्न सकिन्छ।"
+
 #: src/components/layout/not-found-screen.tsx
 msgid "The page you're looking for may have been moved or no longer exists."
 msgstr "तपाईंले खोजिरहनुभएको पृष्ठ सारिएको हुन सक्छ वा अब अवस्थित छैन।"
@@ -5307,10 +5352,6 @@ msgstr "पृष्ठहरू तस्बिर हुन्, पछाड�
 #: src/features/auth/pages/resume-password.tsx
 msgid "The password you entered is incorrect"
 msgstr "तपाईंले प्रविष्ट गर्नुभएको पासवर्ड सही छैन"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "The PDF is read by code running in this tab. Nothing is uploaded, nothing is stored, and no account is needed. Open your browser's network tab and watch, if you like."
-msgstr "PDF यो ट्याबमा चलिरहेको कोडले पढ्छ। केही पनि अपलोड गरिँदैन, केही पनि भण्डारण गरिँदैन, र खाता चाहिँदैन। चाहनुहुन्छ भने आफ्नो ब्राउजरको नेटवर्क ट्याब खोलेर हेर्नुहोस्।"
 
 #: src/features/auth/pages/error.tsx
 msgid "The provider didn't share an email address, which is required to sign in."
@@ -5352,10 +5393,6 @@ msgstr "पहिलो पृष्ठको माथिल्लो भाग
 #: src/components/input/rich-input.tsx
 msgid "The URL you entered is not valid."
 msgstr "तपाईंले प्रविष्ट गरेको URL मान्य छैन।"
-
-#: src/routes/agent/-components/resume-pane.tsx
-msgid "The working resume was deleted. This thread is read-only."
-msgstr "काम गर्ने बायोडाटा मेटाइएको थियो। यो थ्रेड पढ्न मात्र मिल्छ।"
 
 #. Menu item that opens appearance theme selection submenu
 #: src/features/command-palette/pages/preferences/theme.tsx
@@ -5405,10 +5442,6 @@ msgstr "यो कार्य उल्ट्याउन सकिँदैन
 msgid "This action cannot be undone. All your data will be permanently deleted."
 msgstr "यो कार्य उल्ट्याउन सकिँदैन। तपाईंका सबै डाटा स्थायी रूपमा मेटिनेछन्।"
 
-#: src/routes/agent/-components/thread-sidebar.tsx
-msgid "This action cannot be undone. It deletes the thread's messages and uploaded attachments."
-msgstr "यो कार्य उल्ट्याउन सकिँदैन। यसले थ्रेडका सन्देश र अपलोड गरिएका संलग्नकहरू मेटाउँछ।"
-
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "This action cannot be undone. It deletes the thread's messages and uploaded attachments. The working resume stays in your dashboard, and you can delete it separately."
 msgstr "यो कार्य उल्ट्याउन सकिँदैन। यसले थ्रेडका सन्देश र अपलोड गरिएका संलग्नकहरू मेटाउँछ। काम भइरहेको बायोडाटा तपाईंको ड्यासबोर्डमै रहन्छ, र त्यसलाई छुट्टै मेटाउन सक्नुहुन्छ।"
@@ -5424,6 +5457,14 @@ msgstr "यो चेक यो फाइलमा लागू हुँदै�
 #: src/features/ats-checker/messages.ts
 msgid "This check only runs on resumes written in English."
 msgstr "यो चेक अङ्ग्रेजीमा लेखिएका बायोडाटामा मात्र चल्छ।"
+
+#: src/features/auth/pages/consent.tsx
+msgid "This connection request is invalid or has expired."
+msgstr "यो जडान अनुरोध अमान्य छ वा म्याद सकिएको छ।"
+
+#: src/features/cover-letters/editor.tsx
+msgid "This cover letter changed elsewhere. Your edits are still here. Reload the latest version before saving again."
+msgstr "यो आवरण पत्र अन्यत्र परिवर्तन भयो। तपाईंका सम्पादनहरू अझै पनि यहाँ छन्। पुन: बचत गर्नु अघि नवीनतम संस्करण पुन: लोड गर्नुहोस्।"
 
 #: src/dialogs/api-key/create.tsx
 msgid "This creates a new API key, which lets other programs read and change your resume data through the Reactive Resume API."
@@ -5533,6 +5574,10 @@ msgstr "यो लिङ्क यसको प्रोटोकल हरा�
 msgid "This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page."
 msgstr "यो प्रक्रिया AI प्रदायकको प्रतिक्रियामा भर पर्न जाकाले केही मिनेट लाग्न सक्छ। कृपया विन्डो बन्द नगर्नुहोस् वा पृष्ठ रिफ्रेस नगर्नुहोस्।"
 
+#: src/dialogs/resume/import.tsx
+msgid "This may take a moment. Please do not close the window or refresh the page."
+msgstr "यसले केही समय लिन सक्छ। कृपया विन्डो बन्द नगर्नुहोस् वा पृष्ठ रिफ्रेस नगर्नुहोस्।"
+
 #: src/features/ats-checker/report/report-view.tsx
 msgid "This measures how faithfully software can extract this file's text. It does not predict whether an application will be rejected, and no tool can. Your file was read in this browser and never uploaded."
 msgstr "सफ्टवेयरले यो फाइलको पाठ कति इमानदारीपूर्वक झिक्न सक्छ भन्ने यसले नाप्छ। कुनै आवेदन अस्वीकृत हुन्छ कि हुँदैन भन्ने यसले बताउँदैन, र कुनै साधनले पनि बताउन सक्दैन। तपाईंको फाइल यही ब्राउजरमा पढियो र कहिल्यै अपलोड भएन।"
@@ -5545,6 +5590,11 @@ msgstr "यो पृष्ठ स्तम्भमा छ, र पाठ क�
 msgid "This page is very densely packed."
 msgstr "यो पृष्ठ धेरै घना भरिएको छ।"
 
+#. Error shown when a PDF has no extractable text layer during import
+#: src/dialogs/resume/import.tsx
+msgid "This PDF has no readable text. It is likely a scan, so there is nothing to import."
+msgstr "यो PDF मा पढ्न योग्य पाठ छैन। यो सम्भवतः स्क्यान हो, त्यसैले आयात गर्न केहि छैन।"
+
 #: src/features/ats-checker/tool.tsx
 msgid "This PDF is password protected. Save an unprotected copy and try again."
 msgstr "यो PDF पासवर्डले सुरक्षित छ। असुरक्षित प्रतिलिपि सुरक्षित गरी फेरि प्रयास गर्नुहोस्।"
@@ -5556,6 +5606,10 @@ msgstr "यो अवधि सुरु हुनु अघि समाप्�
 #: src/libs/resume/ats.ts
 msgid "This period starts in the future."
 msgstr "यो अवधि भविष्यमा सुरु हुन्छ।"
+
+#: src/features/cover-letters/library.tsx
+msgid "This resume has no embedded cover letters."
+msgstr "यो पुन: सुरुवातमा कुनै सम्मिलित आवरण पत्रहरू छैनन्।"
 
 #: src/routes/builder/$resumeId/-sidebar/left/index.tsx
 msgid "This resume is locked"
@@ -5572,6 +5626,10 @@ msgstr "यो बायोडाटा लामो छ।"
 #: src/features/auth/pages/resume-password.tsx
 msgid "This resume is password protected"
 msgstr "यो बायोडाटा पासवर्डले सुरक्षित छ"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "This resume stops reporting the current parent updates. Its own content is left unchanged."
+msgstr ""
 
 #: src/features/resume/builder/draft.ts
 msgid "This resume was updated by an AI agent."
@@ -5630,7 +5688,6 @@ msgid "This will roll back this patch and any patches applied after it."
 msgstr "यसले यो प्याच र त्यसपछि लागू गरिएका सबै प्याचहरू फिर्ता गर्नेछ।"
 
 #: src/routes/agent/-components/agent-chat.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
 msgid "Thread actions"
 msgstr "थ्रेडका कार्यहरू"
 
@@ -5642,20 +5699,9 @@ msgstr "थ्रेड अभिलेखमा राखियो।"
 msgid "Thread deleted."
 msgstr "थ्रेड मेटाइयो।"
 
-#: src/features/command-palette/pages/navigation.tsx
-#: src/features/command-palette/pages/resumes.tsx
-#: src/routes/agent/-components/thread-sidebar.tsx
-#: src/routes/agent/$threadId.tsx
-msgid "Threads"
-msgstr "थ्रेडहरू"
-
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Tighten the skills section so it supports the target role instead of reading like a keyword dump."
 msgstr "किवर्ड डम्प जस्तै पढ्नुको सट्टा लक्ष्य भूमिकालाई समर्थन गर्ने गरी सीप खण्डलाई कडा पार्नुहोस्।"
-
-#: src/routes/_home/-sections/hero.tsx
-msgid "Timelapse of a resume being built in Reactive Resume"
-msgstr "Reactive Resume मा बायोडाटा बन्दै गरेको टाइमल्याप्स"
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Timeline"
@@ -5678,7 +5724,7 @@ msgstr "आफ्नो खाता मेटाउन, तल पुष्ट�
 
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "Together.ai"
-msgstr "Together.ai"
+msgstr ""
 
 #: src/routes/builder/$resumeId/-sidebar/left/shared/section-base.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/shared/section-base.tsx
@@ -5719,19 +5765,10 @@ msgstr "टोकनहरू: {total}"
 msgid "Tokens: {total} ({cached} cached)"
 msgstr "टोकनहरू: {total} ({cached} क्यास गरिएको)"
 
-#: src/features/applications/components/application-form-sheet.tsx
-msgid "Track a job you're applying to and link the resume you sent."
-msgstr "तपाईंले आवेदन गरिरहनुभएको जागिर ट्र्याक गर्नुहोस् र तपाईंले पठाउनुभएको पुन: सुरुवात लिङ्क गर्नुहोस्।"
-
-#: src/routes/dashboard/applications/index.tsx
-msgid "Track your first application"
-msgstr "आफ्नो पहिलो आवेदन ट्रयाक गर्नुहोस्"
-
 #: src/routes/builder/$resumeId/-sidebar/right/sections/statistics.tsx
 msgid "Track your resume's views and downloads"
 msgstr "तपाईंको बायोडाटाका हेर्ने र डाउनलोड गर्ने तथ्याङ्कहरू ट्र्याक गर्नुहोस्"
 
-#: src/routes/_home/-sections/footer.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/information.tsx
 msgid "Translations"
 msgstr "अनुवादहरू"
@@ -5847,10 +5884,6 @@ msgstr "पूर्ववत गर्नुहोस्"
 msgid "Undo stylesheet edit"
 msgstr "शैलीपत्र सम्पादन पूर्ववत गर्नुहोस्"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Unlimited Resumes"
-msgstr "असीमित बायोडाटाहरू"
-
 #: src/features/settings/authentication/components/hooks.tsx
 msgid "Unlinking your {providerName} account..."
 msgstr "तपाईंको {providerName} खाता छुट्याउँदै (Unlink) गर्दैछ..."
@@ -5957,8 +5990,8 @@ msgid "Update the project bullets to show leadership, constraints, tradeoffs, an
 msgstr "परियोजनाका बुँदाहरू अद्यावधिक गर्नुहोस् ताकि नेतृत्व, सीमा, सम्झौता र नाप्न मिल्ने नतिजा देखियून्।"
 
 #: src/features/applications/components/application-form-sheet.tsx
-msgid "Update this application's details."
-msgstr "यो आवेदनको विवरण अपडेट गर्नुहोस्।"
+msgid "Update this saved job and posting details."
+msgstr ""
 
 #: src/features/applications/components/application-detail-sheet.tsx
 msgid "Update this timeline note."
@@ -5967,6 +6000,10 @@ msgstr "यो समयरेखा नोट अद्यावधिक ग�
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "तपाईंको पासवर्ड अद्यावधिक गर्नुहोस्"
+
+#: src/routes/builder/$resumeId/-components/parent-updates.tsx
+msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
+msgstr ""
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Updating your password..."
@@ -5979,10 +6016,6 @@ msgstr "तपाईंको बायोडाटा अद्यावधि�
 #: src/features/applications/components/import-applications-sheet.tsx
 msgid "Upload .csv"
 msgstr "csv अपलोड गर्नुहोस्"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "Upload a resume and see what an applicant tracking system reads from it. Everything runs in this browser. Your file is never uploaded, and nothing is stored."
-msgstr "कुनै बायोडाटा अपलोड गर्नुहोस् र आवेदक ट्र्याकिङ प्रणालीले त्यसबाट के पढ्छ हेर्नुहोस्। सबै कुरा यही ब्राउजरमा चल्छ। तपाईंको फाइल कहिल्यै अपलोड हुँदैन, र केही पनि भण्डारण गरिँदैन।"
 
 #: src/routes/agent/-components/agent-chat.tsx
 msgid "Upload attachments"
@@ -6050,6 +6083,10 @@ msgstr "लेआउट पुनः-रेन्डर हुँदा पन�
 msgid "Use at least 9pt."
 msgstr "कम्तीमा 9pt प्रयोग गर्नुहोस्।"
 
+#: src/features/resume/builder/password-dialog.tsx
+msgid "Use between 6 and 64 characters."
+msgstr "६ देखि ६४ अक्षरहरूको बीचमा प्रयोग गर्नुहोस्।"
+
 #: src/components/input/color-picker.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Use color {color}"
@@ -6063,6 +6100,10 @@ msgstr "\"Experience\", \"Education\" र \"Skills\" जस्ता साद�
 msgid "Use sample"
 msgstr "नमूना प्रयोग गर्नुहोस्"
 
+#: src/dialogs/api-key/create.tsx
+msgid "Use this secret key to access your data through the API."
+msgstr ""
+
 #: src/features/ats-checker/messages.ts
 msgid "Use your editor's normal bullet list, so stray glyphs do not land mid-sentence."
 msgstr "आफ्नो सम्पादकको सामान्य बुलेट सूची प्रयोग गर्नुहोस्, ताकि भड्किएका ग्लिफ वाक्यको बीचमा नआऊन्।"
@@ -6073,10 +6114,6 @@ msgstr "आफ्नो सम्पादकको सामान्य बु
 #: src/features/settings/pages/profile.tsx
 msgid "Username"
 msgstr "प्रयोगकर्तानाम (Username)"
-
-#: src/routes/_home/-sections/statistics.tsx
-msgid "Users"
-msgstr "प्रयोगकर्ताहरू"
 
 #: src/libs/locale.ts
 msgid "Uzbek"
@@ -6195,10 +6232,6 @@ msgstr "हामीले त्यो पृष्ठ फेला पार�
 msgid "We couldn't link that provider account. Please try again."
 msgstr "हामीले त्यो प्रदायक खाता जोड्न सकेनौं। कृपया फेरि प्रयास गर्नुहोस्।"
 
-#: src/routes/agent/$threadId.tsx
-msgid "We couldn't open this thread."
-msgstr "हामीले यो थ्रेड खोल्न सकेनौं।"
-
 #: src/features/auth/pages/error.tsx
 msgid "We couldn't read your profile from the provider."
 msgstr "हामीले प्रदायकबाट तपाईंको प्रोफाइल पढ्न सकेनौं।"
@@ -6244,22 +6277,6 @@ msgstr "तपाईं के गर्न चाहनुहुन्छ?"
 msgid "What do you want to rename this section to?"
 msgstr "यो खण्डलाई के नाममा परिवर्तन गर्न चाहनुहुन्छ?"
 
-#: src/routes/_home/-sections/faq.tsx
-msgid "What makes Reactive Resume different from other resume builders?"
-msgstr "अन्य बायोडाटा निर्माण गर्ने साधनहरूको तुलनामा Reactive Resume कसरी फरक छ?"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "What this checks"
-msgstr "यसले के जाँच्छ"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "What this does not do"
-msgstr "यसले के गर्दैन"
-
-#: src/routes/_home/-sections/hero.tsx
-msgid "What's new in the latest version?"
-msgstr "नवीनतम संस्करणमा के नयाँ छ?"
-
 #: src/routes/builder/$resumeId/-components/header.tsx
 #: src/routes/dashboard/resumes/-components/menus/use-resume-menu-actions.ts
 msgid "When locked, the resume cannot be updated or deleted."
@@ -6281,10 +6298,6 @@ msgstr "भर्तीकर्ताले तपाईंलाई सम्�
 msgid "Whether software can recover the words at all."
 msgstr "सफ्टवेयरले शब्दहरू फेला पार्न सक्छ कि सक्दैन।"
 
-#: src/routes/_home/ats-checker.tsx
-msgid "Whether the file holds real text, or a picture of it."
-msgstr "फाइलमा वास्तविक पाठ छ कि यसको तस्बिर मात्र छ।"
-
 #: src/features/ats-checker/messages.ts
 msgid "Whether the page geometry preserves reading order."
 msgstr "पृष्ठको ज्यामितीले पढ्ने क्रम जोगाउँछ कि जोगाउँदैन।"
@@ -6292,18 +6305,6 @@ msgstr "पृष्ठको ज्यामितीले पढ्ने क
 #: src/features/ats-checker/messages.ts
 msgid "Whether the resume is segmented the way software expects."
 msgstr "बायोडाटा सफ्टवेयरले अपेक्षा गरेजस्तै विभाजित छ कि छैन।"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "Whether the text comes out in the order a person would read it."
-msgstr "पाठ मानिसले पढ्ने क्रममा आउँछ कि आउँदैन।"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "Whether the usual sections are there and can be told apart."
-msgstr "सामान्य खण्डहरू त्यहाँ छन् र छुट्याउन सकिन्छ कि सकिँदैन।"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "Whether your name, email, phone and dates survive intact."
-msgstr "तपाईंको नाम, इमेल, फोन र मितिहरू सुरक्षित रहन्छन् कि रहँदैनन्।"
 
 #: src/features/ats-checker/messages.ts
 msgid "Whether your timeline can be reconstructed."
@@ -6349,25 +6350,9 @@ msgstr "https:// सहित पूरा ठेगाना लेख्नु
 msgid "Writing"
 msgstr "लेखन"
 
-#: src/routes/_home/-sections/footer.tsx
-msgid "X (Twitter)"
-msgstr "एक्स (ट्विटर)"
-
 #: src/features/settings/integrations/components/ai-section.tsx
 msgid "xAI Grok"
-msgstr "xAI ग्रोक"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes. One click exports your resume to PDF, with your formatting and styling intact."
-msgstr "हो। एउटै क्लिकमा तपाईंको बायोडाटा PDF मा निर्यात हुन्छ, तपाईंको ढाँचा र सजावट जस्ताको तस्तै रहन्छ।"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes. Pick your language on the settings page, or with the language switcher in the top right corner. If your language is missing, or the existing translation could be better, you can <0>contribute to the translations on Crowdin<1> (opens in new tab)</1></0>."
-msgstr "हो। सेटिङ पृष्ठमा, वा माथि दायाँ कुनाको भाषा स्विचरबाट आफ्नो भाषा छान्नुहोस्। तपाईंको भाषा छैन भने, वा भइरहेको अनुवाद अझ राम्रो हुन सक्छ भने, तपाईं <0>Crowdin मा अनुवादमा योगदान<1> (नयाँ ट्याबमा खुल्छ)</1></0> गर्न सक्नुहुन्छ।"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Yes. Reactive Resume is free to use, with no hidden costs, premium tiers, or subscription fees. It's open source, and it will stay free."
-msgstr "हो। Reactive Resume प्रयोग गर्न निःशुल्क छ, कुनै लुकेको खर्च, प्रिमियम तह वा सदस्यता शुल्क छैन। यो खुला-स्रोत हो, र निःशुल्क नै रहनेछ।"
+msgstr ""
 
 #: src/features/auth/pages/login.tsx
 msgid "You can also sign in with your username."
@@ -6423,14 +6408,6 @@ msgstr "तपाईंको सम्पर्क विवरण पहिल
 msgid "Your data has been exported."
 msgstr "तपाईंको डाटा निर्यात गरिएको छ।"
 
-#: src/routes/_home/-sections/features.tsx
-msgid "Your data is secure, and never shared or sold to anyone."
-msgstr "तपाईंको डाटा सुरक्षित छ, र कहिल्यै कसैसँग सेयर वा बेचिँदैन।"
-
-#: src/routes/_home/-sections/faq.tsx
-msgid "Your data is stored securely and never shared with third parties. If you want full control over it, you can self-host Reactive Resume on your own servers."
-msgstr "तपाईंको डाटा सुरक्षित रूपमा भण्डारण गरिन्छ र कहिल्यै तेस्रो पक्षसँग सेयर गरिँदैन। यसमाथि पूर्ण नियन्त्रण चाहनुहुन्छ भने, तपाईं Reactive Resume आफ्नै सर्भरमा आफैं होस्ट गर्न सक्नुहुन्छ।"
-
 #: src/features/ats-checker/messages.ts
 msgid "Your dates are written several different ways."
 msgstr "तपाईंका मितिहरू धेरै फरक तरिकाले लेखिएका छन्।"
@@ -6442,10 +6419,6 @@ msgstr "तपाईंको इमेल ठेगाना पाठका �
 #: src/features/auth/pages/error.tsx
 msgid "Your email address isn't verified with the provider."
 msgstr "तपाईंको इमेल ठेगाना प्रदायकसँग प्रमाणित छैन।"
-
-#: src/routes/_home/ats-checker.tsx
-msgid "Your file stays here"
-msgstr "तपाईंको फाइल यहीँ रहन्छ"
 
 #: src/features/ats-checker/messages.ts
 msgid "Your headings look the same as your body text."
@@ -6545,9 +6518,9 @@ msgstr "तपाईंको बायोडाटाले \"I\" र \"my\" �
 msgid "Your resume's public URL is protected by a password. Share the password only with people you trust."
 msgstr "तपाईंको बायोडाटाको सार्वजनिक URL पासवर्डले सुरक्षित छ। पासवर्ड आफूले विश्वास गर्ने मानिससँग मात्र सेयर गर्नुहोस्।"
 
-#: src/routes/_home/-sections/donate.tsx
-msgid "Your support keeps the project free and open to everyone, now and later."
-msgstr "तपाईंको साथले नै यो परियोजना अहिले र पछि पनि सबैका लागि निःशुल्क र खुला रहन्छ।"
+#: src/features/cover-letters/editor-dialog.tsx
+msgid "Your saved cover letter will remain unchanged."
+msgstr "तपाईंको सुरक्षित कभर लेटर अपरिवर्तित रहनेछ।"
 
 #: src/routes/builder/$resumeId/-sidebar/left/sections/picture.tsx
 msgid "Zoom"
@@ -6557,7 +6530,6 @@ msgstr "जुम गर्नुहोस्"
 msgid "Zoom in"
 msgstr "जूम इन"
 
-#: src/routes/agent/-components/resume-pane.tsx
 #: src/routes/builder/$resumeId/-components/dock.tsx
 msgid "Zoom level"
 msgstr "जुम स्तर"

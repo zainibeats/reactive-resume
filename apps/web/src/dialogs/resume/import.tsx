@@ -41,7 +41,9 @@ const formSchema = z.discriminatedUnion("type", [
 	}),
 	z.object({
 		type: z.literal("pdf"),
-		file: z.instanceof(File).refine((file) => file.type === "application/pdf", { message: "File must be a PDF" }),
+		file: z
+			.instanceof(File)
+			.refine((file) => file.type === "" || file.type === "application/pdf", { message: "File must be a PDF" }),
 	}),
 	z.object({
 		type: z.literal("docx"),
@@ -49,6 +51,7 @@ const formSchema = z.discriminatedUnion("type", [
 			.instanceof(File)
 			.refine(
 				(file) =>
+					file.type === "" ||
 					file.type === "application/msword" ||
 					file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 				{ message: "File must be a Microsoft Word document" },
@@ -58,19 +61,19 @@ const formSchema = z.discriminatedUnion("type", [
 		type: z.literal("reactive-resume-json"),
 		file: z
 			.instanceof(File)
-			.refine((file) => file.type === "application/json", { message: "File must be a JSON file" }),
+			.refine((file) => file.type === "" || file.type === "application/json", { message: "File must be a JSON file" }),
 	}),
 	z.object({
 		type: z.literal("reactive-resume-v4-json"),
 		file: z
 			.instanceof(File)
-			.refine((file) => file.type === "application/json", { message: "File must be a JSON file" }),
+			.refine((file) => file.type === "" || file.type === "application/json", { message: "File must be a JSON file" }),
 	}),
 	z.object({
 		type: z.literal("json-resume-json"),
 		file: z
 			.instanceof(File)
-			.refine((file) => file.type === "application/json", { message: "File must be a JSON file" }),
+			.refine((file) => file.type === "" || file.type === "application/json", { message: "File must be a JSON file" }),
 	}),
 ]);
 
@@ -141,10 +144,15 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 
 			setIsImporting(true);
 
+			// A PDF parsed in the browser never touches a provider, so promising one would be a lie.
+			const isLocalPdf = value.type === "pdf" && !hasUsableProvider;
+
 			const toastId = toast.add({
 				type: "loading",
 				title: t`Importing your resume...`,
-				description: t`This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page.`,
+				description: isLocalPdf
+					? t`This may take a moment. Please do not close the window or refresh the page.`
+					: t`This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page.`,
 			});
 
 			try {
@@ -160,14 +168,31 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 
 				if (value.type === "pdf") {
 					if (isLoadingAiProviders) throw new Error(t`Loading AI providers. Please try again in a moment.`);
-					if (!hasUsableProvider)
-						throw new Error(t`This feature requires a connected AI provider. Please set one up in the settings.`);
 
-					const base64 = await fileToBase64(value.file);
+					if (hasUsableProvider) {
+						const base64 = await fileToBase64(value.file);
 
-					data = await client.ai.parsePdf({
-						file: { name: value.file.name, data: base64 },
-					});
+						data = await client.ai.parsePdf({
+							file: { name: value.file.name, data: base64 },
+						});
+					} else {
+						const [{ extractPdfLines }, { parseResumeText }] = await Promise.all([
+							import("@/features/resume/import/pdf-text"),
+							import("@reactive-resume/import/plain-text"),
+						]);
+
+						const lines = await extractPdfLines(value.file);
+						if (lines.length === 0) {
+							throw new Error(
+								t({
+									comment: "Error shown when a PDF has no extractable text layer during import",
+									message: "This PDF has no readable text. It is likely a scan, so there is nothing to import.",
+								}),
+							);
+						}
+
+						data = parseResumeText(lines.join("\n"));
+					}
 				}
 
 				if (value.type === "docx") {
@@ -236,7 +261,8 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 
 	const type = useStore(form.store, (s) => s.values.type);
 	const file = useStore(form.store, (s) => s.values.file);
-	const aiRequired = type === "pdf" || type === "docx";
+	const aiRequired = type === "docx";
+	const pdfWithoutAi = type === "pdf" && !isLoadingAiProviders && !hasUsableProvider;
 
 	const onSelectFile = () => {
 		if (!inputRef.current) return;
@@ -371,13 +397,8 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 												},
 												{
 													value: "pdf",
-													textValue: t({ comment: "File format label in import source selector", message: "PDF" }),
-													label: (
-														<div className="flex items-center gap-x-2">
-															{t({ comment: "File format label in import source selector", message: "PDF" })}{" "}
-															<Badge>{t`AI`}</Badge>
-														</div>
-													),
+													textValue: "PDF",
+													label: "PDF",
 												},
 												{
 													value: "docx",
@@ -413,7 +434,7 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 				{aiRequired && !isLoadingAiProviders && !hasUsableProvider && (
 					<div className="flex flex-col gap-3 rounded-md border border-dashed p-3 text-sm lg:flex-row lg:items-center lg:justify-between">
 						<span className="text-muted-foreground">
-							<Trans>Importing from PDF or Word requires a connected AI provider.</Trans>
+							<Trans>Importing from Word requires a connected AI provider.</Trans>
 						</span>
 						<Button
 							size="sm"
@@ -425,6 +446,15 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 								</Link>
 							}
 						/>
+					</div>
+				)}
+
+				{pdfWithoutAi && (
+					<div className="rounded-md border border-dashed p-3 text-muted-foreground text-sm">
+						<Trans>
+							No AI provider is connected, so we will read the text out of the PDF here in your browser and fill in what
+							we can recognize. Expect to tidy up the result.
+						</Trans>
 					</div>
 				)}
 

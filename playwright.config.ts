@@ -9,9 +9,7 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: isCI,
 	retries: 0,
-	// Semantic CSS acceptance includes deterministic PDF preflight and 15 visual renders. Keep it serial so
-	// independent browser workers do not contend for the fixed production preflight deadline.
-	workers: 1,
+	workers: isCI ? 1 : undefined,
 	timeout: 30_000,
 	expect: {
 		timeout: 10_000,

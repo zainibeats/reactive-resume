@@ -33,6 +33,10 @@ const itemWebsiteSchema = websiteSchema
 
 export const pictureSchema = z.object({
 	hidden: z.boolean().describe("Whether to hide the picture from the resume."),
+	fit: z
+		.enum(["cover", "contain"])
+		.catch("cover")
+		.describe("How the picture fits its frame: cover crops overflow, while contain preserves the whole image."),
 	url: z
 		.string()
 		.describe(
@@ -103,6 +107,11 @@ export const summarySchema = z.object({
 		),
 	columns: z.number().int().min(1).max(6).catch(1).describe("The number of columns the summary should span across."),
 	hidden: z.boolean().describe("Whether to hide the summary from the resume."),
+	showHeading: z
+		.boolean()
+		.optional()
+		.catch(true)
+		.describe("Whether to show the summary heading, icon, and decoration while retaining summary content."),
 	keepTogether: z
 		.boolean()
 		.catch(false)
@@ -311,6 +320,11 @@ export const baseSectionSchema = z.object({
 		),
 	columns: z.number().int().min(1).max(6).catch(1).describe("The number of columns the section should span across."),
 	hidden: z.boolean().describe("Whether to hide the section from the resume."),
+	showHeading: z
+		.boolean()
+		.optional()
+		.catch(true)
+		.describe("Whether to show the section heading, icon, and decoration while retaining section content."),
 	keepTogether: z
 		.boolean()
 		.catch(false)
@@ -338,7 +352,22 @@ const publicationsSectionSchema = itemSection(
 	"The items to display in the publications section.",
 );
 const referencesSectionSchema = itemSection(referenceItemSchema, "The items to display in the references section.");
-const skillsSectionSchema = itemSection(skillItemSchema, "The items to display in the skills section.");
+const skillKeywordLayoutSchema = z
+	.enum(["inline", "list"])
+	.default("inline")
+	.catch("inline")
+	.describe("How skill keywords are displayed: inline separated by commas, or one bullet per keyword.");
+
+export const skillsSectionSchema = itemSection(skillItemSchema, "The items to display in the skills section.")
+	.extend({
+		keywordLayout: skillKeywordLayoutSchema,
+		layout: z
+			.enum(["default", "inline"])
+			.default("default")
+			.catch("default")
+			.describe("The layout style for skill items. 'inline' places item fields next to name"),
+	})
+	.transform((section) => (section.layout === "inline" ? { ...section, columns: 1 } : section));
 const volunteerSectionSchema = itemSection(volunteerItemSchema, "The items to display in the volunteer section.");
 
 const sectionsSchema = z.object({
@@ -402,6 +431,7 @@ export type CustomSectionItem = z.infer<(typeof customSectionItemDefinitionByTyp
 
 const customSectionSchemaOptions = Object.entries(customSectionItemDefinitionByType).map(([type, { schema }]) =>
 	baseSectionSchema.extend({
+		keywordLayout: (type === "skills" ? skillKeywordLayoutSchema : z.undefined().catch(undefined)).optional(),
 		id: z.string().describe("The unique identifier for the custom section. Usually generated as a UUID."),
 		type: z
 			.literal(type as CustomSectionType)
@@ -521,6 +551,12 @@ const designSchema = z.object({
 export const typographySchema = z.object({
 	body: typographyItemSchema.describe("The typography for the body of the resume."),
 	heading: typographyItemSchema.describe("The typography for the headings of the resume."),
+	hyphenation: z
+		.boolean()
+		.optional()
+		.describe(
+			"Enable automatic PDF hyphenation using the resume language. Currently supports German. Defaults to false.",
+		),
 });
 
 const styleSlotSchema = z.enum([
@@ -692,7 +728,13 @@ export const resumeDataSchema = z.looseObject({
 
 export type ResumeData = z.infer<typeof resumeDataSchema>;
 
-export const parseResumeData = (data: unknown): ResumeData => resumeDataSchema.parse(data);
+export const parseResumeData = (data: unknown): ResumeData => {
+	const parsed = resumeDataSchema.parse(data);
+	parsed.summary.showHeading ??= true;
+	for (const section of Object.values(parsed.sections)) section.showHeading ??= true;
+	for (const section of parsed.customSections) section.showHeading ??= true;
+	return parsed;
+};
 
 export type LayoutPage = z.infer<typeof pageLayoutSchema>;
 export type Typography = z.infer<typeof typographySchema>;

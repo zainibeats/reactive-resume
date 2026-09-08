@@ -14,6 +14,7 @@ import {
 	resumeDataSchema,
 	sectionTypeSchema,
 	skillItemSchema,
+	skillsSectionSchema,
 	styleRuleSchema,
 	styleRulesSchema,
 	summarySchema,
@@ -102,6 +103,42 @@ const customSectionFixture = (type: CustomSectionType, item: Record<string, unkn
 });
 
 describe("resumeDataSchema", () => {
+	it("defaults heading visibility to true for legacy summary and section data", () => {
+		const legacySummary = {
+			title: "",
+			icon: "article",
+			columns: 1,
+			hidden: false,
+			keepTogether: false,
+			startOnNewPage: false,
+			content: "<p>Summary</p>",
+		};
+		const legacySection = {
+			title: "",
+			icon: "briefcase",
+			columns: 1,
+			hidden: false,
+			keepTogether: false,
+			startOnNewPage: false,
+			items: [],
+		};
+
+		expect(
+			parseResumeData({
+				...defaultResumeData,
+				summary: legacySummary,
+				sections: { ...defaultResumeData.sections, experience: legacySection },
+			}).summary.showHeading,
+		).toBe(true);
+		expect(
+			parseResumeData({
+				...defaultResumeData,
+				summary: legacySummary,
+				sections: { ...defaultResumeData.sections, experience: legacySection },
+			}).sections.experience.showHeading,
+		).toBe(true);
+	});
+
 	it("validates the default resume", () => {
 		expect(resumeDataSchema.safeParse(defaultResumeData).success).toBe(true);
 	});
@@ -238,6 +275,20 @@ describe("websiteSchema", () => {
 describe("pictureSchema", () => {
 	it("accepts the default picture config", () => {
 		expect(pictureSchema.safeParse(defaultResumeData.picture).success).toBe(true);
+	});
+
+	it("defaults missing and invalid legacy fit values to cover", () => {
+		const { fit: _fit, ...legacyPicture } = defaultResumeData.picture;
+
+		expect(pictureSchema.parse(legacyPicture).fit).toBe("cover");
+		expect(pictureSchema.parse({ ...legacyPicture, fit: "stretch" }).fit).toBe("cover");
+	});
+
+	it("preserves contain through parsing and JSON round-trip", () => {
+		const picture = pictureSchema.parse({ ...defaultResumeData.picture, fit: "contain" });
+		const roundTripped = pictureSchema.parse(JSON.parse(JSON.stringify(picture)));
+
+		expect(roundTripped.fit).toBe("contain");
 	});
 
 	it("rejects size below 32", () => {
@@ -682,5 +733,42 @@ describe("styleRulesSchema", () => {
 				slots: { heading: { opacity: 2, lineHeight: 10, letterSpacing: -17 } },
 			}).success,
 		).toBe(false);
+	});
+});
+
+describe("skillsSectionSchema", () => {
+	it("forces columns to 1 when layout is 'inline'", () => {
+		const result = skillsSectionSchema.parse({
+			title: "Skills",
+			columns: 2,
+			hidden: false,
+			layout: "inline",
+			items: [],
+		});
+		expect(result.columns).toBe(1);
+		expect(result.layout).toBe("inline");
+	});
+
+	it("preserves columns when layout is 'default'", () => {
+		const result = skillsSectionSchema.parse({
+			title: "Skills",
+			columns: 3,
+			hidden: false,
+			layout: "default",
+			items: [],
+		});
+		expect(result.columns).toBe(3);
+		expect(result.layout).toBe("default");
+	});
+
+	it("defaults layout to 'default' when missing", () => {
+		const result = skillsSectionSchema.parse({
+			title: "Skills",
+			columns: 2,
+			hidden: false,
+			items: [],
+		});
+		expect(result.layout).toBe("default");
+		expect(result.columns).toBe(2);
 	});
 });

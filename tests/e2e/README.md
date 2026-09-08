@@ -26,30 +26,14 @@ Run tests:
 
 `APP_URL=http://localhost:3000 PORT=3000 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres FLAG_DISABLE_SIGNUPS=false FLAG_DISABLE_EMAIL_AUTH=false FLAG_DISABLE_API_RATE_LIMIT=true LOCAL_STORAGE_PATH=/workspace/data/e2e pnpm test:e2e`
 
-## Semantic CSS
-
-Run the six Semantic CSS scenarios: default mode, legacy conversion, source-only autosave preservation, portable
-selector rendering, break-inside pagination, and all-template visual regression:
-
-```bash
-pnpm exec playwright test tests/e2e/specs/semantic-css
-```
-
-Linux/Chromium visual baselines are updated intentionally with:
-
-```bash
-pnpm exec playwright test tests/e2e/specs/semantic-css/template-visual.spec.ts \
-	--project=chromium --update-snapshots
-```
-
 ## Coverage
 
 - Email/password auth smoke.
-- Dashboard sample resume creation.
-- Builder basics edit and autosave persistence.
+- Dashboard resume lifecycle: create, rename, duplicate, delete.
+- Builder section editing, autosave/navigation, and locking.
 - JSON export/import.
 - Public sharing for anonymous visitors.
-- Semantic CSS default mode, legacy conversion, source-only autosave preservation, portable selector rendering,
-  break-inside pagination, and all-template visual regression.
 
-PDF, DOCX, OAuth, passkeys, 2FA, password reset, and AI flows are intentionally outside the initial PR gate.
+Visual regression, PDF/DOCX rasterization parity, thumbnail resolution, and import-fixture reproduction are
+intentionally outside the PR gate to keep it fast; the opt-in geometry, offline-font, and root-resume suites stay
+behind their environment flags.

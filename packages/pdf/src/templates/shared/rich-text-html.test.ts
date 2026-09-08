@@ -9,6 +9,38 @@ type PdfElement = ReactElement<{ children?: unknown; element?: { tag: string } }
 const getPdfElementProps = (element: unknown) => (element as PdfElement).props;
 
 describe("normalizeRichTextHtml", () => {
+	it("expands tabs only inside marked paragraphs and headings", () => {
+		expect(
+			normalizeRichTextHtml(
+				'<p data-resume-whitespace="preserve">A\tB</p><h2 data-resume-whitespace="preserve">\tC</h2><p>D\tE</p>',
+			),
+		).toBe(
+			'<p data-resume-whitespace="preserve">A    B</p><h2 data-resume-whitespace="preserve">    C</h2><p>D\tE</p>',
+		);
+	});
+
+	it("retains marked paragraphs inside lists so preservation stays node-local", () => {
+		expect(normalizeRichTextHtml('<ul><li><p data-resume-whitespace="preserve">  Listed\ttext  </p></li></ul>')).toBe(
+			'<ul><li><p data-resume-whitespace="preserve">  Listed    text  </p></li></ul>',
+		);
+	});
+
+	it("does not reinterpret marked RTL line breaks as pseudo-bullet lists", () => {
+		const html = '<p data-resume-whitespace="preserve">  - First<br>  - Second</p>';
+		expect(normalizeRichTextHtml(html, { direction: "rtl" })).toBe(
+			'<p data-resume-whitespace="preserve">\u200f  - First<br>  - Second</p>',
+		);
+	});
+
+	it("decodes opted-in soft hyphens in text without changing links or escaped literals", () => {
+		const html =
+			'<p title="&shy;">Soft&shy;ware &#173; &#xAD; &amp;shy; <a href="https://example.com/&shy;">link</a></p>';
+		expect(normalizeRichTextHtml(html)).toBe(html);
+		expect(normalizeRichTextHtml(html, { softHyphens: true })).toBe(
+			'<p title="&shy;">Soft\u00ADware \u00AD \u00AD &amp;shy; <a href="https://example.com/&shy;">link</a></p>',
+		);
+	});
+
 	it("wraps loose inline content in a <p>", () => {
 		expect(normalizeRichTextHtml("hello world")).toBe("<p>hello world</p>");
 	});
@@ -141,6 +173,19 @@ describe("normalizeRichTextHtml", () => {
 
 	it("trims input whitespace", () => {
 		expect(normalizeRichTextHtml("   text   ")).toBe("<p>text</p>");
+	});
+
+	it("preserves authored Unicode spaces around bare rich text", () => {
+		expect(normalizeRichTextHtml("\u3000text\u00a0")).toBe("<p>\u3000text\u00a0</p>");
+	});
+
+	it("retains an inline ideographic-space paragraph", () => {
+		expect(normalizeRichTextHtml("\u3000")).toBe("<p>\u3000</p>");
+	});
+
+	it("does not discard a Unicode-space sibling when unwrapping a list paragraph", () => {
+		const html = "<ul><li>\u3000<p>text</p></li></ul>";
+		expect(normalizeRichTextHtml(html)).toBe(html);
 	});
 
 	it("returns empty string for empty input", () => {

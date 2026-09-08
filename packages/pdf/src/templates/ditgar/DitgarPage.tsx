@@ -20,6 +20,7 @@ import { TemplateProvider } from "../shared/context";
 import { getFeaturedSummaryLayout } from "../shared/featured-summary";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
+import { PageMarginBackground } from "../shared/page-margin-background";
 import { hasTemplatePicture } from "../shared/picture";
 import {
 	Heading,
@@ -65,6 +66,8 @@ const ditgarFeatures = {
 	stackSidebarItemHeader: true,
 } satisfies TemplateFeatures;
 
+const ditgarItemHeaderBorderWidth = 2;
+
 export const DitgarPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pageNumber }: TemplatePageProps) => {
 	const data = useRender();
 	const pageNodeKey = semanticNodeKeys.page(pageNumber);
@@ -87,15 +90,25 @@ export const DitgarPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 		<Page
 			{...semanticPageProps}
 			size={semanticPageSize ?? pageSize}
-			style={composeStyles(styles.page, pageMinHeightStyle, semanticPageStyle)}
+			style={composeStyles(
+				styles.page,
+				{ paddingVertical: metrics.page.paddingVertical },
+				pageMinHeightStyle,
+				semanticPageStyle,
+			)}
 		>
 			<TemplateProvider pageNodeKey={pageNodeKey} styles={styles} colors={colors} features={ditgarFeatures}>
 				{showSidebar && (
 					<View
 						style={composeStyles(styles.sidebarColumn, {
 							width: `${metadata.layout.sidebarWidth}%`,
+							marginTop: -metrics.page.paddingVertical,
 						})}
 					>
+						<PageMarginBackground
+							color={colors.sidebarBackground ?? colors.background}
+							margin={metrics.page.paddingVertical}
+						/>
 						{showHeader && <Header styles={styles} colors={colors} />}
 
 						{!page.fullWidth && (
@@ -111,7 +124,7 @@ export const DitgarPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 					</View>
 				)}
 
-				<View style={styles.mainColumn}>
+				<View style={composeStyles(styles.mainColumn, { marginTop: -metrics.page.paddingVertical })}>
 					{featuredSummarySection && (
 						<SemanticRegionTemplatePartView
 							region="featured"
@@ -244,7 +257,6 @@ const useDitgarTemplate = (): DitgarTemplate => {
 			sidebarContent: {
 				paddingHorizontal: metrics.page.paddingHorizontal,
 				paddingTop: metrics.page.paddingVertical,
-				paddingBottom: metrics.page.paddingVertical,
 			},
 			mainColumn: {
 				flex: 1,
@@ -252,7 +264,6 @@ const useDitgarTemplate = (): DitgarTemplate => {
 			mainContent: {
 				paddingHorizontal: metrics.page.paddingHorizontal,
 				paddingTop: metrics.page.paddingVertical,
-				paddingBottom: metrics.page.paddingVertical,
 			},
 			specialContainer: {
 				backgroundColor: primaryTint,
@@ -322,11 +333,12 @@ const useDitgarTemplate = (): DitgarTemplate => {
 					rowGap: 0,
 					...(context.placement === "main"
 						? {
-								borderLeftWidth: 2,
+								borderLeftWidth: ditgarItemHeaderBorderWidth,
 								borderLeftColor: accentFor(context),
 								paddingLeft: metrics.gapX(0.5),
 								paddingVertical: metrics.gapY(0.125),
-								marginLeft: -metrics.gapX(0.625),
+								// Keep header text aligned with the body after its border and padding.
+								marginLeft: -(ditgarItemHeaderBorderWidth + metrics.gapX(0.5)),
 							}
 						: {}),
 				}),

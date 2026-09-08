@@ -4,7 +4,7 @@ import type { WritableDraft } from "immer";
 import { t } from "@lingui/core/macro";
 import { consumeEventIterator } from "@orpc/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useBlocker, useParams } from "@tanstack/react-router";
 import { debounce, isEqual } from "es-toolkit";
 import { useCallback, useEffect, useState } from "react";
 import { immer } from "zustand/middleware/immer";
@@ -22,6 +22,7 @@ export type Resume = {
 	updatedAt: Date;
 	hasPassword?: boolean;
 	isPublic?: boolean;
+	showDownloadButtons?: boolean;
 	/** Set when this resume was created as a child of another resume; drives the parent-update review UI. */
 	parentId?: string | null;
 };
@@ -66,6 +67,7 @@ type Runtime = {
 	isSaving: boolean;
 	pendingResume?: Resume;
 	syncErrorToastId?: string;
+	slowSaveToastId?: string;
 	syncResume: ReturnType<typeof debounce<(resume: Resume) => void>>;
 	beforeUnloadHandler?: () => void;
 	deferredRemoteResume?: Resume;
@@ -79,6 +81,7 @@ type ResumeUpdateSubscriptionOptions = {
 };
 
 const SAVE_DEBOUNCE_MS = 500;
+const NAVIGATION_SAVE_WAIT_MS = 10_000;
 // Rapid edits within this window coalesce into a single undo step (e.g. typing a word / dragging).
 const HISTORY_COALESCE_MS = 500;
 // Bounded stacks: keep undo/redo memory (whole-resume snapshots) predictable during a long session.
@@ -232,6 +235,10 @@ async function flushResumeSave(id: string) {
 			timeout: 0,
 		});
 	} finally {
+		if (runtime.slowSaveToastId !== undefined) {
+			toast.close(runtime.slowSaveToastId);
+			runtime.slowSaveToastId = undefined;
+		}
 		runtime.isSaving = false;
 		if (runtime.pendingResume && runtime.syncErrorToastId === undefined) void flushResumeSave(id);
 	}
@@ -413,6 +420,7 @@ export const useResumeStore = create<ResumeStore>()(
 				state.resume.updatedAt = resume.updatedAt;
 				state.resume.hasPassword = resume.hasPassword;
 				state.resume.isPublic = resume.isPublic;
+				state.resume.showDownloadButtons = resume.showDownloadButtons;
 			});
 		},
 
@@ -664,10 +672,55 @@ export function useBuilderResumeUpdateSubscription() {
 	useResumeUpdateSubscription({ resumeId, onUpdate, onError });
 }
 
+// Route transitions can await a save; unmount cleanup and browser unload cannot.
+function saveResumeBeforeLeaving(id: string): boolean | Promise<boolean> {
+	const runtime = runtimes.get(id);
+	const current = useResumeStore.getState().resume;
+	if (!runtime?.hasPendingLocalChanges || current?.id !== id) return true;
+
+	runtime.syncResume.cancel();
+	runtime.pendingResume = cloneResume(current);
+	useResumeStore.getState().setSaveStatus("saving");
+
+	return new Promise<boolean>((resolve) => {
+		const finish = (saved: boolean) => {
+			clearTimeout(timeout);
+			unsubscribe();
+			resolve(saved);
+		};
+		const unsubscribe = useResumeStore.subscribe((state) => {
+			if (state.resume?.id !== id || state.saveStatus === "error") {
+				finish(false);
+			} else if (state.saveStatus === "saved" && !runtime.hasPendingLocalChanges) {
+				finish(true);
+			}
+		});
+		const timeout = setTimeout(() => {
+			finish(false);
+			// Keep the write in flight: it may already have reached the server.
+			runtime.slowSaveToastId = toast.add({
+				type: "info",
+				description: t`Saving is taking longer than expected. Your changes are still open.`,
+				id: runtime.slowSaveToastId,
+				timeout: 0,
+			});
+		}, NAVIGATION_SAVE_WAIT_MS);
+		void flushResumeSave(id);
+	});
+}
+
 export function useResumeCleanup() {
 	const params = useParams({ strict: false }) as { resumeId?: string };
 	const resumeId = params.resumeId;
 	const reset = useResumeStore((state) => state.reset);
+
+	useBlocker({
+		shouldBlockFn: async ({ next }) => {
+			if (!resumeId || ("resumeId" in next.params && next.params.resumeId === resumeId)) return false;
+			return !(await saveResumeBeforeLeaving(resumeId));
+		},
+		enableBeforeUnload: () => !!resumeId && (runtimes.get(resumeId)?.hasPendingLocalChanges ?? false),
+	});
 
 	useEffect(() => {
 		if (!resumeId) return;

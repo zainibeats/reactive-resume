@@ -22,7 +22,7 @@ import { applicationsListQueryKey } from "../queries";
 
 const MAX_IMPORT = 500;
 const SAMPLE =
-	"Company,Role,Stage,Stage Date,Location,Salary,Source,Tags\nStripe,Frontend Engineer,applied,2026-07-01,Remote,$180k,LinkedIn,remote;react";
+	"Company,Role,Stage,Stage Date,Location,Salary,Source,Tags,Contact Name,Contact Email,Contact Phone\nStripe,Frontend Engineer,applied,2026-07-01,Remote,$180k,LinkedIn,remote;react,Jane Doe,jane@example.com,+1 555 0100";
 
 type Props = {
 	open: boolean;
@@ -74,8 +74,8 @@ export function ImportApplicationsSheet({ open, onOpenChange }: Props) {
 					</SheetTitle>
 					<SheetDescription>
 						<Trans>
-							Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source and
-							Tags.
+							Paste rows or upload a .csv. We map columns like Company, Role, Stage, Stage Date, Salary, Source, Tags,
+							Contact Name, Contact Email and Contact Phone.
 						</Trans>
 					</SheetDescription>
 				</SheetHeader>
@@ -118,10 +118,18 @@ export function ImportApplicationsSheet({ open, onOpenChange }: Props) {
 								<Trans>{importable.length} ready to import</Trans>
 								{parsed.skipped > 0 && (
 									<span className="text-muted-foreground text-xs">
-										· <Trans>{parsed.skipped} skipped (missing company/role)</Trans>
+										· <Trans>{parsed.skipped} skipped (invalid or missing data)</Trans>
 									</span>
 								)}
 							</div>
+							{parsed.contactsSkipped > 0 && (
+								<p className="mt-1.5 text-muted-foreground text-xs">
+									<Trans>
+										{parsed.contactsSkipped} contact(s) skipped (invalid email or missing Contact Name). Those
+										applications still import.
+									</Trans>
+								</p>
+							)}
 							{overflow > 0 && (
 								<p className="mt-1.5 text-amber-600 text-xs dark:text-amber-500">
 									<Trans>

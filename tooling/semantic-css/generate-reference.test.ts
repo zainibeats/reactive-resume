@@ -151,7 +151,7 @@ it("names every custom-section item shape by its type key", () => {
 		expect(reference).toContain(`| \`customSections[]\` | \`${type}\` | \`${schemaName}\` |`);
 	}
 	expect(reference).toContain(
-		"| `customSections[]` | `experience` | `experienceItemSchema` | `{ id, hidden, company, position, location, period, description }` |",
+		"| `customSections[]` | `experience` | `experienceItemSchema` | `{ id, hidden, company, position, location, period, website, description, roles }` |",
 	);
 	expect(reference).toContain(
 		"| `customSections[].items[].company` | `string` | yes (type experience, schema experienceItemSchema at customSections[]) |",

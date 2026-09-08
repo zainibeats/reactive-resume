@@ -1,8 +1,7 @@
 import type { Style } from "@react-pdf/types";
 import type { ReactElement, ReactNode } from "react";
 import { cloneElement, isValidElement } from "react";
-import { Html } from "react-pdf-html";
-import { Link as PdfLink, Text as PdfText, View } from "#react-pdf-renderer";
+import { View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { resolvedPdfFlowProps, resolvedPdfTextProps } from "../../semantic/adapter";
 import {
@@ -14,6 +13,7 @@ import {
 } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
 import { getRichTextSemanticNodeKey } from "../../semantic/rich-text-keys";
+import { Html, Link as PdfLink, Text as PdfText } from "../../text";
 import { useSectionStyleRule, useTemplateStyle } from "./context";
 import {
 	normalizeRichTextHtml,
@@ -21,7 +21,7 @@ import {
 	richTextMarkClassName,
 	richTextSemanticNodeKeyAttribute,
 } from "./rich-text-html";
-import { renderRichTextParagraph, toRichTextStyleArray } from "./rich-text-renderers";
+import { renderRichTextParagraph, renderWithBoundedIndent, toRichTextStyleArray } from "./rich-text-renderers";
 import {
 	createRichTextProseSpacing,
 	getRichTextEdgeTrimStyle,
@@ -74,7 +74,7 @@ const applyRtlDirectionRecursively = (node: ReactNode): ReactNode => {
 };
 
 export const RichText = ({ children, semanticField }: RichTextProps) => {
-	const { metadata, rtl } = useRender();
+	const { metadata, rtl, hyphenationCallback } = useRender();
 	const parentNodeKey = useSemanticNodeKey();
 	const fieldNodeKey =
 		parentNodeKey && semanticField ? semanticNodeKeys.field(parentNodeKey, semanticField) : undefined;
@@ -108,7 +108,10 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 	);
 	const proseSpacing = createRichTextProseSpacing(bodyLineHeight);
 
-	const normalizedHtml = normalizeRichTextHtml(children, { direction: rtl ? "rtl" : "ltr" });
+	const normalizedHtml = normalizeRichTextHtml(children, {
+		direction: rtl ? "rtl" : "ltr",
+		softHyphens: metadata.typography.hyphenation === true && /^de(?:-|$)/i.test(metadata.page.locale),
+	});
 	const html = richTextNodeKey
 		? projectNormalizedRichTextHtml(normalizedHtml, richTextNodeKey, renderedChildKeysFor)
 		: normalizedHtml;
@@ -119,6 +122,7 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 		element.getAttribute(richTextSemanticNodeKeyAttribute) ??
 		(richTextNodeKey ? getRichTextSemanticNodeKey(richTextNodeKey, element, richTextMarkClassName) : undefined);
 	const resolvedFor = (element: Parameters<typeof getRichTextSemanticNodeKey>[1]) => resolveNode(keyFor(element));
+	const listLengths = new WeakMap<object, number>();
 	const renderText = ({
 		element,
 		style,
@@ -132,11 +136,18 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 		const resolved = resolveNode(nodeKey);
 		const visible = isNodeVisible(nodeKey);
 		if (!visible) return null;
-		return (
-			<PdfText {...resolvedPdfTextProps(resolved)} style={composeStyles(style, resolved.style, safeTextStyle)}>
+		const text = (
+			<PdfText
+				{...resolvedPdfTextProps(resolved)}
+				data-resume-whitespace={element.getAttribute("data-resume-whitespace")}
+				style={composeStyles(style, resolved.style, safeTextStyle)}
+			>
 				{textChildren}
 			</PdfText>
 		);
+		return /^h[1-6]$/i.test(element.rawTagName) && Number(element.getAttribute("data-indent")) > 0
+			? renderWithBoundedIndent(text, rtl)
+			: text;
 	};
 	const renderView = ({
 		element,
@@ -151,11 +162,12 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 		const resolved = resolveNode(nodeKey);
 		const visible = isNodeVisible(nodeKey);
 		if (!visible) return null;
-		return (
+		const view = (
 			<View {...resolvedPdfFlowProps(resolved)} style={composeStyles(style, resolved.style)}>
 				{viewChildren}
 			</View>
 		);
+		return Number(element.getAttribute("data-paragraph-indent")) > 0 ? renderWithBoundedIndent(view, rtl) : view;
 	};
 
 	return (
@@ -220,8 +232,13 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 					const paragraphProps = {
 						...props,
 						style: props.style,
+						indent: Number(props.element.getAttribute("data-indent")),
 						semanticStyle: resolved.style,
-						textProps: resolvedPdfTextProps(resolved),
+						textProps: {
+							...resolvedPdfTextProps(resolved),
+							hyphenationCallback,
+							"data-resume-whitespace": props.element.getAttribute("data-resume-whitespace"),
+						},
 						rtl,
 						...(rtlTextWrapStyle ? { rtlTextWrapStyle } : {}),
 						...(rtl ? { applyRtlDirection: applyRtlDirectionRecursively } : {}),
@@ -242,17 +259,51 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 					const contentResolved = resolveNode(contentNodeKey);
 					const isOrderedList = isRichTextElementInsideOrderedList(element);
 					const marker = isOrderedList ? `${element.indexOfType + 1}.` : "•";
+					// Reserve the same gutter throughout a list, then let Yoga measure wider
+					// glyphs. An explicit authored width keeps its ordinary CSS geometry.
+					let orderedMarkerStyle: Style | undefined;
+					if (
+						isOrderedList &&
+						markerResolved.style?.width === undefined &&
+						markerResolved.style?.flexBasis === undefined
+					) {
+						const parent = element.parentNode;
+						const listLength = parent
+							? (listLengths.get(parent) ??
+								parent.childNodes.filter((child) => child.rawTagName?.toLowerCase() === "li").length)
+							: 1;
+						if (parent) listLengths.set(parent, listLength);
+						const markerFontSize =
+							typeof markerResolved.style?.fontSize === "number"
+								? markerResolved.style.fontSize
+								: metadata.typography.body.fontSize;
+						const markerLetterSpacing =
+							typeof markerResolved.style?.letterSpacing === "number"
+								? Math.max(0, markerResolved.style.letterSpacing)
+								: 0;
+						const markerDigits = String(listLength).length;
+						orderedMarkerStyle = {
+							width: "auto",
+							minWidth: markerDigits * markerFontSize + (markerDigits + 1) * markerLetterSpacing,
+							flexShrink: 0,
+						};
+					}
 					const itemStyles = toRichTextStyleArray(style);
 					const contentItemStyles = itemStyles.map(stripRichTextVerticalMargins);
 
+					// The scoped @react-pdf/layout patch keeps these companions together using
+					// actual text fragments, including authored orphan counts and fallback fonts.
 					const markerNode = (
 						<PdfText
 							key="marker"
+							data-resume-list-marker
 							{...resolvedPdfTextProps(markerResolved)}
-							minPresenceAhead={
-								markerResolved.minPresenceAhead ?? bodyLineHeight ?? metadata.typography.body.lineHeight
-							}
-							style={composeStyles(richListItemMarkerStyle, markerResolved.style)}
+							style={composeStyles(
+								richListItemMarkerStyle,
+								orderedMarkerStyle,
+								{ alignSelf: "flex-start" },
+								markerResolved.style,
+							)}
 						>
 							{marker}
 						</PdfText>
@@ -262,6 +313,7 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 					const contentNode = rtl ? (
 						<PdfText
 							key="content"
+							data-resume-list-content
 							{...resolvedPdfTextProps(contentResolved)}
 							style={composeStyles(
 								richListItemContentStyle,
@@ -277,6 +329,7 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 					) : (
 						<View
 							key="content"
+							data-resume-list-content
 							{...resolvedPdfFlowProps(contentResolved)}
 							style={composeStyles(
 								richListItemContentStyle,
@@ -308,6 +361,7 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 					// (works fine for split-row/contact-list). Swap DOM order to position the marker.
 					return (
 						<View
+							data-resume-list-item
 							{...resolvedPdfFlowProps(itemResolved)}
 							style={composeStyles(
 								richListItemRowStyle,
@@ -317,6 +371,10 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 								itemResolved.style,
 							)}
 						>
+							{/* React PDF only honors an authored presence hint after a preceding sibling. */}
+							{markerResolved.minPresenceAhead ? (
+								<View key="presence-spacer" style={{ position: "absolute", width: 0, height: 0 }} />
+							) : null}
 							{renderedChildren}
 						</View>
 					);

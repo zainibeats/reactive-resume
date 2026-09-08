@@ -21,6 +21,16 @@ describe("createResumeDataJsonSchema", () => {
 		});
 	});
 
+	it("accepts legacy input with omitted picture fit", () => {
+		const schema = createResumeDataJsonSchema();
+
+		expect(schema).toMatchObject({
+			properties: {
+				picture: { required: expect.not.arrayContaining(["fit"]) },
+			},
+		});
+	});
+
 	it("enforces the custom-section type and item correlation", () => {
 		const generatedSchema = z.fromJSONSchema(createResumeDataJsonSchema());
 		const valid = {
@@ -61,7 +71,7 @@ describe("createCustomSectionItemJsonSchemas", () => {
 		expect(schemas.experience).toMatchObject({
 			schemaName: "experienceItemSchema",
 			schema: {
-				required: ["id", "hidden", "company", "position", "location", "period", "description"],
+				required: ["id", "hidden", "company", "position", "location", "period", "website", "description", "roles"],
 			},
 		});
 		expect(schemas["cover-letter"]).toMatchObject({

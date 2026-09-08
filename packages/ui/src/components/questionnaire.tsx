@@ -15,16 +15,6 @@ function Questionnaire({ className, ...props }: React.ComponentProps<typeof Ques
 	);
 }
 
-function QuestionnaireProgress({ className, ...props }: React.ComponentProps<typeof QuestionnairePrimitive.Progress>) {
-	return (
-		<QuestionnairePrimitive.Progress
-			data-slot="questionnaire-progress"
-			className={cn("min-h-[1lh] w-fit min-w-[14ch] font-medium text-muted-foreground text-xs tabular-nums", className)}
-			{...props}
-		/>
-	);
-}
-
 function QuestionnaireItem({ className, ...props }: React.ComponentProps<typeof QuestionnairePrimitive.Item>) {
 	return (
 		<QuestionnairePrimitive.Item
@@ -43,19 +33,6 @@ function QuestionnaireTitle({ className, ...props }: React.ComponentProps<typeof
 				"cn-font-heading text-pretty font-medium text-base leading-snug [&:not(:has(~[data-slot=questionnaire-description]))]:mb-4",
 				className,
 			)}
-			{...props}
-		/>
-	);
-}
-
-function QuestionnaireDescription({
-	className,
-	...props
-}: React.ComponentProps<typeof QuestionnairePrimitive.Description>) {
-	return (
-		<QuestionnairePrimitive.Description
-			data-slot="questionnaire-description"
-			className={cn("text-pretty text-muted-foreground text-sm", className)}
 			{...props}
 		/>
 	);
@@ -118,12 +95,6 @@ function QuestionnaireChoice({
 	);
 }
 
-function QuestionnaireChoiceDescription({ className, ...props }: React.ComponentProps<"span">) {
-	return (
-		<span data-slot="questionnaire-choice-description" className={cn("text-muted-foreground", className)} {...props} />
-	);
-}
-
 function QuestionnaireInput({ className, ...props }: React.ComponentProps<typeof QuestionnairePrimitive.Input>) {
 	return (
 		<div data-slot="questionnaire-input-wrapper" className="group/questionnaire-input relative w-full min-w-0">
@@ -163,81 +134,6 @@ function QuestionnaireActions({ className, ...props }: React.ComponentProps<"div
 	);
 }
 
-function QuestionnairePrevious({
-	children,
-	className,
-	size = "default",
-	variant = "outline",
-	...props
-}: React.ComponentProps<typeof QuestionnairePrimitive.Previous> &
-	Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
-	return (
-		<QuestionnairePrimitive.Previous
-			data-slot="questionnaire-previous"
-			data-size={size}
-			data-variant={variant}
-			className={cn(
-				buttonVariants({ size, variant }),
-				"col-start-1 row-start-1 min-h-11 justify-self-start sm:min-h-0",
-				className,
-			)}
-			{...props}
-		>
-			{children ?? "Previous"}
-		</QuestionnairePrimitive.Previous>
-	);
-}
-
-function QuestionnaireSkip({
-	children,
-	className,
-	size = "default",
-	variant = "outline",
-	...props
-}: React.ComponentProps<typeof QuestionnairePrimitive.Skip> &
-	Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
-	return (
-		<QuestionnairePrimitive.Skip
-			data-slot="questionnaire-skip"
-			data-size={size}
-			data-variant={variant}
-			className={cn(
-				buttonVariants({ size, variant }),
-				"col-start-2 row-start-1 min-h-11 justify-self-end sm:min-h-0",
-				className,
-			)}
-			{...props}
-		>
-			{children ?? "Skip"}
-		</QuestionnairePrimitive.Skip>
-	);
-}
-
-function QuestionnaireNext({
-	children,
-	className,
-	size = "default",
-	variant = "default",
-	...props
-}: React.ComponentProps<typeof QuestionnairePrimitive.Next> &
-	Pick<React.ComponentProps<typeof Button>, "size" | "variant">) {
-	return (
-		<QuestionnairePrimitive.Next
-			data-slot="questionnaire-next"
-			data-size={size}
-			data-variant={variant}
-			className={cn(
-				buttonVariants({ size, variant }),
-				"col-start-3 row-start-1 min-h-11 justify-self-end sm:min-h-0",
-				className,
-			)}
-			{...props}
-		>
-			{children ?? "Next"}
-		</QuestionnairePrimitive.Next>
-	);
-}
-
 function QuestionnaireSubmit({
 	children,
 	className,
@@ -267,16 +163,10 @@ export {
 	Questionnaire,
 	QuestionnaireActions,
 	QuestionnaireChoice,
-	QuestionnaireChoiceDescription,
 	QuestionnaireChoices,
-	QuestionnaireDescription,
 	QuestionnaireError,
 	QuestionnaireInput,
 	QuestionnaireItem,
-	QuestionnaireNext,
-	QuestionnairePrevious,
-	QuestionnaireProgress,
-	QuestionnaireSkip,
 	QuestionnaireSubmit,
 	QuestionnaireTitle,
 };

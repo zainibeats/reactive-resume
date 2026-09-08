@@ -215,10 +215,7 @@ export function ProfileSettingsPage({ session }: Props) {
 								<Input
 									type="email"
 									autoComplete="email"
-									placeholder={t({
-										comment: "Example email placeholder on profile settings form",
-										message: "john.doe@example.com",
-									})}
+									placeholder="john.doe@example.com"
 									className="lowercase"
 									name={field.name}
 									value={field.state.value}

@@ -3,6 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	CopySimpleIcon,
 	FolderOpenIcon,
+	GitBranchIcon,
 	LockSimpleIcon,
 	LockSimpleOpenIcon,
 	PencilSimpleLineIcon,
@@ -24,7 +25,7 @@ type Props = Omit<React.ComponentProps<typeof DropdownMenuContent>, "children"> 
 };
 
 export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
-	const { handleDelete, handleDuplicate, handleToggleLock, handleUpdate } = useResumeMenuActions(resume);
+	const { handleDelete, handleDerive, handleDuplicate, handleToggleLock, handleUpdate } = useResumeMenuActions(resume);
 
 	return (
 		<DropdownMenu>
@@ -48,6 +49,11 @@ export function ResumeDropdownMenu({ resume, children, ...props }: Props) {
 				<DropdownMenuItem onClick={handleDuplicate}>
 					<CopySimpleIcon />
 					<Trans comment="Resume card dropdown action to create a copy">Duplicate</Trans>
+				</DropdownMenuItem>
+
+				<DropdownMenuItem onClick={handleDerive}>
+					<GitBranchIcon />
+					<Trans comment="Resume card dropdown action to create a linked child resume">Create child resume</Trans>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem onClick={handleToggleLock}>

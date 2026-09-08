@@ -32,7 +32,7 @@ type SemanticStylesheetSeed = {
 	source: { languageVersion: number; text: string };
 };
 
-export async function updateSemanticCssFixture(
+async function _updateSemanticCssFixture(
 	resumeId: string,
 	update: {
 		stylesheet?: SemanticStylesheetSeed;
@@ -143,7 +143,7 @@ export async function updateSemanticCssFixture(
 	}
 }
 
-export async function readSemanticCssFixture(resumeId: string) {
+async function _readSemanticCssFixture(resumeId: string) {
 	const pool = new Pool({ connectionString: getDatabaseUrl() });
 
 	try {

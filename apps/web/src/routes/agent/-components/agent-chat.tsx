@@ -1,5 +1,5 @@
 import type { AgentUIMessage } from "@reactive-resume/ai/tools/agent-tool-contracts";
-import type { UIMessage, UIMessageChunk } from "ai";
+import type { UIMessage } from "ai";
 import type * as React from "react";
 import type { RouterOutput } from "@/libs/orpc/client";
 import type { PatchApprovalResponse } from "./patch-approval-card";
@@ -25,7 +25,12 @@ import {
 } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { lastAssistantMessageIsCompleteWithApprovalResponses, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
+import {
+	lastAssistantMessageIsCompleteWithApprovalResponses,
+	lastAssistantMessageIsCompleteWithToolCalls,
+	parseJsonEventStream,
+	uiMessageChunkSchema,
+} from "ai";
 import { m } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -348,34 +353,18 @@ function textFromMessage(message: UIMessage) {
 }
 
 function parseAgentSseStream(stream: ReadableStream<string>) {
-	let buffer = "";
-	const eventBoundary = /\r?\n\r?\n/;
-
-	return stream.pipeThrough(
-		new TransformStream<string, UIMessageChunk>({
+	return parseJsonEventStream({
+		stream: stream.pipeThrough(new TextEncoderStream()),
+		schema: uiMessageChunkSchema,
+	}).pipeThrough(
+		new TransformStream({
 			transform(chunk, controller) {
-				buffer += chunk;
-
-				let boundary = eventBoundary.exec(buffer);
-				while (boundary) {
-					const event = buffer.slice(0, boundary.index);
-					buffer = buffer.slice(boundary.index + boundary[0].length);
-
-					for (const line of event.split(/\r?\n/)) {
-						if (!line.startsWith("data:")) continue;
-
-						const data = line.slice("data:".length).trimStart();
-						if (!data || data === "[DONE]") continue;
-
-						try {
-							controller.enqueue(JSON.parse(data) as UIMessageChunk);
-						} catch (error) {
-							console.warn("[agent] dropping malformed SSE frame", error);
-						}
-					}
-
-					boundary = eventBoundary.exec(buffer);
+				if (!chunk.success) {
+					console.warn("[agent] dropping malformed SSE frame", chunk.error);
+					return;
 				}
+
+				controller.enqueue(chunk.value);
 			},
 		}),
 	);

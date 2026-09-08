@@ -30,6 +30,7 @@ vi.mock("@reactive-resume/db/schema", () => ({
 		tags: "tags",
 		data: "data",
 		isPublic: "is_public",
+		showDownloadButtons: "show_download_buttons",
 		isLocked: "is_locked",
 		password: "password",
 		updatedAt: "updated_at",
@@ -237,6 +238,17 @@ it("imports", () => {
 });
 
 describe("create", () => {
+	it("rejects out-of-range values before creating any record", async () => {
+		const data = structuredClone(defaultResumeData);
+		data.metadata.page.marginX = 500;
+		dbMock.insert.mockReturnValue({ values: vi.fn(() => Promise.resolve()) });
+		await expect(
+			resumeService.create({ userId: "u1", name: "Resume", slug: "resume", tags: [], locale: "en-US", data }),
+		).rejects.toMatchObject({ code: "BAD_REQUEST", status: 400 });
+		expect(dbMock.insert).not.toHaveBeenCalled();
+		expect(publishResumeUpdatedMock).not.toHaveBeenCalled();
+	});
+
 	it("copies stylesheet content", async () => {
 		const data = createSemanticResumeData();
 		const values = vi.fn((_input: unknown) => Promise.resolve());
@@ -450,6 +462,27 @@ describe("versions.restore", () => {
 });
 
 describe("update", () => {
+	it.each([false, true])(
+		"persists showDownloadButtons=%s without changing resume content",
+		async (showDownloadButtons) => {
+			const row = { ...createResumeRow(defaultResumeData), showDownloadButtons };
+			const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false }]);
+			const update = createUpdateChain([row]);
+			dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
+				callback({ select: () => select.chain, update: () => update.chain }),
+			);
+
+			const result = await resumeService.update({ id: "r1", userId: "u1", showDownloadButtons });
+
+			expect(update.set).toHaveBeenCalledWith(expect.objectContaining({ showDownloadButtons }));
+			expect(update.returning).toHaveBeenCalledWith(
+				expect.objectContaining({ showDownloadButtons: "show_download_buttons" }),
+			);
+			expect(result.showDownloadButtons).toBe(showDownloadButtons);
+			expect(result.data).toEqual(defaultResumeData);
+		},
+	);
+
 	it("throws RESUME_LOCKED when the pre-read reports the resume is locked", async () => {
 		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: true, updatedAt: new Date() }]);
 		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
@@ -545,6 +578,22 @@ describe("update", () => {
 		);
 	});
 
+	it("rejects out-of-range PUT data before any update or notification", async () => {
+		const data = structuredClone(defaultResumeData);
+		data.metadata.typography.body.fontSize = 999;
+		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false }]);
+		const update = createUpdateChain([createResumeRow(defaultResumeData)]);
+		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
+			callback({ select: () => select.chain, update: () => update.chain }),
+		);
+		await expect(resumeService.update({ id: "r1", userId: "u1", data, skipAutoSnapshot: true })).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+			status: 400,
+		});
+		expect(update.set).not.toHaveBeenCalled();
+		expect(publishResumeUpdatedMock).not.toHaveBeenCalled();
+	});
+
 	it("rejects renderer-unsafe data before updating the JSONB column", async () => {
 		const select = createLockedSelectChain([{ data: defaultResumeData, isLocked: false, updatedAt: new Date() }]);
 		const update = createUpdateChain([createResumeRow(defaultResumeData)]);
@@ -608,6 +657,10 @@ describe("patch", () => {
 		const lockedSelect = createLockedSelectChain([existing]);
 		const row = createResumeRow(existing.data, existing.updatedAt);
 		const update = createUpdateChain([row]);
+		update.returning.mockImplementation(() => {
+			const written = update.set.mock.calls.at(-1)?.[0] as { data: ResumeData };
+			return Promise.resolve([{ ...row, data: written.data }]);
+		});
 		const versionSelect = {
 			from: () => ({ where: () => ({ orderBy: () => ({ limit: () => [] }) }) }),
 		};
@@ -620,6 +673,51 @@ describe("patch", () => {
 
 		return { tx, update };
 	};
+
+	it.each([
+		["/metadata/template", "unknown-template"],
+		["/metadata/page/format", "a3"],
+		["/metadata/page/marginX", 500],
+		["/metadata/typography/body/fontSize", 999],
+	] as const)("rejects an invalid patch at %s atomically", async (path, value) => {
+		const data = structuredClone(defaultResumeData);
+		data.metadata.template = "chikorita";
+		data.metadata.page.marginX = 40;
+		const before = structuredClone(data);
+		const { tx, update } = createPatchTx({ data, isLocked: false, updatedAt: new Date() });
+		await expect(
+			resumeService.patchInTransaction(tx as never, {
+				id: "r1",
+				userId: "u1",
+				operations: [
+					{ op: "replace", path: "/basics/name", value: "Must not persist" },
+					{ op: "replace", path, value },
+				],
+			}),
+		).rejects.toMatchObject({ code: "INVALID_PATCH_OPERATIONS", status: 400 });
+		expect(update.set).not.toHaveBeenCalled();
+		expect(tx.insert).not.toHaveBeenCalled();
+		expect(data).toEqual(before);
+	});
+
+	it("normalizes stored legacy data before validating newly submitted patch values", async () => {
+		const data = structuredClone(defaultResumeData);
+		data.metadata.page.marginX = 500;
+		const { tx, update } = createPatchTx({ data, isLocked: false, updatedAt: new Date() });
+		await resumeService.patchInTransaction(tx as never, {
+			id: "r1",
+			userId: "u1",
+			operations: [{ op: "replace", path: "/basics/name", value: "Ada" }],
+		});
+		expect(update.set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					basics: expect.objectContaining({ name: "Ada" }),
+					metadata: expect.objectContaining({ page: expect.objectContaining({ marginX: 14 }) }),
+				}),
+			}),
+		);
+	});
 
 	it("persists stylesheet source through the ordinary patch path", async () => {
 		const data = createSemanticResumeData();
@@ -900,4 +998,151 @@ describe("statistics.increment", () => {
 		expect(dbMock.transaction).toHaveBeenCalledTimes(1);
 		expect(txInsert).toHaveBeenCalledTimes(2);
 	});
+});
+
+describe("sharing preferences", () => {
+	it("returns the saved preference when the owner reloads the builder", async () => {
+		const row = { ...createResumeRow(defaultResumeData), showDownloadButtons: false };
+		dbMock.select.mockReturnValue(createSelectChain([row]));
+		const result = await resumeService.getById({ id: "r1", userId: "u1" });
+		expect(dbMock.select).toHaveBeenCalledWith(
+			expect.objectContaining({ showDownloadButtons: "show_download_buttons" }),
+		);
+		expect(result.showDownloadButtons).toBe(false);
+	});
+
+	it.each([false, true])("returns saved showDownloadButtons=%s to public viewers", async (showDownloadButtons) => {
+		const row = {
+			...createResumeRow(defaultResumeData),
+			userId: "u1",
+			isPublic: true,
+			showDownloadButtons,
+			passwordHash: null,
+		};
+		dbMock.select.mockReturnValue({ from: () => ({ innerJoin: () => ({ where: () => Promise.resolve([row]) }) }) });
+		const increment = vi.spyOn(resumeService.statistics, "increment").mockResolvedValue();
+		try {
+			const result = await resumeService.getBySlug({
+				username: "owner",
+				slug: "resume",
+				requestHeaders: new Headers(),
+			});
+			expect(dbMock.select).toHaveBeenCalledWith(
+				expect.objectContaining({ showDownloadButtons: "show_download_buttons" }),
+			);
+			expect(result.showDownloadButtons).toBe(showDownloadButtons);
+		} finally {
+			increment.mockRestore();
+		}
+	});
+});
+
+describe("statistics.recordDownload", () => {
+	const input = { username: "owner", slug: "resume", requestHeaders: new Headers() };
+	const publicResume = { id: "r1", userId: "u1", isPublic: true, passwordHash: null };
+	const selectResume = (rows: unknown[]) =>
+		dbMock.select.mockReturnValueOnce({
+			from: () => ({ innerJoin: () => ({ where: () => Promise.resolve(rows) }) }),
+		});
+	const captureWrites = () => {
+		const values = vi.fn((_input: unknown) => ({ onConflictDoUpdate: vi.fn(async () => undefined) }));
+		dbMock.transaction.mockImplementationOnce(async (callback: (tx: unknown) => Promise<unknown>) =>
+			callback({ insert: () => ({ values }) }),
+		);
+		return values;
+	};
+
+	it.each([undefined, "another-user"])(
+		"counts a public visitor (%s) in totals and daily downloads without adding views",
+		async (currentUserId) => {
+			selectResume([publicResume]);
+			const values = captureWrites();
+			await resumeService.statistics.recordDownload({ ...input, ...(currentUserId ? { currentUserId } : {}) });
+			expect(values).toHaveBeenCalledTimes(2);
+			expect(values.mock.calls[0]?.[0]).toMatchObject({ resumeId: "r1", views: 0, downloads: 1 });
+			expect(values.mock.calls[0]?.[0]).toHaveProperty("lastDownloadedAt");
+			expect(values.mock.calls[0]?.[0]).toHaveProperty("lastViewedAt", undefined);
+			expect(values.mock.calls[1]?.[0]).toMatchObject({
+				resumeId: "r1",
+				views: 0,
+				downloads: 1,
+				date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+			});
+		},
+	);
+
+	it("does not count the owner's own download", async () => {
+		selectResume([publicResume]);
+		await resumeService.statistics.recordDownload({ ...input, currentUserId: "u1" });
+		expect(dbMock.transaction).not.toHaveBeenCalled();
+	});
+
+	it.each([{ rows: [] }, { rows: [{ ...publicResume, isPublic: false }] }])(
+		"rejects unavailable resumes without recording a download",
+		async ({ rows }) => {
+			selectResume(rows);
+			await expect(resumeService.statistics.recordDownload(input)).rejects.toMatchObject({ code: "NOT_FOUND" });
+			expect(dbMock.transaction).not.toHaveBeenCalled();
+		},
+	);
+
+	it("requires current password access before recording a download", async () => {
+		selectResume([{ ...publicResume, passwordHash: "hash" }]);
+		hasResumeAccessMock.mockReturnValueOnce(false);
+		await expect(resumeService.statistics.recordDownload(input)).rejects.toMatchObject({ code: "NEED_PASSWORD" });
+		expect(hasResumeAccessMock).toHaveBeenCalledWith(input.requestHeaders, "r1", "hash");
+		expect(dbMock.transaction).not.toHaveBeenCalled();
+	});
+
+	it("records a visitor with valid password access", async () => {
+		selectResume([{ ...publicResume, passwordHash: "hash" }]);
+		hasResumeAccessMock.mockReturnValueOnce(true);
+		const values = captureWrites();
+		await resumeService.statistics.recordDownload(input);
+		expect(values).toHaveBeenCalledTimes(2);
+	});
+});
+
+describe("root public-only lookup", () => {
+	it("rejects a private target even for its owner after identity resolution", async () => {
+		const row = {
+			...createResumeRow(defaultResumeData),
+			userId: "u1",
+			isPublic: false,
+			hasPassword: false,
+			passwordHash: null,
+		};
+		dbMock.select.mockReturnValue({ from: () => ({ innerJoin: () => ({ where: async () => [row] }) }) });
+		await expect(
+			resumeService.getBySlug({
+				username: "owner",
+				slug: "resume",
+				requestHeaders: new Headers(),
+				currentUserId: "u1",
+				requirePublic: true,
+			}),
+		).rejects.toMatchObject({ code: "NOT_FOUND" });
+	});
+});
+
+it("rejects a different resume reusing the resolved root slug", async () => {
+	const row = {
+		...createResumeRow(defaultResumeData),
+		id: "replacement-id",
+		userId: "u1",
+		isPublic: true,
+		hasPassword: false,
+		passwordHash: null,
+	};
+	dbMock.select.mockReturnValue({ from: () => ({ innerJoin: () => ({ where: async () => [row] }) }) });
+	await expect(
+		resumeService.getBySlug({
+			username: "owner",
+			slug: "resume",
+			requestHeaders: new Headers(),
+			currentUserId: "u1",
+			requirePublic: true,
+			expectedResumeId: "configured-id",
+		}),
+	).rejects.toMatchObject({ code: "NOT_FOUND" });
 });

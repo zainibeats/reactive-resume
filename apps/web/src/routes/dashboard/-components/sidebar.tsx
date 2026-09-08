@@ -5,6 +5,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	BrainIcon,
 	BriefcaseIcon,
+	EnvelopeSimpleIcon,
 	GearSixIcon,
 	ReadCvLogoIcon,
 	ShieldCheckIcon,
@@ -47,6 +48,11 @@ const appSidebarItems = [
 		icon: <BriefcaseIcon />,
 		label: msg`Job Search`,
 		href: "/dashboard/applications",
+	},
+	{
+		icon: <EnvelopeSimpleIcon />,
+		label: msg`Cover Letters`,
+		href: "/dashboard/cover-letters",
 	},
 ] as const satisfies SidebarItem[];
 

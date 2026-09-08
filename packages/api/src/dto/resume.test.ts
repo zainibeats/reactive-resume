@@ -4,6 +4,19 @@ import { redactResumeForViewer } from "../features/resume/access-policy";
 import { resumeDto } from "./resume";
 
 describe("resume DTO output validation", () => {
+	it.each([false, true])("accepts showDownloadButtons=%s in a partial update", (showDownloadButtons) => {
+		expect(resumeDto.update.input.parse({ id: "resume-id", showDownloadButtons })).toEqual({
+			id: "resume-id",
+			showDownloadButtons,
+		});
+	});
+
+	it("leaves the download preference absent from unrelated updates", () => {
+		expect(resumeDto.update.input.parse({ id: "resume-id", name: "Renamed" })).not.toHaveProperty(
+			"showDownloadButtons",
+		);
+	});
+
 	it("normalizes ordinary PUT data without losing compatible custom-section overlap", () => {
 		const parsed = resumeDto.update.input.parse({
 			id: "resume-id",
@@ -99,6 +112,7 @@ describe("resume DTO output validation", () => {
 			},
 			isPublic: true,
 			isLocked: false,
+			showDownloadButtons: true,
 			hasPassword: false,
 		};
 
@@ -134,6 +148,7 @@ describe("resume DTO output validation", () => {
 			).data,
 			isPublic: true,
 			isLocked: false,
+			showDownloadButtons: true,
 			hasPassword: false,
 		});
 
@@ -152,9 +167,24 @@ describe("resume DTO output validation", () => {
 			parentRevision: null,
 			isPublic: false,
 			isLocked: false,
+			showDownloadButtons: true,
 			updatedAt: new Date("2026-01-01T00:00:00Z"),
 			hasPassword: false,
 		};
 		expect(resumeDto.restoreVersion.output.parse(resume)).toEqual(resume);
+	});
+});
+
+describe("resume DTO write bounds", () => {
+	it.each(["update", "import"] as const)("rejects invalid template in %s input before normalization", (operation) => {
+		const data = { ...defaultResumeData, metadata: { ...defaultResumeData.metadata, template: "unknown-template" } };
+		expect(resumeDto[operation].input.safeParse({ id: "resume-id", data }).success).toBe(false);
+	});
+
+	it("continues to accept metadata-only updates without resume data", () => {
+		expect(resumeDto.update.input.parse({ id: "resume-id", name: "Renamed" })).toEqual({
+			id: "resume-id",
+			name: "Renamed",
+		});
 	});
 });

@@ -15,6 +15,7 @@ import { Route as DashboardRouteRouteImport } from "./routes/dashboard/route";
 import { Route as UsernameSlugRouteImport } from "./routes/$username/$slug";
 import { Route as HomeIndexRouteImport } from "./routes/_home/index";
 import { Route as AuthIndexRouteImport } from "./routes/auth/index";
+import { Route as AuthConsentRouteImport } from "./routes/auth/consent";
 import { Route as AuthErrorRouteImport } from "./routes/auth/error";
 import { Route as AuthForgotPasswordRouteImport } from "./routes/auth/forgot-password";
 import { Route as AuthLoginRouteImport } from "./routes/auth/login";
@@ -25,6 +26,7 @@ import { Route as AuthVerify2faRouteImport } from "./routes/auth/verify-2fa";
 import { Route as AuthVerify2faBackupRouteImport } from "./routes/auth/verify-2fa-backup";
 import { Route as BuilderResumeIdRouteRouteImport } from "./routes/builder/$resumeId/route";
 import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
+import { Route as DashboardCoverLettersRouteImport } from "./routes/dashboard/cover-letters";
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
 import { Route as DashboardApplicationsIndexRouteImport } from "./routes/dashboard/applications/index";
 import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
@@ -62,6 +64,11 @@ const HomeIndexRoute = HomeIndexRouteImport.update({
 const AuthIndexRoute = AuthIndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => AuthRouteRoute,
+} as any);
+const AuthConsentRoute = AuthConsentRouteImport.update({
+  id: "/consent",
+  path: "/consent",
   getParentRoute: () => AuthRouteRoute,
 } as any);
 const AuthErrorRoute = AuthErrorRouteImport.update({
@@ -112,6 +119,11 @@ const BuilderResumeIdRouteRoute = BuilderResumeIdRouteRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardCoverLettersRoute = DashboardCoverLettersRouteImport.update({
+  id: "/cover-letters",
+  path: "/cover-letters",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
 const BuilderResumeIdIndexRoute = BuilderResumeIdIndexRouteImport.update({
@@ -173,6 +185,7 @@ export interface FileRoutesByFullPath {
   "/dashboard": typeof DashboardRouteRouteWithChildren;
   "/builder/$resumeId": typeof BuilderResumeIdRouteRouteWithChildren;
   "/$username/$slug": typeof UsernameSlugRoute;
+  "/auth/consent": typeof AuthConsentRoute;
   "/auth/error": typeof AuthErrorRoute;
   "/auth/forgot-password": typeof AuthForgotPasswordRoute;
   "/auth/login": typeof AuthLoginRoute;
@@ -181,6 +194,7 @@ export interface FileRoutesByFullPath {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
+  "/dashboard/cover-letters": typeof DashboardCoverLettersRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
@@ -195,6 +209,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/$username/$slug": typeof UsernameSlugRoute;
+  "/auth/consent": typeof AuthConsentRoute;
   "/auth/error": typeof AuthErrorRoute;
   "/auth/forgot-password": typeof AuthForgotPasswordRoute;
   "/auth/login": typeof AuthLoginRoute;
@@ -203,6 +218,7 @@ export interface FileRoutesByTo {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
+  "/dashboard/cover-letters": typeof DashboardCoverLettersRoute;
   "/": typeof HomeIndexRoute;
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
@@ -223,6 +239,7 @@ export interface FileRoutesById {
   "/dashboard": typeof DashboardRouteRouteWithChildren;
   "/builder/$resumeId": typeof BuilderResumeIdRouteRouteWithChildren;
   "/$username/$slug": typeof UsernameSlugRoute;
+  "/auth/consent": typeof AuthConsentRoute;
   "/auth/error": typeof AuthErrorRoute;
   "/auth/forgot-password": typeof AuthForgotPasswordRoute;
   "/auth/login": typeof AuthLoginRoute;
@@ -231,6 +248,7 @@ export interface FileRoutesById {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
+  "/dashboard/cover-letters": typeof DashboardCoverLettersRoute;
   "/_home/": typeof HomeIndexRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
@@ -252,6 +270,7 @@ export interface FileRouteTypes {
     | "/dashboard"
     | "/builder/$resumeId"
     | "/$username/$slug"
+    | "/auth/consent"
     | "/auth/error"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -260,6 +279,7 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
+    | "/dashboard/cover-letters"
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
@@ -274,6 +294,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/$username/$slug"
+    | "/auth/consent"
     | "/auth/error"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -282,6 +303,7 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
+    | "/dashboard/cover-letters"
     | "/"
     | "/auth"
     | "/dashboard"
@@ -301,6 +323,7 @@ export interface FileRouteTypes {
     | "/dashboard"
     | "/builder/$resumeId"
     | "/$username/$slug"
+    | "/auth/consent"
     | "/auth/error"
     | "/auth/forgot-password"
     | "/auth/login"
@@ -309,6 +332,7 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
+    | "/dashboard/cover-letters"
     | "/_home/"
     | "/auth/"
     | "/dashboard/"
@@ -373,6 +397,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/auth/";
       preLoaderRoute: typeof AuthIndexRouteImport;
+      parentRoute: typeof AuthRouteRoute;
+    };
+    "/auth/consent": {
+      id: "/auth/consent";
+      path: "/consent";
+      fullPath: "/auth/consent";
+      preLoaderRoute: typeof AuthConsentRouteImport;
       parentRoute: typeof AuthRouteRoute;
     };
     "/auth/error": {
@@ -443,6 +474,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/dashboard/";
       preLoaderRoute: typeof DashboardIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    "/dashboard/cover-letters": {
+      id: "/dashboard/cover-letters";
+      path: "/cover-letters";
+      fullPath: "/dashboard/cover-letters";
+      preLoaderRoute: typeof DashboardCoverLettersRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
     "/builder/$resumeId/": {
@@ -524,6 +562,7 @@ const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(
 );
 
 interface AuthRouteRouteChildren {
+  AuthConsentRoute: typeof AuthConsentRoute;
   AuthErrorRoute: typeof AuthErrorRoute;
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute;
   AuthLoginRoute: typeof AuthLoginRoute;
@@ -536,6 +575,7 @@ interface AuthRouteRouteChildren {
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthConsentRoute: AuthConsentRoute,
   AuthErrorRoute: AuthErrorRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
@@ -552,6 +592,7 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 );
 
 interface DashboardRouteRouteChildren {
+  DashboardCoverLettersRoute: typeof DashboardCoverLettersRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardSettingsIntegrationsRouteRoute: typeof DashboardSettingsIntegrationsRouteRoute;
   DashboardSettingsAccountRoute: typeof DashboardSettingsAccountRoute;
@@ -564,6 +605,7 @@ interface DashboardRouteRouteChildren {
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardCoverLettersRoute: DashboardCoverLettersRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardSettingsIntegrationsRouteRoute:
     DashboardSettingsIntegrationsRouteRoute,
