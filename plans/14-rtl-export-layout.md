@@ -4,7 +4,7 @@
 
 ## Status and evidence
 
-- **Issue:** [#3275](https://github.com/amruthpillai/reactive-resume/issues/3275).
+- **Issue:** [#3275](https://github.com/reactive-resume/reactive-resume/issues/3275).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort L; risk high for shaping/fallback changes, medium for template-local alignment.
 - **Readiness/confidence:** Diagnostic plan ready; historical cause unverified. Report says self-hosted Arabic PDF direction, alignment, shaping, and section layout are inconsistent, with Hebrew/Persian also affected. It supplies a screenshot but no exact JSON, font, template, or deployment version.
 - **Prior work:** #3099 addressed Rhyhorn and does not establish all-template/script correctness. #3447 corrected a separately reproduced builder canvas bug: inherited RTL canvas direction changed physical text anchors. Two Arabic-locale controls differed by 35,009 pixels before that fix, English controls matched; setting canvas context direction after resize restored exact parity. Broader exported-PDF claims remain open.
@@ -53,7 +53,7 @@ Add `<p>...</p>`, `<ol><li>...</li><li>Second 123</li></ol>`, a multi-line headi
 
 ### 1. Preserve exact report data and locate the failing surface
 
-Read issue body/comments using `rtk proxy gh issue view 3275 --repo amruthpillai/reactive-resume --json body,comments`; do not post a comment. Required fixture: sanitized JSON retaining locale/font/styles/template, actual exported PDF, browser/build, and identified incorrect words/regions. If absent, record exact limits and run controlled diagnostics only.
+Read issue body/comments using `rtk proxy gh issue view 3275 --repo reactive-resume/reactive-resume --json body,comments`; do not post a comment. Required fixture: sanitized JSON retaining locale/font/styles/template, actual exported PDF, browser/build, and identified incorrect words/regions. If absent, record exact limits and run controlled diagnostics only.
 
 Generate browser and server PDFs from identical saved data. Compare actual preview to an independent render of each downloaded PDF. If only preview differs, retain exact PDF bytes and investigate viewer code; if both PDFs are wrong, proceed to shaping/layout. If only one generated PDF is wrong, compare selected font files/cache state before template changes.
 

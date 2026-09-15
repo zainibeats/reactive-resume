@@ -8,7 +8,7 @@
  * that opened the last dialog, since closing a dialog restores focus to its trigger. A Space
  * keypress then activates that still-focused button on keyup and the dialog reopens.
  *
- * @see https://github.com/amruthpillai/reactive-resume/issues/3300
+ * @see https://github.com/reactive-resume/reactive-resume/issues/3300
  */
 export function blurFocusedElementOnPan(): void {
 	if (typeof document === "undefined") return;

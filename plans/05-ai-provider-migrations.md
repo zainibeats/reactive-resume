@@ -2,7 +2,7 @@
 
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05). **Status:** needs_reproduction; database absence observed historically, migration defect unproved.  
 **Priority:** P1 deployment investigation. **Effort:** 0.5–1 day with deployment metadata; 1–2 days if migration repair proved. **Risk:** High: database integrity and stored credentials.  
-**Issues:** [#3152](https://github.com/amruthpillai/reactive-resume/issues/3152).
+**Issues:** [#3152](https://github.com/reactive-resume/reactive-resume/issues/3152).
 
 ## Execution contract
 

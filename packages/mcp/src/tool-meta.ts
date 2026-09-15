@@ -177,6 +177,7 @@ export const TOOL_META = {
 			"current structure, and `resume://_meta/schema` to understand valid paths and types.",
 			"",
 			"Supported operations: add, remove, replace, move, copy, test.",
+			"Can remove or overwrite existing content; edits to a public resume change its published content.",
 			"",
 			"Common path examples:",
 			"  /basics/name                          — Change the name",
@@ -197,7 +198,7 @@ export const TOOL_META = {
 			id: resumeIdSchema,
 			operations: resumePatchOperationsSchema,
 		}),
-		annotations: WRITE_NON_IDEMPOTENT,
+		annotations: { ...WRITE_NON_IDEMPOTENT, destructiveHint: true, openWorldHint: true },
 	},
 	[T.updateResume]: {
 		title: "Update Resume (metadata)",
@@ -221,18 +222,18 @@ export const TOOL_META = {
 					"When true, anyone with the link can view the public resume (subject to password if set in the app).",
 				),
 		}),
-		annotations: WRITE_NON_IDEMPOTENT,
+		annotations: { ...WRITE_NON_IDEMPOTENT, destructiveHint: true, openWorldHint: true },
 	},
 	[T.deleteResume]: {
 		title: "Delete Resume",
 		description: [
-			"Permanently delete a resume and all its associated files (screenshots, PDFs).",
+			"Permanently delete a resume and all its associated files (screenshots, PDFs), removing public access if published.",
 			"",
 			`This action is IRREVERSIBLE. Locked resumes cannot be deleted; use \`${T.unlockResume}\` first.`,
 			`Consider using \`${T.duplicateResume}\` to create a backup before deleting.`,
 		].join("\n"),
 		inputSchema: z.object({ id: resumeIdSchema }),
-		annotations: WRITE_DESTRUCTIVE,
+		annotations: { ...WRITE_DESTRUCTIVE, openWorldHint: true },
 	},
 	[T.lockResume]: {
 		title: "Lock Resume",

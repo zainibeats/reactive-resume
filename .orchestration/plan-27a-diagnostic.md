@@ -1,7 +1,7 @@
 # Plan 27 Phase A diagnostic evidence
 
 Date: 2026-09-06  
-Issue: [#3377](https://github.com/amruthpillai/reactive-resume/issues/3377)  
+Issue: [#3377](https://github.com/reactive-resume/reactive-resume/issues/3377)<br>
 Revision: `2a4a1583b` (`origin/main` at run start)  
 Scope: Phase A, steps 1–2 only. No resolver, runtime behavior, or remote-source behavior changed.
 

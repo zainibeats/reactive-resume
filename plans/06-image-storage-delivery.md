@@ -2,7 +2,7 @@
 
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05). **Status:** needs_reproduction after historical ACL fix; two distinct failure boundaries.  
 **Priority:** P1 diagnosis. **Effort:** 1–2 days controlled storage matrix; 1–2 days per proved defect. **Risk:** Medium/high: public/private object boundaries and external image fetching.  
-**Issues:** [#2684](https://github.com/amruthpillai/reactive-resume/issues/2684), [#2778](https://github.com/amruthpillai/reactive-resume/issues/2778).
+**Issues:** [#2684](https://github.com/reactive-resume/reactive-resume/issues/2684), [#2778](https://github.com/reactive-resume/reactive-resume/issues/2778).
 
 ## Execution contract
 

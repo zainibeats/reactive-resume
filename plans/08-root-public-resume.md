@@ -3,7 +3,7 @@
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05).  
 **Status:** agent-selected self-hosted root mode; ready for future implementation. **Category:** feature.  
 **Priority:** P2. **Effort:** 2–4 days for optional root mode and production regression. **Risk:** High: private/public boundaries, origin and route handling.  
-**Issues:** [#2669](https://github.com/amruthpillai/reactive-resume/issues/2669).
+**Issues:** [#2669](https://github.com/reactive-resume/reactive-resume/issues/2669).
 
 ## Execution contract
 

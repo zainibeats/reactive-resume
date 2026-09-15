@@ -2,7 +2,7 @@
 
 ## Status and decision gate
 
-- **Issues:** [#3060](https://github.com/amruthpillai/reactive-resume/issues/3060).
+- **Issues:** [#3060](https://github.com/reactive-resume/reactive-resume/issues/3060).
 - **Planned at:** `7a98f6662`, 2026-09-05.
 - **Priority / effort / risk:** P2 / M / medium; blank-title migration can change every existing resume.
 - **Readiness:** Product direction approved (Q1, 2026-09-05): add an explicit Show heading toggle that hides heading, icon, and separator while retaining content and the builder name. Preserve empty-title localized fallback. Q2 approved (2026-09-05): Move to creates continuations with visible headings until explicitly hidden. Q3 approved: hide visual headings consistently in preview, PDF, and DOCX while retaining section labels in the screen-reader outline.

@@ -46,7 +46,7 @@ Rules:
 
 ## Agent skills
 
-- Issues and specs: GitHub Issues for `amruthpillai/reactive-resume`. See `docs/agents/issue-tracker.md`.
+- Issues and specs: GitHub Issues for `reactive-resume/reactive-resume`. See `docs/agents/issue-tracker.md`.
 - Domain docs use a multi-context layout. See `docs/agents/domain.md`.
 
 ## Overview
@@ -65,7 +65,7 @@ Reactive Resume should move toward a personal resume builder for an individual o
 
 ### Fork divergence from upstream (amruthpillai/reactive-resume)
 
-This repo periodically merges `upstream/main` (github.com/amruthpillai/reactive-resume). Upstream is a multi-user, marketing-forward SaaS product; this fork is a single-owner personal tool. An agent doing an upstream merge has a structural blind spot here: a 3-way merge has no way to know that a file upstream reintroduces was deliberately deleted on purpose, so **treat every item below as intentional unless the user says otherwise, and re-verify it after every upstream merge** rather than trusting that a clean merge preserved it.
+This repo periodically merges `upstream/main` (github.com/reactive-resume/reactive-resume; formerly amruthpillai/reactive-resume, which GitHub redirects). Upstream is a multi-user, marketing-forward SaaS product; this fork is a single-owner personal tool. An agent doing an upstream merge has a structural blind spot here: a 3-way merge has no way to know that a file upstream reintroduces was deliberately deleted on purpose, so **treat every item below as intentional unless the user says otherwise, and re-verify it after every upstream merge** rather than trusting that a clean merge preserved it.
 
 **Removed entirely (do not silently reintroduce from an upstream merge):**
 
@@ -74,7 +74,7 @@ This repo periodically merges `upstream/main` (github.com/amruthpillai/reactive-
 - The standalone `/agent` route workspace (thread sidebar, `agent/new`, `agent/$threadId`, `new-thread-setup.tsx`, `thread-sidebar.tsx`, `route.tsx`). The AI assistant instead lives **inline inside the builder** as `apps/web/src/routes/builder/$resumeId/-components/ai-assistant.tsx`, which renders the shared `AgentChat` component at `apps/web/src/routes/agent/-components/agent-chat.tsx`. The underlying `packages/api/src/features/agent/*` service layer is shared and present in both; only the standalone page shell was removed.
 - Platform statistics endpoints (`packages/api/src/features/statistics/*` and its MCP tool) — this is a self-hosted single-owner instance, not a hosted service with aggregate metrics to report.
 - The MCP application tools (`list_applications`, `read_application`, `create_application`, `update_application`, `delete_application`, `import_applications`, `autofill_application_from_job`, `score_application_match`, `tailor_resume_for_application`, `draft_application_message`, etc. — see `packages/mcp/src/mcp-tool-names.ts`). The Applications / job-search feature itself is **kept** as a normal oRPC-backed dashboard surface (`apps/web/src/features/applications/*`, `apps/web/src/routes/dashboard/applications`); it is just not exposed over MCP.
-- Upstream's competitor-comparison marketing docs (`docs/comparisons/reactive-resume-vs-*.mdx`) and SEO/AEO content-planning docs under `docs/superpowers/{plans,specs}`. See `SIMPLIFICATION_BACKLOG.md` for the running log of this kind of removal.
+- Upstream's competitor-comparison marketing docs (`docs/comparisons/reactive-resume-vs-*.mdx`), SEO/AEO content-planning docs under `docs/superpowers/{plans,specs}`, the `apps/web/src/features/homepage/*` landing-page rebuild (v5.3.x), `chatgpt-app-submission.json`, and upstream's Blacksmith/Docker Hub CI publishing pipeline (`docs/agents/container-publishing.md`, `.github/actionlint.yaml`, `tooling/{docker-publishing,playwright-mirrors}.test.ts`; workflows stay on `ubuntu-latest` + GHCR). See `SIMPLIFICATION_BACKLOG.md` for the running log of this kind of removal.
 - `dashClient`/`adminClient` Better Auth plugins (`apps/web/src/libs/auth/client.ts`) — no admin dashboard, no org/team management.
 - Upstream's `/ats-checker` marketing landing page (`apps/web/src/routes/_home/ats-checker.tsx`) — its page shell imports the removed `Footer` section and `Spotlight` animation and hardcodes rxresu.me OG/Twitter meta. The ATS checker itself is **kept**: `apps/web/src/features/ats-checker/*` is used by the builder's right-sidebar `ats-check.tsx` section, which is where this fork exposes it.
 - Public-resume social-card SEO (`createPublicResumeSeoMarkup` and the `/` + `/ats-checker` markup injection in `apps/server/src/static/web.ts`) — not adopted, because upstream defines it inside the same homepage SEO/structured-data block this fork removes. Revisit if public resume link previews become a priority.
@@ -99,7 +99,7 @@ This repo periodically merges `upstream/main` (github.com/amruthpillai/reactive-
 
 ### Prerequisites
 
-Prerequisites: **Node.js 24** (matches Dockerfile `ARG NODE_VERSION=24`), **pnpm 11.21.0** ([install guide](https://pnpm.io/installation)), and **Docker** for PostgreSQL (`sudo dockerd &` if the daemon isn't running).
+Prerequisites: **Node.js 24** (pinned in `.nvmrc`; matches Dockerfile `ARG NODE_VERSION=24`), **pnpm 12.3.4** (pinned by `packageManager` in the root `package.json`; pnpm self-manages to it, so any recent pnpm can bootstrap — the Dockerfile's `ARG PNPM_VERSION` only picks the base image) ([install guide](https://pnpm.io/installation)), and **Docker** for PostgreSQL (`sudo dockerd &` if the daemon isn't running).
 
 ## Ownership map
 

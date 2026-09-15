@@ -4,7 +4,7 @@
 
 ## Status and evidence
 
-- **Issue:** [#2683](https://github.com/amruthpillai/reactive-resume/issues/2683).
+- **Issue:** [#2683](https://github.com/reactive-resume/reactive-resume/issues/2683).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M; risk medium for preview geometry, high for page sizing changes.
 - **Report:** Cloud Rhyhorn playground appears to have no bottom space, while downloaded PDF has bottom space. Attachment is a video; no source JSON, page settings, browser, or exact output supplied. No comment establishes a current reproduction.
 - **Confidence/readiness:** Current source high confidence; original cause low confidence. Diagnostic plan ready; implementation requires exact data or a separately reproduced defect.

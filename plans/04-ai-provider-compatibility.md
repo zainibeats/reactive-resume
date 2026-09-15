@@ -2,7 +2,7 @@
 
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05). **Status:** needs_reproduction for exact providers; current contract baseline verified.  
 **Priority:** P1 diagnosis. **Effort:** 1–2 days matrix; 0.5–2 days per adapter defect. **Risk:** Medium/high: external requests, private documents, credential handling.  
-**Issues:** [#2732](https://github.com/amruthpillai/reactive-resume/issues/2732), [#2766](https://github.com/amruthpillai/reactive-resume/issues/2766), [#2723](https://github.com/amruthpillai/reactive-resume/issues/2723), [#2708](https://github.com/amruthpillai/reactive-resume/issues/2708).
+**Issues:** [#2732](https://github.com/reactive-resume/reactive-resume/issues/2732), [#2766](https://github.com/reactive-resume/reactive-resume/issues/2766), [#2723](https://github.com/reactive-resume/reactive-resume/issues/2723), [#2708](https://github.com/reactive-resume/reactive-resume/issues/2708).
 
 ## Execution contract
 

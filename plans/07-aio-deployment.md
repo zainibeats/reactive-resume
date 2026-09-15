@@ -3,7 +3,7 @@
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05).  
 **Status:** AIO request declined by maintainer; bounded documentation plan ready. **Category:** docs.  
 **Priority:** P2 documentation. **Effort:** 0.5–1 day. **Risk:** Low; deployment commands must remain accurate.  
-**Issues:** [#2722](https://github.com/amruthpillai/reactive-resume/issues/2722).
+**Issues:** [#2722](https://github.com/reactive-resume/reactive-resume/issues/2722).
 
 ## Execution contract
 

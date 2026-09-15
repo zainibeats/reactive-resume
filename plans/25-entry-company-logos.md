@@ -8,7 +8,7 @@ Use the existing uploader limits and ownership rules. The storage inventory is a
 
 ## Status
 
-- **Issue:** [#3379](https://github.com/amruthpillai/reactive-resume/issues/3379).
+- **Issue:** [#3379](https://github.com/reactive-resume/reactive-resume/issues/3379).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3; effort L; risk medium/high because storage, export, and schema are involved.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Confidence:** High that no first-class Experience logo field exists. No decision to support arbitrary remote URLs or employer logo discovery has been made.

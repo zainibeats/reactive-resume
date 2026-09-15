@@ -73,7 +73,7 @@ const renderHeaderBoxes = async (template: Template): Promise<string[]> => {
 		.map((node) => nodeText(node));
 };
 
-// https://github.com/amruthpillai/reactive-resume/issues/3349: the resolved `item-header` style used
+// https://github.com/reactive-resume/reactive-resume/issues/3349: the resolved `item-header` style used
 // to be bound onto the first child that happened to be a literal `View`, so sections whose header
 // starts with anything else lost it entirely and stacked headers only styled their first row.
 describe("item-header binding", () => {

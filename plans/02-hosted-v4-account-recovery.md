@@ -3,7 +3,7 @@
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05).  
 **Status:** agent-selected scoped recovery plan; production access and source availability gated. **Category:** direction.  
 **Priority:** P2. **Effort:** 0.5–1 day verification; recovery effort unknown until backups and policy exist. **Risk:** High: private account data and irreversible reconciliation.  
-**Issues:** [#3181](https://github.com/amruthpillai/reactive-resume/issues/3181), [#2760](https://github.com/amruthpillai/reactive-resume/issues/2760).
+**Issues:** [#3181](https://github.com/reactive-resume/reactive-resume/issues/3181), [#2760](https://github.com/reactive-resume/reactive-resume/issues/2760).
 
 ## Execution contract
 
@@ -42,7 +42,7 @@ No common root cause proved. #3181 is a hosted data availability/retention decis
 
 ## Verification steps before accessing private data
 
-1. Read both issue bodies/comments through the authenticated issue tracker and preserve a sanitized observation table with deployment/version, date range, old/new account method, and missing versus invisible records. **Verify:** `rtk proxy gh issue view 3181 --repo amruthpillai/reactive-resume --json number,title,body,comments` and corresponding command for `2760` return the intended issue. Do not paste their personal contact information into output files.
+1. Read both issue bodies/comments through the authenticated issue tracker and preserve a sanitized observation table with deployment/version, date range, old/new account method, and missing versus invisible records. **Verify:** `rtk proxy gh issue view 3181 --repo reactive-resume/reactive-resume --json number,title,body,comments` and corresponding command for `2760` return the intended issue. Do not paste their personal contact information into output files.
 2. Check current source drift and the owner predicate. **Verify:** `rtk proxy rg -n 'eq\(schema.resume.userId, input.userId\)|resume_slug_user_id_unique' packages/api/src/features/resume/service.ts` finds the ownership/uniqueness boundaries. In a disposable account, create `Recovery Fixture`, reload list with empty tags, then fetch by ID as owner and another user. Browser pattern: `tests/e2e/specs/resume-lifecycle.spec.ts`; API pattern: `packages/api/src/features/resume/service.test.ts`. Expected: only owner sees the created record; no historical account data involved.
 3. With an authorized operator, inspect **read-only metadata** for snapshot availability, capture date, user mapping existence and counts for a verified owner. Do not expose DB URLs or row contents. Verification artifact must explicitly say `ownerVerified`, `sourceAvailable`, `sourceTimestamp`, `targetTimestamp`, and whether both versions differ. If any value is unknown, mark unknown rather than inventing it. No production query or recovery is implied by local filesystem access.
 4. For #2760, compare create response's returned resume ID, authenticated session user ID, unfiltered list response, and UI display in the same session. Redact identifiers before committing evidence. **Verify:** run the service and auth-export tests below; a future regression must isolate response omitted by server versus response hidden by client. If the server returns the record, narrow follow-up to the owning web list/cache seam rather than migration.

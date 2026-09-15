@@ -2,7 +2,7 @@
 
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05). **Status:** needs_reproduction; no common current root cause proved.  
 **Priority:** P1 investigation. **Effort:** 1–2 days diagnosis; 0.5–2 days per proved fix. **Risk:** High: account ownership and authentication.  
-**Issues:** [#3166](https://github.com/amruthpillai/reactive-resume/issues/3166), [#3164](https://github.com/amruthpillai/reactive-resume/issues/3164), [#3078](https://github.com/amruthpillai/reactive-resume/issues/3078), [#3046](https://github.com/amruthpillai/reactive-resume/issues/3046), [#2897](https://github.com/amruthpillai/reactive-resume/issues/2897), [#2837](https://github.com/amruthpillai/reactive-resume/issues/2837).
+**Issues:** [#3166](https://github.com/reactive-resume/reactive-resume/issues/3166), [#3164](https://github.com/reactive-resume/reactive-resume/issues/3164), [#3078](https://github.com/reactive-resume/reactive-resume/issues/3078), [#3046](https://github.com/reactive-resume/reactive-resume/issues/3046), [#2897](https://github.com/reactive-resume/reactive-resume/issues/2897), [#2837](https://github.com/reactive-resume/reactive-resume/issues/2837).
 
 ## Execution contract
 

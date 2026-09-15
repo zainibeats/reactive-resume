@@ -82,8 +82,12 @@ async function defaultPublicClientRegistration(request: Request): Promise<Reques
 		if (allLoopback) body.application_type = "native";
 	}
 
+	// MCP clients that authenticate with PKCE alone omit the method, and Better Auth
+	// would otherwise register them as `client_secret_basic`. Honor an explicit choice:
+	// forcing it to "none" issues no client secret, so the client's own Basic/post
+	// credentials are rejected at the token endpoint with 401 invalid_client.
 	if (!request.headers.get("authorization")) {
-		body.token_endpoint_auth_method = "none";
+		body.token_endpoint_auth_method ??= "none";
 	}
 
 	return new Request(url.toString(), {

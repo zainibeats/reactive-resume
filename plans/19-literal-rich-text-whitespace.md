@@ -4,7 +4,7 @@
 
 ## Status and intent
 
-- **Issue:** [#3397](https://github.com/amruthpillai/reactive-resume/issues/3397).
+- **Issue:** [#3397](https://github.com/reactive-resume/reactive-resume/issues/3397).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M–L; risk high for global HTML whitespace changes.
 - **Readiness:** Known behavioral mismatch, high confidence; implementation direction approved. Preserve intentional whitespace in ordinary paragraphs/headings using the scoped persisted contract below. Tab width and existing line-break behavior use the labeled routine judgments below.
 - **Dependencies:** Existing paragraph indentation and merged #3451 literal Unicode spaces must remain. Coordinate RichInput changes with Plan16 tables. No need to reimplement paragraph indentation.

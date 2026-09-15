@@ -48,7 +48,7 @@ You could wire the bridge yourself with a raw `@deepseek-ai/dsh-mcp-client` row.
 
 ## Development
 
-This package lives in the [Reactive Resume monorepo](https://github.com/amruthpillai/reactive-resume) at `packages/dsh-plugin`, next to `packages/mcp` — the server it bridges. `src/tool-names.test.ts` checks every tool the prompt guide names against `@reactive-resume/mcp/tool-names`, so renaming a tool breaks this package in the same pull request.
+This package lives in the [Reactive Resume monorepo](https://github.com/reactive-resume/reactive-resume) at `packages/dsh-plugin`, next to `packages/mcp` — the server it bridges. `src/tool-names.test.ts` checks every tool the prompt guide names against `@reactive-resume/mcp/tool-names`, so renaming a tool breaks this package in the same pull request.
 
 ```bash
 pnpm --filter dsh-plugin-reactive-resume test

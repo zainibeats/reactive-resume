@@ -8,7 +8,7 @@ No persistent autosort or implicit sorting of roles/custom sections in this incr
 
 ## Status
 
-- **Issue:** [#2725](https://github.com/amruthpillai/reactive-resume/issues/2725).
+- **Issue:** [#2725](https://github.com/reactive-resume/reactive-resume/issues/2725).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort M, risk medium for unexpected reorder and free-form dates.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Confidence:** High that period strings are free-form and existing parsing can be reused for some cases; the selected comparator remains subject to the parser’s nullable results.

@@ -2,7 +2,7 @@
 
 ## Status and decision gate
 
-- **Issues:** [#3155](https://github.com/amruthpillai/reactive-resume/issues/3155), [#2841](https://github.com/amruthpillai/reactive-resume/issues/2841).
+- **Issues:** [#3155](https://github.com/reactive-resume/reactive-resume/issues/3155), [#2841](https://github.com/reactive-resume/reactive-resume/issues/2841).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort M, risk medium. Q4 approved (2026-09-05): an optional dedicated left date column with entry details aligned beside it, preserving current layout by default. Q5 approved: date column follows reading start, left for LTR and right for RTL. Q6 approved: user-controlled width per section, long dates wrap within the column, and entry details stay aligned. Q7 expands support to every section type with a free-text date field, including custom equivalents. Q8 approved: support all templates, preserving each template’s current layout when disabled. Q9 approved: entries without dates leave the date column empty and retain the same detail alignment as dated entries.
 - **Evidence confidence:** High for current shared rendering and existing controls; the exact historical Chikorita visual parity remains unverified. #3155 asks for left-aligned dates; a comment distinguishes an outdented fixed-width date column from simple field order. #2841 bundles date/location order, large level icons, and link underlines after a v4-to-v5 migration. A contributor's CSS suggestion is not owner approval for a new global setting.
 

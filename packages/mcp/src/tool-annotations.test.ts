@@ -22,9 +22,12 @@ describe("MCP_TOOL_NAME", () => {
 });
 
 describe("tool annotations", () => {
-	it("provides annotations for every registered tool", () => {
+	it("provides explicit submission hints for every registered tool", () => {
 		for (const name of Object.values(MCP_TOOL_NAME)) {
-			expect(TOOL_META[name].annotations).toBeDefined();
+			const annotations = TOOL_META[name].annotations;
+			expect(typeof annotations.readOnlyHint, name).toBe("boolean");
+			expect(typeof annotations.destructiveHint, name).toBe("boolean");
+			expect(typeof annotations.openWorldHint, name).toBe("boolean");
 		}
 	});
 
@@ -58,13 +61,7 @@ describe("tool annotations", () => {
 	});
 
 	it("marks creation/import/duplicate as non-readonly and non-idempotent", () => {
-		for (const name of [
-			MCP_TOOL_NAME.createResume,
-			MCP_TOOL_NAME.importResume,
-			MCP_TOOL_NAME.duplicateResume,
-			MCP_TOOL_NAME.patchResume,
-			MCP_TOOL_NAME.updateResume,
-		]) {
+		for (const name of [MCP_TOOL_NAME.createResume, MCP_TOOL_NAME.importResume, MCP_TOOL_NAME.duplicateResume]) {
 			const annotations = TOOL_META[name].annotations;
 			expect(annotations.readOnlyHint, name).toBe(false);
 			expect(annotations.idempotentHint, name).toBe(false);
@@ -81,9 +78,21 @@ describe("tool annotations", () => {
 		}
 	});
 
-	it("declares no tools as open-world", () => {
+	it("marks tools that replace or remove existing data as destructive", () => {
+		for (const name of [MCP_TOOL_NAME.patchResume, MCP_TOOL_NAME.updateResume]) {
+			expect(TOOL_META[name].annotations.readOnlyHint, name).toBe(false);
+			expect(TOOL_META[name].annotations.destructiveHint, name).toBe(true);
+		}
+	});
+
+	it("marks public content changes and external AI calls as open-world", () => {
+		const openWorldTools = new Set<string>([
+			MCP_TOOL_NAME.patchResume,
+			MCP_TOOL_NAME.updateResume,
+			MCP_TOOL_NAME.deleteResume,
+		]);
 		for (const [name, { annotations }] of Object.entries(TOOL_META)) {
-			expect(annotations.openWorldHint, name).toBe(false);
+			expect(annotations.openWorldHint, name).toBe(openWorldTools.has(name));
 		}
 	});
 });

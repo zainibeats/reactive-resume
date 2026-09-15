@@ -4,7 +4,7 @@
 
 ## Status and issue coverage
 
-- **Issues:** [#3168](https://github.com/amruthpillai/reactive-resume/issues/3168), [#3088](https://github.com/amruthpillai/reactive-resume/issues/3088), [#2794](https://github.com/amruthpillai/reactive-resume/issues/2794), [#2782](https://github.com/amruthpillai/reactive-resume/issues/2782).
+- **Issues:** [#3168](https://github.com/reactive-resume/reactive-resume/issues/3168), [#3088](https://github.com/reactive-resume/reactive-resume/issues/3088), [#2794](https://github.com/reactive-resume/reactive-resume/issues/2794), [#2782](https://github.com/reactive-resume/reactive-resume/issues/2782).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M–L; risk medium (rendering) / high (storage and destructive cropping). Confidence medium for existing behavior, low for historical root causes.
 - **Readiness:** Diagnostics ready; #2782 implementation direction ready under delegated routine judgment. No additional product answer required for the bounded fit selector. Historical reporter equivalence still requires the missing source fixture.
 - **Dependencies:** Plan 06 owns upload/storage delivery if network evidence points there. Plan 13 owns font/spacing regressions. Do not duplicate either fix merely because the symptom appears near a picture.

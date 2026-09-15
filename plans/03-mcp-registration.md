@@ -2,7 +2,7 @@
 
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05). **Status:** historical confirmed defect fixed; remaining deployment/client evidence needed.  
 **Priority:** P1 verification. **Effort:** 0.5–1 day local verification; operator retest dependent. **Risk:** High: OAuth security and schema evolution.  
-**Issues:** [#3398](https://github.com/amruthpillai/reactive-resume/issues/3398), [#3153](https://github.com/amruthpillai/reactive-resume/issues/3153).
+**Issues:** [#3398](https://github.com/reactive-resume/reactive-resume/issues/3398), [#3153](https://github.com/reactive-resume/reactive-resume/issues/3153).
 
 ## Execution contract
 

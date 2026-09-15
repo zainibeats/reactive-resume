@@ -8,7 +8,7 @@ Keep the order name → rating → proficiency → keywords in both stacked and 
 
 ## Status
 
-- **Issue:** [#2611](https://github.com/amruthpillai/reactive-resume/issues/2611).
+- **Issue:** [#2611](https://github.com/reactive-resume/reactive-resume/issues/2611).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort M, risk medium because Skills uses shared rendering.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Confidence:** High for current shared order; historical rectangle dimensions and screenshot parity remain unverified. Related-issue mentions are not additional accepted requirements.

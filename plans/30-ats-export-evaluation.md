@@ -8,7 +8,7 @@ Measure existing PDF/DOCX first. Add a preset only for measured deficiencies and
 
 ## Status
 
-- **Issue:** [#2845](https://github.com/amruthpillai/reactive-resume/issues/2845).
+- **Issue:** [#2845](https://github.com/reactive-resume/reactive-resume/issues/2845).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2, effort L for evaluation, risk medium/high for misleading compatibility claims.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Evidence:** The issue requests single-column standard-font PDF/DOCX, consistent dates, preview, and vendor-specific guarantees. Current DOCX and ATS checks already exist; do not implement a duplicate export path or equate the application's heuristic score with a vendor parser score.

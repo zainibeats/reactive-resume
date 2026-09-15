@@ -3,7 +3,7 @@
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05).  
 **Status:** agent-selected documentation plan; ready for future execution. **Category:** docs.  
 **Priority:** P2. **Effort:** 0.5–1 day documentation and synthetic workflow verification. **Risk:** Low for documentation; private data must stay local during verification.  
-**Issue:** [#2705](https://github.com/amruthpillai/reactive-resume/issues/2705).
+**Issue:** [#2705](https://github.com/reactive-resume/reactive-resume/issues/2705).
 
 ## Execution contract
 

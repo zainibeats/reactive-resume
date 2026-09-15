@@ -23,17 +23,17 @@ two complete ResumeData objects under `onePage` and `overflow`; neither is an of
 
 Access/revalidation date: **2026-09-06**. Research base: `b85d285b69843612e9d7f0ab802248982e7bf0ea`.
 Planning authority: commit `a2557b2ad40e06e1e63eb655f286e6a78fe6bf0d`,
-[Plan 33](https://github.com/amruthpillai/reactive-resume/blob/a2557b2ad40e06e1e63eb655f286e6a78fe6bf0d/plans/33-europass-template.md)
+[Plan 33](https://github.com/reactive-resume/reactive-resume/blob/a2557b2ad40e06e1e63eb655f286e6a78fe6bf0d/plans/33-europass-template.md)
 and its recorded decisions. Approval covers this research/proposal unit; concrete visual approval remains open.
 
-Read-only `gh issue view 2689` confirmed the [issue](https://github.com/amruthpillai/reactive-resume/issues/2689)
+Read-only `gh issue view 2689` confirmed the [issue](https://github.com/reactive-resume/reactive-resume/issues/2689)
 is open, last updated 2026-08-16. Its request for a built-in option is relevant; assertions about compulsory
 formats are not adopted. The linked community converter remains third-party work, not an import contract.
 
-The complete open-PR list returned four PRs: [#3455](https://github.com/amruthpillai/reactive-resume/pull/3455)
-(planning), [#3456](https://github.com/amruthpillai/reactive-resume/pull/3456) (execution ledger),
-[#3467](https://github.com/amruthpillai/reactive-resume/pull/3467) (authored-page guidance), and
-[#3468](https://github.com/amruthpillai/reactive-resume/pull/3468) (stylesheet diagnostics).
+The complete open-PR list returned four PRs: [#3455](https://github.com/reactive-resume/reactive-resume/pull/3455)
+(planning), [#3456](https://github.com/reactive-resume/reactive-resume/pull/3456) (execution ledger),
+[#3467](https://github.com/reactive-resume/reactive-resume/pull/3467) (authored-page guidance), and
+[#3468](https://github.com/reactive-resume/reactive-resume/pull/3468) (stylesheet diagnostics).
 None proposed a Europass renderer. Pagination guidance is adjacent work; no shared source is changed here.
 
 The schema still has 15 template IDs and no Europass ID. The plan's targeted drift check from `7a98f6662`

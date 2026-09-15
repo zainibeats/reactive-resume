@@ -1,6 +1,6 @@
+import type * as React from "react";
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import { CaretDownIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
-import * as React from "react";
 import {
 	InputGroup,
 	InputGroupAddon,
@@ -211,10 +211,6 @@ function ComboboxChipsInput({ className, ...props }: ComboboxPrimitive.Input.Pro
 	);
 }
 
-function useComboboxAnchor() {
-	return React.useRef<HTMLDivElement | null>(null);
-}
-
 export {
 	ComboboxChips,
 	ComboboxChipsInput,
@@ -231,6 +227,5 @@ export {
 	ComboboxSeparator,
 	ComboboxTrigger,
 	ComboboxValue,
-	useComboboxAnchor,
 	useFilter,
 };

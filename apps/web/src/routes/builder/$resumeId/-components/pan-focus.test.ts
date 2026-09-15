@@ -41,7 +41,7 @@ describe("blurFocusedElementOnPan", () => {
 	// The issue: closing a dialog restores focus to its trigger, and because react-zoom-pan-pinch
 	// preventDefault()s the canvas mousedown the browser never moves focus away. Space then
 	// activates the still-focused trigger on keyup and reopens the dialog.
-	// https://github.com/amruthpillai/reactive-resume/issues/3300
+	// https://github.com/reactive-resume/reactive-resume/issues/3300
 	it("stops a Space keypress after panning from re-activating the last dialog trigger", () => {
 		const trigger = document.createElement("button");
 		const openDialog = vi.fn();

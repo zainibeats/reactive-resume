@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-- **Issue:** [#2768](https://github.com/amruthpillai/reactive-resume/issues/2768).
+- **Issue:** [#2768](https://github.com/reactive-resume/reactive-resume/issues/2768).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M for diagnosis; risk medium.
 - **Readiness:** Ready for a controlled reproduction. No verified root cause or implementation is prescribed.
 - **Evidence:** The report says both PDF and JSON import fail and quotes DOM `NotFoundError: Failed to execute removeChild on Node`. It labels Cloud but references localhost. No original file, application version, stack, browser version, or exact import format is available. On 2026-08-16 the owner requested a source file. The report does not establish that PDF extraction and JSON validation share a cause.

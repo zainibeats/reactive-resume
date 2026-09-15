@@ -189,7 +189,7 @@ describe("ImportResumeDialog — detected files without MIME metadata", () => {
 });
 
 describe("ImportResumeDialog — Set up a provider", () => {
-	// https://github.com/amruthpillai/reactive-resume/issues/3307
+	// https://github.com/reactive-resume/reactive-resume/issues/3307
 	it("confirms before leaving instead of navigating behind the dialog", async () => {
 		renderDialog();
 		const link = await selectWordFile();

@@ -3,7 +3,7 @@
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05).  
 **Status:** agent-selected documentation plan; ready for future execution. **Category:** docs.  
 **Priority:** P2. **Effort:** 0.5 day documentation/history verification. **Risk:** Low: factual documentation only.  
-**Issue:** [#3010](https://github.com/amruthpillai/reactive-resume/issues/3010).
+**Issue:** [#3010](https://github.com/reactive-resume/reactive-resume/issues/3010).
 
 ## Execution contract
 

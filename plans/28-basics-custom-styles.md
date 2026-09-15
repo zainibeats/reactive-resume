@@ -8,7 +8,7 @@ Proceed with tested documentation examples and only reproducible advertised-bind
 
 ## Status
 
-- **Issue:** [#3137](https://github.com/amruthpillai/reactive-resume/issues/3137).
+- **Issue:** [#3137](https://github.com/reactive-resume/reactive-resume/issues/3137).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort S for verification/documentation, unresolved for new rendering capabilities; risk low for documentation and high for arbitrary CSS expansion.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Evidence:** The report bundles header branding, gradients, spacing/line breaks, and icons. On 2026-09-05 the owner explicitly stated that current Semantic CSS supports header/name/headline/contact-list/contact-item/icon/field/page/region styling, linked the guide, and requested an exact remaining template/CSS case. Confidence is high that much of the original missing selector surface now exists; historical appearance is not automatically restored.

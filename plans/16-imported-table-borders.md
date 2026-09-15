@@ -4,7 +4,7 @@
 
 ## Status
 
-- **Issue:** [#3196](https://github.com/amruthpillai/reactive-resume/issues/3196).
+- **Issue:** [#3196](https://github.com/reactive-resume/reactive-resume/issues/3196).
 - **Planned at:** `7a98f6662`, 2026-09-05. Rendering source remains identical in the planning checkout.
 - **Priority / effort / risk:** P1 / M–L / high for editor changes, medium for renderer compatibility. Incorrect normalization destroys authored structure.
 - **Confidence:** High for the two controlled limitations below; low for their equivalence to the original report.
@@ -13,7 +13,7 @@
 
 ## Evidence, impact, and limits
 
-The reporter used Ditgar on cloud, imported JSON, then updated a resume whose table lost its grid. The screenshot still shows text in three columns. No exact HTML/JSON or application version was supplied. [The maintainer's clarification](https://github.com/amruthpillai/reactive-resume/issues/3196#issuecomment-5552909919) explicitly distinguishes merged #3438, which fixed complete loss of text inside otherwise unrecognized semantic HTML wrappers. That fix does not establish border correctness. The custom-section-heading concern is separate and outside this plan.
+The reporter used Ditgar on cloud, imported JSON, then updated a resume whose table lost its grid. The screenshot still shows text in three columns. No exact HTML/JSON or application version was supplied. [The maintainer's clarification](https://github.com/reactive-resume/reactive-resume/issues/3196#issuecomment-5552909919) explicitly distinguishes merged #3438, which fixed complete loss of text inside otherwise unrecognized semantic HTML wrappers. That fix does not establish border correctness. The custom-section-heading concern is separate and outside this plan.
 
 A fresh controlled production probe at the planned source revision established:
 
@@ -126,7 +126,7 @@ Routine judgments do not need separate answers: preserve source while unsupporte
 
 ### 2. Obtain and classify the historical fixture
 
-Read the existing issue through `rtk proxy gh issue view 3196 --repo amruthpillai/reactive-resume --json body,comments`. Do not post a new comment. If no source arrives, record “historical equivalence unverified” and continue only the independently authorized data-loss repair.
+Read the existing issue through `rtk proxy gh issue view 3196 --repo reactive-resume/reactive-resume --json body,comments`. Do not post a new comment. If no source arrives, record “historical equivalence unverified” and continue only the independently authorized data-loss repair.
 
 Compare source tags/styles before editing with the exported JSON after editing. Branch on the first difference: table removed → editor; markup retained but only `border` attribute present → compatibility policy; supported inline borders retained yet missing from PDF → renderer regression. For the last branch, minimize to one table, one style, one template before changing code.
 

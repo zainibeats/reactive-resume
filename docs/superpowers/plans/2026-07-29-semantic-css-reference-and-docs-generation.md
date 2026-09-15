@@ -248,7 +248,7 @@ export async function generateOpenApiSpec({ appUrl, version }: { appUrl: string;
 			title: "Reactive Resume",
 			version,
 			description: "Reactive Resume API",
-			license: { name: "MIT", url: "https://github.com/amruthpillai/reactive-resume/blob/main/LICENSE" },
+			license: { name: "MIT", url: "https://github.com/reactive-resume/reactive-resume/blob/main/LICENSE" },
 			contact: { name: "Amruth Pillai", email: "hello@amruthpillai.com", url: "https://amruthpillai.com" },
 		},
 		servers: [{ url: `${appUrl}/api/openapi` }],

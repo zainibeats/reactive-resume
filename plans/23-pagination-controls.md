@@ -8,7 +8,7 @@ Implement the Q10 guidance independently. Implement item controls only after pro
 
 ## Status
 
-- **Issues:** [#3350](https://github.com/amruthpillai/reactive-resume/issues/3350), [#3090](https://github.com/amruthpillai/reactive-resume/issues/3090).
+- **Issues:** [#3350](https://github.com/reactive-resume/reactive-resume/issues/3350), [#3090](https://github.com/reactive-resume/reactive-resume/issues/3090).
 - **Planned at:** `7a98f6662`, 2026-09-05.
 - **Priority / effort / risk:** P2 / L / high: incorrect keep-together behavior can clip content.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.

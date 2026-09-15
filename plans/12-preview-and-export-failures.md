@@ -4,7 +4,7 @@
 
 ## Status and intent
 
-- **Issues:** [#3323](https://github.com/amruthpillai/reactive-resume/issues/3323), [#3290](https://github.com/amruthpillai/reactive-resume/issues/3290), [#3033](https://github.com/amruthpillai/reactive-resume/issues/3033), [#3007](https://github.com/amruthpillai/reactive-resume/issues/3007), [#2609](https://github.com/amruthpillai/reactive-resume/issues/2609).
+- **Issues:** [#3323](https://github.com/reactive-resume/reactive-resume/issues/3323), [#3290](https://github.com/reactive-resume/reactive-resume/issues/3290), [#3033](https://github.com/reactive-resume/reactive-resume/issues/3033), [#3007](https://github.com/reactive-resume/reactive-resume/issues/3007), [#2609](https://github.com/reactive-resume/reactive-resume/issues/2609).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P1; effort M per reproduced cause; risk medium. Confidence low for historical root causes, high for current source paths below.
 - **Readiness:** Investigation ready; no runtime fix selected. Missing original resume/browser/deployment fixtures are material blockers to historical resolution.
 - **Dependencies:** None for diagnosis. Coordinate persistence findings with the builder draft owner; font-specific findings with Plan 13. Share reproduction utilities only, unless two reports prove the same failing boundary.

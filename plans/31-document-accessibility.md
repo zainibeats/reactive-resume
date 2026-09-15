@@ -8,7 +8,7 @@ Reuse the existing component on public HTML only after measuring PDF.js announce
 
 ## Status and execution boundary
 
-- **Issue:** [#2844](https://github.com/amruthpillai/reactive-resume/issues/2844).
+- **Issue:** [#2844](https://github.com/reactive-resume/reactive-resume/issues/2844).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M for the existing HTML mirror, L for export accessibility; risk medium.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Evidence confidence:** High for the source facts below; unknown for PDF tagging and assistive-technology behavior until actual output is inspected. The issue requests H1 name, H2 sections, H3 companies, H4 job titles, lists, and labels. The owner requested an exact output and acceptance criteria on 2026-08-16; the issue has not supplied a focused fixture.

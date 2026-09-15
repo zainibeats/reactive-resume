@@ -50,14 +50,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: "24"
+          node-version-file: ".nvmrc"
           cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Run Server and Tooling Tests
-        run: pnpm exec turbo run test:ci --filter=server --filter=@reactive-resume/tooling
 
       - name: Install Playwright Browser
         run: pnpm exec playwright install --with-deps chromium
@@ -72,6 +69,13 @@ jobs:
 
       - name: Run Database Migrations
         run: pnpm db:migrate
+
+      # Runs every workspace package, not a hand-maintained filter list, so a package
+      # cannot silently lose coverage by being left out. Serial execution: the PDF
+      # rasterization and API rate-limit suites time out when several packages' Vitest
+      # thread pools oversubscribe the runner at once.
+      - name: Run Unit Tests
+        run: pnpm exec turbo run test:ci --concurrency=1
 
       - name: Build
         run: pnpm build

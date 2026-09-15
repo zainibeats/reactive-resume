@@ -441,6 +441,17 @@ const coordinatesFor = (result: RenderedFixture, markers: readonly DateMarker[])
 
 const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
+// Rasterized pixels depend on the host's font rasterizer: the identical PDF, with byte-identical
+// text coordinates, hashes differently on macOS and Linux. These PNG baselines were authored on
+// macOS, so the pixel comparison only runs there. Coordinates, page counts and item counts are
+// portable and stay asserted on every host, which is what the characterization actually protects.
+const comparesPixels = process.platform === "darwin";
+
+const withoutPixels = <T extends { rasterSha256: string[] }>(evidence: T): Omit<T, "rasterSha256"> => {
+	const { rasterSha256: _rasterSha256, ...portable } = evidence;
+	return portable;
+};
+
 const fixtureEvidence = (result: RenderedFixture, coordinates: Record<string, unknown>) => {
 	const rasterPngs = result.raster.map((page) => encode(page));
 	return {
@@ -469,7 +480,12 @@ const writeArtifacts = (name: string, result: RenderedFixture, coordinates: Reco
 const assertFixtureBaseline = (name: string, result: RenderedFixture, coordinates: Record<string, unknown>): void => {
 	if (process.env.DATE_LAYOUT_ARTIFACT_DIR) return;
 	const evidence = fixtureEvidence(result, coordinates);
-	expect(JSON.parse(readFileSync(join(baselineDirectory, `${name}.json`), "utf8"))).toEqual(evidence);
+	const baseline = JSON.parse(readFileSync(join(baselineDirectory, `${name}.json`), "utf8"));
+	if (!comparesPixels) {
+		expect(withoutPixels(baseline)).toEqual(withoutPixels(evidence));
+		return;
+	}
+	expect(baseline).toEqual(evidence);
 	for (const index of result.raster.keys()) {
 		const expectedPng = readFileSync(join(baselineDirectory, `${name}-page-${index + 1}.png`));
 		expect(sha256(expectedPng)).toBe(evidence.rasterSha256[index]);
@@ -562,7 +578,15 @@ describe("date layout characterization (#3155, #2841)", () => {
 			mkdirSync(output, { recursive: true });
 			writeFileSync(join(output, "all-templates.json"), `${JSON.stringify(evidence, null, "\t")}\n`);
 		} else {
-			expect(JSON.parse(readFileSync(join(baselineDirectory, "all-templates.json"), "utf8"))).toEqual(evidence);
+			const baseline: Record<string, { rasterSha256: string[] }> = JSON.parse(
+				readFileSync(join(baselineDirectory, "all-templates.json"), "utf8"),
+			);
+			if (comparesPixels) expect(baseline).toEqual(evidence);
+			else {
+				const portable = (entries: Record<string, { rasterSha256: string[] }>) =>
+					Object.fromEntries(Object.entries(entries).map(([key, value]) => [key, withoutPixels(value)]));
+				expect(portable(baseline)).toEqual(portable(evidence as Record<string, { rasterSha256: string[] }>));
+			}
 		}
 	});
 

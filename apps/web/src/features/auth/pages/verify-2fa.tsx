@@ -6,6 +6,7 @@ import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { FormControl, FormItem, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
+import { OTPField } from "@reactive-resume/ui/components/otp-field";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { authClient } from "@/libs/auth/client";
 import { useAppForm } from "@/libs/tanstack-form";
@@ -98,15 +99,26 @@ function TwoFactorVerificationPage({ backupCode = false }: TwoFactorVerification
 						>
 							<FormControl
 								render={
-									<Input
-										type={backupCode ? "text" : "number"}
-										maxLength={backupCode ? 10 : 6}
-										className="max-w-xs"
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-									/>
+									backupCode ? (
+										<Input
+											type="text"
+											maxLength={10}
+											className="max-w-xs"
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) => field.handleChange(event.target.value)}
+										/>
+									) : (
+										<OTPField
+											length={6}
+											autoSubmit
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onValueChange={field.handleChange}
+										/>
+									)
 								}
 							/>
 							<FormMessage errors={field.state.meta.errors} />

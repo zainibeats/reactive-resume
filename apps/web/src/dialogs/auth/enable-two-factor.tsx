@@ -19,6 +19,7 @@ import {
 } from "@reactive-resume/ui/components/dialog";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
+import { OTPField } from "@reactive-resume/ui/components/otp-field";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { authClient } from "@/libs/auth/client";
@@ -287,14 +288,13 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 										<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
 											<FormControl
 												render={
-													<Input
-														type="number"
-														maxLength={6}
-														className="max-w-xs"
+													<OTPField
+														length={6}
+														autoSubmit
 														name={field.name}
 														value={field.state.value}
 														onBlur={field.handleBlur}
-														onChange={(event) => field.handleChange(event.target.value)}
+														onValueChange={field.handleChange}
 													/>
 												}
 											/>

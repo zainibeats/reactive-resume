@@ -4,7 +4,7 @@
 
 ## Status and scope
 
-- **Issues:** [#3378](https://github.com/amruthpillai/reactive-resume/issues/3378), [#3265](https://github.com/amruthpillai/reactive-resume/issues/3265), [#2921](https://github.com/amruthpillai/reactive-resume/issues/2921).
+- **Issues:** [#3378](https://github.com/reactive-resume/reactive-resume/issues/3378), [#3265](https://github.com/reactive-resume/reactive-resume/issues/3265), [#2921](https://github.com/reactive-resume/reactive-resume/issues/2921).
 - **Planned against:** `7a98f6662`, 2026-09-05.
 - **Priority / effort / risk:** P2 / M / medium. A mistaken restore operation can duplicate section IDs or change output visibility.
 - **Readiness:** #2921 describes a verified missing UI distinction. The historical removal paths in #3378 and #3265 remain unverified. Do not claim those reports fixed merely because a deliberately unplaced fixture becomes recoverable.

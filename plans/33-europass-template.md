@@ -8,7 +8,7 @@ Research and fixture mapping can proceed now. Visual approval remains a material
 
 ## Status and decision gate
 
-- **Issue:** [#2689](https://github.com/amruthpillai/reactive-resume/issues/2689).
+- **Issue:** [#2689](https://github.com/reactive-resume/reactive-resume/issues/2689).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort L, risk medium/high for unsupported standards claims and a new template surface.
 - **Readiness:** Research/data mapping and visual proposal are selected by agent judgment and ready for later execution. Stop before template code for review of the actual proposed visual artifacts; their layout does not yet exist to approve.
 - **Evidence:** The issue asks for a built-in Europass option and makes claims about German requirements/DIN 5008. Those claims are unverified and must not be repeated as facts. A third-party XML-to-v5 converter comment is not an official template specification or import contract.

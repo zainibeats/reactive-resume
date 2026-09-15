@@ -8,7 +8,7 @@ Add one backward-compatible template option and retain profile IDs/order/links. 
 
 ## Status
 
-- **Issue:** [#2812](https://github.com/amruthpillai/reactive-resume/issues/2812).
+- **Issue:** [#2812](https://github.com/reactive-resume/reactive-resume/issues/2812).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort M, risk medium.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Evidence:** Two screenshots compare the old and new output; no source resume or dimensions are provided. High confidence in current source routing, unverified pixel parity with the older renderer.

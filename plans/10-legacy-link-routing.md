@@ -3,14 +3,14 @@
 **Planned at:** `7a98f6662ffc6fd5a1a7281c30ab3829fe3722ec` (2026-09-05).  
 **Status:** superseded by maintainer decision on 2026-09-06; do not implement. **Category:** declined feature.
 **Priority:** P2. **Effort:** 2–4 days for prospective notices and transaction tests. **Risk:** High: attribution, privacy and failed-request counting.  
-**Issue:** [#2836](https://github.com/amruthpillai/reactive-resume/issues/2836).
+**Issue:** [#2836](https://github.com/reactive-resume/reactive-resume/issues/2836).
 
 ## Final disposition
 
 Maintainer declined this feature after planning. Retired-link support is not planned because redirect lifecycle,
 retention, slug reuse, ownership, privacy-safe tracking, and invalid-link error handling create disproportionate
 ongoing overhead. PR #3463 was closed unmerged, and the decision is recorded in
-[issue #2836](https://github.com/amruthpillai/reactive-resume/issues/2836#issuecomment-5556080394).
+[issue #2836](https://github.com/reactive-resume/reactive-resume/issues/2836#issuecomment-5556080394).
 
 Remaining content below is retained as historical planning evidence only. It is non-executable and must not be
 used to start implementation.

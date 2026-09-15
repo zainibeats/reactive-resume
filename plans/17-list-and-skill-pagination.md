@@ -4,7 +4,7 @@
 
 ## Status and residual scope
 
-- **Issues:** [#2751](https://github.com/amruthpillai/reactive-resume/issues/2751), [#3040](https://github.com/amruthpillai/reactive-resume/issues/3040).
+- **Issues:** [#2751](https://github.com/reactive-resume/reactive-resume/issues/2751), [#3040](https://github.com/reactive-resume/reactive-resume/issues/3040).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M; risk high for page-fragmentation changes, medium for local marker sizing. Confidence medium for current controls, low for historical equivalence.
 - **Readiness:** Diagnostics ready. No new pagination policy authorized here.
 - **Dependencies:** Merged #3449 ordered-marker gutters and #3434 level gaps must remain. Plan 23/#3350 owns optional item keep-together policy; do not preempt it with `wrap={false}` on skills.

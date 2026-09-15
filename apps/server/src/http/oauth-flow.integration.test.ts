@@ -156,6 +156,89 @@ describe.skipIf(!databaseURL)("MCP OAuth flow with PostgreSQL", () => {
 		expect([claims.aud].flat()).toContain(`${origin}/mcp`);
 		expect((await handleAuth(tokenRequest())).status).toBe(400);
 	}, 30_000);
+	it("exchanges a code for a confidential client that registered client_secret_basic", async () => {
+		if (!databaseURL) return;
+		process.env.DATABASE_URL = databaseURL;
+		process.env.APP_URL = "http://localhost:33920";
+		process.env.AUTH_SECRET = "oauth-integration-test-secret-only";
+		const { handleAuth, handleOAuth } = await import("./auth");
+		const origin = process.env.APP_URL;
+		const redirectURI = "http://127.0.0.1:33921/callback";
+		const request = (path: string, body: object, cookie = "") =>
+			new Request(`${origin}/api/auth/${path}`, {
+				method: "POST",
+				headers: { "content-type": "application/json", origin, cookie },
+				body: JSON.stringify(body),
+			});
+
+		const registration = await handleAuth(
+			request("oauth2/register", {
+				client_name: "Confidential MCP client",
+				redirect_uris: [redirectURI],
+				token_endpoint_auth_method: "client_secret_basic",
+			}),
+		);
+		expect(registration.status, await registration.clone().text()).toBe(201);
+		const client = await registration.json();
+		// Downgrading this to a public client leaves the client without a secret, and its
+		// Basic-authenticated token exchange then fails with 401 invalid_client.
+		expect(client.token_endpoint_auth_method).toBe("client_secret_basic");
+		expect(client.client_secret).toBeTruthy();
+
+		const verifier = randomBytes(32).toString("base64url");
+		const query = new URLSearchParams({
+			client_id: client.client_id,
+			redirect_uri: redirectURI,
+			response_type: "code",
+			scope: "openid profile offline_access",
+			code_challenge: createHash("sha256").update(verifier).digest("base64url"),
+			code_challenge_method: "S256",
+			resource: `${origin}/mcp`,
+			state: "opaque-state",
+		});
+		const authorize = await handleAuth(new Request(`${origin}/api/auth/oauth2/authorize?${query}`));
+		const login = await handleOAuth(new Request(new URL(authorize.headers.get("location") ?? "", origin)));
+		const callbackURL = new URL(login.headers.get("location") ?? "", origin).searchParams.get("callbackURL");
+
+		const unique = randomBytes(6).toString("hex");
+		const signup = await handleAuth(
+			request("sign-up/email", {
+				name: "Confidential Test",
+				email: `confidential-${unique}@example.com`,
+				username: `confidential-${unique}`,
+				password: "password123",
+			}),
+		);
+		expect(signup.status, await signup.clone().text()).toBe(200);
+		const cookie = signup.headers
+			.getSetCookie()
+			.map((value) => value.split(";", 1)[0])
+			.join("; ");
+		const callback = await handleOAuth(new Request(`${origin}${callbackURL}`, { headers: { cookie } }));
+		const oauth_query = new URL(callback.headers.get("location") ?? "", origin).search.slice(1);
+		const accepted = await handleAuth(request("oauth2/consent", { accept: true, oauth_query }, cookie));
+		expect(accepted.status, await accepted.clone().text()).toBe(200);
+		const code = new URL((await accepted.json()).url).searchParams.get("code");
+
+		const tokenResponse = await handleAuth(
+			new Request(`${origin}/api/auth/oauth2/token`, {
+				method: "POST",
+				headers: {
+					"content-type": "application/x-www-form-urlencoded",
+					authorization: `Basic ${Buffer.from(`${client.client_id}:${client.client_secret}`).toString("base64")}`,
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: code ?? "",
+					redirect_uri: redirectURI,
+					code_verifier: verifier,
+					resource: `${origin}/mcp`,
+				}),
+			}),
+		);
+		expect(tokenResponse.status, await tokenResponse.clone().text()).toBe(200);
+		await expect(tokenResponse.json()).resolves.toMatchObject({ token_type: "Bearer" });
+	}, 30_000);
 	it.each(["login", "max-age", "create"])(
 		"requires fresh authentication for %s without looping",
 		async (mode) => {

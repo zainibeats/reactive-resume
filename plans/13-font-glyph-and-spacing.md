@@ -4,7 +4,7 @@
 
 ## Status
 
-- **Issues:** [#3249](https://github.com/amruthpillai/reactive-resume/issues/3249), [#3159](https://github.com/amruthpillai/reactive-resume/issues/3159), [#3147](https://github.com/amruthpillai/reactive-resume/issues/3147), [#3093](https://github.com/amruthpillai/reactive-resume/issues/3093), [#3089](https://github.com/amruthpillai/reactive-resume/issues/3089), [#2988](https://github.com/amruthpillai/reactive-resume/issues/2988).
+- **Issues:** [#3249](https://github.com/reactive-resume/reactive-resume/issues/3249), [#3159](https://github.com/reactive-resume/reactive-resume/issues/3159), [#3147](https://github.com/reactive-resume/reactive-resume/issues/3147), [#3093](https://github.com/reactive-resume/reactive-resume/issues/3093), [#3089](https://github.com/reactive-resume/reactive-resume/issues/3089), [#2988](https://github.com/reactive-resume/reactive-resume/issues/2988).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2; effort M per isolated defect; risk high for dependency metric/glyph changes, medium for template-local geometry.
 - **Confidence:** High for current code and retained regression behavior; low/medium for historical residuals without original fixtures.
 - **Readiness:** Diagnostic work ready; no speculative font replacement, global line-height correction, or glyph-cache reset approved.

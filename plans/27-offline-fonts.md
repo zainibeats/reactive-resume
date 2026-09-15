@@ -8,7 +8,7 @@ Inventory current source owners and define one source manifest consumed by previ
 
 ## Status
 
-- **Issue:** [#3377](https://github.com/amruthpillai/reactive-resume/issues/3377).
+- **Issue:** [#3377](https://github.com/reactive-resume/reactive-resume/issues/3377).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P2, effort L, risk high for download size, licensing, and missing glyphs.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Evidence:** Self-hosted user requests operation without Google font access. Blocking Google alone is not equivalent to being offline: the current catalog includes other CDNs too. Confidence is high for remote catalog/fallback paths, unmeasured for a fully cold offline browser/server run.

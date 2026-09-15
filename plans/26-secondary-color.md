@@ -8,7 +8,7 @@ Implement the explicit decorative-consumer list after source inventory; do not p
 
 ## Status
 
-- **Issue:** [#3373](https://github.com/amruthpillai/reactive-resume/issues/3373).
+- **Issue:** [#3373](https://github.com/reactive-resume/reactive-resume/issues/3373).
 - **Planned at:** `7a98f6662`, 2026-09-05. Priority P3, effort M, risk medium.
 - **Readiness:** Direction selected above. Ready for later execution after the technical verification gates; this task remains documentation-only.
 - **Confidence:** High for missing token/UI; which elements should consume it remains unresolved.
