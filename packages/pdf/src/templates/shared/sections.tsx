@@ -785,6 +785,23 @@ const CustomSummarySection = ({ section, showHeading = true }: CustomSummarySect
 	);
 };
 
+/**
+ * The username doubles as the link text for a profile. When the author leaves it blank the link
+ * used to wrap an empty <Text>, leaving nothing to click in the PDF, so fall back to the link
+ * label and then the url. With "Show link in title" on, the network name carries the link instead.
+ */
+const ProfileLink = ({ item }: { item: ProfileItem }) => {
+	const username = <Text semanticField="username">{item.username}</Text>;
+
+	if (!shouldRenderSeparateItemWebsite(item.website)) return username;
+
+	return (
+		<Link semanticRole="profile" src={item.website.url}>
+			{item.username ? username : getWebsiteDisplayText(item.website)}
+		</Link>
+	);
+};
+
 const ProfileSection = ({ sectionId = "profiles", sectionData }: ItemSectionProps<ProfileItem> = {}) => {
 	const data = useRender();
 	const profiles = sectionData ?? data.sections.profiles;
@@ -801,12 +818,12 @@ const ProfileSection = ({ sectionId = "profiles", sectionData }: ItemSectionProp
 						<SectionItemHeader>
 							<View style={composeStyles(inlineStyle)}>
 								<Icon name={item.icon as IconName} />
-								<Bold semanticField="network">{item.network}</Bold>
+								<ItemTitle bold={item.mainEntryBold ?? false} field="network" website={item.website}>
+									{item.network}
+								</ItemTitle>
 							</View>
 						</SectionItemHeader>
-						<Link semanticRole="profile" src={item.website.url}>
-							<Text semanticField="username">{item.username}</Text>
-						</Link>
+						<ProfileLink item={item} />
 					</SectionItem>
 				))}
 			</SectionItems>
@@ -1277,7 +1294,9 @@ const LanguagesSection = ({ sectionId = "languages", sectionData }: ItemSectionP
 					<SectionItem key={item.id} itemId={item.id}>
 						<View style={{ flexGrow: languages.columns > 1 ? 1 : 0 }}>
 							<SectionItemHeader>
-								<Bold semanticField="language">{item.language}</Bold>
+								<MainEntryText bold={item.mainEntryBold ?? false} field="language">
+									{item.language}
+								</MainEntryText>
 								<Text semanticField="fluency">{item.fluency}</Text>
 							</SectionItemHeader>
 						</View>

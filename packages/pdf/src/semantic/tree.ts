@@ -307,28 +307,21 @@ const buildItem = ({
 			name,
 			value: item[name],
 			direction,
-			structuredLink: type !== "profiles" && website?.inlineLink === true && name === headerFieldNames[0],
+			structuredLink: website?.inlineLink === true && name === headerFieldNames[0],
 		});
 
 		if (!field) continue;
 		(parent === headerKey ? headerChildren : bodyChildren).push(field);
 	}
 
-	if (website && type !== "profiles") {
+	// Profiles carry their standalone link on the username line (`profile`) instead of a trailing
+	// `website` line; an inline link moves onto the network name like every other section.
+	if (website) {
 		const parent = website.inlineLink ? headerKey : key;
+		const role = website.inlineLink ? "inline-website" : type === "profiles" ? "profile" : "website";
 		(parent === headerKey ? headerChildren : bodyChildren).push(
 			semanticNode({
-				key: semanticNodeKeys.link(parent, website.inlineLink ? "inline-website" : "website"),
-				kind: "link",
-				roles: ["structured-link"],
-			}),
-		);
-	}
-
-	if (type === "profiles") {
-		bodyChildren.push(
-			semanticNode({
-				key: semanticNodeKeys.link(key, "profile"),
+				key: semanticNodeKeys.link(parent, role),
 				kind: "link",
 				roles: ["structured-link"],
 			}),

@@ -584,7 +584,10 @@ describe("buildSemanticTree", () => {
 		expect(semanticNodeKeys.richTextNode(parent, "paragraph", 2)).toBe("page-1/region-main/paragraph-2");
 	});
 
-	it.each([false, true])("emits exactly one profile link when inlineLink is %s", (inlineLink) => {
+	it.each([
+		[false, "link-profile"],
+		[true, "item-header/link-inline-website"],
+	])("emits exactly one profile link when inlineLink is %s", (inlineLink, linkKey) => {
 		const data = structuredClone(defaultResumeData);
 		data.sections.profiles.items = [
 			{
@@ -610,7 +613,39 @@ describe("buildSemanticTree", () => {
 		);
 
 		expect(findNodes(profile, (node) => node.kind === "link").map((node) => node.key)).toEqual([
-			"page-1/region-main/section-profiles/section-items/item-profile%2F1/link-profile",
+			`page-1/region-main/section-profiles/section-items/item-profile%2F1/${linkKey}`,
+		]);
+	});
+
+	it("emits no profile link when the profile has no url", () => {
+		const data = structuredClone(defaultResumeData);
+		data.sections.profiles.items = [
+			{
+				id: "profile/1",
+				hidden: false,
+				icon: "discord-logo",
+				iconColor: "",
+				network: "Discord",
+				username: "ada#1234",
+				website: { url: "", label: "", inlineLink: false },
+			},
+		];
+		const tree = buildSemanticTree({
+			data,
+			template: "onyx",
+			page: { fullWidth: true, main: ["profiles"], sidebar: [] },
+			pageNumber: 1,
+			showHeader: false,
+		});
+		const profile = required(
+			findNode(tree, (node) => node.kind === "item" && node.id === "profile/1"),
+			"profile item",
+		);
+
+		expect(findNodes(profile, (node) => node.kind === "link")).toEqual([]);
+		expect(findNodes(profile, (node) => node.kind === "field").map((node) => node.attributes.name)).toEqual([
+			"network",
+			"username",
 		]);
 	});
 

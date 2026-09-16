@@ -23,6 +23,7 @@ const defaultValues: FormValues = {
 	id: "",
 	hidden: false,
 	language: "",
+	mainEntryBold: false,
 	fluency: "",
 	level: 0,
 };
@@ -31,8 +32,13 @@ export function CreateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const updateResumeData = useUpdateResumeData();
 
+	const initialValues: FormValues = {
+		...makeSectionItem(defaultValues, data?.item),
+		mainEntryBold: data?.item?.mainEntryBold ?? false,
+	};
+
 	const form = useAppForm({
-		defaultValues: makeSectionItem(defaultValues, data?.item),
+		defaultValues: initialValues,
 		validators: { onSubmit: formSchema },
 		onSubmit: ({ value }) => {
 			updateResumeData((draft) => {
@@ -64,7 +70,7 @@ export function UpdateLanguageDialog({ data }: DialogProps<"resume.sections.lang
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: ({ value }) => {
 			updateResumeData((draft) => {
@@ -99,6 +105,28 @@ const LanguageForm = withForm({
 				<form.AppField name="language">{(field) => <field.TextField label={<Trans>Language</Trans>} />}</form.AppField>
 
 				<form.AppField name="fluency">{(field) => <field.TextField label={<Trans>Fluency</Trans>} />}</form.AppField>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2 sm:col-span-full">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold</Trans>
+							</FormLabel>
+						</FormItem>
+					)}
+				</form.Field>
 
 				<form.Field name="level">
 					{(field) => (

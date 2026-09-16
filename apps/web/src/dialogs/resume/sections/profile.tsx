@@ -35,6 +35,7 @@ const defaultValues: FormValues = {
 	icon: "acorn",
 	iconColor: "",
 	network: "",
+	mainEntryBold: false,
 	username: "",
 	website: { url: "", label: "", inlineLink: false },
 };
@@ -43,8 +44,13 @@ export function CreateProfileDialog({ data }: DialogProps<"resume.sections.profi
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const updateResumeData = useUpdateResumeData();
 
+	const initialValues: FormValues = {
+		...makeSectionItem(defaultValues, data?.item),
+		mainEntryBold: data?.item?.mainEntryBold ?? false,
+	};
+
 	const form = useAppForm({
-		defaultValues: makeSectionItem(defaultValues, data?.item),
+		defaultValues: initialValues,
 		validators: { onSubmit: formSchema },
 		onSubmit: ({ value }) => {
 			updateResumeData((draft) => {
@@ -76,7 +82,7 @@ export function UpdateProfileDialog({ data }: DialogProps<"resume.sections.profi
 	const updateResumeData = useUpdateResumeData();
 
 	const form = useAppForm({
-		defaultValues: data.item,
+		defaultValues: formSchema.parse({ ...data.item, mainEntryBold: data.item.mainEntryBold ?? false }),
 		validators: { onSubmit: formSchema },
 		onSubmit: ({ value }) => {
 			updateResumeData((draft) => {
@@ -206,6 +212,28 @@ const ProfileForm = withForm({
 								/>
 							</InputGroup>
 							<FormMessage errors={field.state.meta.errors} />
+						</FormItem>
+					)}
+				</form.Field>
+
+				<form.Field name="mainEntryBold">
+					{(field) => (
+						<FormItem className="flex items-center gap-x-2 sm:col-span-full">
+							<FormControl
+								render={
+									<input
+										type="checkbox"
+										className="size-4 accent-primary"
+										checked={field.state.value}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.checked);
+										}}
+									/>
+								}
+							/>
+							<FormLabel className="mt-0!">
+								<Trans>Bold</Trans>
+							</FormLabel>
 						</FormItem>
 					)}
 				</form.Field>

@@ -295,7 +295,7 @@ function renderLanguages(section: Sections["languages"], colorHex: string): Para
 	const baseRun = getBaseRun();
 
 	for (const item of items) {
-		const children: TextRun[] = [new TextRun({ text: item.language, bold: true, ...baseRun })];
+		const children: TextRun[] = [new TextRun({ text: item.language, bold: item.mainEntryBold ?? false, ...baseRun })];
 
 		if (item.fluency) {
 			children.push(new TextRun({ text: ` — ${item.fluency}`, ...baseRun }));
@@ -453,7 +453,9 @@ function renderProfiles(section: Sections["profiles"], colorHex: string): Paragr
 	const baseRun = getBaseRun();
 
 	for (const item of items) {
-		const children: (TextRun | ExternalHyperlink)[] = [new TextRun({ text: item.network, bold: true, ...baseRun })];
+		const children: (TextRun | ExternalHyperlink)[] = [
+			new TextRun({ text: item.network, bold: item.mainEntryBold ?? false, ...baseRun }),
+		];
 
 		if (item.username) {
 			children.push(new TextRun({ text: ` — ${item.username}`, ...baseRun }));

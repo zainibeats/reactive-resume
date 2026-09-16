@@ -307,6 +307,26 @@ describe("mainEntryBold in DOCX export", () => {
 			text: "Mathematics",
 			item: { ...baseItem, name: "Mathematics", icon: "", iconColor: "", proficiency: "", level: 0, keywords: [] },
 		},
+		{
+			label: "language name",
+			type: "languages" as const,
+			text: "French",
+			item: { id: "item-1", hidden: false, language: "French", fluency: "Fluent", level: 0 },
+		},
+		{
+			label: "profile network",
+			type: "profiles" as const,
+			text: "GitHub",
+			item: {
+				id: "item-1",
+				hidden: false,
+				icon: "",
+				iconColor: "",
+				network: "GitHub",
+				username: "ada",
+				website: noWebsite,
+			},
+		},
 	];
 
 	it.each(cases)("leaves the $label unbold by default", ({ type, text, item }) => {

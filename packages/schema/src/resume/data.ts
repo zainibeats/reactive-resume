@@ -212,6 +212,10 @@ export const interestItemSchema = baseItemSchema.extend({
 
 export const languageItemSchema = baseItemSchema.extend({
 	language: z.string().min(1).describe("The name of the language the author knows."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the language name should be rendered in bold. Defaults to false."),
 	fluency: z
 		.string()
 		.describe(
@@ -231,6 +235,10 @@ export const profileItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
 	iconColor: iconColorSchema,
 	network: z.string().min(1).describe("The name of the network or platform."),
+	mainEntryBold: z
+		.boolean()
+		.optional()
+		.describe("Whether the network name should be rendered in bold. Defaults to false."),
 	username: z.string().describe("The username of the author on the network or platform."),
 	website: itemWebsiteSchema.describe("The link to the profile of the author on the network or platform, if any."),
 });
