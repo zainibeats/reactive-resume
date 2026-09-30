@@ -1,52 +1,25 @@
 import type { CompileStylesheetResult } from "./types";
 
 const MAX_ENTRIES = 128;
-const MAX_SERIALIZED_BYTES = 16 * 1024 * 1024;
+const cache = new Map<string, CompileStylesheetResult>();
 
-type CacheEntry = {
-	value: CompileStylesheetResult;
-	size: number;
-};
-
-function serializedSize(value: CompileStylesheetResult): number {
-	return new TextEncoder().encode(JSON.stringify(value)).byteLength;
+export function getCachedStylesheet(key: string): CompileStylesheetResult | undefined {
+	const value = cache.get(key);
+	if (value === undefined) return;
+	cache.delete(key);
+	cache.set(key, value);
+	return value;
 }
 
-export class StylesheetCompilationCache {
-	readonly #entries = new Map<string, CacheEntry>();
-	#size = 0;
-
-	get(key: string): CompileStylesheetResult | undefined {
-		const entry = this.#entries.get(key);
-		if (!entry) return;
-		this.#entries.delete(key);
-		this.#entries.set(key, entry);
-		return entry.value;
-	}
-
-	set(key: string, value: CompileStylesheetResult): void {
-		const previous = this.#entries.get(key);
-		if (previous) {
-			this.#size -= previous.size;
-			this.#entries.delete(key);
-		}
-
-		const entry = { value, size: serializedSize(value) };
-		if (entry.size > MAX_SERIALIZED_BYTES) return;
-		this.#entries.set(key, entry);
-		this.#size += entry.size;
-
-		while (this.#entries.size > MAX_ENTRIES || this.#size > MAX_SERIALIZED_BYTES) {
-			const oldestKey = this.#entries.keys().next().value;
-			if (typeof oldestKey !== "string") break;
-			const oldest = this.#entries.get(oldestKey);
-			this.#entries.delete(oldestKey);
-			this.#size -= oldest?.size ?? 0;
-		}
+export function setCachedStylesheet(key: string, value: CompileStylesheetResult): void {
+	cache.delete(key);
+	cache.set(key, value);
+	while (cache.size > MAX_ENTRIES) {
+		const oldestKey = cache.keys().next().value;
+		if (oldestKey === undefined) break;
+		cache.delete(oldestKey);
 	}
 }
-
-export const stylesheetCompilationCache = new StylesheetCompilationCache();
 
 const SEMANTIC_CSS_COMPILER_BUILD_ID = "semantic-css-v1-values-2";
 

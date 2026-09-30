@@ -1,4 +1,4 @@
-import type { AnyDialogRendererEntry } from "../renderer-registry";
+import type { AnyDialogRendererEntry } from "../schemas";
 import { CreateResumeDialog, DeriveResumeDialog, DuplicateResumeDialog, UpdateResumeDialog } from ".";
 import { ImportResumeDialog } from "./import";
 import { CreateAwardDialog, UpdateAwardDialog } from "./sections/award";

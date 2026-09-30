@@ -96,9 +96,9 @@ const punctuationFallbackFonts = {
 	sansSerif: "Noto Sans",
 } as const;
 
-export const webFontList = webFontListJSON as WebFont[];
-export const webFontMap = new Map<string, WebFont>(webFontList.map((font) => [font.family, font]));
-export const standardFontList = standardPdfFontList.filter((font) => !webFontMap.has(font.family));
+const webFontList = webFontListJSON as WebFont[];
+const webFontMap = new Map<string, WebFont>(webFontList.map((font) => [font.family, font]));
+const standardFontList = standardPdfFontList.filter((font) => !webFontMap.has(font.family));
 
 const fontMap = new Map<string, FontRecord>();
 const chinesePrioritySet = new Set<string>(preferredChineseFontFamilies);

@@ -3,24 +3,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { i18n } from "@lingui/core";
 import { PDF_ATS_RULE_CODES } from "@reactive-resume/resume/ats-pdf";
-import {
-	getPdfCategoryDescription,
-	getPdfCategoryLabel,
-	getPdfFindingMessage,
-	getPdfSeverityLabel,
-	getPdfSkipReasonLabel,
-} from "./messages";
+import { getPdfCategoryDescription, getPdfCategoryLabel, getPdfFindingMessage, getPdfSeverityLabel } from "./messages";
 
 const CATEGORIES = ["parseability", "layout", "sections", "contact", "dates", "content"] as const;
 const SEVERITIES = ["blocker", "warning", "tip"] as const;
-const SKIP_REASONS = [
-	"no-text",
-	"no-operators",
-	"not-english",
-	"not-applicable",
-	"encrypted",
-	"insufficient-data",
-] as const;
 
 beforeAll(() => {
 	i18n.load("en", {});
@@ -59,9 +45,5 @@ describe("labels", () => {
 		}
 
 		for (const severity of SEVERITIES) expect(getPdfSeverityLabel(severity).length).toBeGreaterThan(0);
-	});
-
-	it("explains every reason a check can be skipped", () => {
-		for (const reason of SKIP_REASONS) expect(getPdfSkipReasonLabel(reason).length).toBeGreaterThan(0);
 	});
 });

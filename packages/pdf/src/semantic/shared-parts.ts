@@ -1,4 +1,29 @@
-import type { TemplateSemanticPrimitivePart } from "./template-manifest";
+import type { Template } from "@reactive-resume/schema/templates";
+import type {
+	TemplateSemanticManifest,
+	TemplateSemanticPart,
+	TemplateSemanticPrimitivePart,
+} from "./template-manifest";
+
+const standardRegions = [
+	{ name: "header", placement: "main", origins: [] },
+	{ name: "main", placement: "main", origins: ["main"] },
+	{ name: "sidebar", placement: "sidebar", origins: ["sidebar"] },
+] as const;
+
+export const baseManifest = <const T extends Template, const P extends readonly TemplateSemanticPart[]>(
+	template: T,
+	parts: P,
+	canonicalBindings?: TemplateSemanticManifest["canonicalBindings"],
+) =>
+	({
+		template,
+		regions: standardRegions,
+		header: { region: "header", placement: "main" },
+		specialSummary: null,
+		parts,
+		...(canonicalBindings ? { canonicalBindings } : {}),
+	}) as const satisfies TemplateSemanticManifest;
 
 /**
  * Sections whose item header is a single title/date row rendered by the shared split-row layout.

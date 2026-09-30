@@ -19,9 +19,11 @@ describe("RTL PDF fixture", () => {
 	it.each(templatePages)("%s wires shared RTL helpers and alignEnd slot", (_template, pagePath) => {
 		const source = readFileSync(pagePath, "utf8");
 
-		expect(source).toContain("createRtlStyleHelpers");
-		// ponytail: alignEnd moved to createBaseTemplateStyles factory; either direct or factory counts.
-		expect(source.includes("alignEnd") || source.includes("createBaseTemplateStyles")).toBe(true);
+		// ponytail: RTL helpers and alignEnd moved to the shared template base; either direct or via useTemplateBase counts.
+		expect(source.includes("createRtlStyleHelpers") || source.includes("useTemplateBase")).toBe(true);
+		expect(
+			source.includes("alignEnd") || source.includes("createBaseTemplateStyles") || source.includes("useTemplateBase"),
+		).toBe(true);
 		expect(source).not.toContain("alignRight");
 		expect(source).not.toContain('from "@reactive-resume/utils/locale"');
 	});

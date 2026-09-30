@@ -3,6 +3,7 @@ import { parsePeriod, parseSingleDate } from "@reactive-resume/resume/ats";
 import { parseResumeData } from "@reactive-resume/schema/resume/data";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
+import { BULLET_PATTERN, toHtml } from "./html";
 
 type SectionKey = SectionType | "summary";
 
@@ -82,7 +83,6 @@ const SECTION_ALIASES: Readonly<Record<string, SectionKey>> = {
 	"social profiles": "profiles",
 };
 
-const BULLET_PATTERN = /^\s*[-–—•*◦‣·]\s+/;
 const EMAIL_PATTERN = /[\w.+-]+@[\w-]+\.[\w.-]*\w/;
 const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s,;|•·]+/gi;
 const PHONE_CANDIDATE = /[+(]?\d[\d\s().+-]{5,}\d/g;
@@ -94,14 +94,6 @@ const PERIOD_CANDIDATE =
 const STRONG_SEPARATOR = /\s*[|•·]\s*|\s{2,}|\s+[–—]\s+/;
 const SENTENCE_END = /[.!?]$/;
 const TRAILING_DATES = [/(?:\p{L}{3,}\.?\s+)?(?:\d{1,2}[/.])?(?:19|20)\d{2}$/u, /(?:\d{1,2}[/.])?(?:19|20)\d{2}$/];
-
-const escapeHtml = (value: string) =>
-	value
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#39;");
 
 const normalizeHeading = (line: string) =>
 	line
@@ -227,19 +219,6 @@ function splitHeaderParts(text: string): string[] {
 		.split(STRONG_SEPARATOR)
 		.map((part) => part.replace(/^[\s,;|•·–—-]+|[\s,;|•·–—-]+$/g, "").trim())
 		.filter(Boolean);
-}
-
-function toHtml(lines: string[]): string {
-	const cleaned = lines.map((line) => line.trim()).filter(Boolean);
-	if (cleaned.length === 0) return "";
-
-	const bulleted = cleaned.filter((line) => BULLET_PATTERN.test(line));
-	if (bulleted.length >= 2 && bulleted.length * 2 >= cleaned.length) {
-		const items = cleaned.map((line) => `<li>${escapeHtml(line.replace(BULLET_PATTERN, ""))}</li>`).join(""); // nosemgrep
-		return `<ul>${items}</ul>`; // nosemgrep
-	}
-
-	return cleaned.map((line) => `<p>${escapeHtml(line.replace(BULLET_PATTERN, ""))}</p>`).join(""); // nosemgrep
 }
 
 function splitList(lines: string[]): string[] {

@@ -4,11 +4,15 @@ import { getNetworkIcon } from "@reactive-resume/resume/icons";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
-import { createUrl } from "@reactive-resume/utils/url";
 import { formatPeriod, formatSingleDate } from "./date";
 import { rethrowAsImportError } from "./error";
 import { arrayToHtmlList, toHtmlDescription } from "./html";
 import { parseLevel } from "./level";
+
+const createUrl = (url?: string, label?: string): { url: string; label: string } => {
+	if (!url) return { url: "", label: "" };
+	return { url, label: label || url };
+};
 
 const createItemWebsite = (url?: string, label?: string) => ({
 	...createUrl(url, label),
@@ -19,7 +23,7 @@ const createItemWebsite = (url?: string, label?: string) => ({
 const iso8601 = z
 	.string()
 	.regex(
-		/^([1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]|[1-2][0-9]{3}-[0-1][0-9]|[1-2][0-9]{3})$/,
+		/^([1-2][0-9]{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])|[1-2][0-9]{3}-(?:0[1-9]|1[0-2])|[1-2][0-9]{3})$/,
 		"Must be a valid ISO 8601 date (YYYY, YYYY-MM, or YYYY-MM-DD)",
 	);
 
@@ -165,9 +169,10 @@ type JSONResume = z.infer<typeof jsonResumeSchema>;
 
 // ponytail: stateless two-method class → two plain functions
 function convertJSONResume(jsonResume: JSONResume): ResumeData {
-	const result: ResumeData = {
-		...defaultResumeData,
-	};
+	// A shallow spread would leave `sections`/`picture`/etc. as the same object as
+	// defaultResumeData; every `result.sections.x = ...` below would then mutate that shared
+	// singleton and leak into the next unrelated import call. Clone it instead.
+	const result: ResumeData = structuredClone(defaultResumeData);
 
 	// Map basics
 	if (jsonResume.basics) {

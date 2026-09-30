@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { StylesheetCompilationCache, stylesheetCacheKey } from "./cache";
+import { getCachedStylesheet, setCachedStylesheet, stylesheetCacheKey } from "./cache";
 import { compileStylesheet } from "./compile";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
 
@@ -396,52 +396,16 @@ describe("Semantic CSS value compilation", () => {
 		expect(stylesheetCacheKey(1, first, "registry")).not.toBe(stylesheetCacheKey(1, second, "registry"));
 	});
 
-	it("uses a bounded least-recently-used cache by entry count and aggregate bytes", () => {
-		const cache = new StylesheetCompilationCache();
+	it("uses a bounded least-recently-used cache by entry count", () => {
 		const result = compileStylesheet({ languageVersion: 1, text: "@version 1;" });
 
-		cache.set("first", result);
-		for (let index = 0; index < 128; index++) cache.set(`next-${index}`, result);
+		setCachedStylesheet("first", result);
+		for (let index = 0; index < 128; index++) setCachedStylesheet(`next-${index}`, result);
 
-		expect(cache.get("first")).toBeUndefined();
-		expect(cache.get("next-0")).toBe(result);
-		cache.set("last", result);
-		expect(cache.get("next-1")).toBeUndefined();
-
-		cache.set("oversized", {
-			program: null,
-			diagnostics: [
-				{
-					code: "LARGE",
-					severity: "warning",
-					message: "x".repeat(16 * 1024 * 1024),
-					range: {
-						start: { line: 1, column: 1, offset: 0 },
-						end: { line: 1, column: 1, offset: 0 },
-					},
-				},
-			],
-		});
-		expect(cache.get("oversized")).toBeUndefined();
-
-		const large = (code: string) => ({
-			program: null,
-			diagnostics: [
-				{
-					code,
-					severity: "warning" as const,
-					message: "x".repeat(9 * 1024 * 1024),
-					range: {
-						start: { line: 1, column: 1, offset: 0 },
-						end: { line: 1, column: 1, offset: 0 },
-					},
-				},
-			],
-		});
-		cache.set("large-first", large("FIRST"));
-		cache.set("large-second", large("SECOND"));
-		expect(cache.get("large-first")).toBeUndefined();
-		expect(cache.get("large-second")).toBeDefined();
+		expect(getCachedStylesheet("first")).toBeUndefined();
+		expect(getCachedStylesheet("next-0")).toBe(result);
+		setCachedStylesheet("last", result);
+		expect(getCachedStylesheet("next-1")).toBeUndefined();
 	});
 
 	it("never throws for malformed Unicode or case/escape-varied attack values", () => {

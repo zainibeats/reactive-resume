@@ -1,13 +1,10 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { UIMessage } from "ai";
 import { ORPCError } from "@orpc/client";
-import { type } from "@orpc/server";
 import { AISDKError } from "ai";
 import { flattenError, ZodError, z } from "zod";
 import { protectedProcedure } from "../../context";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { aiProvidersService } from "../ai-providers/service";
-import { resumeService } from "../resume/service";
 import { atsReviewInputSchema, atsReviewOutputSchema, reviewResumeText } from "./ats-review";
 import { aiService, fileInputSchema } from "./service";
 
@@ -141,48 +138,6 @@ export const aiRouter = {
 				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
 				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
 				if (error instanceof ZodError) throwResumeStructureError(error);
-				throw error;
-			}
-		}),
-
-	chat: protectedProcedure
-		.route({
-			method: "POST",
-			path: "/ai/chat",
-			tags: ["AI"],
-			operationId: "aiChat",
-			summary: "Chat with AI to modify resume",
-			description:
-				"Streams a chat response from the configured AI provider. The LLM can call the propose_resume_patches tool to generate JSON Patch proposals for explicit user approval. Requires authentication and AI provider credentials.",
-		})
-		.input(
-			type<{
-				aiProviderId?: string;
-				messages: UIMessage[];
-				resumeId: string;
-			}>(),
-		)
-		.use(aiRequestRateLimit)
-		.handler(async ({ context, input }) => {
-			try {
-				const [provider, resume] = await Promise.all([
-					getRunnableProvider(context.user.id, input.aiProviderId),
-					resumeService.getById({ id: input.resumeId, userId: context.user.id }),
-				]);
-
-				return await aiService.chat({
-					provider: provider.provider,
-					model: provider.model,
-					apiKey: provider.apiKey,
-					baseURL: provider.baseURL ?? "",
-					messages: input.messages,
-					resumeData: resume.data,
-					resumeUpdatedAt: resume.updatedAt,
-				});
-			} catch (error) {
-				if (isCredentialEncryptionUnavailable(error)) throwCredentialEncryptionUnavailable();
-				if (isInvalidAiBaseUrlError(error)) throwAiProviderConfigError();
-				if (isAiProviderGatewayError(error)) throwAiProviderGatewayError(error);
 				throw error;
 			}
 		}),

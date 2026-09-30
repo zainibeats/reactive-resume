@@ -1,6 +1,6 @@
 import type { StylesheetSource } from "@reactive-resume/schema/resume/stylesheet";
-import type { CompileStylesheetResult } from "./types";
-import { stylesheetCacheKey, stylesheetCompilationCache } from "./cache";
+import type { CompiledStyleRule, CompileStylesheetResult, StyleProgram } from "./types";
+import { getCachedStylesheet, setCachedStylesheet, stylesheetCacheKey } from "./cache";
 import { createDiagnostic, isFatalStylesheetDiagnostic } from "./diagnostics";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
 import { parseStylesheet } from "./parse";
@@ -8,11 +8,13 @@ import { PROPERTY_REGISTRY_V1 } from "./registry/properties";
 import { SEMANTIC_NODE_KINDS } from "./registry/semantic";
 import { SYSTEM_VARIABLE_REGISTRY_V1 } from "./registry/system-variables";
 import { compileProgram, cssFunctionDepth } from "./values";
-import { getStylesheetCompiler } from "./version";
 
 function isPositiveInteger(value: string): boolean {
 	return /^[1-9]\d*$/.test(value);
 }
+
+const compileVersionOne = (rules: readonly CompiledStyleRule[]): StyleProgram =>
+	Object.freeze({ languageVersion: 1, rules: Object.freeze([...rules]) });
 
 export function compileStylesheet(source: StylesheetSource): CompileStylesheetResult {
 	if (new TextEncoder().encode(source.text).byteLength > SEMANTIC_CSS_LIMITS_V1.maxSourceBytes) {
@@ -35,7 +37,7 @@ export function compileStylesheet(source: StylesheetSource): CompileStylesheetRe
 
 	const registry = JSON.stringify([PROPERTY_REGISTRY_V1, SEMANTIC_NODE_KINDS, SYSTEM_VARIABLE_REGISTRY_V1]);
 	const cacheKey = stylesheetCacheKey(source.languageVersion, source.text, registry);
-	const cached = stylesheetCompilationCache.get(cacheKey);
+	const cached = getCachedStylesheet(cacheKey);
 	if (cached) return cached;
 
 	const stylesheet = parseStylesheet(source.text);
@@ -87,7 +89,7 @@ export function compileStylesheet(source: StylesheetSource): CompileStylesheetRe
 		}
 	}
 
-	const compiler = getStylesheetCompiler(source.languageVersion);
+	const compiler = source.languageVersion === 1 ? compileVersionOne : undefined;
 	if (!compiler) {
 		diagnostics.push(
 			createDiagnostic(
@@ -109,6 +111,6 @@ export function compileStylesheet(source: StylesheetSource): CompileStylesheetRe
 	}
 
 	const result = { program: compiler(compiled.program.rules), diagnostics };
-	stylesheetCompilationCache.set(cacheKey, result);
+	setCachedStylesheet(cacheKey, result);
 	return result;
 }

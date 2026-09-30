@@ -67,16 +67,6 @@ describe("useCommandPaletteStore", () => {
 		expect(useCommandPaletteStore.getState().peekPage()).toBe("b");
 	});
 
-	it("popPage removes the last page and clears search", () => {
-		useCommandPaletteStore.setState({ pages: ["a", "b"], search: "x" });
-
-		useCommandPaletteStore.getState().popPage();
-
-		const state = useCommandPaletteStore.getState();
-		expect(state.pages).toEqual(["a"]);
-		expect(state.search).toBe("");
-	});
-
 	it("reset clears every state field", () => {
 		useCommandPaletteStore.setState({ open: true, search: "x", pages: ["a"] });
 

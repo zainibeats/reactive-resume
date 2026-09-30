@@ -3,13 +3,11 @@ import type { ReactNode } from "react";
 import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
-import { rgbaStringToHex } from "@reactive-resume/utils/color";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { resolvedPdfFlowProps } from "../../semantic/adapter";
 import { useRenderedSectionIds, useResolvedNode, useSemanticNodeVisible } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { createBaseTemplateStyles } from "../shared/base-template-styles";
 import {
 	CustomFieldContactItem,
 	EmailContactItem,
@@ -30,9 +28,9 @@ import {
 	semanticTemplatePartNodeKey,
 	Text,
 } from "../shared/primitives";
-import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
+import { createIconSlot, useTemplateBase } from "../shared/template-base";
 
 type RhyhornStyles = Omit<TemplateStyleSlots, "page"> & {
 	page: Style;
@@ -231,18 +229,11 @@ const Header = ({ styles }: RhyhornHeaderProps) => {
 };
 
 const useRhyhornTemplate = (): RhyhornTemplate => {
-	const { picture, metadata, rtl } = useRender();
+	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
-		const foreground = rgbaStringToHex(metadata.design.colors.text);
-		const background = rgbaStringToHex(metadata.design.colors.background);
-		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const colors: TemplateColorRoles = { foreground, background, primary };
-		const metrics = getTemplateMetrics(metadata.page);
 		const contactGap = metrics.gapX(0.5);
-
-		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
 			...base,
@@ -319,12 +310,24 @@ const useRhyhornTemplate = (): RhyhornTemplate => {
 				sectionHeading: (context) => ({ ...baseStyles.sectionHeading, color: accentFor(context) }),
 				levelItem: (context) => ({ borderColor: accentFor(context) }),
 				levelItemActive: (context) => ({ backgroundColor: accentFor(context) }),
-				icon: (context) => ({
-					display: metadata.page.hideIcons ? "none" : "flex",
-					size: metadata.typography.body.fontSize,
-					color: accentFor(context),
-				}),
+				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies RhyhornStyles,
 		};
-	}, [picture, metadata, rtl]);
+	}, [
+		metadata,
+		r.sectionHeadingTextAlign,
+		r.row,
+		r.headerIdentity,
+		r.contactSeparatorClear,
+		r.contactSeparator,
+		primary,
+		metrics.sectionGap,
+		metrics.gapY,
+		metrics.page.paddingVertical,
+		metrics.gapX,
+		base,
+		metrics.page.paddingHorizontal,
+		foreground,
+		background,
+	]);
 };

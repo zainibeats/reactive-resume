@@ -1,4 +1,4 @@
-import type { AnyDialogRendererEntry } from "../renderer-registry";
+import type { AnyDialogRendererEntry } from "../schemas";
 import { CreateApiKeyDialog } from "./create";
 
 export const apiKeyDialogRenderers: readonly AnyDialogRendererEntry[] = [

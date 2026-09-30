@@ -5,6 +5,7 @@ import { Button } from "@reactive-resume/ui/components/button";
 import { ScrollArea } from "@reactive-resume/ui/components/scroll-area";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@reactive-resume/ui/components/tooltip";
+import { getScrollBehavior } from "@/features/resume/builder/section-recovery";
 import { getSectionIcon, getSectionTitle, rightSidebarSections } from "@/libs/resume/section";
 import { BuilderSidebarEdge } from "../../-components/edge";
 import { useBuilderSidebar } from "../../-store/sidebar";
@@ -71,7 +72,7 @@ function SidebarEdge() {
 			// Section ids are globally unique; document.getElementById reliably resolves the scroll target.
 			document
 				.getElementById(`sidebar-${section}`)
-				?.scrollIntoView({ block: "start", inline: "nearest", behavior: "smooth" });
+				?.scrollIntoView({ block: "start", inline: "nearest", behavior: getScrollBehavior() });
 		},
 		[toggleSidebar],
 	);

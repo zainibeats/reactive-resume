@@ -1,5 +1,4 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import { deepmergeCustom } from "deepmerge-ts";
 import { jsonrepair } from "jsonrepair";
 import { flattenError, ZodError } from "zod";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
@@ -38,10 +37,17 @@ type ResumeSanitizationResult = {
 	diagnostics: ResumeSanitizationDiagnostics;
 };
 
-const mergeDefaultsDeep = deepmergeCustom({
-	filterValues: (values) => values.filter((value) => value !== undefined && value !== null),
-	mergeArrays: false,
-});
+function mergeDefaultsDeep(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
+	const output: Record<string, unknown> = { ...target };
+
+	for (const [key, value] of Object.entries(source)) {
+		if (value === undefined || value === null) continue;
+		const current = target[key];
+		output[key] = isObject(current) && isObject(value) ? mergeDefaultsDeep(current, value) : value;
+	}
+
+	return output;
+}
 
 const sectionRequiredFieldMap = {
 	profiles: "network",

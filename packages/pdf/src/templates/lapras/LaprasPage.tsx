@@ -2,34 +2,17 @@ import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
-import { rgbaStringToHex } from "@reactive-resume/utils/color";
-import { Page, StyleSheet, View } from "#react-pdf-renderer";
+import { Page, StyleSheet } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { useRenderedSectionIds, useResolvedNode } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { createBaseTemplateStyles } from "../shared/base-template-styles";
-import {
-	CustomFieldContactItem,
-	EmailContactItem,
-	LocationContactItem,
-	PhoneContactItem,
-	WebsiteContactItem,
-} from "../shared/contact-item";
 import { TemplateProvider } from "../shared/context";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
-import { hasTemplatePicture } from "../shared/picture";
-import {
-	Heading,
-	SemanticContactListView,
-	SemanticHeaderPicture,
-	SemanticHeaderView,
-	SemanticRegionView,
-	Text,
-} from "../shared/primitives";
-import { createRtlStyleHelpers } from "../shared/rtl";
+import { SemanticRegionView } from "../shared/primitives";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
+import { createIconSlot, TemplateHeader, useTemplateBase } from "../shared/template-base";
 
 type LaprasStyles = Omit<TemplateStyleSlots, "page"> & {
 	page: Style;
@@ -92,49 +75,28 @@ export const LaprasPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 	);
 };
 
-const Header = ({ styles }: LaprasHeaderProps) => {
-	const { basics, picture } = useRender();
-	const hasPicture = hasTemplatePicture(picture);
-
-	return (
-		<SemanticHeaderView style={styles.header}>
-			{hasPicture && <SemanticHeaderPicture src={picture.url} style={styles.picture} />}
-
-			<View style={styles.headerTitle}>
-				<View style={styles.headerIdentity}>
-					<Heading style={styles.headerName}>{basics.name}</Heading>
-					<Text>{basics.headline}</Text>
-				</View>
-
-				<SemanticContactListView style={styles.contactList}>
-					<EmailContactItem email={basics.email} style={styles.contactItem} />
-					<PhoneContactItem phone={basics.phone} style={styles.contactItem} />
-					<LocationContactItem location={basics.location} style={styles.contactItem} />
-					<WebsiteContactItem website={basics.website} style={styles.contactItem} />
-					{basics.customFields.map((field) => (
-						<CustomFieldContactItem key={field.id} field={field} style={styles.contactItem} />
-					))}
-				</SemanticContactListView>
-			</View>
-		</SemanticHeaderView>
-	);
-};
+const Header = ({ styles }: LaprasHeaderProps) => (
+	<TemplateHeader
+		styles={{
+			header: styles.header,
+			picture: styles.picture,
+			title: styles.headerTitle,
+			identity: styles.headerIdentity,
+			name: styles.headerName,
+			contactList: styles.contactList,
+			contactItem: styles.contactItem,
+		}}
+	/>
+);
 
 const useLaprasTemplate = (): LaprasTemplate => {
-	const { picture, metadata, rtl } = useRender();
+	const { picture, metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
-		const foreground = rgbaStringToHex(metadata.design.colors.text);
-		const background = rgbaStringToHex(metadata.design.colors.background);
-		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const borderColor = "#CCCCCC";
 		const pictureBorderRadius = Math.min(picture.borderRadius, 30);
 		const headingNegativeMargin = metadata.typography.heading.fontSize + 6;
 		const colors: TemplateColorRoles = { foreground, background, primary };
-		const metrics = getTemplateMetrics(metadata.page);
-
-		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
 			...base,
@@ -215,12 +177,21 @@ const useLaprasTemplate = (): LaprasTemplate => {
 				...baseStyles,
 				levelItem: (context) => ({ borderColor: accentFor(context) }),
 				levelItemActive: (context) => ({ backgroundColor: accentFor(context) }),
-				icon: (context) => ({
-					display: metadata.page.hideIcons ? "none" : "flex",
-					size: metadata.typography.body.fontSize,
-					color: accentFor(context),
-				}),
+				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies LaprasStyles,
 		};
-	}, [picture, metadata, rtl]);
+	}, [
+		picture,
+		metadata,
+		r.row,
+		r.headerIdentity,
+		primary,
+		metrics.gapY,
+		metrics.page.paddingVertical,
+		metrics.gapX,
+		base,
+		metrics.page.paddingHorizontal,
+		foreground,
+		background,
+	]);
 };

@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 import z from "zod";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
@@ -16,6 +17,11 @@ type GeneratedSpecView = {
 		Record<
 			string,
 			{
+				tags?: string[];
+				operationId?: string;
+				summary?: string;
+				description?: string;
+				responses?: Record<string, { description?: string }>;
 				requestBody?: {
 					content?: Record<string, { schema?: unknown }>;
 				};
@@ -72,6 +78,51 @@ function findImpossibleRequestSchemas(spec: GeneratedSpecView) {
 }
 
 describe("generateOpenApiSpec", () => {
+	it("documents all cover-letter procedures with REST metadata", async () => {
+		const spec = (await generateSpec()) as GeneratedSpecView;
+		const expected = [
+			["get", "/cover-letters", "listCoverLetters", "List cover letters", "200"],
+			["get", "/cover-letters/{id}", "getCoverLetter", "Get cover letter by ID", "200"],
+			["post", "/cover-letters", "createCoverLetter", "Create a cover letter", "200"],
+			["put", "/cover-letters/{id}", "updateCoverLetter", "Update a cover letter", "200"],
+			["post", "/cover-letters/{id}/refresh-style", "refreshCoverLetterStyle", "Refresh cover letter style", "200"],
+			["post", "/cover-letters/{id}/duplicate", "duplicateCoverLetter", "Duplicate a cover letter", "200"],
+			["delete", "/cover-letters/{id}", "deleteCoverLetter", "Delete a cover letter", "200"],
+			["post", "/cover-letters/from-resume", "copyEmbeddedCoverLetter", "Copy an embedded cover letter", "200"],
+			["get", "/cover-letters/{id}/export", "exportCoverLetter", "Export a cover letter", "200"],
+			["post", "/cover-letters/import", "importCoverLetter", "Import a cover letter", "200"],
+		] as const;
+
+		for (const [method, path, operationId, summary, successStatus] of expected) {
+			const operation = spec.paths?.[path]?.[method];
+			expect(operation).toMatchObject({
+				tags: ["Cover Letters"],
+				operationId,
+				summary,
+				description: expect.any(String),
+				responses: { [successStatus]: { description: expect.any(String) } },
+			});
+		}
+	});
+
+	it("keeps published cover-letter operations in sync with the runtime spec", async () => {
+		const published = JSON.parse(
+			await readFile(new URL("../../../../docs/spec.json", import.meta.url), "utf8"),
+		) as GeneratedSpecView;
+		const runtime = await generateSpec();
+		const coverLetterPaths = (spec: GeneratedSpecView) =>
+			Object.fromEntries(
+				Object.entries(spec.paths ?? {}).filter(
+					([path]) => path.startsWith("/cover-letters") || path.startsWith("/coverLetters/"),
+				),
+			);
+
+		const publishedPaths = coverLetterPaths(published);
+		const runtimePaths = coverLetterPaths(runtime as GeneratedSpecView);
+		expect(Object.keys(publishedPaths).sort()).toEqual(Object.keys(runtimePaths).sort());
+		expect(publishedPaths).toEqual(runtimePaths);
+	});
+
 	it("uses caller-provided application URL and version", async () => {
 		const spec = await generateSpec();
 

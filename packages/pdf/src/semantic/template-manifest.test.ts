@@ -7,11 +7,7 @@ import { TEMPLATE_PART_CHILD_KINDS_V1 } from "@reactive-resume/resume/stylesheet
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { templateSchema } from "@reactive-resume/schema/templates";
 import { createBindingInventory } from "./binding-inventory";
-import {
-	getTemplateSemanticBindingRegistry,
-	getTemplateSemanticManifest,
-	validateTemplateSemanticManifest,
-} from "./template-manifest";
+import { getTemplateSemanticBindingRegistry, getTemplateSemanticManifest } from "./template-manifest";
 import { buildSemanticTree } from "./tree";
 
 const EXPECTED_ITEM_HEADER_ROW = {
@@ -567,171 +563,6 @@ describe("template semantic manifests", () => {
 		},
 	);
 
-	it("rejects duplicate part names and keys", () => {
-		const duplicateName = structuredClone(getTemplateSemanticManifest("ditto")) as TemplateSemanticManifest;
-		const duplicateKey = structuredClone(getTemplateSemanticManifest("ditto")) as TemplateSemanticManifest;
-		const first = duplicateName.parts[0];
-		if (!first) throw new Error("Missing Ditto part fixture");
-
-		(duplicateName.parts as TemplateSemanticManifest["parts"][number][]).push({
-			...first,
-			key: "another-key",
-		});
-		(duplicateKey.parts as TemplateSemanticManifest["parts"][number][]).push({
-			...first,
-			name: "another-name",
-		});
-
-		expect(() => validateTemplateSemanticManifest(duplicateName)).toThrow(/duplicate part name/);
-		expect(() => validateTemplateSemanticManifest(duplicateKey)).toThrow(/duplicate part key/);
-	});
-
-	it("rejects unknown placements, owner lies, synthetic wrappers, and missing or invented chrome", () => {
-		const unknownRegionPlacement = structuredClone(
-			getTemplateSemanticManifest("chikorita"),
-		) as TemplateSemanticManifest;
-		const unknownHeaderPlacement = structuredClone(
-			getTemplateSemanticManifest("chikorita"),
-		) as TemplateSemanticManifest;
-		const ownerLie = structuredClone(getTemplateSemanticManifest("bronzor")) as TemplateSemanticManifest;
-		const synthetic = structuredClone(getTemplateSemanticManifest("ditto")) as TemplateSemanticManifest;
-		const missing = structuredClone(getTemplateSemanticManifest("azurill")) as TemplateSemanticManifest;
-		const invented = structuredClone(getTemplateSemanticManifest("chikorita")) as TemplateSemanticManifest;
-
-		(unknownRegionPlacement.regions[0] as { placement: string }).placement = "footer";
-		(unknownHeaderPlacement.header as { placement: string }).placement = "footer";
-		const alias = ownerLie.parts.find((part) => part.name === "interleaved-section-row")?.binding;
-		if (alias?.type !== "alias") throw new Error("Missing Bronzor alias fixture");
-		(alias as { canonicalKind: string }).canonicalKind = "item";
-		const primitive = synthetic.parts[0]?.binding;
-		if (primitive?.type !== "primitive") throw new Error("Missing Ditto primitive fixture");
-		(primitive as unknown as { source: string }).source = "synthetic";
-		(missing.parts as TemplateSemanticManifest["parts"][number][]).pop();
-		(invented.parts as TemplateSemanticManifest["parts"][number][]).push({
-			name: "invented-wrapper",
-			key: "invented-wrapper",
-			owner: { kind: "header", key: "header" },
-			binding: { type: "primitive", primitive: "View", source: "existing" },
-			route: { parent: "owner", at: "start" },
-		});
-
-		expect(() => validateTemplateSemanticManifest(unknownRegionPlacement)).toThrow(/unknown region placement/);
-		expect(() => validateTemplateSemanticManifest(unknownHeaderPlacement)).toThrow(/unknown header placement/);
-		expect(() => validateTemplateSemanticManifest(ownerLie)).toThrow(/aliases a non-owner primitive/);
-		expect(() => validateTemplateSemanticManifest(synthetic)).toThrow(/synthetic wrapper/);
-		expect(() => validateTemplateSemanticManifest(missing)).toThrow(/frozen renderer contract/);
-		expect(() => validateTemplateSemanticManifest(invented)).toThrow(/frozen renderer contract/);
-	});
-
-	it("rejects exact renderer-contract mutations across layout, routing, bindings, conditions, and chrome", () => {
-		const removedMain = structuredClone(getTemplateSemanticManifest("chikorita")) as TemplateSemanticManifest;
-		const wrongOrigin = structuredClone(getTemplateSemanticManifest("chikorita")) as TemplateSemanticManifest;
-		const wrongFlow = structuredClone(getTemplateSemanticManifest("bronzor")) as TemplateSemanticManifest;
-		const wrongPrimitive = structuredClone(getTemplateSemanticManifest("ditto")) as TemplateSemanticManifest;
-		const primitiveToAlias = structuredClone(getTemplateSemanticManifest("rhyhorn")) as TemplateSemanticManifest;
-		const aliasToPrimitive = structuredClone(getTemplateSemanticManifest("bronzor")) as TemplateSemanticManifest;
-		const wrongSummary = structuredClone(getTemplateSemanticManifest("leafish")) as TemplateSemanticManifest;
-		const unknownOwner = structuredClone(getTemplateSemanticManifest("bronzor")) as TemplateSemanticManifest;
-		const changedCondition = structuredClone(getTemplateSemanticManifest("azurill")) as TemplateSemanticManifest;
-		const changedSelectorCondition = structuredClone(getTemplateSemanticManifest("meowth")) as TemplateSemanticManifest;
-		const missingChrome = structuredClone(getTemplateSemanticManifest("ditto")) as TemplateSemanticManifest;
-		const extraChrome = structuredClone(getTemplateSemanticManifest("ditto")) as TemplateSemanticManifest;
-
-		(removedMain.regions as TemplateSemanticManifest["regions"][number][]).splice(1, 1);
-		(wrongOrigin.regions[1]?.origins as string[])[0] = "sidebar";
-		(wrongFlow.regions[1] as { flow: string }).flow = "sequential";
-		const headerBand = wrongPrimitive.parts.find((part) => part.name === "header-band");
-		if (headerBand?.binding.type !== "primitive") throw new Error("Missing Ditto header band");
-		(headerBand.binding as { primitive: string }).primitive = "Text";
-		const content = primitiveToAlias.parts.find((part) => part.name === "contact-item-content");
-		if (!content) throw new Error("Missing Rhyhorn content");
-		(content as unknown as { binding: object; route?: object }).binding = {
-			type: "alias",
-			canonicalKind: "contact-item",
-			token: "contact-item-content",
-		};
-		delete (content as unknown as { route?: object }).route;
-		const row = aliasToPrimitive.parts.find((part) => part.name === "interleaved-section-row");
-		if (!row) throw new Error("Missing Bronzor row");
-		(row as unknown as { binding: object; route?: object }).binding = {
-			type: "primitive",
-			primitive: "View",
-			source: "existing",
-		};
-		(row as unknown as { route?: object }).route = { parent: "owner", at: "start" };
-		if (!wrongSummary.specialSummary) throw new Error("Missing Leafish summary");
-		(wrongSummary.specialSummary as { source: string }).source = "main-with-header";
-		(unknownOwner.parts[0]?.owner as unknown as { key: string }).key = "unknown";
-		const line = changedCondition.parts.find((part) => part.name === "timeline-line");
-		if (!line || !("columns" in line.owner)) throw new Error("Missing Azurill timeline line");
-		delete (line.owner as { columns?: number }).columns;
-		const leading = changedSelectorCondition.parts.find((part) => part.name === "inline-item-header-leading");
-		if (leading?.binding.type !== "primitive" || !leading.route || !Array.isArray(leading.route.take)) {
-			throw new Error("Missing Meowth leading selectors");
-		}
-		(leading.route.take[0]?.sectionTypes as string[])[0] = "education";
-		(missingChrome.parts as TemplateSemanticManifest["parts"][number][]).pop();
-		const extra = structuredClone(extraChrome.parts[0]);
-		if (!extra) throw new Error("Missing Ditto chrome");
-		(extra as { name: string; key: string }).name = "extra";
-		(extra as { name: string; key: string }).key = "extra";
-		(extraChrome.parts as TemplateSemanticManifest["parts"][number][]).push(extra);
-
-		for (const mutation of [
-			removedMain,
-			wrongOrigin,
-			wrongFlow,
-			wrongPrimitive,
-			primitiveToAlias,
-			aliasToPrimitive,
-			wrongSummary,
-			unknownOwner,
-			changedCondition,
-			changedSelectorCondition,
-			missingChrome,
-			extraChrome,
-		]) {
-			expect(() => validateTemplateSemanticManifest(mutation)).toThrow();
-		}
-	});
-
-	it("rejects empty and unknown selector section conditions before exact-contract comparison", () => {
-		const empty = structuredClone(getTemplateSemanticManifest("meowth")) as TemplateSemanticManifest;
-		const unknown = structuredClone(getTemplateSemanticManifest("meowth")) as TemplateSemanticManifest;
-		const getFirstSelector = (manifest: TemplateSemanticManifest) => {
-			const leading = manifest.parts.find((part) => part.name === "inline-item-header-leading");
-			if (
-				leading?.binding.type !== "primitive" ||
-				!leading.route ||
-				!Array.isArray(leading.route.take) ||
-				!leading.route.take[0]
-			) {
-				throw new Error("Missing Meowth leading selector");
-			}
-			return leading.route.take[0];
-		};
-
-		(getFirstSelector(empty) as { sectionTypes: string[] }).sectionTypes = [];
-		(getFirstSelector(unknown) as { sectionTypes: string[] }).sectionTypes = ["unknown"];
-
-		expect(() => validateTemplateSemanticManifest(empty)).toThrow(/selector section types must not be empty/);
-		expect(() => validateTemplateSemanticManifest(unknown)).toThrow(/selector has an unknown section type/);
-	});
-
-	it("rejects cyclic and unsupported-depth primitive routing before exact-contract comparison", () => {
-		const cycle = structuredClone(getTemplateSemanticManifest("azurill")) as TemplateSemanticManifest;
-		const tooDeep = structuredClone(getTemplateSemanticManifest("azurill")) as TemplateSemanticManifest;
-		const marker = cycle.parts.find((part) => part.name === "timeline-marker");
-		if (marker?.binding.type !== "primitive") throw new Error("Missing Azurill marker");
-		(marker.route as { parent: string }).parent = "timeline-dot";
-		const content = tooDeep.parts.find((part) => part.name === "timeline-content");
-		if (content?.binding.type !== "primitive") throw new Error("Missing Azurill content");
-		(content.route as { parent: string }).parent = "timeline-dot";
-
-		expect(() => validateTemplateSemanticManifest(cycle)).toThrow(/cyclic part routing/);
-		expect(() => validateTemplateSemanticManifest(tooDeep)).toThrow(/unsupported part routing depth/);
-	});
-
 	it.each(templateSchema.options)("%s builds its manifest-backed tree without key collisions", (template) => {
 		const tree = buildFixtureTree(template);
 		const nodes = flattenTree(tree);
@@ -981,8 +812,8 @@ describe("template semantic manifests", () => {
 		);
 
 		expect(aliasedSections.length).toBeGreaterThan(0);
-		expect(aliasedSections.map((node) => inventory.aliasTokensByNodeKey[node.key])).toEqual(
-			aliasedSections.map(() => ["interleaved-section-row"]),
+		expect(aliasedSections.map((node) => node.attributes.part)).toEqual(
+			aliasedSections.map(() => "interleaved-section-row"),
 		);
 		expect(
 			Object.values(inventory.bindings).some(
@@ -1034,7 +865,6 @@ describe("template semantic manifests", () => {
 		).toEqual([contacts[0]?.key, linkedContent?.key]);
 		expect(contacts[0]?.attributes.part).toBeUndefined();
 		expect(contacts[1]?.attributes.part).toBe("contact-item-last");
-		expect(inventory.aliasTokensByNodeKey[contacts[1]?.key ?? ""]).toEqual(["contact-item-last"]);
 		expect(findPart(tree, "contact-item-last")).toBeUndefined();
 	});
 
@@ -1379,8 +1209,6 @@ describe("template semantic manifests", () => {
 			const inventory = createBindingInventory(tree, getTemplateSemanticBindingRegistry(template));
 			const nodeCount = flattenTree(tree).length;
 
-			expect(inventory.unboundNodeKeys).toEqual([]);
-			expect(inventory.syntheticWrapperCount).toBe(0);
 			expect(Object.keys(inventory.bindings)).toHaveLength(nodeCount);
 			for (const partNode of findNodes(tree, (node) => node.kind === "template-part")) {
 				const binding = inventory.bindings[partNode.key];

@@ -10,9 +10,9 @@ import {
 	PlusIcon,
 	ReadCvLogoIcon,
 } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@reactive-resume/ui/components/input-group";
@@ -31,7 +31,6 @@ import { resumeViewSchema, useResumeView } from "./-components/view-mode";
 type SortOption = "lastUpdatedAt" | "createdAt" | "name";
 
 const searchSchema = z.object({
-	search: z.string().default(""),
 	tags: z.array(z.string()).default([]),
 	sort: z.enum(["lastUpdatedAt", "createdAt", "name"]).default("lastUpdatedAt"),
 	view: resumeViewSchema.optional().catch(undefined),
@@ -39,7 +38,7 @@ const searchSchema = z.object({
 
 type Search = z.output<typeof searchSchema>;
 
-const defaultSearch: Search = { search: "", tags: [], sort: "lastUpdatedAt" };
+const defaultSearch: Search = { tags: [], sort: "lastUpdatedAt" };
 
 export const Route = createFileRoute("/dashboard/resumes/")({
 	component: RouteComponent,
@@ -51,23 +50,27 @@ export const Route = createFileRoute("/dashboard/resumes/")({
 
 function RouteComponent() {
 	const { i18n } = useLingui();
-	const { search, tags, sort, view: searchView } = Route.useSearch();
+	const { tags, sort, view: searchView } = Route.useSearch();
+	const [searchQuery, setSearchQuery] = useState("");
 	const { session } = Route.useRouteContext();
 	const view = useResumeView(searchView, session.user.id);
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { openDialog } = useDialogStore();
 
 	const { data: allTags } = useQuery(orpc.resume.tags.list.queryOptions());
-	const { data: resumes } = useQuery(orpc.resume.list.queryOptions({ input: { tags, sort } }));
+	const { data: resumes } = useQuery({
+		...orpc.resume.list.queryOptions({ input: { tags, sort } }),
+		placeholderData: keepPreviousData,
+	});
 
 	const filteredResumes = useMemo(() => {
-		const list = resumes ?? [];
-		const query = search.trim().toLowerCase();
-		if (!query) return list;
-		return list.filter(
+		if (!resumes) return undefined;
+		const query = searchQuery.trim().toLowerCase();
+		if (!query) return resumes;
+		return resumes.filter(
 			(resume) => resume.name.toLowerCase().includes(query) || resume.slug.toLowerCase().includes(query),
 		);
-	}, [resumes, search]);
+	}, [resumes, searchQuery]);
 
 	const tagOptions = useMemo(() => {
 		if (!allTags) return [];
@@ -146,12 +149,9 @@ function RouteComponent() {
 							<MagnifyingGlassIcon />
 						</InputGroupAddon>
 						<InputGroupInput
-							value={search}
+							value={searchQuery}
 							placeholder={t`Search resumes...`}
-							onChange={(event) => {
-								const value = event.target.value;
-								void navigate({ search: (prev: Search) => ({ ...prev, search: value }) });
-							}}
+							onChange={(event) => setSearchQuery(event.target.value)}
 						/>
 					</InputGroup>
 				)}

@@ -10,6 +10,23 @@ const resumeIdArg = z
 		`The ID of the resume. Use \`${T.listResumes}\` to find IDs, or \`${T.createResume}\` to create a new one first.`,
 	);
 
+/** Shared prompt titles/descriptions, also consumed by the static MCP server card. */
+export const PROMPT_META = {
+	build_resume: {
+		title: "Build Resume",
+		description: "Guide the user step-by-step through building a resume from scratch, section by section.",
+	},
+	improve_resume: {
+		title: "Improve Resume",
+		description: "Review resume content and suggest concrete improvements to wording, impact, and structure.",
+	},
+	review_resume: {
+		title: "Review Resume",
+		description:
+			"Get a structured, professional critique with a scorecard and prioritized recommendations. Read-only: no changes are made.",
+	},
+} as const;
+
 /** Embeds the resume data and JSON schema as context messages. */
 function resumeContext(id: string) {
 	return [
@@ -68,8 +85,7 @@ export function registerPrompts(server: McpServer) {
 	server.registerPrompt(
 		"build_resume",
 		{
-			title: "Build Resume",
-			description: "Guide the user step-by-step through building a resume from scratch, section by section.",
+			...PROMPT_META.build_resume,
 			argsSchema: { id: resumeIdArg },
 		},
 		({ id }) => ({
@@ -109,8 +125,7 @@ export function registerPrompts(server: McpServer) {
 	server.registerPrompt(
 		"improve_resume",
 		{
-			title: "Improve Resume",
-			description: "Review resume content and suggest concrete improvements to wording, impact, and structure.",
+			...PROMPT_META.improve_resume,
 			argsSchema: { id: resumeIdArg },
 		},
 		({ id }) => ({
@@ -153,9 +168,7 @@ export function registerPrompts(server: McpServer) {
 	server.registerPrompt(
 		"review_resume",
 		{
-			title: "Review Resume",
-			description:
-				"Get a structured, professional critique with a scorecard and prioritized recommendations. Read-only: no changes are made.",
+			...PROMPT_META.review_resume,
 			argsSchema: { id: resumeIdArg },
 		},
 		({ id }) => ({

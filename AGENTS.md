@@ -47,11 +47,10 @@ Rules:
 ## Agent skills
 
 - Issues and specs: GitHub Issues for `reactive-resume/reactive-resume`. See `docs/agents/issue-tracker.md`.
-- Domain docs use a multi-context layout. See `docs/agents/domain.md`.
 
 ## Overview
 
-Reactive Resume is a pnpm monorepo (Turborepo) with two deployable apps: `apps/web` (TanStack Start / React 19 / Vite) and `apps/server` (Hono / Node.js). The production Docker image runs a single Node.js process on port 3000; `apps/server` mounts the API/auth/MCP/static routes and serves the built web app.
+Reactive Resume is a pnpm monorepo (Turborepo) with two deployable apps: `apps/web` (React 19 SPA with TanStack Router and Vite) and `apps/server` (Hono / Node.js). The production Docker image runs a single Node.js process on port 3000; `apps/server` mounts the API/auth/MCP/static routes and serves the built web app.
 
 ### Product direction
 
@@ -75,6 +74,8 @@ This repo periodically merges `upstream/main` (github.com/reactive-resume/reacti
 - Platform statistics endpoints (`packages/api/src/features/statistics/*` and its MCP tool) — this is a self-hosted single-owner instance, not a hosted service with aggregate metrics to report.
 - The MCP application tools (`list_applications`, `read_application`, `create_application`, `update_application`, `delete_application`, `import_applications`, `autofill_application_from_job`, `score_application_match`, `tailor_resume_for_application`, `draft_application_message`, etc. — see `packages/mcp/src/mcp-tool-names.ts`). The Applications / job-search feature itself is **kept** as a normal oRPC-backed dashboard surface (`apps/web/src/features/applications/*`, `apps/web/src/routes/dashboard/applications`); it is just not exposed over MCP.
 - Upstream's competitor-comparison marketing docs (`docs/comparisons/reactive-resume-vs-*.mdx`), SEO/AEO content-planning docs under `docs/superpowers/{plans,specs}`, the `apps/web/src/features/homepage/*` landing-page rebuild (v5.3.x), `chatgpt-app-submission.json`, and upstream's Blacksmith/Docker Hub CI publishing pipeline (`docs/agents/container-publishing.md`, `.github/actionlint.yaml`, `tooling/{docker-publishing,playwright-mirrors}.test.ts`; workflows stay on `ubuntu-latest` + GHCR). See `SIMPLIFICATION_BACKLOG.md` for the running log of this kind of removal.
+- Upstream's Vercel Hobby deployment files (`vercel.json`, `api/index.mjs`, `.vercelignore`, `.github/workflows/vercel.yml`, `docs/self-hosting/vercel.mdx`, `docs/contributing/deployment-checks.mdx`, `docs/guides/large-rpc-requests.mdx`, `tooling/deployment/smoke.mjs`) and its `USE_BLACKSMITH` checkout steps in workflows. The env-gated Vercel runtime code (Blob storage, `apps/web/src/libs/orpc/fetch.ts` staging, lazy auth init) is **kept** because it is shared with the Docker path.
+- The MCP independent cover-letter tools (`list_cover_letters`, `create_cover_letter`, `copy_embedded_cover_letter`, etc.). MCP stays resume-only; the cover-letter library itself is kept in the web dashboard. `packages/mcp/src/mcp-server-card.test.ts` pins their absence.
 - `dashClient`/`adminClient` Better Auth plugins (`apps/web/src/libs/auth/client.ts`) — no admin dashboard, no org/team management.
 - Upstream's `/ats-checker` marketing landing page (`apps/web/src/routes/_home/ats-checker.tsx`) — its page shell imports the removed `Footer` section and `Spotlight` animation and hardcodes rxresu.me OG/Twitter meta. The ATS checker itself is **kept**: `apps/web/src/features/ats-checker/*` is used by the builder's right-sidebar `ats-check.tsx` section, which is where this fork exposes it.
 - Public-resume social-card SEO (`createPublicResumeSeoMarkup` and the `/` + `/ats-checker` markup injection in `apps/server/src/static/web.ts`) — not adopted, because upstream defines it inside the same homepage SEO/structured-data block this fork removes. Revisit if public resume link previews become a priority.
@@ -99,7 +100,7 @@ This repo periodically merges `upstream/main` (github.com/reactive-resume/reacti
 
 ### Prerequisites
 
-Prerequisites: **Node.js 24** (pinned in `.nvmrc`; matches Dockerfile `ARG NODE_VERSION=24`), **pnpm 12.3.4** (pinned by `packageManager` in the root `package.json`; pnpm self-manages to it, so any recent pnpm can bootstrap — the Dockerfile's `ARG PNPM_VERSION` only picks the base image) ([install guide](https://pnpm.io/installation)), and **Docker** for PostgreSQL (`sudo dockerd &` if the daemon isn't running).
+Prerequisites: **Node.js 24** (pinned in `.nvmrc`; matches Dockerfile `ARG NODE_VERSION=24`), **pnpm 12.6.0** (pinned by `packageManager` in the root `package.json`; pnpm self-manages to it, so any recent pnpm can bootstrap — the Dockerfile's `ARG PNPM_VERSION` only picks the base image) ([install guide](https://pnpm.io/installation)), and **Docker** for PostgreSQL (`sudo dockerd &` if the daemon isn't running).
 
 ## Ownership map
 
@@ -135,9 +136,10 @@ Where each concern lives, and where new code for it goes:
 ## Web app conventions
 
 - `apps/web/src/router.tsx` initializes router context with `queryClient`, `orpc`, `theme`, `locale`, `session`, and `flags`. Reuse route context instead of refetching these ad hoc.
-- Builder shell: `apps/web/src/routes/builder/$resumeId`. Its nested preview route is client-only (`ssr: false`); the public resume route `apps/web/src/routes/$username/$slug.tsx` uses `ssr: "data-only"`.
-- Browser-only preview code: `apps/web/src/features/resume/preview`. Public PDF viewer: `apps/web/src/features/resume/public`. Keep PDF.js/canvas/browser APIs out of SSR paths.
-- Isomorphic oRPC client: `apps/web/src/libs/orpc/client.ts` — server calls use an in-process router client, browser calls use `/api/rpc` with credentials included.
+- The web app is a client-rendered SPA. `apps/server` serves `index.html` from `apps/server/src/static/web.ts` (this fork only injects the root-resume noindex/canonical shell there; no homepage OG/JSON-LD); there is no React SSR.
+- Builder shell: `apps/web/src/routes/builder/$resumeId`. Public resume route: `apps/web/src/routes/$username/$slug.tsx`.
+- Browser-only preview code: `apps/web/src/features/resume/preview`. Public PDF viewer: `apps/web/src/features/resume/public`. Keep PDF.js/canvas code in these features, not in `packages/pdf`.
+- oRPC client: `apps/web/src/libs/orpc/client.ts` calls `/api/rpc` with credentials included. `apps/web/src/libs/orpc/fetch.ts` stages large request bodies through Blob on Vercel.
 - For React components with explicit props, use a named props type (e.g. `type FooProps = {...}` with `function Foo(props: FooProps)`) rather than inline object annotations, especially with more than one field or with generics.
 
 ## Package boundaries
@@ -155,7 +157,7 @@ Multi-place changes:
 
 - **Resume data shape**: `packages/schema/src/resume/*` first, then API DTOs, importers, PDF rendering, and web forms consuming it.
 - **New template**: `packages/schema/src/templates.ts`, `packages/pdf/src/templates/index.ts`, source under `packages/pdf/src/templates/<name>/`, and previews under `apps/web/public/templates/{jpg,pdf}`.
-- **New DB column/table**: `packages/db/src/schema/*`, then `dotenvx run -f .env.local -- pnpm db:generate`.
+- **New DB column/table**: `packages/db/src/schema/*`, then `pnpm db:generate`.
 - **New env var**: `packages/env/src/server.ts` **and** the `globalEnv` array in `turbo.json`. Turborepo 2.x strict env mode filters out unlisted vars, so the variable will be `undefined` in child processes at runtime even when correctly set in the OS/container environment.
 
 ## Environment and database
@@ -164,18 +166,18 @@ Copy `.env.example` to `.env.local`. Three required vars: `APP_URL` (default `ht
 
 - **S3/SeaweedFS optional.** If `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, and `S3_BUCKET` are all set, the app uses S3-compatible storage. `.env.example` ships SeaweedFS defaults, so either start the `seaweedfs` compose service or comment those vars out to use local filesystem storage under `<workspace>/data`. `LOCAL_STORAGE_PATH` must be absolute when set.
 - **`REDIS_URL` and `ENCRYPTION_SECRET`** are optional for core resume flows but both required for saved AI providers and the authenticated `/agent` workspace. Host-run dev uses `REDIS_URL=redis://localhost:6379`; the container-run app uses `redis://redis:6379`.
-- **`drizzle-kit` (used by `pnpm db:migrate`) reads `DATABASE_URL` from `process.env` directly** — it does not auto-load `.env`. Run migration commands through `dotenvx`.
+- **`drizzle-kit` (used by `pnpm db:migrate`) reads `DATABASE_URL` from `process.env` directly** — it does not auto-load `.env`. The root migration scripts load `.env.local` through `dotenvx` before invoking Drizzle Kit.
 - The production server auto-runs migrations at startup before serving traffic, so manual `pnpm db:migrate` is mainly for first setup, migration debugging, or applying migrations without starting the app.
 
 ## Commands
 
-Prefix dev servers and migration commands with `dotenvx run -f .env.local --`. Tests, typechecks, linters, boundary checks, and `pnpm build` do not need it; if one fails on a missing env var, rerun it with the prefix.
+Dev server and migration scripts load `.env.local` through the project-local `dotenvx`. Tests, typechecks, linters, boundary checks, and `pnpm build` do not load it automatically.
 
 ```
 sudo docker compose -f compose.dev.yml up -d postgres                                    # DB only
 sudo docker compose -f compose.dev.yml up -d postgres redis seaweedfs seaweedfs_create_bucket   # full infra
-dotenvx run -f .env.local -- pnpm dev            # port 3000 (dev:web for web only)
-dotenvx run -f .env.local -- pnpm db:generate    # db:migrate to apply
+pnpm dev                                          # port 3000 (dev:web for web only)
+pnpm db:generate                                  # db:migrate to apply
 pnpm check                                       # Biome — WRITE-CAPABLE (--write --unsafe)
 pnpm test | pnpm typecheck | pnpm build | pnpm exec turbo boundaries
 ```
@@ -248,3 +250,14 @@ Vitest test paths are package-relative when running through `pnpm --filter <pack
 - Refactor continuously: prune dead code, rename confusing identifiers, simplify complex logic.
 - Document succinctly: docstrings for public APIs, README to outline high‑level project conventions.
 - If changes are agreed upon, git add and commit your changes when necessary
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->

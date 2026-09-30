@@ -6,21 +6,12 @@ import {
 	SidebarContent,
 	SidebarFooter,
 	SidebarGroup,
-	SidebarGroupAction,
 	SidebarGroupContent,
 	SidebarGroupLabel,
 	SidebarHeader,
-	SidebarInput,
-	SidebarInset,
 	SidebarMenu,
-	SidebarMenuAction,
-	SidebarMenuBadge,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarMenuSkeleton,
-	SidebarMenuSub,
-	SidebarMenuSubButton,
-	SidebarMenuSubItem,
 	SidebarProvider,
 	SidebarRail,
 	SidebarSeparator,
@@ -192,22 +183,6 @@ describe("SidebarRail", () => {
 	});
 });
 
-describe("SidebarInset", () => {
-	it("renders as <main> with data-slot='sidebar-inset'", () => {
-		render(<SidebarInset data-testid="inset">x</SidebarInset>);
-		const inset = screen.getByTestId("inset");
-		expect(inset.tagName).toBe("MAIN");
-		expect(inset).toHaveAttribute("data-slot", "sidebar-inset");
-	});
-});
-
-describe("SidebarInput", () => {
-	it("renders with data-slot='sidebar-input'", () => {
-		render(<SidebarInput data-testid="i" />);
-		expect(screen.getByTestId("i")).toHaveAttribute("data-slot", "sidebar-input");
-	});
-});
-
 describe("SidebarHeader / SidebarFooter / SidebarSeparator", () => {
 	it("SidebarHeader uses data-slot='sidebar-header'", () => {
 		render(<SidebarHeader data-testid="h">x</SidebarHeader>);
@@ -245,11 +220,6 @@ describe("SidebarContent / SidebarGroup", () => {
 		render(<SidebarGroupLabel data-testid="l">Group</SidebarGroupLabel>);
 		expect(screen.getByTestId("l")).toHaveAttribute("data-slot", "sidebar-group-label");
 	});
-
-	it("SidebarGroupAction uses data-slot='sidebar-group-action'", () => {
-		render(<SidebarGroupAction data-testid="a">+</SidebarGroupAction>);
-		expect(screen.getByTestId("a")).toHaveAttribute("data-slot", "sidebar-group-action");
-	});
 });
 
 describe("SidebarMenu and items", () => {
@@ -286,48 +256,6 @@ describe("SidebarMenu and items", () => {
 		);
 		// data-active is set as a presence attribute when isActive is truthy
 		expect(screen.getByTestId("b")).toHaveAttribute("data-active");
-	});
-
-	it("SidebarMenuAction uses data-slot='sidebar-menu-action'", () => {
-		render(<SidebarMenuAction data-testid="a">x</SidebarMenuAction>);
-		expect(screen.getByTestId("a")).toHaveAttribute("data-slot", "sidebar-menu-action");
-	});
-
-	it("SidebarMenuBadge uses data-slot='sidebar-menu-badge'", () => {
-		render(<SidebarMenuBadge data-testid="b">5</SidebarMenuBadge>);
-		expect(screen.getByTestId("b")).toHaveAttribute("data-slot", "sidebar-menu-badge");
-	});
-
-	it("SidebarMenuSkeleton renders without throwing", () => {
-		render(<SidebarMenuSkeleton data-testid="sk" />);
-		expect(screen.getByTestId("sk")).toBeInTheDocument();
-	});
-
-	it("SidebarMenuSkeleton supports showIcon", () => {
-		const { container } = render(<SidebarMenuSkeleton showIcon />);
-		// Should render the icon Skeleton
-		expect(container.querySelectorAll("[data-slot=skeleton]").length).toBeGreaterThan(1);
-	});
-});
-
-describe("SidebarMenuSub family", () => {
-	it("SidebarMenuSub uses data-slot='sidebar-menu-sub' and is <ul>", () => {
-		render(<SidebarMenuSub data-testid="ms" />);
-		const ms = screen.getByTestId("ms");
-		expect(ms.tagName).toBe("UL");
-		expect(ms).toHaveAttribute("data-slot", "sidebar-menu-sub");
-	});
-
-	it("SidebarMenuSubItem uses data-slot='sidebar-menu-sub-item' and is <li>", () => {
-		render(<SidebarMenuSubItem data-testid="ms">x</SidebarMenuSubItem>);
-		const ms = screen.getByTestId("ms");
-		expect(ms.tagName).toBe("LI");
-		expect(ms).toHaveAttribute("data-slot", "sidebar-menu-sub-item");
-	});
-
-	it("SidebarMenuSubButton uses data-slot='sidebar-menu-sub-button'", () => {
-		render(<SidebarMenuSubButton data-testid="b">x</SidebarMenuSubButton>);
-		expect(screen.getByTestId("b")).toHaveAttribute("data-slot", "sidebar-menu-sub-button");
 	});
 });
 

@@ -33,8 +33,7 @@ describe("semantic binding inventory", () => {
 			"template-part": { type: "primitive", primitive: "View", source: "synthetic" },
 		});
 
-		expect(inventory.unboundNodeKeys).toEqual(["resume/part"]);
-		expect(inventory.syntheticWrapperCount).toBe(1);
+		expect(inventory.bindings["resume/part"]).toEqual({ type: "primitive", primitive: "View", source: "synthetic" });
 	});
 
 	it("reports an alias unbound when its canonical primitive owner is absent", () => {
@@ -48,7 +47,6 @@ describe("semantic binding inventory", () => {
 		});
 
 		expect(inventory.bindings).toEqual({});
-		expect(inventory.unboundNodeKeys).toEqual(["rich"]);
 	});
 
 	it("reports a rich-text alias unbound when its existing canonical node has the wrong kind", () => {
@@ -63,8 +61,6 @@ describe("semantic binding inventory", () => {
 		});
 
 		expect(inventory.bindings.rich).toBeUndefined();
-		expect(inventory.unboundNodeKeys).toContain("rich");
-		expect(inventory.unboundNodeKeys).not.toEqual([]);
 	});
 
 	it("reports a rich-text alias unbound when its field owner binding is synthetic or non-primitive", () => {
@@ -96,21 +92,8 @@ describe("semantic binding inventory", () => {
 			},
 		);
 
-		expect({
-			syntheticBinding: synthetic.bindings["rich-synthetic"],
-			syntheticAliasUnbound: synthetic.unboundNodeKeys.includes("rich-synthetic"),
-			syntheticInventoryClean: synthetic.unboundNodeKeys.length === 0,
-			nonPrimitiveBinding: nonPrimitive.bindings["rich-non-primitive"],
-			nonPrimitiveAliasUnbound: nonPrimitive.unboundNodeKeys.includes("rich-non-primitive"),
-			nonPrimitiveInventoryClean: nonPrimitive.unboundNodeKeys.length === 0,
-		}).toEqual({
-			syntheticBinding: undefined,
-			syntheticAliasUnbound: true,
-			syntheticInventoryClean: false,
-			nonPrimitiveBinding: undefined,
-			nonPrimitiveAliasUnbound: true,
-			nonPrimitiveInventoryClean: false,
-		});
+		expect(synthetic.bindings["rich-synthetic"]).toBeUndefined();
+		expect(nonPrimitive.bindings["rich-non-primitive"]).toBeUndefined();
 	});
 
 	it("resolves conditional bindings to the primitive the existing renderer uses", () => {
@@ -156,8 +139,6 @@ describe("semantic binding inventory", () => {
 		const nodeCount = (candidate: SemanticNode): number =>
 			1 + candidate.children.reduce((count, child) => count + nodeCount(child), 0);
 
-		expect(inventory.unboundNodeKeys).toEqual([]);
-		expect(inventory.syntheticWrapperCount).toBe(0);
 		expect(Object.keys(inventory.bindings)).toHaveLength(nodeCount(tree));
 		expect(
 			Object.values(inventory.bindings).every((binding) => binding.type === "alias" || binding.source === "existing"),
@@ -402,6 +383,5 @@ describe("semantic binding inventory", () => {
 		const inventory = createBindingInventory(tree, getTemplateSemanticBindingRegistry(template));
 
 		expect(inventory.bindings[part.key]).toEqual({ type: "primitive", primitive, source: "existing" });
-		expect(inventory.syntheticWrapperCount).toBe(0);
 	});
 });

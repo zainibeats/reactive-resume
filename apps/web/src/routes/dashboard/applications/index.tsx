@@ -5,6 +5,7 @@ import { Trans } from "@lingui/react/macro";
 import {
 	ArchiveIcon,
 	BriefcaseIcon,
+	CalendarDotsIcon,
 	ChartBarIcon,
 	DownloadSimpleIcon,
 	FunnelIcon,
@@ -27,6 +28,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { ApplicationDetailSheet } from "@/features/applications/components/application-detail-sheet";
 import { ApplicationFormSheet } from "@/features/applications/components/application-form-sheet";
 import { ApplicationBoard } from "@/features/applications/components/board";
+import { ApplicationCalendar } from "@/features/applications/components/calendar-view";
 import { ExportApplicationsSheet } from "@/features/applications/components/export-applications-sheet";
 import { ImportApplicationsSheet } from "@/features/applications/components/import-applications-sheet";
 import { ApplicationInsights } from "@/features/applications/components/insights-view";
@@ -46,7 +48,7 @@ type SortKey = (typeof SORT_OPTIONS)[number]["value"];
 
 const searchSchema = z.object({
 	search: z.string().default(""),
-	view: z.enum(["board", "table", "insights"]).default("board"),
+	view: z.enum(["board", "table", "calendar", "insights"]).default("board"),
 	tags: z.array(z.string()).default([]),
 	sort: z.enum(["updated", "applied", "company", "role"]).default("updated"),
 	archived: z.boolean().default(false),
@@ -67,6 +69,7 @@ function RouteComponent() {
 	const { search, view, tags, sort, archived, create, applicationId } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 
+	const [textSearch, setTextSearch] = useState(search);
 	const [addOpen, setAddOpen] = useState(false);
 	const [importOpen, setImportOpen] = useState(false);
 	const [exportOpen, setExportOpen] = useState(false);
@@ -86,7 +89,7 @@ function RouteComponent() {
 		void navigate({ replace: true, search: (prev: Search) => ({ ...prev, create: false }) });
 	}, [create, navigate]);
 
-	const { data: applications } = useQuery(applicationsListQueryOptions());
+	const { data: applications, isPending } = useQuery(applicationsListQueryOptions());
 	const { data: allTags } = useQuery(orpc.applications.tags.queryOptions());
 
 	useEffect(() => {
@@ -98,7 +101,7 @@ function RouteComponent() {
 
 	// Board & table hide archived; tag/search filters + sort are applied client-side.
 	const filtered = useMemo(() => {
-		const query = search.trim().toLowerCase();
+		const query = textSearch.trim().toLowerCase();
 		const rows = (applications ?? [])
 			.filter((app) => archived || !app.archived)
 			.filter((app) => tags.length === 0 || tags.every((tag: string) => app.tags.includes(tag)))
@@ -111,13 +114,14 @@ function RouteComponent() {
 			role: (a, b) => a.role.localeCompare(b.role),
 		};
 		return rows.sort(compare[sort as SortKey]);
-	}, [applications, search, tags, sort, archived]);
+	}, [applications, textSearch, tags, sort, archived]);
 
 	const archivedCount = (applications ?? []).filter((app) => app.archived).length;
 
-	const isEmpty = (applications?.length ?? 0) === 0;
+	// While loading render neither the empty state nor the board; a failed load falls back to the empty state.
+	const isEmpty = !applications?.length;
 
-	const setSearch = (patch: Partial<Search>) => void navigate({ search: (prev: Search) => ({ ...prev, ...patch }) });
+	const setUrlSearch = (patch: Partial<Search>) => void navigate({ search: (prev: Search) => ({ ...prev, ...patch }) });
 
 	return (
 		<div className="flex h-[calc(100dvh-2rem)] flex-col gap-4">
@@ -147,7 +151,7 @@ function RouteComponent() {
 
 			<Separator />
 
-			{isEmpty ? (
+			{isPending ? null : isEmpty ? (
 				<EmptyState onAdd={() => setAddOpen(true)} onImport={() => setImportOpen(true)} />
 			) : (
 				<>
@@ -158,9 +162,9 @@ function RouteComponent() {
 								<MagnifyingGlassIcon />
 							</InputGroupAddon>
 							<InputGroupInput
-								value={search}
+								value={textSearch}
 								placeholder={t`Search saved jobs…`}
-								onChange={(event) => setSearch({ search: event.target.value })}
+								onChange={(event) => setTextSearch(event.target.value)}
 							/>
 						</InputGroup>
 
@@ -172,17 +176,17 @@ function RouteComponent() {
 								value={tags}
 								placeholder={t`Filter by tags`}
 								options={(allTags ?? []).map((tag) => ({ value: tag, label: tag }))}
-								onValueChange={(value) => setSearch({ tags: value ?? [] })}
+								onValueChange={(value) => setUrlSearch({ tags: value ?? [] })}
 							/>
 						)}
 
-						{view !== "insights" && (
+						{view !== "insights" && view !== "calendar" && (
 							<Combobox
 								className="w-40 min-w-0 shrink max-sm:hidden"
 								value={sort}
 								placeholder={t`Sort by…`}
 								options={SORT_OPTIONS.map((option) => ({ value: option.value, label: i18n.t(option.label) }))}
-								onValueChange={(value) => value && setSearch({ sort: value as SortKey })}
+								onValueChange={(value) => value && setUrlSearch({ sort: value as SortKey })}
 							/>
 						)}
 
@@ -191,7 +195,7 @@ function RouteComponent() {
 								size="sm"
 								variant={archived ? "secondary" : "outline"}
 								className="shrink-0 max-sm:hidden"
-								onClick={() => setSearch({ archived: !archived })}
+								onClick={() => setUrlSearch({ archived: !archived })}
 							>
 								<ArchiveIcon />
 								<Trans>Archived</Trans> ({archivedCount})
@@ -223,7 +227,7 @@ function RouteComponent() {
 												value={tags}
 												placeholder={t`Any tag`}
 												options={(allTags ?? []).map((tag) => ({ value: tag, label: tag }))}
-												onValueChange={(value) => setSearch({ tags: value ?? [] })}
+												onValueChange={(value) => setUrlSearch({ tags: value ?? [] })}
 											/>
 										</div>
 									)}
@@ -235,7 +239,7 @@ function RouteComponent() {
 											className="w-full"
 											value={sort}
 											options={SORT_OPTIONS.map((option) => ({ value: option.value, label: i18n.t(option.label) }))}
-											onValueChange={(value) => value && setSearch({ sort: value as SortKey })}
+											onValueChange={(value) => value && setUrlSearch({ sort: value as SortKey })}
 										/>
 									</div>
 									{archivedCount > 0 && (
@@ -243,7 +247,7 @@ function RouteComponent() {
 											size="sm"
 											variant={archived ? "secondary" : "outline"}
 											className="w-full"
-											onClick={() => setSearch({ archived: !archived })}
+											onClick={() => setUrlSearch({ archived: !archived })}
 										>
 											<ArchiveIcon />
 											<Trans>Archived</Trans> ({archivedCount})
@@ -274,6 +278,15 @@ function RouteComponent() {
 									<span className="sr-only">{i18n.t(msg`Table`)}</span>
 								</TabsTrigger>
 								<TabsTrigger
+									value="calendar"
+									title={i18n.t(msg`Calendar`)}
+									nativeButton={false}
+									render={<Link to="." search={(p: Search) => ({ ...p, view: "calendar" })} />}
+								>
+									<CalendarDotsIcon />
+									<span className="sr-only">{i18n.t(msg`Calendar`)}</span>
+								</TabsTrigger>
+								<TabsTrigger
 									value="insights"
 									title={i18n.t(msg`Insights`)}
 									nativeButton={false}
@@ -295,7 +308,10 @@ function RouteComponent() {
 								<Button
 									size="sm"
 									variant="outline"
-									onClick={() => setSearch({ search: "", tags: [], archived: false })}
+									onClick={() => {
+										setTextSearch("");
+										setUrlSearch({ search: "", tags: [], archived: false });
+									}}
 								>
 									<Trans>Clear filters</Trans>
 								</Button>
@@ -307,6 +323,13 @@ function RouteComponent() {
 								)}
 								{view === "table" && (
 									<ApplicationTable applications={filtered} onOpen={setSelected} onEdit={setEditing} />
+								)}
+								{view === "calendar" && (
+									<ApplicationCalendar
+										applications={filtered}
+										allApplications={applications ?? []}
+										onOpen={setSelected}
+									/>
 								)}
 								{view === "insights" && <ApplicationInsights applications={applications ?? []} />}
 							</>

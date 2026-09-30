@@ -2,7 +2,7 @@ import type { SemanticNode } from "./types";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { compileStylesheet } from "./compile";
-import { compileSelector, getSpecificity, matchesSelector } from "./selector";
+import { compileSelector, createSelectorMatcher } from "./selector";
 
 const experienceId = "229ad766-cb9a-4f16-aaf0-fdd8394a9b95";
 
@@ -58,9 +58,15 @@ const fixtureTree = node("resume", "resume", {
 	],
 });
 
+const selectorMatches = createSelectorMatcher(fixtureTree);
+
 function matches(source: string, nodeKey: string): boolean {
 	const result = compileSelector(source);
-	return result.selector ? matchesSelector(result.selector, fixtureTree, nodeKey) : false;
+	return result.selector ? selectorMatches(result.selector, nodeKey) : false;
+}
+
+function getSpecificity(source: string): readonly number[] | null {
+	return compileSelector(source).selector?.selectors[0]?.specificity ?? null;
 }
 
 describe("semantic selector compilation", () => {

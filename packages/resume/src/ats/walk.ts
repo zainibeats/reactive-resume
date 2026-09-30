@@ -18,7 +18,7 @@ export type WalkedSection = {
 	items: readonly WalkedItem[];
 };
 
-export const escapePointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
+const escapePointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
 
 export const isRenderedSection = (section: WalkedSection) => !section.hidden && section.placement !== "none";
 

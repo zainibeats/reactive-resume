@@ -1,6 +1,6 @@
 import type { ModelMessage } from "ai";
 import { describe, expect, it } from "vitest";
-import { estimateTokenCount, pruneAgentModelContext } from "./context";
+import { estimateTokens, pruneAgentModelContext } from "./context";
 
 const BIG_RESUME = { basics: { name: "Alice" }, sections: { summary: { content: "x".repeat(2_000) } } };
 
@@ -265,11 +265,11 @@ describe("pruneAgentModelContext — tier 3 (turn dropping)", () => {
 	});
 });
 
-describe("estimateTokenCount", () => {
+describe("estimateTokens", () => {
 	it("estimates natural text at roughly one token per word", () => {
-		expect(estimateTokenCount("old question ".repeat(50))).toBeGreaterThanOrEqual(90);
-		expect(estimateTokenCount("old question ".repeat(50))).toBeLessThan(120);
-		expect(estimateTokenCount({ a: 1 })).toBeGreaterThan(0);
+		expect(estimateTokens("old question ".repeat(50))).toBeGreaterThanOrEqual(90);
+		expect(estimateTokens("old question ".repeat(50))).toBeLessThan(120);
+		expect(estimateTokens({ a: 1 })).toBeGreaterThan(0);
 	});
 
 	it("treats binary attachment data as opaque bytes instead of serializing it", () => {
@@ -277,7 +277,7 @@ describe("estimateTokenCount", () => {
 		const message = { role: "user", content: [{ type: "image", image: bytes, mediaType: "image/png" }] };
 
 		const started = performance.now();
-		const estimate = estimateTokenCount(message);
+		const estimate = estimateTokens(message);
 		const elapsedMs = performance.now() - started;
 
 		// ~bytes/4 tokens, computed without expanding each byte into JSON.

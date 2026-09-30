@@ -62,16 +62,7 @@ function isDateSnapshotForModel(model: string, modelId: string) {
 	const snapshotPrefix = `${modelId}-`;
 	if (!model.startsWith(snapshotPrefix)) return false;
 
-	const suffix = model.slice(snapshotPrefix.length);
-	const [year, month, day] = suffix.split("-");
-
-	return (
-		suffix.length === "YYYY-MM-DD".length &&
-		year?.length === 4 &&
-		month?.length === 2 &&
-		day?.length === 2 &&
-		[year, month, day].every((part) => /^\d+$/.test(part))
-	);
+	return /^\d{4}-\d{2}-\d{2}$/.test(model.slice(snapshotPrefix.length));
 }
 
 export function supportsOpenAIWebSearch(model: string) {

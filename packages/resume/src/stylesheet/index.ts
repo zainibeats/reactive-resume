@@ -46,6 +46,5 @@ export {
 	TEMPLATE_PART_CHILD_KINDS_V1,
 } from "./registry/semantic";
 export { createSystemVariables, SYSTEM_VARIABLE_REGISTRY_V1 } from "./registry/system-variables";
-export { compileSelector, createSelectorMatcher, getSpecificity, matchesSelector } from "./selector";
+export { compileSelector, createSelectorMatcher } from "./selector";
 export { escapeCssComment, escapeCssString, serializeGeneratedStylesheet } from "./serialize";
-export { SUPPORTED_SEMANTIC_CSS_VERSIONS } from "./version";

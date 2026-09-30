@@ -2,34 +2,17 @@ import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
-import { rgbaStringToHex } from "@reactive-resume/utils/color";
-import { Page, StyleSheet, View } from "#react-pdf-renderer";
+import { Page, StyleSheet } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { useRenderedSectionIds, useResolvedNode } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { createBaseTemplateStyles } from "../shared/base-template-styles";
-import {
-	CustomFieldContactItem,
-	EmailContactItem,
-	LocationContactItem,
-	PhoneContactItem,
-	WebsiteContactItem,
-} from "../shared/contact-item";
 import { TemplateProvider } from "../shared/context";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
-import { hasTemplatePicture } from "../shared/picture";
-import {
-	Heading,
-	SemanticContactListView,
-	SemanticHeaderPicture,
-	SemanticHeaderView,
-	SemanticRegionView,
-	Text,
-} from "../shared/primitives";
-import { createRtlStyleHelpers } from "../shared/rtl";
+import { SemanticRegionView } from "../shared/primitives";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
+import { TemplateHeader, useTemplateBase } from "../shared/template-base";
 
 type BronzorStyles = Omit<TemplateStyleSlots, "page"> & {
 	page: Style;
@@ -107,46 +90,26 @@ export const BronzorPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pa
 	);
 };
 
-const Header = ({ styles }: BronzorHeaderProps) => {
-	const { basics, picture } = useRender();
-	const hasPicture = hasTemplatePicture(picture);
-
-	return (
-		<SemanticHeaderView style={styles.header}>
-			{hasPicture && <SemanticHeaderPicture src={picture.url} style={styles.picture} />}
-
-			<View style={styles.headerTitle}>
-				<View style={styles.headerIdentity}>
-					<Heading style={styles.headerName}>{basics.name}</Heading>
-					<Text>{basics.headline}</Text>
-				</View>
-			</View>
-
-			<SemanticContactListView style={styles.headerContactRow}>
-				<EmailContactItem email={basics.email} style={styles.headerContactItem} />
-				<PhoneContactItem phone={basics.phone} style={styles.headerContactItem} />
-				<LocationContactItem location={basics.location} style={styles.headerContactItem} />
-				<WebsiteContactItem website={basics.website} style={styles.headerContactItem} />
-				{basics.customFields.map((field) => (
-					<CustomFieldContactItem key={field.id} field={field} style={styles.headerContactItem} />
-				))}
-			</SemanticContactListView>
-		</SemanticHeaderView>
-	);
-};
+const Header = ({ styles }: BronzorHeaderProps) => (
+	<TemplateHeader
+		styles={{
+			header: styles.header,
+			picture: styles.picture,
+			title: styles.headerTitle,
+			identity: styles.headerIdentity,
+			name: styles.headerName,
+			contactList: styles.headerContactRow,
+			contactItem: styles.headerContactItem,
+		}}
+		contactListOutsideTitle
+	/>
+);
 
 const useBronzorTemplate = (): BronzorTemplate => {
-	const { picture, metadata, rtl } = useRender();
+	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
-		const foreground = rgbaStringToHex(metadata.design.colors.text);
-		const background = rgbaStringToHex(metadata.design.colors.background);
-		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const colors: TemplateColorRoles = { foreground, background, primary };
-		const metrics = getTemplateMetrics(metadata.page);
-
-		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
 			...base,
@@ -215,5 +178,19 @@ const useBronzorTemplate = (): BronzorTemplate => {
 		});
 
 		return { colors, styles: baseStyles satisfies BronzorStyles };
-	}, [picture, metadata, rtl]);
+	}, [
+		metadata,
+		r.sectionHeadingTextAlign,
+		r.row,
+		primary,
+		metrics.page.paddingVertical,
+		metrics.page.paddingHorizontal,
+		metrics.headerGap,
+		metrics.columnGap,
+		metrics.gapY,
+		foreground,
+		base,
+		metrics.gapX,
+		background,
+	]);
 };

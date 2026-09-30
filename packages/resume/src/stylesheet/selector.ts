@@ -300,10 +300,6 @@ export function compileSelector(source: string | CssNode): CompileSelectorResult
 	}
 }
 
-export function getSpecificity(_source: string): Specificity | null {
-	return compileSelector(_source).selector?.selectors[0]?.specificity ?? null;
-}
-
 function buildTree(root: SemanticNode): Map<string, TreeNode> {
 	const nodes = new Map<string, TreeNode>();
 	const rootNode: TreeNode = { node: root, parent: null, children: [] };
@@ -452,8 +448,4 @@ export function createSelectorMatcher(root: SemanticNode): (selector: CompiledSe
 		const target = nodes.get(nodeKey);
 		return target ? selector.selectors.some((complex) => matchesComplex(complex, target)) : false;
 	};
-}
-
-export function matchesSelector(selector: CompiledSelector, root: SemanticNode, nodeKey: string): boolean {
-	return createSelectorMatcher(root)(selector, nodeKey);
 }

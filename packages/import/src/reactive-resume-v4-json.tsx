@@ -238,6 +238,29 @@ const hasV4Shape = (value: unknown): value is V4ResumeData =>
 
 const NOT_V4_MESSAGE = "This file doesn't look like a Reactive Resume v4 export.";
 
+type V4Item = { id?: string; visible?: boolean };
+type V4SectionHeader = { name?: string; columns?: number; visible?: boolean };
+
+const baseSection = (section?: V4SectionHeader) => ({
+	title: section?.name ?? "",
+	icon: "",
+	columns: section?.columns ?? 1,
+	hidden: !(section?.visible ?? true),
+	keepTogether: false,
+	startOnNewPage: false,
+});
+
+const itemBase = (item: V4Item) => ({
+	id: item.id ?? generateId(),
+	hidden: !(item.visible ?? true),
+});
+
+const toWebsite = (url?: V4Url) => ({
+	url: url?.href ?? "",
+	label: url?.label ?? "",
+	inlineLink: false,
+});
+
 // ponytail: stateless single-method class → plain function
 export function parseReactiveResumeV4JSON(json: string): ResumeData {
 	try {
@@ -277,125 +300,74 @@ export function parseReactiveResumeV4JSON(json: string): ResumeData {
 				})),
 			},
 			summary: {
-				title: v4Data.sections.summary?.name ?? "",
-				icon: "",
-				columns: v4Data.sections.summary?.columns ?? 1,
-				hidden: !(v4Data.sections.summary?.visible ?? true),
-				keepTogether: false,
-				startOnNewPage: false,
+				...baseSection(v4Data.sections.summary),
 				content: v4Data.sections.summary?.content ?? "",
 			},
 			sections: {
 				profiles: {
-					title: v4Data.sections.profiles?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.profiles?.columns ?? 1,
-					hidden: !(v4Data.sections.profiles?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.profiles),
 					items: (v4Data.sections.profiles?.items ?? [])
 						.filter((item) => item.network && item.network.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							icon: item.icon ?? "",
 							iconColor: "",
 							network: item.network ?? "",
 							username: item.username ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 						})),
 				},
 				experience: {
-					title: v4Data.sections.experience?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.experience?.columns ?? 1,
-					hidden: !(v4Data.sections.experience?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.experience),
 					items: (v4Data.sections.experience?.items ?? [])
 						.filter((item) => item.company && item.company.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							company: item.company ?? "",
 							position: item.position ?? "",
 							location: item.location ?? "",
 							period: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							roles: [],
 							description: item.summary ?? "",
 						})),
 				},
 				education: {
-					title: v4Data.sections.education?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.education?.columns ?? 1,
-					hidden: !(v4Data.sections.education?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.education),
 					items: (v4Data.sections.education?.items ?? [])
 						.filter((item) => item.institution && item.institution.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							school: item.institution ?? "",
 							degree: item.studyType ?? "",
 							area: item.area ?? "",
 							grade: item.score ?? "",
 							location: "",
 							period: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? "",
 						})),
 				},
 				projects: {
-					title: v4Data.sections.projects?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.projects?.columns ?? 1,
-					hidden: !(v4Data.sections.projects?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.projects),
 					items: (v4Data.sections.projects?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							name: item.name ?? "",
 							period: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? item.description ?? "",
 						})),
 				},
 				skills: {
-					title: v4Data.sections.skills?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.skills?.columns ?? 1,
+					...baseSection(v4Data.sections.skills),
 					layout: "default",
 					keywordLayout: "inline",
-					hidden: !(v4Data.sections.skills?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
 					items: (v4Data.sections.skills?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							icon: "",
 							iconColor: "",
 							name: item.name ?? "",
@@ -406,17 +378,11 @@ export function parseReactiveResumeV4JSON(json: string): ResumeData {
 						})),
 				},
 				languages: {
-					title: v4Data.sections.languages?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.languages?.columns ?? 1,
-					hidden: !(v4Data.sections.languages?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.languages),
 					items: (v4Data.sections.languages?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							language: item.name ?? "",
 							fluency: item.description ?? "",
 							// v4 stored language level as 0-10; scale down to v5's 0-5 range
@@ -424,17 +390,11 @@ export function parseReactiveResumeV4JSON(json: string): ResumeData {
 						})),
 				},
 				interests: {
-					title: v4Data.sections.interests?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.interests?.columns ?? 1,
-					hidden: !(v4Data.sections.interests?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.interests),
 					items: (v4Data.sections.interests?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							icon: "",
 							iconColor: "",
 							name: item.name ?? "",
@@ -442,117 +402,67 @@ export function parseReactiveResumeV4JSON(json: string): ResumeData {
 						})),
 				},
 				awards: {
-					title: v4Data.sections.awards?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.awards?.columns ?? 1,
-					hidden: !(v4Data.sections.awards?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.awards),
 					items: (v4Data.sections.awards?.items ?? [])
 						.filter((item) => item.title && item.title.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							title: item.title ?? "",
 							awarder: item.awarder ?? "",
 							date: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? "",
 						})),
 				},
 				certifications: {
-					title: v4Data.sections.certifications?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.certifications?.columns ?? 1,
-					hidden: !(v4Data.sections.certifications?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.certifications),
 					items: (v4Data.sections.certifications?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							title: item.name ?? "",
 							issuer: item.issuer ?? "",
 							date: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? "",
 						})),
 				},
 				publications: {
-					title: v4Data.sections.publications?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.publications?.columns ?? 1,
-					hidden: !(v4Data.sections.publications?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.publications),
 					items: (v4Data.sections.publications?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							title: item.name ?? "",
 							publisher: item.publisher ?? "",
 							date: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? "",
 						})),
 				},
 				volunteer: {
-					title: v4Data.sections.volunteer?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.volunteer?.columns ?? 1,
-					hidden: !(v4Data.sections.volunteer?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.volunteer),
 					items: (v4Data.sections.volunteer?.items ?? [])
 						.filter((item) => item.organization && item.organization.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							organization: item.organization ?? "",
 							location: item.location ?? "",
 							period: item.date ?? "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? "",
 						})),
 				},
 				references: {
-					title: v4Data.sections.references?.name ?? "",
-					icon: "",
-					columns: v4Data.sections.references?.columns ?? 1,
-					hidden: !(v4Data.sections.references?.visible ?? true),
-					keepTogether: false,
-					startOnNewPage: false,
+					...baseSection(v4Data.sections.references),
 					items: (v4Data.sections.references?.items ?? [])
 						.filter((item) => item.name && item.name.length > 0)
 						.map((item) => ({
-							id: item.id ?? generateId(),
-							hidden: !(item.visible ?? true),
+							...itemBase(item),
 							name: item.name ?? "",
 							position: item.description ?? "",
 							phone: "",
-							website: {
-								url: item.url?.href ?? "",
-								label: item.url?.label ?? "",
-								inlineLink: false,
-							},
+							website: toWebsite(item.url),
 							description: item.summary ?? "",
 						})),
 				},
@@ -577,11 +487,7 @@ export function parseReactiveResumeV4JSON(json: string): ResumeData {
 						position: hasName ? (item.description ?? "") : "",
 						location: item.location ?? "",
 						period: item.date ?? "",
-						website: {
-							url: item.url?.href ?? "",
-							label: item.url?.label ?? "",
-							inlineLink: false,
-						},
+						website: toWebsite(item.url),
 						roles: [],
 						// Prefer HTML summary; fall back to plain description
 						// (for description-only items, description IS the body content)

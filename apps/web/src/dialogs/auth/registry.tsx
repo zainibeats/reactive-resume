@@ -1,4 +1,4 @@
-import type { AnyDialogRendererEntry } from "../renderer-registry";
+import type { AnyDialogRendererEntry } from "../schemas";
 import { ChangePasswordDialog } from "./change-password";
 import { DisableTwoFactorDialog } from "./disable-two-factor";
 import { EnableTwoFactorDialog } from "./enable-two-factor";

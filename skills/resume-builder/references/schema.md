@@ -85,6 +85,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.profiles.items[].icon` | `string` | yes | — | The icon to display for the custom field. Must be a valid icon name from @phosphor-icons/web icon set, or an empty string to hide. Default to '' (empty string) when unsure which icons are available. |
 | `sections.profiles.items[].iconColor` | `string` | yes | default: "" | Custom color for the icon, defined as rgba(r, g, b, a). Leave blank to use the template default icon color. |
 | `sections.profiles.items[].network` | `string` | yes | minLength: 1 | The name of the network or platform. |
+| `sections.profiles.items[].mainEntryBold` | `boolean` | no | — | Whether the network name should be rendered in bold. Defaults to false. |
 | `sections.profiles.items[].username` | `string` | yes | — | The username of the author on the network or platform. |
 | `sections.profiles.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The link to the profile of the author on the network or platform, if any. |
 | `sections.profiles.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -197,6 +198,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.languages.items[].id` | `string` | yes | — | The unique identifier for the item. Usually generated as a UUID. |
 | `sections.languages.items[].hidden` | `boolean` | yes | — | Whether to hide the item from the resume. |
 | `sections.languages.items[].language` | `string` | yes | minLength: 1 | The name of the language the author knows. |
+| `sections.languages.items[].mainEntryBold` | `boolean` | no | — | Whether the language name should be rendered in bold. Defaults to false. |
 | `sections.languages.items[].fluency` | `string` | yes | — | The fluency level of the language. Can be any text, such as 'Native', 'Fluent', 'Conversational', etc. or can also be a CEFR level (A1, A2, B1, B2, C1, C2). |
 | `sections.languages.items[].level` | `number` | yes | minimum: 0; maximum: 5; default: 0 | The proficiency level of the language, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden. |
 | `sections.interests` | `object` | yes | — | The section to display the interests of the author. |
@@ -353,6 +355,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].icon` | `string` | yes (type profiles, schema profileItemSchema at customSections[]) | — | The icon to display for the custom field. Must be a valid icon name from @phosphor-icons/web icon set, or an empty string to hide. Default to '' (empty string) when unsure which icons are available. |
 | `customSections[].items[].iconColor` | `string` | yes (type profiles, schema profileItemSchema at customSections[]) | default: "" | Custom color for the icon, defined as rgba(r, g, b, a). Leave blank to use the template default icon color. |
 | `customSections[].items[].network` | `string` | yes (type profiles, schema profileItemSchema at customSections[]) | minLength: 1 | The name of the network or platform. |
+| `customSections[].items[].mainEntryBold` | `boolean` | no (type profiles, schema profileItemSchema at customSections[]) | — | Whether the network name should be rendered in bold. Defaults to false. |
 | `customSections[].items[].username` | `string` | yes (type profiles, schema profileItemSchema at customSections[]) | — | The username of the author on the network or platform. |
 | `customSections[].items[].website` | `object` | yes (type profiles, schema profileItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The link to the profile of the author on the network or platform, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type profiles, schema profileItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -478,6 +481,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].id` | `string` | yes (type languages, schema languageItemSchema at customSections[]) | — | The unique identifier for the item. Usually generated as a UUID. |
 | `customSections[].items[].hidden` | `boolean` | yes (type languages, schema languageItemSchema at customSections[]) | — | Whether to hide the item from the resume. |
 | `customSections[].items[].language` | `string` | yes (type languages, schema languageItemSchema at customSections[]) | minLength: 1 | The name of the language the author knows. |
+| `customSections[].items[].mainEntryBold` | `boolean` | no (type languages, schema languageItemSchema at customSections[]) | — | Whether the language name should be rendered in bold. Defaults to false. |
 | `customSections[].items[].fluency` | `string` | yes (type languages, schema languageItemSchema at customSections[]) | — | The fluency level of the language. Can be any text, such as 'Native', 'Fluent', 'Conversational', etc. or can also be a CEFR level (A1, A2, B1, B2, C1, C2). |
 | `customSections[].items[].level` | `number` | yes (type languages, schema languageItemSchema at customSections[]) | minimum: 0; maximum: 5; default: 0 | The proficiency level of the language, defined as a number between 0 and 5. If set to 0, the icons displaying the level will be hidden. |
 | `customSections[]` | `object` | — (type interests, schema interestItemSchema at customSections[]) | — | — |

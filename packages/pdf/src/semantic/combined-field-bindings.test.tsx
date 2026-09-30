@@ -248,7 +248,9 @@ describe("combined PDF field bindings", () => {
 			} else {
 				expect(aliases).toEqual([]);
 			}
-			expect(inventory.syntheticWrapperCount).toBe(0);
+			expect(
+				Object.values(inventory.bindings).every((binding) => binding.type === "alias" || binding.source === "existing"),
+			).toBe(true);
 		}
 
 		for (const [template, data, text] of [

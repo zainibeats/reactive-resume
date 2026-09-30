@@ -11,7 +11,7 @@ import { IconContext } from "@phosphor-icons/react";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
-import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
+import { domMax, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
 import { Toaster } from "@reactive-resume/ui/components/toast";
 import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
@@ -21,10 +21,8 @@ import { CommandPalette } from "@/features/command-palette";
 import { ThemeProvider } from "@/features/theme/provider";
 import { ConfirmDialogProvider } from "@/hooks/use-confirm";
 import { PromptDialogProvider } from "@/hooks/use-prompt";
-import { getSession } from "@/libs/auth/session";
-import { getLocale, isRTL, loadLocale } from "@/libs/locale";
-import { client } from "@/libs/orpc/client";
-import { getTheme } from "@/libs/theme";
+import { isRTL } from "@/libs/locale";
+import { loadRootContext } from "@/libs/root-context";
 
 type RouterContext = {
 	theme: Theme;
@@ -70,18 +68,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			],
 		};
 	},
-	beforeLoad: async () => {
-		const [theme, locale, session, flags] = await Promise.all([
-			getTheme(),
-			getLocale(),
-			getSession(),
-			client.flags.get(),
-		]);
-
-		await loadLocale(locale);
-
-		return { theme, locale, session, flags };
-	},
+	beforeLoad: async () => loadRootContext(),
 });
 
 function RootComponent() {
@@ -100,7 +87,7 @@ function RootComponent() {
 
 			<QueryClientProvider client={queryClient}>
 				<MotionConfig reducedMotion="user">
-					<LazyMotion features={domAnimation}>
+					<LazyMotion features={domMax}>
 						<I18nProvider i18n={i18n}>
 							<IconContext.Provider value={iconContextValue}>
 								<ThemeProvider theme={theme}>

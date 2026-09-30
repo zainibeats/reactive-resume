@@ -2,37 +2,19 @@ import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateFeatures, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
-import { rgbaStringToHex } from "@reactive-resume/utils/color";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { useRenderedSectionIds, useResolvedNode } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { createBaseTemplateStyles } from "../shared/base-template-styles";
 import { getPrimaryTint } from "../shared/color-helpers";
-import {
-	CustomFieldContactItem,
-	EmailContactItem,
-	LocationContactItem,
-	PhoneContactItem,
-	WebsiteContactItem,
-} from "../shared/contact-item";
 import { TemplateProvider } from "../shared/context";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
 import { PageMarginBackground } from "../shared/page-margin-background";
-import { hasTemplatePicture } from "../shared/picture";
-import {
-	Heading,
-	SemanticContactListView,
-	SemanticHeaderPicture,
-	SemanticHeaderView,
-	SemanticRegionView,
-	SemanticTemplatePartView,
-	Text,
-} from "../shared/primitives";
-import { createRtlStyleHelpers } from "../shared/rtl";
+import { SemanticRegionView, SemanticTemplatePartView } from "../shared/primitives";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
+import { createIconSlot, TemplateHeader, useTemplateBase } from "../shared/template-base";
 
 type GlalieStyles = Omit<TemplateStyleSlots, "page"> & {
 	page: Style;
@@ -135,42 +117,25 @@ export const GlaliePage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 	);
 };
 
-const Header = ({ styles }: GlalieHeaderProps) => {
-	const { basics, picture } = useRender();
-	const hasPicture = hasTemplatePicture(picture);
-
-	return (
-		<SemanticHeaderView style={styles.header}>
-			{hasPicture && <SemanticHeaderPicture src={picture.url} style={styles.picture} />}
-
-			<View style={styles.headerTitle}>
-				<View style={styles.headerIdentity}>
-					<Heading style={styles.headerName}>{basics.name}</Heading>
-					<Text>{basics.headline}</Text>
-				</View>
-			</View>
-
-			<SemanticContactListView style={styles.contactList}>
-				<EmailContactItem email={basics.email} style={styles.contactItem} />
-				<PhoneContactItem phone={basics.phone} style={styles.contactItem} />
-				<LocationContactItem location={basics.location} style={styles.contactItem} />
-				<WebsiteContactItem website={basics.website} style={styles.contactItem} />
-				{basics.customFields.map((field) => (
-					<CustomFieldContactItem key={field.id} field={field} style={styles.contactItem} />
-				))}
-			</SemanticContactListView>
-		</SemanticHeaderView>
-	);
-};
+const Header = ({ styles }: GlalieHeaderProps) => (
+	<TemplateHeader
+		styles={{
+			header: styles.header,
+			picture: styles.picture,
+			title: styles.headerTitle,
+			identity: styles.headerIdentity,
+			name: styles.headerName,
+			contactList: styles.contactList,
+			contactItem: styles.contactItem,
+		}}
+		contactListOutsideTitle
+	/>
+);
 
 const useGlalieTemplate = (): GlalieTemplate => {
-	const { picture, metadata, rtl } = useRender();
+	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
-		const foreground = rgbaStringToHex(metadata.design.colors.text);
-		const background = rgbaStringToHex(metadata.design.colors.background);
-		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const primaryTint = getPrimaryTint(metadata.design.colors.primary, 0.2);
 		const colors: TemplateColorRoles = {
 			foreground,
@@ -179,9 +144,6 @@ const useGlalieTemplate = (): GlalieTemplate => {
 			sidebarForeground: foreground,
 			sidebarBackground: primaryTint,
 		};
-		const metrics = getTemplateMetrics(metadata.page);
-
-		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
 			...base,
@@ -285,12 +247,21 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				sectionHeading: (context) => ({ ...baseStyles.sectionHeading, color: accentFor(context) }),
 				levelItem: (context) => ({ borderColor: accentFor(context) }),
 				levelItemActive: (context) => ({ backgroundColor: accentFor(context) }),
-				icon: (context) => ({
-					display: metadata.page.hideIcons ? "none" : "flex",
-					size: metadata.typography.body.fontSize,
-					color: accentFor(context),
-				}),
+				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies GlalieStyles,
 		};
-	}, [picture, metadata, rtl]);
+	}, [
+		metadata,
+		r.row,
+		r.anchorToStart,
+		primary,
+		metrics.sectionGap,
+		metrics.gapY,
+		metrics.page.paddingVertical,
+		metrics.gapX,
+		base,
+		metrics.page.paddingHorizontal,
+		foreground,
+		background,
+	]);
 };

@@ -2,12 +2,10 @@ import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
-import { rgbaStringToHex } from "@reactive-resume/utils/color";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { useRenderedSectionIds, useResolvedNode } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { createBaseTemplateStyles } from "../shared/base-template-styles";
 import { getPrimaryTint as getPrimaryAlpha } from "../shared/color-helpers";
 import {
 	CustomFieldContactItem,
@@ -29,9 +27,9 @@ import {
 	SemanticTemplatePartView,
 	Text,
 } from "../shared/primitives";
-import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
+import { createIconSlot, useTemplateBase } from "../shared/template-base";
 
 type LeafishStyles = Omit<TemplateStyleSlots, "page"> & {
 	page: Style;
@@ -152,19 +150,12 @@ const Header = ({ styles }: LeafishHeaderProps) => {
 };
 
 const useLeafishTemplate = (): LeafishTemplate => {
-	const { picture, metadata, rtl } = useRender();
+	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
-		const foreground = rgbaStringToHex(metadata.design.colors.text);
-		const background = rgbaStringToHex(metadata.design.colors.background);
-		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const primaryTintLight = getPrimaryAlpha(metadata.design.colors.primary, 0.1);
 		const primaryTintDark = getPrimaryAlpha(metadata.design.colors.primary, 0.2);
 		const colors: TemplateColorRoles = { foreground, background, primary };
-		const metrics = getTemplateMetrics(metadata.page);
-
-		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
 			...base,
@@ -250,12 +241,21 @@ const useLeafishTemplate = (): LeafishTemplate => {
 				sectionHeading: (context) => ({ ...baseStyles.sectionHeading, color: accentFor(context) }),
 				levelItem: (context) => ({ borderColor: accentFor(context) }),
 				levelItemActive: (context) => ({ backgroundColor: accentFor(context) }),
-				icon: (context) => ({
-					display: metadata.page.hideIcons ? "none" : "flex",
-					size: metadata.typography.body.fontSize,
-					color: accentFor(context),
-				}),
+				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies LeafishStyles,
 		};
-	}, [picture, metadata, rtl]);
+	}, [
+		metadata,
+		r.row,
+		r.headerIdentity,
+		primary,
+		metrics.gapY,
+		metrics.page.paddingVertical,
+		metrics.gapX,
+		base,
+		metrics.page.paddingHorizontal,
+		metrics.columnGap,
+		foreground,
+		background,
+	]);
 };

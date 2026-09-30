@@ -4,10 +4,6 @@ import { parseStoredResumeData } from "./resume-data-validation";
 
 export type PublicResumeSocialMetaInput = { username: string; slug: string };
 
-export type PublicResumeSocialMetaDependencies = {
-	findResume(input: PublicResumeSocialMetaInput): Promise<{ name: string; data: unknown } | null>;
-};
-
 // Only public, password-free resumes are matched. Password-protected resumes must not leak their
 // summary to an unauthenticated crawler, and this read deliberately skips the view counting and
 // access gating in resumeService.getBySlug — a card render is not a visit.
@@ -33,13 +29,8 @@ const findResume = async ({ username, slug }: PublicResumeSocialMetaInput) => {
 	return resume ?? null;
 };
 
-const defaultDependencies: PublicResumeSocialMetaDependencies = { findResume };
-
-export async function getPublicResumeSocialMeta(
-	input: PublicResumeSocialMetaInput,
-	dependencies: PublicResumeSocialMetaDependencies = defaultDependencies,
-): Promise<ResumeSocialMeta | null> {
-	const resume = await dependencies.findResume(input);
+export async function getPublicResumeSocialMeta(input: PublicResumeSocialMetaInput): Promise<ResumeSocialMeta | null> {
+	const resume = await findResume(input);
 	if (!resume) return null;
 
 	return getResumeSocialMeta(parseStoredResumeData(resume.data), resume.name);

@@ -24,7 +24,7 @@ export type PublicResumePdfDependencies = {
 	findResume(input: Pick<CreatePublicResumePdfInput, "username" | "slug">): Promise<PublicRenderResume | null>;
 	hasPasswordAccess(requestHeaders: Headers, resumeId: string, passwordHash: string | null): boolean | Promise<boolean>;
 	resolveCurrentUserId(requestHeaders: Headers): Promise<string | undefined>;
-	rateLimiter: { consume(input: { trustedClient: string; resumeId: string }): void };
+	rateLimiter: { consume(input: { trustedClient: string; resumeId: string }): void | Promise<void> };
 	renderPdf(input: { data: ResumeData; filename: string }): Promise<File>;
 };
 
@@ -78,7 +78,7 @@ export async function createPublicResumePdf(
 	}
 
 	const data = parseStoredResumeData(resume.data);
-	dependencies.rateLimiter.consume({ trustedClient: input.trustedClient, resumeId: resume.id });
+	await dependencies.rateLimiter.consume({ trustedClient: input.trustedClient, resumeId: resume.id });
 	const filename = generateFilename(data.basics.name || "Resume", "pdf");
 	return { body: await dependencies.renderPdf({ data, filename }), filename };
 }

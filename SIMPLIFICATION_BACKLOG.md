@@ -21,6 +21,25 @@ References:
 - `packages/mcp/src/mcp-server-card.ts`
 - `apps/server/src/mcp/server.ts`
 
+### Keep upstream's Vercel deployment and cover-letter MCP surface out - Done
+
+The September 2026 upstream merge (v5.3.2) added one-click Vercel Hobby deployment and MCP tools for the independent
+cover-letter library. This fork deploys as a self-hosted Docker instance and keeps MCP resume-only.
+
+Completed change:
+
+- Dropped Vercel deployment files: `vercel.json`, `api/index.mjs`, `.vercelignore`, `.github/workflows/vercel.yml`,
+  `docs/self-hosting/vercel.mdx`, `docs/contributing/deployment-checks.mdx`, `docs/guides/large-rpc-requests.mdx`, and `tooling/deployment/smoke.mjs`.
+- Kept upstream's env-gated Vercel runtime code (Blob storage backend, staged large RPC requests, lazy auth init) because it
+  is entangled with shared storage/oRPC/auth paths and inert outside Vercel.
+- Did not register the cover-letter MCP tools; `mcp-server-card.test.ts` pins their absence.
+
+References:
+
+- `packages/mcp/src/mcp-tool-names.ts`
+- `knip.json`
+- `docs/docs.json`
+
 ### Remove hosted-service structured marketing data - Done
 
 The focused first-visit screen still emitted hidden FAQ, pricing, project, and software marketing schemas. The FAQ was not

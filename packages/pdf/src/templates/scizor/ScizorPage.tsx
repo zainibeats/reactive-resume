@@ -2,12 +2,10 @@ import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
-import { rgbaStringToHex } from "@reactive-resume/utils/color";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
 import { useRenderedSectionIds, useResolvedNode } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { createBaseTemplateStyles } from "../shared/base-template-styles";
 import {
 	CustomFieldContactItem,
 	EmailContactItem,
@@ -28,9 +26,9 @@ import {
 	SemanticTemplatePartView,
 	Text,
 } from "../shared/primitives";
-import { createRtlStyleHelpers } from "../shared/rtl";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight } from "../shared/styles";
+import { createIconSlot, useTemplateBase } from "../shared/template-base";
 
 type ScizorStyles = Omit<TemplateStyleSlots, "page"> & {
 	page: Style;
@@ -112,17 +110,11 @@ const Header = ({ styles }: ScizorHeaderProps) => {
 };
 
 const useScizorTemplate = (): ScizorTemplate => {
-	const { picture, metadata, rtl } = useRender();
+	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
-		const foreground = rgbaStringToHex(metadata.design.colors.text);
-		const background = rgbaStringToHex(metadata.design.colors.background);
-		const primary = rgbaStringToHex(metadata.design.colors.primary);
 		const divider = "#D8DCE2";
 		const colors: TemplateColorRoles = { foreground, background, primary };
-		const metrics = getTemplateMetrics(metadata.page);
-		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		const baseStyles = StyleSheet.create({
 			...base,
@@ -219,12 +211,25 @@ const useScizorTemplate = (): ScizorTemplate => {
 				},
 				levelItem: (context) => ({ borderColor: accentFor(context) }),
 				levelItemActive: (context) => ({ backgroundColor: accentFor(context) }),
-				icon: (context) => ({
-					display: metadata.page.hideIcons ? "none" : "flex",
-					size: metadata.typography.body.fontSize,
-					color: accentFor(context),
-				}),
+				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies ScizorStyles,
 		};
-	}, [picture, metadata, rtl]);
+	}, [
+		metadata,
+		r.row,
+		r.headerIdentity,
+		primary,
+		metrics.sectionGap,
+		metrics.page.paddingVertical,
+		metrics.page.paddingHorizontal,
+		metrics.itemGapY,
+		foreground,
+		metrics.gapY,
+		base.page,
+		background,
+		base.heading,
+		metrics.gapX,
+		base.bold,
+		base,
+	]);
 };

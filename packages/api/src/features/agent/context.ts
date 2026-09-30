@@ -25,7 +25,7 @@ function isBinary(value: unknown): value is ArrayBufferView | ArrayBuffer {
 // so serialization-based estimation would expand binary into per-byte entries (hundreds of MB of
 // JSON for one allowed 25MB attachment). String leaves go through tokenx; binary counts as
 // opaque bytes; structural syntax gets a small flat cost.
-function estimateTokens(value: unknown): number {
+export function estimateTokens(value: unknown): number {
 	if (value === null || value === undefined) return 1;
 	if (typeof value === "string") return estimateTextTokenCount(value);
 	if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return 2;
@@ -41,10 +41,6 @@ function estimateTokens(value: unknown): number {
 		return sum;
 	}
 	return 2;
-}
-
-export function estimateTokenCount(value: unknown): number {
-	return estimateTokens(value);
 }
 
 function contentParts(message: ModelMessage): LoosePart[] {
@@ -116,18 +112,10 @@ function hasApprovalContent(message: ModelMessage): boolean {
 	);
 }
 
-function lastIndexWhere<T>(items: T[], predicate: (item: T) => boolean): number {
-	for (let index = items.length - 1; index >= 0; index--) {
-		// biome-ignore lint/style/noNonNullAssertion: index is in range
-		if (predicate(items[index]!)) return index;
-	}
-	return -1;
-}
-
 // Tier 2: collapse the oldest tool call/result pairs into stubs — always both sides of a pair
 // (several BYOK gateways reject unpaired tool messages), never the protected regions.
 function collapseOldestToolPairs(messages: ModelMessage[], budget: number): ModelMessage[] {
-	const lastAssistantIndex = lastIndexWhere(messages, (message) => message.role === "assistant");
+	const lastAssistantIndex = messages.findLastIndex((message) => message.role === "assistant");
 	const survivingSnapshotCallIds = new Set<string>();
 
 	// The surviving snapshot (last one, by Tier 0) must keep its full pair.
@@ -152,7 +140,7 @@ function collapseOldestToolPairs(messages: ModelMessage[], budget: number): Mode
 	let changed = false;
 
 	for (const [index, message] of next.entries()) {
-		if (estimateTokenCount(next) <= budget) break;
+		if (estimateTokens(next) <= budget) break;
 		if (index === lastAssistantIndex || hasApprovalContent(message)) continue;
 		if (message.role !== "assistant" && message.role !== "tool") continue;
 
@@ -194,7 +182,7 @@ function dropOldestTurns(messages: ModelMessage[], budget: number): ModelMessage
 
 	const turns = turnStarts.map((start, turnIndex) => messages.slice(start, turnStarts[turnIndex + 1]));
 	let dropCount = 0;
-	while (dropCount < turns.length - 2 && estimateTokenCount(turns.slice(dropCount).flat()) > budget) {
+	while (dropCount < turns.length - 2 && estimateTokens(turns.slice(dropCount).flat()) > budget) {
 		dropCount += 1;
 	}
 
@@ -206,15 +194,15 @@ export function pruneAgentModelContext(
 	budget: number = AGENT_CONTEXT_TOKEN_BUDGET,
 ): ModelMessage[] {
 	let current = supersedeStaleSnapshots(messages);
-	if (estimateTokenCount(current) <= budget) return current;
+	if (estimateTokens(current) <= budget) return current;
 
 	// Tier 1: strip reasoning from all but the last assistant message.
 	const withoutReasoning = pruneMessages({ messages: current, reasoning: "before-last-message" });
-	if (estimateTokenCount(withoutReasoning) < estimateTokenCount(current)) current = withoutReasoning;
-	if (estimateTokenCount(current) <= budget) return current;
+	if (estimateTokens(withoutReasoning) < estimateTokens(current)) current = withoutReasoning;
+	if (estimateTokens(current) <= budget) return current;
 
 	current = collapseOldestToolPairs(current, budget);
-	if (estimateTokenCount(current) <= budget) return current;
+	if (estimateTokens(current) <= budget) return current;
 
 	return dropOldestTurns(current, budget);
 }

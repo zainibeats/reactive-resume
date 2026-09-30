@@ -40,6 +40,8 @@ type ProviderRowProps = {
 const SELF_HOSTED_GROUP = { value: "self-hosted", label: t`Local & self-hosted` };
 const HOSTED_GROUP = { value: "hosted", label: t`Hosted providers` };
 
+// Provider labels are brand names and stay untranslated on purpose, so every locale shows the
+// vendor's own spelling instead of a literal translation (e.g. "Google Gemini", not "谷歌双子座").
 const providerOptions: AIProviderOption[] = [
 	{
 		value: "lmstudio",
@@ -51,7 +53,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "ollama",
-		label: t`Ollama`,
+		label: "Ollama",
 		group: SELF_HOSTED_GROUP,
 		keywords: ["ollama", "local", "cloud"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.ollama,
@@ -59,7 +61,7 @@ const providerOptions: AIProviderOption[] = [
 	},
 	{
 		value: "openai-compatible",
-		label: t`OpenAI-compatible`,
+		label: "OpenAI-compatible",
 		group: SELF_HOSTED_GROUP,
 		keywords: ["compatible", "custom", "gateway", "llama.cpp", "vllm"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS["openai-compatible"],
@@ -68,7 +70,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "openai",
 		group: HOSTED_GROUP,
-		label: t`OpenAI`,
+		label: "OpenAI",
 		keywords: ["openai", "gpt", "chatgpt"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.openai,
 		defaultModel: "gpt-4.1",
@@ -76,7 +78,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "anthropic",
 		group: HOSTED_GROUP,
-		label: t`Anthropic Claude`,
+		label: "Anthropic Claude",
 		keywords: ["anthropic", "claude", "ai"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.anthropic,
 		defaultModel: "claude-3-5-sonnet-latest",
@@ -84,7 +86,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "gemini",
 		group: HOSTED_GROUP,
-		label: t`Google Gemini`,
+		label: "Google Gemini",
 		keywords: ["gemini", "google"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.gemini,
 		defaultModel: "gemini-2.0-flash",
@@ -92,7 +94,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "vercel-ai-gateway",
 		group: HOSTED_GROUP,
-		label: t`Vercel AI Gateway`,
+		label: "Vercel AI Gateway",
 		keywords: ["vercel", "gateway", "ai"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS["vercel-ai-gateway"],
 		defaultModel: "openai/gpt-4.1",
@@ -100,7 +102,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "openrouter",
 		group: HOSTED_GROUP,
-		label: t`OpenRouter`,
+		label: "OpenRouter",
 		keywords: ["openrouter", "router"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.openrouter,
 		defaultModel: "openai/gpt-4.1",
@@ -108,7 +110,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "mistral",
 		group: HOSTED_GROUP,
-		label: t`Mistral AI`,
+		label: "Mistral AI",
 		keywords: ["mistral", "magistral"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.mistral,
 		defaultModel: "mistral-large-latest",
@@ -116,7 +118,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "cohere",
 		group: HOSTED_GROUP,
-		label: t`Cohere`,
+		label: "Cohere",
 		keywords: ["cohere", "command"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.cohere,
 		defaultModel: "command-a-03-2025",
@@ -124,7 +126,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "xai",
 		group: HOSTED_GROUP,
-		label: t`xAI Grok`,
+		label: "xAI Grok",
 		keywords: ["xai", "grok"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.xai,
 		defaultModel: "grok-4",
@@ -132,7 +134,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "groq",
 		group: HOSTED_GROUP,
-		label: t`Groq`,
+		label: "Groq",
 		keywords: ["groq", "llama"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.groq,
 		defaultModel: "llama-3.3-70b-versatile",
@@ -140,7 +142,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "deepseek",
 		group: HOSTED_GROUP,
-		label: t`DeepSeek`,
+		label: "DeepSeek",
 		keywords: ["deepseek"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.deepseek,
 		defaultModel: "deepseek-chat",
@@ -148,7 +150,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "togetherai",
 		group: HOSTED_GROUP,
-		label: t`Together.ai`,
+		label: "Together.ai",
 		keywords: ["together", "togetherai", "llama"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.togetherai,
 		defaultModel: "meta-llama/Meta-Llama-3.3-70B-Instruct-Turbo",
@@ -156,7 +158,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "fireworks",
 		group: HOSTED_GROUP,
-		label: t`Fireworks`,
+		label: "Fireworks",
 		keywords: ["fireworks", "llama", "deepseek"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.fireworks,
 		defaultModel: "accounts/fireworks/models/llama-v3p3-70b-instruct",
@@ -164,7 +166,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "cerebras",
 		group: HOSTED_GROUP,
-		label: t`Cerebras`,
+		label: "Cerebras",
 		keywords: ["cerebras", "llama"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.cerebras,
 		defaultModel: "llama3.3-70b",
@@ -172,7 +174,7 @@ const providerOptions: AIProviderOption[] = [
 	{
 		value: "perplexity",
 		group: HOSTED_GROUP,
-		label: t`Perplexity`,
+		label: "Perplexity",
 		keywords: ["perplexity", "sonar"],
 		defaultBaseURL: AI_PROVIDER_DEFAULT_BASE_URLS.perplexity,
 		defaultModel: "sonar-pro",

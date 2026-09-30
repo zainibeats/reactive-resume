@@ -10,9 +10,6 @@ import {
 	isStandardPdfFontFamily,
 	resolveBoldFontWeight,
 	resolveLegacyFontAlias,
-	standardFontList,
-	webFontList,
-	webFontMap,
 } from "./index";
 
 const sortFontFamilies = (families: string[]) => {
@@ -32,21 +29,22 @@ describe("fontList", () => {
 		expect(families).toContain("Times-Roman");
 	});
 
-	it("merges standardFontList and webFontList without duplicates", () => {
-		const expectedSize = standardFontList.length + webFontList.length;
-		expect(fontList).toHaveLength(expectedSize);
+	it("contains no duplicate font families", () => {
+		const families = fontList.map((font) => font.family.toLowerCase());
+		expect(new Set(families).size).toBe(families.length);
 	});
 });
 
-describe("standardFontList", () => {
-	it("contains only fonts not present in webFontMap", () => {
-		for (const font of standardFontList) {
-			expect(webFontMap.has(font.family)).toBe(false);
+describe("standard PDF fonts", () => {
+	it("exposes standard fonts that are not part of the web font catalog", () => {
+		for (const family of ["Helvetica", "Courier", "Times-Roman"]) {
+			expect(isStandardPdfFontFamily(family)).toBe(true);
+			expect(getWebFont(family)).toBeUndefined();
 		}
 	});
 
 	it("marks all standard fonts with type='standard'", () => {
-		for (const font of standardFontList) {
+		for (const font of fontList.filter((font) => isStandardPdfFontFamily(font.family))) {
 			expect(font.type).toBe("standard");
 		}
 	});

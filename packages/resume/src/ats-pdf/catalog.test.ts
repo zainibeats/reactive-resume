@@ -11,12 +11,10 @@ import {
 const CATEGORIES = ["parseability", "layout", "sections", "contact", "dates", "content"];
 
 describe("PDF_ATS_RULE_CATALOG_V1", () => {
-	it("gives every rule a category, a meaning and an action", () => {
+	it("gives every rule a category", () => {
 		for (const code of PDF_ATS_RULE_CODES) {
 			const rule = PDF_ATS_RULE_CATALOG_V1[code];
 			expect(CATEGORIES).toContain(rule.category);
-			expect(rule.meaning.length).toBeGreaterThan(0);
-			expect(rule.action.length).toBeGreaterThan(0);
 		}
 	});
 

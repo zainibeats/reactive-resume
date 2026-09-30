@@ -86,9 +86,6 @@ export type SemanticBindingRegistry = Readonly<
 
 export type BindingInventory = {
 	bindings: Readonly<Record<string, SemanticBinding>>;
-	aliasTokensByNodeKey: Readonly<Record<string, readonly string[]>>;
-	unboundNodeKeys: readonly string[];
-	syntheticWrapperCount: number;
 };
 
 const existing = (primitive: PrimitiveBinding["primitive"]): PrimitiveBinding => ({
@@ -165,28 +162,14 @@ export function createBindingInventory(
 	registry: SemanticBindingRegistry = SHARED_BINDING_REGISTRY,
 ): BindingInventory {
 	const bindings: Record<string, SemanticBinding> = {};
-	const aliasTokensByNodeKey: Record<string, readonly string[]> = {};
-	const unboundNodeKeys: string[] = [];
 	const nodes = new Map<string, SemanticNode>();
-	let syntheticWrapperCount = 0;
 
 	const visit = (node: SemanticNode, parent?: SemanticNode) => {
 		nodes.set(node.key, node);
-		const aliasTokens = node.attributes.part?.split(" ").filter(Boolean);
-		if (aliasTokens?.length) aliasTokensByNodeKey[node.key] = aliasTokens;
+
 		const declaration = registry[node.kind];
 		const binding = typeof declaration === "function" ? declaration(node, { parent }) : declaration;
-
-		if (!binding) {
-			unboundNodeKeys.push(node.key);
-		} else {
-			bindings[node.key] = binding;
-
-			if (binding.type === "primitive" && binding.source === "synthetic") {
-				syntheticWrapperCount += 1;
-				unboundNodeKeys.push(node.key);
-			}
-		}
+		if (binding) bindings[node.key] = binding;
 
 		for (const child of node.children) visit(child, node);
 	};
@@ -204,9 +187,8 @@ export function createBindingInventory(
 			canonicalBinding.source !== "existing"
 		) {
 			delete bindings[nodeKey];
-			unboundNodeKeys.push(nodeKey);
 		}
 	}
 
-	return { bindings, aliasTokensByNodeKey, unboundNodeKeys, syntheticWrapperCount };
+	return { bindings };
 }

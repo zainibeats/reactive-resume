@@ -1,5 +1,6 @@
 // biome-ignore-all lint/style/noNonNullAssertion: These tests assert imported section lengths before inspecting the first item.
 import { describe, expect, it } from "vitest";
+import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { parseJSONResume } from "./json-resume";
 
 describe("parseJSONResume", () => {
@@ -12,6 +13,29 @@ describe("parseJSONResume", () => {
 		const invalid = JSON.stringify({ basics: { email: "not-an-email" } });
 		expect(() => parseJSONResume(invalid)).toThrow();
 	});
+
+	it.each([
+		"2024-00",
+		"2024-13",
+		"2024-19",
+		"2024-00-01",
+		"2024-13-01",
+		"2024-01-00",
+		"2024-01-32",
+		"2024-1",
+		"2024-1-5",
+	])("rejects the malformed date %s and names the field", (startDate) => {
+		const json = JSON.stringify({ work: [{ name: "Acme", position: "Engineer", startDate }] });
+		expect(() => parseJSONResume(json)).toThrow(/work\.0\.startDate \(Must be a valid ISO 8601 date/);
+	});
+
+	it.each(["2024", "2024-01", "2024-12", "2024-02-29", "1999-12-31"])(
+		"still accepts the valid date %s",
+		(startDate) => {
+			const json = JSON.stringify({ work: [{ name: "Acme", position: "Engineer", startDate }] });
+			expect(() => parseJSONResume(json)).not.toThrow();
+		},
+	);
 
 	it("imports an empty JSON Resume into a baseline ResumeData", () => {
 		const result = parseJSONResume("{}");
@@ -163,5 +187,13 @@ describe("parseJSONResume", () => {
 		const project = result.sections.projects.items[0]!;
 		expect(project.name).toBe("Open source CLI");
 		expect(project.description).toContain("10k stars");
+	});
+
+	it("does not leak section data from one import into the next", () => {
+		parseJSONResume(JSON.stringify({ work: [{ name: "Acme", position: "Engineer" }] }));
+		const next = parseJSONResume("{}");
+
+		expect(next.sections.experience.items).toHaveLength(0);
+		expect(defaultResumeData.sections.experience.items).toHaveLength(0);
 	});
 });

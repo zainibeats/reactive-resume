@@ -11,7 +11,6 @@ type CommandPaletteActions = {
 	setSearch: (search: string) => void;
 	pushPage: (page: string) => void;
 	peekPage: () => string | undefined;
-	popPage: () => void;
 	reset: () => void;
 	goBack: () => void;
 };
@@ -37,8 +36,6 @@ export const useCommandPaletteStore = create<CommandPaletteStore>((set, get) => 
 	peekPage: () => get().pages[get().pages.length - 1],
 
 	pushPage: (page) => set((state) => ({ pages: [...state.pages, page], search: "" })),
-
-	popPage: () => set((state) => ({ pages: state.pages.slice(0, -1), search: "" })),
 
 	reset: () => set(initialState),
 

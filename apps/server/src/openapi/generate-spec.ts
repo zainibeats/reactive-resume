@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-export async function generateOpenApiDocumentation(
+async function generateOpenApiDocumentation(
 	target = fileURLToPath(new URL("../../../../docs/spec.json", import.meta.url)),
 ) {
 	const packageJson = JSON.parse(await readFile(new URL("../../../../package.json", import.meta.url), "utf8")) as {

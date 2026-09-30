@@ -129,7 +129,7 @@ export function withAccumulatedUsageMetadata(previous: UIMessage, next: UIMessag
 	return { ...next, metadata: { ...nextMetadata, usage } } as UIMessage;
 }
 
-async function nextMessageSequence(threadId: string, database: AgentMessagesDb) {
+export async function nextMessageSequence(threadId: string, database: AgentMessagesDb) {
 	const [row] = await database
 		.select({ maxSequence: max(schema.agentMessage.sequence) })
 		.from(schema.agentMessage)
@@ -138,7 +138,7 @@ async function nextMessageSequence(threadId: string, database: AgentMessagesDb) 
 	return (row?.maxSequence ?? -1) + 1;
 }
 
-async function touchThread(input: { threadId: string; userId: string }, database: AgentMessagesDb) {
+export async function touchThread(input: { threadId: string; userId: string }, database: AgentMessagesDb) {
 	await database
 		.update(schema.agentThread)
 		.set({ lastMessageAt: new Date() })

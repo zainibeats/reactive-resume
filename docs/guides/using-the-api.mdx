@@ -61,3 +61,43 @@ description: "Create Reactive Resume API keys, authenticate REST requests with b
 
   </Step>
 </Steps>
+
+## Cover-letter REST endpoint migration
+
+Cover-letter REST operations now use `/cover-letters` resource paths and HTTP methods instead of the automatically generated `/coverLetters/*` POST endpoints. This is a **breaking change for REST clients**: the old REST URLs are no longer served and return `404`. There are no compatibility aliases.
+
+All paths below are relative to `/api/openapi` on your instance. Authentication with `x-api-key` is unchanged.
+
+| Previous endpoint | Replacement endpoint |
+| --- | --- |
+| `POST /coverLetters/list` | `GET /cover-letters` |
+| `POST /coverLetters/getById` | `GET /cover-letters/{id}` |
+| `POST /coverLetters/create` | `POST /cover-letters` |
+| `POST /coverLetters/update` | `PUT /cover-letters/{id}` |
+| `POST /coverLetters/refreshStyle` | `POST /cover-letters/{id}/refresh-style` |
+| `POST /coverLetters/duplicate` | `POST /cover-letters/{id}/duplicate` |
+| `POST /coverLetters/delete` | `DELETE /cover-letters/{id}` |
+| `POST /coverLetters/copyEmbedded` | `POST /cover-letters/from-resume` |
+| `POST /coverLetters/export` | `GET /cover-letters/{id}/export` |
+| `POST /coverLetters/import` | `POST /cover-letters/import` |
+
+Update request inputs as well as the URL and method:
+
+- Move `id` from the JSON body into the URL path wherever `{id}` appears. URL-encode the ID as a single path segment.
+- For listing, send `search`, `resumeId`, `applicationId`, `limit`, and `offset` as query parameters, not a JSON body. The get-by-ID and export operations also have no request body.
+- Keep the remaining inputs as JSON for POST, PUT, and DELETE requests, with `Content-Type: application/json`. In particular, `expectedRevision` remains required in the JSON body for update, refresh-style, and delete; refreshing style also requires `resumeId`.
+- Create, copy-from-resume, and import keep their existing JSON inputs. Update still modifies only the supplied fields; it does not replace the entire document.
+- Successful operations return `200`, including create and delete. Delete has an empty response body; do not expect `204` or parse a JSON document from it. Other response shapes are unchanged.
+
+For example, list cover letters with query parameters:
+
+```bash
+curl --get "https://rxresu.me/api/openapi/cover-letters" \
+  -H "x-api-key: YOUR_API_KEY" \
+  --data-urlencode "search=Engineer" \
+  --data-urlencode "limit=20"
+```
+
+If you generate an SDK, regenerate it from your instance's `/api/openapi/spec.json` after upgrading: operation IDs have changed too (for example, `coverLetters.getById` is now `getCoverLetter`). Self-hosted clients should use the spec from the version they are running.
+
+This migration applies only to REST under `/api/openapi`. Existing oRPC clients under `/api/rpc` continue to use the same `coverLetters.*` procedure names and RPC protocol; do not apply the REST path or payload changes to them.

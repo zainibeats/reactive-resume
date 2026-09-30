@@ -30,12 +30,10 @@ describe("ATS_RULE_CATALOG_V1", () => {
 		`);
 	});
 
-	it("gives every rule a severity, a meaning and an action", () => {
+	it("gives every rule a severity", () => {
 		for (const code of ATS_RULE_CODES) {
 			const rule = ATS_RULE_CATALOG_V1[code];
 			expect(["error", "warning", "info"]).toContain(rule.severity);
-			expect(rule.meaning.length).toBeGreaterThan(0);
-			expect(rule.action.length).toBeGreaterThan(0);
 		}
 	});
 

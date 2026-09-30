@@ -57,6 +57,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browser
+        timeout-minutes: 10
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Generate Test Secrets

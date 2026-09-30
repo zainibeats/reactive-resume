@@ -1,4 +1,4 @@
-import type { PdfCategory, PdfRuleCode, PdfSeverity, PdfSkipReason } from "@reactive-resume/resume/ats-pdf";
+import type { PdfCategory, PdfRuleCode, PdfSeverity } from "@reactive-resume/resume/ats-pdf";
 import { t } from "@lingui/core/macro";
 import { match } from "ts-pattern";
 
@@ -368,16 +368,5 @@ export function getPdfSeverityLabel(severity: PdfSeverity): string {
 		.with("blocker", () => t`Blocker`)
 		.with("warning", () => t`Warning`)
 		.with("tip", () => t`Tip`)
-		.exhaustive();
-}
-
-export function getPdfSkipReasonLabel(reason: PdfSkipReason): string {
-	return match(reason)
-		.with("no-text", () => t`No text could be read from this file.`)
-		.with("no-operators", () => t`This file's page contents could not be inspected in time.`)
-		.with("not-english", () => t`This check only runs on resumes written in English.`)
-		.with("not-applicable", () => t`This check does not apply to this file.`)
-		.with("encrypted", () => t`This file is encrypted.`)
-		.with("insufficient-data", () => t`There was not enough information to run this check.`)
 		.exhaustive();
 }

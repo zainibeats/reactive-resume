@@ -1,6 +1,6 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { ModelMessage, UIMessage } from "ai";
+import type { ModelMessage } from "ai";
 import { inflateRawSync } from "node:zlib";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createCerebras } from "@ai-sdk/cerebras";
@@ -15,23 +15,11 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createPerplexity } from "@ai-sdk/perplexity";
 import { createTogetherAI } from "@ai-sdk/togetherai";
 import { createXai } from "@ai-sdk/xai";
-import { streamToEventIterator } from "@orpc/server";
-import {
-	APICallError,
-	convertToModelMessages,
-	createGateway,
-	generateText,
-	LoadAPIKeyError,
-	NoSuchModelError,
-	stepCountIs,
-	streamText,
-	tool,
-} from "ai";
+import { APICallError, createGateway, generateText, LoadAPIKeyError, NoSuchModelError } from "ai";
 import { createOllama } from "ollama-ai-provider-v2";
 import { match } from "ts-pattern";
 import { z } from "zod";
 import {
-	chatSystemPromptTemplate,
 	docxParserSystemPrompt,
 	docxParserUserPrompt,
 	pdfParserSystemPrompt,
@@ -39,13 +27,7 @@ import {
 } from "@reactive-resume/ai/prompts";
 import { buildAiExtractionTemplate } from "@reactive-resume/ai/resume/extraction-template";
 import { sanitizeAndParseResumeJson } from "@reactive-resume/ai/resume/sanitize";
-import {
-	normalizeResumePatchProposals,
-	resumePatchProposalToolInputSchema,
-	resumePatchProposalToolOutputSchema,
-} from "@reactive-resume/ai/tools/patch-proposal";
 import { AI_PROVIDER_DEFAULT_BASE_URLS, AI_PROVIDER_DISPLAY_NAMES, aiProviderSchema } from "@reactive-resume/ai/types";
-import { applyResumePatches } from "@reactive-resume/resume/patch";
 import { supportsProviderNativeWebSearch } from "./capabilities";
 import { resolveAiBaseUrl } from "./url-policy";
 
@@ -94,29 +76,15 @@ const TEST_CONNECTION_MAX_OUTPUT_TOKENS = 128;
 // AbortSignal.timeout stores the delay as a 32-bit signed integer.
 const MAX_ABORT_SIGNAL_TIMEOUT_MS = 2_147_483_647;
 
-/**
- * Parse `AI_TEST_TIMEOUT_MS` into a safe, finite, non-negative integer.
- *
- * Rejects empty, non-numeric, negative, fractional, and out-of-range values
- * so that `AbortSignal.timeout` never receives an invalid delay.
- *
- * @param raw - The raw environment variable value, if set.
- * @param fallback - Milliseconds to use when `raw` is missing or invalid.
- * @returns The validated timeout in milliseconds.
- */
-function parseTestConnectionTimeoutMs(raw: string | undefined, fallback: number): number {
-	if (raw === undefined) return fallback;
-	const trimmed = raw.trim();
-	if (trimmed === "") return fallback;
-	if (!/^\d+$/.test(trimmed)) return fallback;
-	const value = Number(trimmed);
-	if (value < 0 || value > MAX_ABORT_SIGNAL_TIMEOUT_MS) return fallback;
-	return value;
-}
-
 // Long enough for a cold local model to load, short enough that the UI does not look frozen.
 // Self-hosted deployments with cold-start models (e.g. Ollama) can override via AI_TEST_TIMEOUT_MS.
-const TEST_CONNECTION_TIMEOUT_MS = parseTestConnectionTimeoutMs(process.env.AI_TEST_TIMEOUT_MS, 30_000);
+const TEST_CONNECTION_TIMEOUT_MS = z.coerce
+	.number()
+	.int()
+	.nonnegative()
+	.max(MAX_ABORT_SIGNAL_TIMEOUT_MS)
+	.catch(30_000)
+	.parse(process.env.AI_TEST_TIMEOUT_MS?.trim() || undefined);
 const DOCX_DOCUMENT_XML_PATH = "word/document.xml";
 const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const ZIP_CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50;
@@ -499,49 +467,7 @@ async function parseDocx(input: ParseDocxInput): Promise<ResumeData> {
 	return parseAndValidateResumeJson(result.text);
 }
 
-function buildChatSystemPrompt(resumeData: ResumeData): string {
-	return chatSystemPromptTemplate.replace("{{RESUME_DATA}}", JSON.stringify(resumeData, null, 2));
-}
-
-type ChatInput = z.infer<typeof aiCredentialsSchema> & {
-	messages: UIMessage[];
-	resumeData: ResumeData;
-	resumeUpdatedAt: Date;
-};
-
-async function chat(input: ChatInput) {
-	const model = getModel(input);
-	const systemPrompt = buildChatSystemPrompt(input.resumeData);
-
-	const result = streamText({
-		model,
-		system: systemPrompt,
-		messages: await convertToModelMessages(input.messages),
-		tools: {
-			propose_resume_patches: tool({
-				description:
-					"Return one or more cohesive resume change proposals. Each proposal must include a title, optional summary, and valid JSON Patch operations against the current resume data. The tool validates but does not apply changes.",
-				inputSchema: resumePatchProposalToolInputSchema,
-				outputSchema: resumePatchProposalToolOutputSchema,
-				execute: (toolInput) => {
-					const proposals = normalizeResumePatchProposals(toolInput, input.resumeUpdatedAt);
-
-					for (const proposal of proposals) {
-						applyResumePatches(input.resumeData, proposal.operations);
-					}
-
-					return { proposals };
-				},
-			}),
-		},
-		stopWhen: stepCountIs(3),
-	});
-
-	return streamToEventIterator(result.toUIMessageStream());
-}
-
 export const aiService = {
-	chat,
 	parseDocx,
 	parsePdf,
 	testConnection,

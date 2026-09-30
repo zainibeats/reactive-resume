@@ -1,16 +1,9 @@
 import type { TemplateSemanticManifest } from "../../semantic/template-manifest";
-import { itemHeaderRowPart } from "../../semantic/shared-parts";
+import { baseManifest, itemHeaderRowPart } from "../../semantic/shared-parts";
 
-export const rhyhornSemanticManifest = {
-	template: "rhyhorn",
-	regions: [
-		{ name: "header", placement: "main", origins: [] },
-		{ name: "main", placement: "main", origins: ["main"] },
-		{ name: "sidebar", placement: "sidebar", origins: ["sidebar"] },
-	],
-	header: { region: "header", placement: "main" },
-	specialSummary: null,
-	parts: [
+export const rhyhornSemanticManifest = baseManifest(
+	"rhyhorn",
+	[
 		itemHeaderRowPart,
 		{
 			name: "contact-item-content",
@@ -30,5 +23,5 @@ export const rhyhornSemanticManifest = {
 			binding: { type: "alias", canonicalKind: "contact-item", token: "contact-item-last" },
 		},
 	],
-	canonicalBindings: [{ kind: "contact-item", binding: { type: "primitive", primitive: "View", source: "existing" } }],
-} as const satisfies TemplateSemanticManifest;
+	[{ kind: "contact-item", binding: { type: "primitive", primitive: "View", source: "existing" } }],
+) satisfies TemplateSemanticManifest;

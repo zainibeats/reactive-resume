@@ -96,11 +96,11 @@ function SidebarItemList({ items }: SidebarItemListProps) {
 			{items.map((item) => (
 				<SidebarMenuItem key={item.href}>
 					<SidebarMenuButton
-						title={i18n.t(item.label)}
+						tooltip={i18n.t(item.label)}
 						render={
 							<Link to={item.href} activeProps={{ className: "bg-sidebar-accent" }}>
 								{item.icon}
-								<span className="shrink-0 transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
+								<span className="shrink-0 transition-opacity duration-150 ease-out-strong group-data-[collapsible=icon]:opacity-0 group-data-instant/sidebar-wrapper:transition-none">
 									{i18n.t(item.label)}
 								</span>
 							</Link>
@@ -161,14 +161,14 @@ export function DashboardSidebar() {
 						<UserDropdownMenu>
 							{({ session }) => (
 								<SidebarMenuButton className="h-auto gap-x-3 group-data-[collapsible=icon]:p-1!">
-									<Avatar className="size-8 shrink-0 transition-all group-data-[collapsible=icon]:size-6">
+									<Avatar className="size-8 shrink-0 group-data-[collapsible=icon]:size-6">
 										<AvatarImage src={session.user.image ?? undefined} />
 										<AvatarFallback className="group-data-[collapsible=icon]:text-[0.5rem]">
 											{getInitials(session.user.name)}
 										</AvatarFallback>
 									</Avatar>
 
-									<div className="transition-[margin,opacity] duration-200 ease-in-out group-data-[collapsible=icon]:-ms-8 group-data-[collapsible=icon]:opacity-0">
+									<div className="transition-opacity duration-150 ease-out-strong group-data-[collapsible=icon]:opacity-0 group-data-instant/sidebar-wrapper:transition-none">
 										<p className="font-medium">{session.user.name}</p>
 										<p className="text-muted-foreground text-xs">{session.user.email}</p>
 									</div>

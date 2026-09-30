@@ -1,6 +1,9 @@
 import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
 import { MCP_TOOL_NAME as T } from "./mcp-tool-names";
+import { PROMPT_META } from "./prompts";
 import { TOOL_META } from "./tool-meta";
+
+const RESUME_ID_ARGUMENT = [{ name: "id", description: "Resume ID.", required: true }] as const;
 
 /**
  * Static MCP server card (SEP-1649 / well-known `mcp/server-card.json`).
@@ -19,27 +22,11 @@ export function buildMcpServerCard(appVersion: string, appUrl = "https://rxresu.
 		annotations,
 	}));
 
-	const prompts = [
-		{
-			name: "build_resume",
-			title: "Build Resume",
-			description: "Guide the user step-by-step through building a resume from scratch, section by section.",
-			arguments: [{ name: "id", description: "Resume ID.", required: true }],
-		},
-		{
-			name: "improve_resume",
-			title: "Improve Resume",
-			description: "Review resume content and suggest concrete improvements to wording, impact, and structure.",
-			arguments: [{ name: "id", description: "Resume ID.", required: true }],
-		},
-		{
-			name: "review_resume",
-			title: "Review Resume",
-			description:
-				"Get a structured, professional critique with a scorecard and prioritized recommendations. Read-only: no changes are made.",
-			arguments: [{ name: "id", description: "Resume ID.", required: true }],
-		},
-	];
+	const prompts = Object.entries(PROMPT_META).map(([name, meta]) => ({
+		name,
+		...meta,
+		arguments: [...RESUME_ID_ARGUMENT],
+	}));
 
 	const resources = [
 		{
@@ -103,6 +90,7 @@ export function buildMcpServerCard(appVersion: string, appUrl = "https://rxresu.
 	};
 }
 
+/** Shared server identity for both the live MCP server and the static server card. */
 export function buildMcpServerInfo(appVersion: string, appUrl: string) {
 	const websiteUrl = new URL(appUrl);
 

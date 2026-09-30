@@ -58,6 +58,17 @@ const formSchema = z.discriminatedUnion("type", [
 			),
 	}),
 	z.object({
+		type: z.literal("linkedin"),
+		file: z
+			.instanceof(File)
+			.refine(
+				(file) => file.type === "" || file.type === "application/zip" || file.name.toLowerCase().endsWith(".zip"),
+				{
+					message: "File must be a ZIP archive",
+				},
+			),
+	}),
+	z.object({
 		type: z.literal("reactive-resume-json"),
 		file: z
 			.instanceof(File)
@@ -101,6 +112,11 @@ async function detectImportType(file: File): Promise<ImportType> {
 	const isZip = header[0] === 0x50 && header[1] === 0x4b && header[2] === 0x03 && header[3] === 0x04; // "PK\x03\x04"
 
 	if (isPdf || mime === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+
+	// Word documents are also ZIPs, so a bare "PK" header is ambiguous. LinkedIn's export is
+	// only ever named with a .zip extension, so check that first and let it win the tie.
+	if (name.endsWith(".zip") || mime === "application/zip") return "linkedin";
+
 	if (
 		isZip ||
 		mime === "application/msword" ||
@@ -144,13 +160,13 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 
 			setIsImporting(true);
 
-			// A PDF parsed in the browser never touches a provider, so promising one would be a lie.
-			const isLocalPdf = value.type === "pdf" && !hasUsableProvider;
+			// A LinkedIn export, or a PDF parsed in the browser, never touches a provider, so promising one would be a lie.
+			const isLocalParse = value.type === "linkedin" || (value.type === "pdf" && !hasUsableProvider);
 
 			const toastId = toast.add({
 				type: "loading",
 				title: t`Importing your resume...`,
-				description: isLocalPdf
+				description: isLocalParse
 					? t`This may take a moment. Please do not close the window or refresh the page.`
 					: t`This may take a few minutes, depending on the response of the AI provider. Please do not close the window or refresh the page.`,
 			});
@@ -193,6 +209,12 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 
 						data = parseResumeText(lines.join("\n"));
 					}
+				}
+
+				if (value.type === "linkedin") {
+					const { parseLinkedInExport } = await import("@reactive-resume/import/linkedin");
+					const bytes = new Uint8Array(await value.file.arrayBuffer());
+					data = parseLinkedInExport(bytes);
 				}
 
 				if (value.type === "docx") {
@@ -315,7 +337,8 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 				<DialogDescription>
 					<Trans>
 						Continue where you left off by importing a resume you built in Reactive Resume or another resume builder.
-						Supported formats are PDF, Microsoft Word, and JSON files from Reactive Resume or JSON Resume.
+						Supported formats are PDF, Microsoft Word, a LinkedIn data export, and JSON files from Reactive Resume or
+						JSON Resume.
 					</Trans>
 				</DialogDescription>
 			</DialogHeader>
@@ -334,12 +357,18 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 							<FormLabel>
 								<Trans>File</Trans>
 							</FormLabel>
-							<FormControl>
-								<Input type="file" className="hidden" ref={inputRef} onChange={onUploadFile} />
+							<FormControl className="group/upload relative">
+								<Input
+									type="file"
+									className="absolute inset-0 z-1 h-full w-full cursor-pointer opacity-0"
+									tabIndex={-1}
+									ref={inputRef}
+									onChange={onUploadFile}
+								/>
 
 								<Button
 									variant="outline"
-									className="h-auto w-full flex-col border-dashed py-8 font-normal"
+									className="h-auto w-full flex-col border-dashed py-8 font-normal group-hover/upload:bg-muted group-hover/upload:text-foreground"
 									onClick={onSelectFile}
 								>
 									{field.state.value ? (
@@ -393,6 +422,14 @@ export function ImportResumeDialog(_: DialogProps<"resume.import">) {
 													label: t({
 														comment: "Import source option for standard JSON Resume format",
 														message: "JSON Resume",
+													}),
+												},
+												{
+													value: "linkedin",
+													textValue: "LinkedIn",
+													label: t({
+														comment: "Import source option for a LinkedIn data export ZIP",
+														message: "LinkedIn (Data Export)",
 													}),
 												},
 												{

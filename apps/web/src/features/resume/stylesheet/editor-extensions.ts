@@ -34,44 +34,40 @@ function walk(root: SemanticNode): SemanticNode[] {
 	return nodes;
 }
 
-function unique(values: readonly string[]): string[] {
-	return [...new Set(values)];
-}
-
 function selectorLabels(metadata: SemanticCssEditorMetadata): string[] {
 	const nodes = walk(metadata.semanticTree);
-	const attributes = unique([
-		"id",
-		"role",
-		...Object.values(SEMANTIC_REGISTRY_V1).flatMap(({ attributes }) => attributes),
-	]);
-	const roles = unique(Object.values(SEMANTIC_REGISTRY_V1).flatMap(({ roles }) => roles));
-	return unique([
-		...SEMANTIC_NODE_KINDS,
-		"*",
-		...nodes.flatMap((node) => (node.id ? [`#${escapeCssIdentifier(node.id)}`] : [])),
-		...attributes.map((attribute) => `[${escapeCssIdentifier(attribute)}]`),
-		...nodes.flatMap((node) =>
-			Object.entries(node.attributes).map(
-				([name, value]) => `[${escapeCssIdentifier(name)}=${escapeCssString(value)}]`,
+	const attributes = [
+		...new Set(["id", "role", ...Object.values(SEMANTIC_REGISTRY_V1).flatMap(({ attributes }) => attributes)]),
+	];
+	const roles = [...new Set(Object.values(SEMANTIC_REGISTRY_V1).flatMap(({ roles }) => roles))];
+	return [
+		...new Set([
+			...SEMANTIC_NODE_KINDS,
+			"*",
+			...nodes.flatMap((node) => (node.id ? [`#${escapeCssIdentifier(node.id)}`] : [])),
+			...attributes.map((attribute) => `[${escapeCssIdentifier(attribute)}]`),
+			...nodes.flatMap((node) =>
+				Object.entries(node.attributes).map(
+					([name, value]) => `[${escapeCssIdentifier(name)}=${escapeCssString(value)}]`,
+				),
 			),
-		),
-		...roles.map((role) => `[role~=${escapeCssString(role)}]`),
-		...metadata.templateParts.map((name) => `template-part[name=${escapeCssString(name)}]`),
-		":root",
-		":first-child",
-		":last-child",
-		":only-child",
-		":nth-child()",
-		":nth-of-type()",
-		":is()",
-		":where()",
-		":not()",
-	]);
+			...roles.map((role) => `[role~=${escapeCssString(role)}]`),
+			...metadata.templateParts.map((name) => `template-part[name=${escapeCssString(name)}]`),
+			":root",
+			":first-child",
+			":last-child",
+			":only-child",
+			":nth-child()",
+			":nth-of-type()",
+			":is()",
+			":where()",
+			":not()",
+		]),
+	];
 }
 
 function userVariables(source: string): string[] {
-	return unique([...source.matchAll(/(--(?!resume-)[-_a-zA-Z0-9]+)\s*:/g)].map((match) => match[1] as string));
+	return [...new Set([...source.matchAll(/(--(?!resume-)[-_a-zA-Z0-9]+)\s*:/g)].map((match) => match[1] as string))];
 }
 
 function completionKind(source: string, position: number): "directive" | "property" | "selector" | "system" | "value" {
@@ -110,12 +106,14 @@ function completionLabels(source: string, position: number, metadata: SemanticCs
 		case "value": {
 			const property = declarationProperty(source, position);
 			const definition = property ? PROPERTY_REGISTRY_V1[property] : undefined;
-			return unique([
-				...(definition?.values ?? []),
-				...(definition?.units ?? []),
-				...userVariables(source),
-				...Object.keys(SYSTEM_VARIABLE_REGISTRY_V1),
-			]);
+			return [
+				...new Set([
+					...(definition?.values ?? []),
+					...(definition?.units ?? []),
+					...userVariables(source),
+					...Object.keys(SYSTEM_VARIABLE_REGISTRY_V1),
+				]),
+			];
 		}
 	}
 }

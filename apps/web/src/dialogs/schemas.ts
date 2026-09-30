@@ -1,4 +1,5 @@
 import type { CoverLetterItem, CustomSection, SectionItem, SummaryItem } from "@reactive-resume/schema/resume/data";
+import type { ReactNode } from "react";
 
 type EmptyDialog<T extends string> = { [K in T]: { type: K; data?: undefined } }[T];
 
@@ -58,6 +59,15 @@ export type DialogSchema =
 	| { type: "resume.sections.custom.update"; data: CustomSection };
 
 export type DialogType = DialogSchema["type"];
+
+type DialogRendererEntry<T extends DialogType = DialogType> = {
+	type: T;
+	render: (dialog: Extract<DialogSchema, { type: T }>) => ReactNode;
+};
+
+export type AnyDialogRendererEntry = {
+	[T in DialogType]: DialogRendererEntry<T>;
+}[DialogType];
 
 export type DialogData<T extends DialogType> = Extract<DialogSchema, { type: T }>["data"];
 

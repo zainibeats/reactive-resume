@@ -995,8 +995,4 @@ export type { TemplateSemanticManifest } from "./template-manifest";
 export { shouldShowResumeHeader } from "../templates/shared/cover-letter";
 export { createBindingInventory, STANDARD_FIELD_REGISTRY, STANDARD_ROLE_REGISTRY } from "./binding-inventory";
 export { semanticNodeKeys } from "./node-keys";
-export {
-	getTemplateSemanticBindingRegistry,
-	getTemplateSemanticManifest,
-	validateTemplateSemanticManifest,
-} from "./template-manifest";
+export { getTemplateSemanticBindingRegistry, getTemplateSemanticManifest } from "./template-manifest";

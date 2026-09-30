@@ -32,9 +32,9 @@ describe("rich text template styles", () => {
 		(_name, file) => {
 			const source = readFileSync(file, "utf8");
 
-			if (source.includes("createBaseTemplateStyles")) {
+			if (source.includes("createBaseTemplateStyles") || source.includes("useTemplateBase")) {
 				// Factory handles richListItemContent; guard is on the factory test above.
-				expect(source).toContain("createBaseTemplateStyles");
+				expect(source.includes("createBaseTemplateStyles") || source.includes("useTemplateBase")).toBe(true);
 				return;
 			}
 
