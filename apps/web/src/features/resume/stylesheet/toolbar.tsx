@@ -1,13 +1,6 @@
 import { t } from "@lingui/core/macro";
-import {
-	ArrowsInIcon,
-	ArrowsOutIcon,
-	ArrowUUpLeftIcon,
-	ArrowUUpRightIcon,
-	CopyIcon,
-	MagicWandIcon,
-} from "@phosphor-icons/react";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@reactive-resume/ui/components/tooltip";
 import { copySourceToClipboard } from "./editor-extensions";
 
@@ -58,20 +51,20 @@ export function StylesheetToolbar({
 }: StylesheetToolbarProps) {
 	return (
 		<div className="flex flex-wrap items-center gap-1" role="toolbar" aria-label={t`Stylesheet editor`}>
-			<ToolbarButton label={t`Undo stylesheet edit`} disabled={disabled || !canUndo} onClick={onUndo}>
-				<ArrowUUpLeftIcon data-icon="inline-start" />
+			<ToolbarButton label={t`Undo resume change`} disabled={disabled || !canUndo} onClick={onUndo}>
+				<Icon name="undo" size={16} />
 			</ToolbarButton>
-			<ToolbarButton label={t`Redo stylesheet edit`} disabled={disabled || !canRedo} onClick={onRedo}>
-				<ArrowUUpRightIcon data-icon="inline-start" />
+			<ToolbarButton label={t`Redo resume change`} disabled={disabled || !canRedo} onClick={onRedo}>
+				<Icon name="redo" size={16} />
 			</ToolbarButton>
 			<ToolbarButton label={t`Copy stylesheet`} onClick={() => void copySourceToClipboard(source)}>
-				<CopyIcon data-icon="inline-start" />
+				<Icon name="content_copy" size={16} />
 			</ToolbarButton>
 			<ToolbarButton label={t`Format stylesheet`} disabled={disabled} onClick={onFormat}>
-				<MagicWandIcon data-icon="inline-start" />
+				<Icon name="auto_fix_high" size={16} />
 			</ToolbarButton>
 			<ToolbarButton label={focused ? t`Exit focus mode` : t`Open focus mode`} onClick={onFocusToggle}>
-				{focused ? <ArrowsInIcon data-icon="inline-start" /> : <ArrowsOutIcon data-icon="inline-start" />}
+				{focused ? <Icon name="close_fullscreen" size={16} /> : <Icon name="open_in_full" size={16} />}
 			</ToolbarButton>
 		</div>
 	);

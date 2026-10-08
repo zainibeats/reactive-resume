@@ -24,7 +24,7 @@ export async function main() {
 
 	const app = createApp();
 
-	serve(
+	const server = serve(
 		{
 			fetch: app.fetch,
 			port,
@@ -33,6 +33,22 @@ export async function main() {
 			console.info(`🚀 Up and running on http://localhost:${info.port}`);
 		},
 	);
+
+	let shuttingDown = false;
+	const shutdown = () => {
+		if (shuttingDown) return;
+		shuttingDown = true;
+		// Stop accepting connections, then wait for active requests before exiting.
+		server.close((error) => {
+			if (error) {
+				console.error("Failed to drain HTTP requests", error);
+				process.exit(1);
+			}
+			process.exit(0);
+		});
+	};
+	process.once("SIGTERM", shutdown);
+	process.once("SIGINT", shutdown);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

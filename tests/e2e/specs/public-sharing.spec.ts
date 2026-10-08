@@ -1,4 +1,5 @@
-import { createSampleResumeFromDashboard, openSidebarSection } from "../fixtures/resume";
+import { readFile } from "node:fs/promises";
+import { createSampleResumeFromDashboard, makeResumePublic } from "../fixtures/resume";
 import { expect, test } from "../fixtures/test";
 
 test("counts a visitor's PDF download without counting the preview", async ({ browser, authPage: page }, testInfo) => {
@@ -11,13 +12,7 @@ test("counts a visitor's PDF download without counting the preview", async ({ br
 		expect(response.ok()).toBe(true);
 		return response.json();
 	};
-	await openSidebarSection(page, "Sharing");
-
-	await page.getByRole("switch", { name: /Allow Public Access/ }).click();
-	const sharingUrl = page.locator("#sharing-url");
-	await expect(sharingUrl).toHaveValue(/\/e2e_/);
-	const publicUrl = await sharingUrl.inputValue();
-	expect(publicUrl).toMatch(/\/e2e_/);
+	const publicUrl = await makeResumePublic(page);
 
 	const anonymous = await browser.newPage();
 	try {
@@ -33,12 +28,13 @@ test("counts a visitor's PDF download without counting the preview", async ({ br
 		if (!downloadPath) throw new Error("The browser did not save the PDF");
 		expect((await readFile(downloadPath)).subarray(0, 5).toString()).toBe("%PDF-");
 		await expect.poll(readStatistics).toMatchObject({ views: 1, downloads: 1, lastDownloadedAt: expect.any(String) });
-		const daily = await page.request.get(`${statisticsUrl}/daily?days=1`);
+		// Two UTC days, summed: a visit that straddles midnight still adds up.
+		const daily = await page.request.get(`${statisticsUrl}/daily?days=2`);
 		expect(daily.ok()).toBe(true);
-		expect(await daily.json()).toEqual([{ date: expect.any(String), views: 1, downloads: 1 }]);
+		const days = (await daily.json()) as { views: number; downloads: number }[];
+		expect(days.reduce((sum, day) => sum + day.views, 0)).toBe(1);
+		expect(days.reduce((sum, day) => sum + day.downloads, 0)).toBe(1);
 	} finally {
 		await anonymous.close();
 	}
 });
-
-import { readFile } from "node:fs/promises";

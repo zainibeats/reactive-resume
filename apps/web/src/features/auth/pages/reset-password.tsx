@@ -1,18 +1,17 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
+import { useSelector } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { useToggle } from "usehooks-ts";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
-import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { PasswordInput } from "@/components/input/password-input";
 import { authClient } from "@/libs/auth/client";
 import { useAppForm } from "@/libs/tanstack-form";
 
 const formSchema = z.object({
-	password: z.string().min(6).max(64),
+	password: z.string().min(8).max(64),
 });
 
 type Props = {
@@ -21,7 +20,6 @@ type Props = {
 
 export function ResetPasswordPage({ token }: Props) {
 	const navigate = useNavigate();
-	const [showPassword, toggleShowPassword] = useToggle(false);
 
 	const form = useAppForm({
 		defaultValues: { password: "" },
@@ -55,14 +53,16 @@ export function ResetPasswordPage({ token }: Props) {
 		},
 	});
 
+	const isSubmitting = useSelector(form.store, (state) => state.isSubmitting);
+
 	return (
 		<>
 			<div className="space-y-1 text-center">
-				<h1 className="font-semibold text-2xl tracking-tight">
+				<h1 className="text-2xl font-semibold tracking-tight">
 					<Trans>Reset your password</Trans>
 				</h1>
 
-				<div className="text-muted-foreground">
+				<div className="text-ink-3">
 					<Trans>Enter a new password for your account</Trans>
 				</div>
 			</div>
@@ -81,47 +81,25 @@ export function ResetPasswordPage({ token }: Props) {
 							<FormLabel>
 								<Trans comment="Label for new password input on reset-password form">New Password</Trans>
 							</FormLabel>
-							<div className="flex items-center gap-x-1.5">
-								<FormControl
-									render={
-										<Input
-											min={6}
-											max={64}
-											type={showPassword ? "text" : "password"}
-											autoComplete="new-password"
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(event) => field.handleChange(event.target.value)}
-										/>
-									}
-								/>
-
-								<Button
-									size="icon"
-									variant="ghost"
-									onClick={toggleShowPassword}
-									aria-label={
-										showPassword
-											? t({
-													comment: "Accessible label for button that hides password in reset-password form",
-													message: "Hide password",
-												})
-											: t({
-													comment: "Accessible label for button that reveals password in reset-password form",
-													message: "Show password",
-												})
-									}
-								>
-									{showPassword ? <EyeIcon /> : <EyeSlashIcon />}
-								</Button>
-							</div>
+							<FormControl
+								render={
+									<PasswordInput
+										minLength={8}
+										maxLength={64}
+										autoComplete="new-password"
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(event) => field.handleChange(event.target.value)}
+									/>
+								}
+							/>
 							<FormMessage errors={field.state.meta.errors} />
 						</FormItem>
 					)}
 				</form.Field>
 
-				<Button type="submit" className="w-full">
+				<Button type="submit" className="w-full" disabled={isSubmitting}>
 					<Trans comment="Primary action button label on reset-password form">Reset Password</Trans>
 				</Button>
 			</form>

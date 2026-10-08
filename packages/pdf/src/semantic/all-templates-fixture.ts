@@ -1,7 +1,8 @@
+import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import { createSampleResumeData } from "@reactive-resume/schema/resume/sample";
 
-export const comprehensiveStylesheet = {
+const comprehensiveStylesheet = {
 	languageVersion: 1,
 	text: `@version 1;
 :root { --accent: var(--resume-primary-color); }
@@ -16,6 +17,29 @@ section[type="projects"] { break-inside: avoid; -resume-min-presence-ahead: 24pt
 resume[template="azurill"] template-part[name="timeline-dot"] { background-color: var(--accent); }
 `,
 } as const;
+
+/** A cover letter, as resumes carried them and as a letter's own document still renders it. */
+const LETTER_SECTION: ResumeData["customSections"][number] = {
+	title: "Cover Letter",
+	icon: "envelope-simple",
+	columns: 1,
+	hidden: false,
+	showHeading: true,
+	keepTogether: false,
+	startOnNewPage: false,
+	id: "019bef5b-0b3d-7e2a-8a7c-12d9e23a4f6b",
+	type: "cover-letter",
+	items: [
+		{
+			id: "019bef5b-0f8d-77d1-9b2a-4a1b65e1b8aa",
+			hidden: false,
+			recipient:
+				'<p>Hiring Manager<br />Sunrise Games Studio<br />Seattle, WA<br /><a href="mailto:hiring@sunrisegames.com">hiring@sunrisegames.com</a></p>',
+			content:
+				"<p>Dear Hiring Manager,</p><p>I'm excited to apply for the Senior Gameplay Engineer role at Sunrise Games Studio. Over the past five years, I have shipped cross-platform titles in Unity and Unreal Engine, leading core gameplay and tooling efforts that improved iteration speed and player experience. At Cascade Studios, I architected combat systems and optimized performance to maintain 60 FPS on console while partnering closely with design and art.</p><p>I thrive in collaborative, cross-disciplinary teams and enjoy mentoring junior engineers. I'd welcome the chance to bring my gameplay systems expertise and tooling focus to your next title.</p><p>Sincerely,<br />David Kowalski</p>",
+		},
+	],
+};
 
 export const buildAllTemplatesFixture = (template: Template) => {
 	const data = structuredClone(createSampleResumeData("Semantic CSS Acceptance"));
@@ -50,6 +74,9 @@ export const buildAllTemplatesFixture = (template: Template) => {
 	for (const certification of data.sections.certifications.items) {
 		certification.description = "<p>Verified certification.</p>";
 	}
+	// Letters render through the same templates, as a cover-letter section; the fixture keeps one to cover it.
+	data.customSections.push(LETTER_SECTION);
+	data.metadata.layout.pages.push({ fullWidth: true, main: [LETTER_SECTION.id], sidebar: [] });
 	data.metadata.template = template;
 	data.metadata.stylesheet = {
 		mode: "semantic",

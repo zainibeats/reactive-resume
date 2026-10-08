@@ -1,5 +1,5 @@
-import type { StylesheetSource } from "@reactive-resume/schema/resume/stylesheet";
 import type { CompiledStyleRule, CompileStylesheetResult, StyleProgram } from "./types";
+import type { StylesheetSource } from "@reactive-resume/schema/resume/stylesheet";
 import { getCachedStylesheet, setCachedStylesheet, stylesheetCacheKey } from "./cache";
 import { createDiagnostic, isFatalStylesheetDiagnostic } from "./diagnostics";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
@@ -8,10 +8,6 @@ import { PROPERTY_REGISTRY_V1 } from "./registry/properties";
 import { SEMANTIC_NODE_KINDS } from "./registry/semantic";
 import { SYSTEM_VARIABLE_REGISTRY_V1 } from "./registry/system-variables";
 import { compileProgram, cssFunctionDepth } from "./values";
-
-function isPositiveInteger(value: string): boolean {
-	return /^[1-9]\d*$/.test(value);
-}
 
 const compileVersionOne = (rules: readonly CompiledStyleRule[]): StyleProgram =>
 	Object.freeze({ languageVersion: 1, rules: Object.freeze([...rules]) });
@@ -42,53 +38,6 @@ export function compileStylesheet(source: StylesheetSource): CompileStylesheetRe
 
 	const stylesheet = parseStylesheet(source.text);
 	const diagnostics = [...stylesheet.diagnostics];
-	const versionDirectives = stylesheet.atRules.filter((atRule) => atRule.name === "version");
-
-	if (versionDirectives.length === 0 && source.languageVersion === 1) {
-		diagnostics.push(
-			createDiagnostic("MISSING_VERSION_DIRECTIVE", "warning", "Version-one stylesheets should start with @version 1;"),
-		);
-	}
-
-	if (versionDirectives.length > 1) {
-		for (const directive of versionDirectives.slice(1)) {
-			diagnostics.push(
-				createDiagnostic(
-					"DUPLICATE_VERSION_DIRECTIVE",
-					"error",
-					"A stylesheet can contain only one @version directive.",
-					directive.range,
-				),
-			);
-		}
-	}
-
-	for (const directive of versionDirectives) {
-		if (directive.hasBlock || !isPositiveInteger(directive.prelude)) {
-			diagnostics.push(
-				createDiagnostic(
-					"INVALID_VERSION",
-					"error",
-					"@version must contain one positive integer and no block.",
-					directive.range,
-				),
-			);
-			continue;
-		}
-
-		const version = Number(directive.prelude);
-		if (version !== source.languageVersion) {
-			diagnostics.push(
-				createDiagnostic(
-					"VERSION_MISMATCH",
-					"error",
-					"@version must match the stylesheet language version.",
-					directive.range,
-				),
-			);
-		}
-	}
-
 	const compiler = source.languageVersion === 1 ? compileVersionOne : undefined;
 	if (!compiler) {
 		diagnostics.push(

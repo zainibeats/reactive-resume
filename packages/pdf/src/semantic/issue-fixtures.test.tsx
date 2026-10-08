@@ -1,12 +1,11 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { describe, expect, it, vi } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
-import { compileStylesheet } from "@reactive-resume/resume/stylesheet";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../document";
+import { pdf } from "../forme/testing";
 import { semanticNodeKeys } from "./node-keys";
-import { resolveResumePresentation, resolveStylesheetMode } from "./resolve";
+import { resolveResumeRuntime } from "./resolve";
 
 const source = (text: string) => ({ languageVersion: 1, text });
 
@@ -96,16 +95,6 @@ const buildIssueFixture = (): ResumeData => {
 	return data;
 };
 
-const resolveIssueFixture = (text: string) => {
-	const data = buildIssueFixture();
-	return resolveResumePresentation({
-		data,
-		template: "onyx",
-		source: source(text),
-		mode: "semantic",
-	});
-};
-
 const pageKey = semanticNodeKeys.page(1);
 const headerKey = semanticNodeKeys.header(semanticNodeKeys.region(pageKey, "header"));
 const sectionItemKey = (section: string) =>
@@ -115,28 +104,6 @@ const sectionItemKey = (section: string) =>
 	);
 
 describe("semantic issue fixtures", () => {
-	it("lets semantic field font weight override template bold defaults (#3146)", () => {
-		const presentation = resolveIssueFixture(`
-			@version 1;
-			section[type="experience"] field[name="company"] { font-weight: 400; }
-		`);
-		const company = semanticNodeKeys.field(semanticNodeKeys.itemHeader(sectionItemKey("experience")), "company");
-
-		expect(presentation[company]?.style?.fontWeight).toBe("400");
-	});
-
-	it("lets semantic link decoration override the builder underline base (#3134)", () => {
-		const presentation = resolveIssueFixture(`
-			@version 1;
-			link { text-decoration: none; }
-		`);
-		const contact = semanticNodeKeys.contactItem(semanticNodeKeys.contactList(headerKey), "email");
-		const link = semanticNodeKeys.link(contact, "contact");
-
-		expect(presentation[link]?.style?.textDecoration).toBe("none");
-		expect(presentation[contact]?.style?.textDecoration).toBe("none");
-	});
-
 	it("cascades contact-link and field-rich-text aliases before selecting winners", () => {
 		const data = buildIssueFixture();
 		const experience = data.sections.experience.items[0];
@@ -146,12 +113,11 @@ describe("semantic issue fixtures", () => {
 		const field = semanticNodeKeys.field(sectionItemKey("experience"), "description");
 
 		const resolve = (text: string) =>
-			resolveResumePresentation({
+			resolveResumeRuntime({
 				data,
 				template: "onyx",
 				source: source(`@version 1;${text}`),
-				mode: "semantic",
-			});
+			}).presentation;
 
 		expect(resolve("contact-item { color: red; } link { color: blue; }")[contact]?.style?.color).toBe("blue");
 		expect(resolve("link { color: blue; } contact-item { color: red; }")[contact]?.style?.color).toBe("red");
@@ -160,51 +126,6 @@ describe("semantic issue fixtures", () => {
 		expect(resolve("link { color: blue; } contact-item[name='email'] { color: red; }")[contact]?.style?.color).toBe(
 			"red",
 		);
-	});
-
-	it("styles Basics/header nodes while rejecting unsupported gradients (#3137)", () => {
-		const valid = resolveIssueFixture(`
-			@version 1;
-			header { background-color: #1e293b; }
-			name { color: white; }
-		`);
-		const invalid = compileStylesheet(source("@version 1; header { background-image: linear-gradient(red, blue); }"));
-
-		expect(valid[headerKey]?.style?.backgroundColor).toBe("#1e293b");
-		expect(valid[semanticNodeKeys.headerPart(headerKey, "name")]?.style?.color).toBe("white");
-		expect(invalid.program).not.toBeNull();
-	});
-
-	it("unbolds only skill names and leaves experience titles unchanged (#2223)", () => {
-		const presentation = resolveIssueFixture(`
-			@version 1;
-			section[type="skills"] field[name="name"] { font-weight: 400; }
-		`);
-		const skillName = semanticNodeKeys.field(semanticNodeKeys.itemHeader(sectionItemKey("skills")), "name");
-		const company = semanticNodeKeys.field(semanticNodeKeys.itemHeader(sectionItemKey("experience")), "company");
-
-		expect(presentation[skillName]?.style?.fontWeight).toBe("400");
-		expect(presentation[company]?.style?.fontWeight).not.toBe("400");
-	});
-
-	it("never applies legacy and semantic custom styles together", () => {
-		const semanticData = buildIssueFixture();
-		semanticData.metadata.stylesheet = {
-			mode: "semantic",
-			source: source("@version 1;"),
-		};
-		const legacyData = buildIssueFixture();
-
-		expect(resolveStylesheetMode(semanticData)).toBe("semantic");
-		expect(resolveStylesheetMode(legacyData)).toBe("legacy");
-		expect(
-			resolveResumePresentation({
-				data: legacyData,
-				template: "onyx",
-				source: source("@version 1; name { color: red; }"),
-				mode: "legacy",
-			}),
-		).toEqual({});
 	});
 
 	it("applies issue-regression styles to the final existing PDF primitives", async () => {
@@ -247,22 +168,6 @@ describe("semantic issue fixtures", () => {
 	it("hides section heading decoration without hiding section content", async () => {
 		const data = buildIssueFixture();
 		data.sections.experience.showHeading = false;
-		const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
-		const instance = pdf(element);
-		await vi.waitFor(() => expect(instance.container.document).not.toBeNull());
-		const document = instance.container.document as HostNode;
-
-		expect(findText(document, "Experience")).toBeUndefined();
-		expect(findText(document, "Analytical Engines")).toBeDefined();
-	});
-
-	it("characterizes section-heading display:none as a CSS alternative", async () => {
-		const data = buildIssueFixture();
-		data.metadata.page.hideSectionIcons = false;
-		data.metadata.stylesheet = {
-			mode: "semantic",
-			source: source('@version 1; section[id="experience"] section-heading { display: none; }'),
-		};
 		const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
 		const instance = pdf(element);
 		await vi.waitFor(() => expect(instance.container.document).not.toBeNull());

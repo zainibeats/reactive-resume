@@ -1,17 +1,13 @@
-import { createSampleResumeFromDashboard, openSidebarSection } from "../fixtures/resume";
+import { createSampleResumeFromDashboard, makeResumePublic } from "../fixtures/resume";
 import { expect, test } from "../fixtures/test";
 
 test("password-protects a public resume and unlocks it as a visitor", async ({ browser, authPage: page }, testInfo) => {
 	await createSampleResumeFromDashboard(page, testInfo);
-	await openSidebarSection(page, "Sharing");
-
-	await page.getByRole("switch", { name: /Allow Public Access/ }).click();
-	const sharingUrl = page.locator("#sharing-url");
-	await expect(sharingUrl).toHaveValue(/\/e2e_/);
-	const publicUrl = await sharingUrl.inputValue();
+	const publicUrl = await makeResumePublic(page);
 
 	const password = "e2e-secret-42";
-	await page.getByRole("button", { name: "Set Password" }).click();
+	const requirePassword = page.getByRole("switch", { name: "Require a password" });
+	await requirePassword.click();
 	const dialog = page.getByRole("dialog", { name: "Protect your resume with a password" });
 	await dialog.getByLabel("Password", { exact: true }).fill(password);
 	await dialog.getByLabel("Confirm Password", { exact: true }).fill("different-password");
@@ -19,7 +15,7 @@ test("password-protects a public resume and unlocks it as a visitor", async ({ b
 	await expect(dialog.getByRole("alert")).toHaveText("Passwords do not match.");
 	await dialog.getByLabel("Confirm Password", { exact: true }).fill(password);
 	await dialog.getByRole("button", { name: "Set Password" }).click();
-	await expect(page.getByRole("button", { name: "Remove Password" })).toBeVisible();
+	await expect(requirePassword).toBeChecked();
 
 	const anonymous = await browser.newPage();
 	try {

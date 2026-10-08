@@ -1,9 +1,8 @@
-// Shared typed contracts for the /agent workspace tools. Zod is the only runtime import — the
+// Shared typed contracts for the assistant's tools. Zod is the only runtime import — the
 // "ai" package is a devDependency used with `import type` only, so this file stays
 // runtime-universal (consumed by both the API tool definitions and the web chat UI).
 import type { UIDataTypes, UIMessage } from "ai";
 import z from "zod";
-import { jsonPatchOperationSchema } from "@reactive-resume/resume/patch";
 
 export const askUserQuestionInputSchema = z.object({
 	question: z.string().trim().min(1),
@@ -11,28 +10,126 @@ export const askUserQuestionInputSchema = z.object({
 	recommendedChoice: z.string().trim().optional(),
 });
 
-export const applyResumePatchInputSchema = z.object({
-	title: z.string().trim().min(1),
-	summary: z.string().trim().optional(),
-	// The `updatedAt` of the read_resume / apply_resume_patch result the operations were built
-	// against. Execution rejects the patch when the resume has changed since, so index-based
-	// operations can never silently target different items (e.g. after a user edit while an
-	// approval was pending). Optional for weaker models; strict ISO when present, so a malformed
-	// value is rejected at the schema (SDK re-asks) instead of silently skipping the check.
-	baseUpdatedAt: z.iso.datetime().optional(),
-	operations: z.array(jsonPatchOperationSchema).min(1),
+export const searchWebInputSchema = z.object({
+	query: z.string().trim().min(1).max(500),
+});
+export const readPageInputSchema = z.object({ url: z.url().max(2_048) });
+export const searchWebOutputSchema = z.array(
+	z.object({
+		url: z.string(),
+		title: z.string(),
+		snippet: z.string().optional(),
+	}),
+);
+export const readPageOutputSchema = z.object({
+	requestedUrl: z.string(),
+	resolvedUrl: z.string().optional(),
+	content: z.string(),
+	format: z.enum(["text", "markdown"]),
+	retrievedAt: z.iso.datetime({ offset: true }),
+	providerFetchedAt: z.iso.datetime({ offset: true }).optional(),
+	method: z.enum(["builtin", "firecrawl", "tavily", "exa"]),
+	truncated: z.boolean(),
+	completeness: z.enum(["unknown", "incomplete"]),
+	fallbackReason: z.string().optional(),
+});
+export type SearchWebOutput = z.infer<typeof searchWebOutputSchema>;
+export type ReadPageOutput = z.infer<typeof readPageOutputSchema>;
+
+export type AgentWebSource = {
+	url: string;
+	title: string;
+	kind: "native" | "search" | "page";
+};
+
+// Link validation only; the server reader additionally checks DNS and redirects before fetching.
+function publicSourceUrl(value: string): string | null {
+	try {
+		const url = new URL(value);
+		const host = url.hostname.toLowerCase().replace(/\.$/, "");
+		if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return null;
+		// Source links use public hostnames. Reject IP literals and local names instead of guessing IP ranges in the browser.
+		if (
+			!host.includes(".") ||
+			/^[\d.]+$/.test(host) ||
+			host.includes(":") ||
+			/(?:^|\.)(?:localhost|local|internal|lan)$/.test(host) ||
+			host.endsWith(".home.arpa")
+		)
+			return null;
+		url.hash = "";
+		return url.toString();
+	} catch {
+		return null;
+	}
+}
+
+/** Sources from successful retrieval and native source parts, never links invented in response text. */
+export function agentWebSources(message: UIMessage): AgentWebSource[] {
+	const sources = new Map<string, AgentWebSource>();
+	const add = (value: string, title: string, kind: AgentWebSource["kind"]) => {
+		const url = publicSourceUrl(value);
+		if (url && !sources.has(url)) sources.set(url, { url, title: title.trim() || url, kind });
+	};
+	for (const part of message.parts) {
+		if (part.type === "source-url") {
+			add(part.url, part.title ?? "", "native");
+			continue;
+		}
+		const toolPart = part as { state?: string; output?: unknown };
+		if (toolPart.state !== "output-available") continue;
+		if (part.type === "tool-search_web") {
+			const parsed = searchWebOutputSchema.safeParse(toolPart.output);
+			if (parsed.success) for (const result of parsed.data) add(result.url, result.title, "search");
+		} else if (part.type === "tool-read_page") {
+			const parsed = readPageOutputSchema.safeParse(toolPart.output);
+			if (parsed.success) add(parsed.data.resolvedUrl ?? parsed.data.requestedUrl, "", "page");
+		}
+	}
+	return [...sources.values()];
+}
+
+/** One edit: rewrite a passage of the document, or add a new passage after it. */
+export const proposedEditInputSchema = z.object({
+	passageId: z.string().trim().min(1).describe("The id of a passage from read_resume or read_letter."),
+	text: z
+		.string()
+		.trim()
+		.min(1)
+		.max(2_000)
+		.describe("The passage as it should read, in plain text: the rewrite, or the new passage to add."),
+	why: z.string().trim().min(1).max(240).describe("One short line on why."),
+	add: z.boolean().optional().describe("Add `text` as a new passage after this one, instead of replacing it."),
 });
 
-// Loose on purpose: legacy persisted outputs predate changedPaths/resume.
-export const applyResumePatchOutputSchema = z.looseObject({
-	actionId: z.string(),
-	resumeId: z.string(),
+export const proposeEditsInputSchema = z.object({
+	title: z.string().trim().min(1).max(80).describe('What the edits do together, e.g. "Tailor to the Lumen posting".'),
+	edits: z.array(proposedEditInputSchema).min(1).max(12),
+});
+
+const proposalTargetSchema = z.object({
+	sectionId: z.string(),
+	itemId: z.string().optional(),
+	roleId: z.string().optional(),
+	field: z.string(),
+});
+
+/** An edit as proposed, resolved against the document: it replaces `before` with `after`. */
+export const proposedEditSchema = z.object({
+	id: z.string(),
+	target: proposalTargetSchema,
+	location: z.string(),
+	before: z.string(),
+	after: z.string(),
+	why: z.string(),
+	status: z.enum(["pending", "accepted", "rejected"]),
+});
+
+export const proposeEditsOutputSchema = z.looseObject({
 	title: z.string(),
-	summary: z.string().nullish(),
-	operations: z.array(jsonPatchOperationSchema),
-	appliedUpdatedAt: z.string(),
-	changedPaths: z.array(z.string()).optional(),
-	resume: z.unknown().optional(),
+	edits: z.array(proposedEditSchema),
+	/** Edits that couldn't be placed: the passage wasn't found (the document changed since it was read). */
+	skipped: z.array(z.object({ passageId: z.string(), reason: z.string() })),
 });
 
 // All-optional and loose: legacy rows have no metadata and must keep rendering.
@@ -40,6 +137,7 @@ export const applyResumePatchOutputSchema = z.looseObject({
 export const agentMessageMetadataSchema = z
 	.looseObject({
 		model: z.string().optional(),
+		provider: z.string().optional(),
 		usage: z
 			.looseObject({
 				inputTokens: z.number().optional(),
@@ -64,17 +162,28 @@ export const agentMessageMetadataSchema = z
 	.optional();
 
 export type AskUserQuestionInput = z.infer<typeof askUserQuestionInputSchema>;
-export type ApplyResumePatchInput = z.infer<typeof applyResumePatchInputSchema>;
-export type ApplyResumePatchOutput = z.infer<typeof applyResumePatchOutputSchema>;
+export type ProposeEditsInput = z.infer<typeof proposeEditsInputSchema>;
+export type ProposedEdit = z.infer<typeof proposedEditSchema>;
+export type ProposeEditsOutput = z.infer<typeof proposeEditsOutputSchema>;
 export type AgentMessageMetadata = z.infer<typeof agentMessageMetadataSchema>;
 
 export type AgentTools = {
 	ask_user_question: { input: AskUserQuestionInput; output: string };
 	read_resume: { input: Record<string, never>; output: unknown };
+	read_letter: { input: Record<string, never>; output: unknown };
 	read_attachment: { input: { attachmentId: string }; output: unknown };
-	apply_resume_patch: { input: ApplyResumePatchInput; output: ApplyResumePatchOutput };
-	// Provider-native web search (OpenAI Responses); input/output shapes are provider-owned.
+	propose_edits: { input: ProposeEditsInput; output: ProposeEditsOutput };
+	search_web: {
+		input: z.infer<typeof searchWebInputSchema>;
+		output: SearchWebOutput;
+	};
+	read_page: {
+		input: z.infer<typeof readPageInputSchema>;
+		output: ReadPageOutput;
+	};
+	// Provider-native search names remain readable in existing conversations.
 	web_search: { input: unknown; output: unknown };
+	google_search: { input: unknown; output: unknown };
 };
 
 export type AgentUIMessage = UIMessage<AgentMessageMetadata, UIDataTypes, AgentTools>;

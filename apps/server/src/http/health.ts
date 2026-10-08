@@ -39,7 +39,9 @@ function publicCheck(check: CheckResult, name: "Database" | "Storage" | "Redis")
 		status: check.status,
 		latencyMs: check.latencyMs,
 		error: `${name} health check failed.`,
-		...(check.type === "local" || check.type === "s3" || check.type === "blob" ? { type: check.type } : {}),
+		...(check.type === "local" || check.type === "s3" || check.type === "blob" || check.type === "r2"
+			? { type: check.type }
+			: {}),
 	};
 }
 
@@ -77,16 +79,8 @@ export async function handleHealth() {
 	};
 
 	if (status === "unhealthy") {
-		console.warn("[Healthcheck]", { route: "/api/health", database, storage });
+		console.warn("[Healthcheck]", { route: "/api/health", database, storage, ...(redis ? { redis } : {}) });
 	}
 
-	const headers = new Headers();
-	const body = JSON.stringify(checks);
-	headers.set("Content-Type", "application/json; charset=UTF-8");
-	headers.set("Content-Length", Buffer.byteLength(body, "utf-8").toString());
-
-	return new Response(body, {
-		headers,
-		status: checks.status === "unhealthy" ? 503 : 200,
-	});
+	return Response.json(checks, { status: checks.status === "unhealthy" ? 503 : 200 });
 }

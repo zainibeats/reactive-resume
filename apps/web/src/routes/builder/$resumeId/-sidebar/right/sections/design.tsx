@@ -2,24 +2,23 @@ import type { ReactNode } from "react";
 import type z from "zod";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { useStore } from "@tanstack/react-form";
+import { useSelector } from "@tanstack/react-form";
 import { AnimatePresence, m } from "motion/react";
 import { colorDesignSchema, levelDesignSchema } from "@reactive-resume/schema/resume/data";
 import { resolveLevelDisplaySizes } from "@reactive-resume/schema/resume/level-display-sizes";
-import { resolveStyleRuleFontSize } from "@reactive-resume/schema/resume/style-rules";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Separator } from "@reactive-resume/ui/components/separator";
 import { cn } from "@reactive-resume/utils/style";
+import { SectionBase } from "../shared/section-base";
 import { ColorPicker } from "@/components/input/color-picker";
 import { IconPicker } from "@/components/input/icon-picker";
 import { LevelTypeCombobox } from "@/components/level/combobox";
 import { LevelDisplay } from "@/components/level/display";
 import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
 import { useSyncFormValues } from "@/hooks/use-sync-form-values";
-import { EASE_OUT_STRONG } from "@/libs/motion";
+import { D1, EASE } from "@/libs/motion";
 import { useAppForm } from "@/libs/tanstack-form";
-import { SectionBase } from "../shared/section-base";
 
 export function DesignSectionBuilder() {
 	return (
@@ -180,7 +179,7 @@ function QuickColorCircle({ color, active, onSelect, className, ...props }: Quic
 			onClick={() => onSelect(color)}
 			className={cn(
 				"relative flex size-8 items-center justify-center rounded-md bg-transparent",
-				"transition-[scale,background-color] duration-150 ease-out-strong hover:bg-secondary/80 active:scale-[0.97]",
+				"transition-[scale,background-color] duration-quick ease-enter hover:bg-sunken/80 active:scale-[0.97]",
 				className,
 			)}
 			{...props}
@@ -193,10 +192,10 @@ function QuickColorCircle({ color, active, onSelect, className, ...props }: Quic
 						initial={{ scale: 0.95, opacity: 0 }}
 						animate={{ scale: 1, opacity: 1 }}
 						exit={{ scale: 0.95, opacity: 0 }}
-						transition={{ duration: 0.16, ease: EASE_OUT_STRONG }}
+						transition={{ duration: D1, ease: EASE }}
 						className="absolute inset-0 flex size-8 items-center justify-center"
 					>
-						<div className="size-4 rounded-md bg-foreground" />
+						<div className="size-4 rounded-md bg-ink" />
 					</m.div>
 				)}
 			</AnimatePresence>
@@ -233,14 +232,10 @@ function LevelSectionForm() {
 	});
 	useSyncFormValues(form, levelDesign);
 
-	const previewType = useStore(form.store, (s) => s.values.type);
-	const previewIcon = useStore(form.store, (s) => s.values.icon);
-	const iconFontSize = resolveStyleRuleFontSize(resume.data, { slot: "icon" });
-	const levelFontSize = resolveStyleRuleFontSize(resume.data, { slot: "level" });
+	const previewType = useSelector(form.store, (s) => s.values.type);
+	const previewIcon = useSelector(form.store, (s) => s.values.icon);
 	const { decorationSize, levelIconExplicitSize } = resolveLevelDisplaySizes({
 		bodyFontSize: resume.data.metadata.typography.body.fontSize,
-		iconFontSize,
-		levelFontSize,
 	});
 
 	return (
@@ -252,7 +247,7 @@ function LevelSectionForm() {
 				void form.handleSubmit();
 			}}
 		>
-			<h4 className="font-semibold text-lg leading-none tracking-tight">
+			<h4 className="text-lg leading-none font-semibold tracking-tight">
 				<Trans>Level</Trans>
 			</h4>
 

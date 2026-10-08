@@ -1,4 +1,4 @@
-import type { Style } from "@react-pdf/types";
+import type { Style } from "../../forme/style-types";
 
 export type TemplatePlacement = "main" | "sidebar";
 

@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
+import { popupSlideClassName } from "@reactive-resume/ui/components/menu-styles";
 import { cn } from "@reactive-resume/utils/style";
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
@@ -31,7 +32,8 @@ function PopoverContent({
 				<PopoverPrimitive.Popup
 					data-slot="popover-content"
 					className={cn(
-						"z-50 flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-popover-foreground text-sm shadow-md outline-hidden ring-1 ring-foreground/10 transition-[opacity,scale] duration-150 ease-out-strong data-ending-style:scale-95 data-starting-style:scale-95 data-ending-style:opacity-0 data-starting-style:opacity-0 data-instant:transition-none data-ending-style:duration-100",
+						"z-50 flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-xl bg-raised p-3 text-sm text-ink shadow-e2 outline-hidden transition-[opacity,scale,translate] duration-standard ease-enter data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--d2)*0.7)] data-instant:transition-none data-starting-style:scale-[0.98] data-starting-style:opacity-0",
+						popupSlideClassName,
 						className,
 					)}
 					{...props}
@@ -46,17 +48,9 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
-	return <PopoverPrimitive.Title data-slot="popover-title" className={cn("font-medium", className)} {...props} />;
-}
-
-function PopoverDescription({ className, ...props }: PopoverPrimitive.Description.Props) {
 	return (
-		<PopoverPrimitive.Description
-			data-slot="popover-description"
-			className={cn("text-muted-foreground", className)}
-			{...props}
-		/>
+		<PopoverPrimitive.Title data-slot="popover-title" className={cn("font-semibold text-ink", className)} {...props} />
 	);
 }
 
-export { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger };
+export { Popover, PopoverContent, PopoverHeader, PopoverTitle, PopoverTrigger };

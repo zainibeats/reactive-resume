@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -214,22 +214,5 @@ const useScizorTemplate = (): ScizorTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies ScizorStyles,
 		};
-	}, [
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.sectionGap,
-		metrics.page.paddingVertical,
-		metrics.page.paddingHorizontal,
-		metrics.itemGapY,
-		foreground,
-		metrics.gapY,
-		base.page,
-		background,
-		base.heading,
-		metrics.gapX,
-		base.bold,
-		base,
-	]);
+	}, [metadata, r, primary, metrics, foreground, background, base]);
 };

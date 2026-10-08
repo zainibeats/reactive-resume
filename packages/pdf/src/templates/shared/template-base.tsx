@@ -1,6 +1,6 @@
-import type { Style } from "@react-pdf/types";
-import type { ResumeData } from "@reactive-resume/schema/resume/data";
+import type { Style } from "../../forme/style-types";
 import type { TemplateIconSlot, TemplateStyleContext } from "./types";
+import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { useMemo } from "react";
 import { rgbaStringToHex } from "@reactive-resume/utils/color";
 import { View } from "#react-pdf-renderer";
@@ -19,10 +19,10 @@ import { Heading, SemanticContactListView, SemanticHeaderPicture, SemanticHeader
 import { createRtlStyleHelpers } from "./rtl";
 
 export const useTemplateBase = () => {
-	const { picture, metadata, rtl } = useRender();
+	const { picture, metadata, rtl, columnsReversed } = useRender();
 
 	return useMemo(() => {
-		const r = createRtlStyleHelpers(rtl);
+		const r = createRtlStyleHelpers(rtl, columnsReversed);
 		const foreground = rgbaStringToHex(metadata.design.colors.text);
 		const background = rgbaStringToHex(metadata.design.colors.background);
 		const primary = rgbaStringToHex(metadata.design.colors.primary);
@@ -30,7 +30,7 @@ export const useTemplateBase = () => {
 		const base = createBaseTemplateStyles({ metadata, foreground, background, r, metrics, picture });
 
 		return { picture, metadata, rtl, r, foreground, background, primary, metrics, base };
-	}, [picture, metadata, rtl]);
+	}, [picture, metadata, rtl, columnsReversed]);
 };
 
 export const createIconSlot = ({
@@ -55,6 +55,7 @@ type TemplateHeaderStyles = {
 	name: Style;
 	contactList: Style;
 	contactItem: Style;
+	contactText?: Style | undefined;
 };
 
 export const TemplateHeader = ({
@@ -68,12 +69,17 @@ export const TemplateHeader = ({
 	const hasPicture = hasTemplatePicture(picture);
 	const contactList = (
 		<SemanticContactListView style={styles.contactList}>
-			<EmailContactItem email={basics.email} style={styles.contactItem} />
-			<PhoneContactItem phone={basics.phone} style={styles.contactItem} />
-			<LocationContactItem location={basics.location} style={styles.contactItem} />
-			<WebsiteContactItem website={basics.website} style={styles.contactItem} />
+			<EmailContactItem email={basics.email} style={styles.contactItem} textStyle={styles.contactText} />
+			<PhoneContactItem phone={basics.phone} style={styles.contactItem} textStyle={styles.contactText} />
+			<LocationContactItem location={basics.location} style={styles.contactItem} textStyle={styles.contactText} />
+			<WebsiteContactItem website={basics.website} style={styles.contactItem} textStyle={styles.contactText} />
 			{basics.customFields.map((field) => (
-				<CustomFieldContactItem key={field.id} field={field} style={styles.contactItem} />
+				<CustomFieldContactItem
+					key={field.id}
+					field={field}
+					style={styles.contactItem}
+					textStyle={styles.contactText}
+				/>
 			))}
 		</SemanticContactListView>
 	);

@@ -58,7 +58,7 @@ const buildFixture = (): ResumeData => {
 			location: "London",
 			period: "1842",
 			website: { url: "https://example.com/company", label: "Company", inlineLink: true },
-			description: "<p>Ignored when roles exist</p>",
+			description: "<p>Company-wide description</p>",
 			roles: [
 				{
 					id: "role/item",
@@ -355,6 +355,27 @@ const buildCompleteFixture = (): ResumeData => {
 };
 
 describe("buildSemanticTree", () => {
+	it("retains company-wide description and prints a repeated position only in the visible role", () => {
+		const data = buildFixture();
+		const item = required(data.sections.experience.items[0], "experience fixture");
+		item.position = required(item.roles[0], "role fixture").position;
+		item.roles.push({ id: "blank-role", position: " ", period: "", description: "<p>Hidden role</p>" });
+		const tree = buildSemanticTree({
+			data,
+			template: "onyx",
+			page: required(data.metadata.layout.pages[0], "authored page"),
+			pageNumber: 1,
+			showHeader: true,
+		});
+		const parent = required(
+			findNode(tree, (node) => node.id === item.id),
+			"experience",
+		);
+		expect(parent.children.some((node) => node.kind === "field" && node.attributes.name === "description")).toBe(true);
+		expect(findNodes(parent, (node) => node.kind === "field" && node.attributes.name === "position")).toHaveLength(1);
+		expect(findNode(tree, (node) => node.id === "blank-role")).toBeUndefined();
+		expect(item.position).toBe("Programmer");
+	});
 	it("builds stable authored-page, section, nested-role, field, and rich-text ancestry", () => {
 		const data = buildFixture();
 		const before = structuredClone(data);
@@ -647,102 +668,5 @@ describe("buildSemanticTree", () => {
 			"network",
 			"username",
 		]);
-	});
-
-	it("models Chikorita's two physical contact rows and routes contacts to their real row parent", () => {
-		const data = structuredClone(defaultResumeData);
-		data.basics.email = "ada@example.com";
-		data.basics.phone = "+44 123";
-		data.basics.location = "London";
-		data.basics.website = { url: "https://example.com", label: "example.com" };
-		data.basics.customFields = [{ id: "custom-1", icon: "", text: "Portfolio", link: "" }];
-		const tree = buildSemanticTree({
-			data,
-			template: "chikorita",
-			page: { fullWidth: true, main: [], sidebar: [] },
-			pageNumber: 1,
-			showHeader: true,
-		});
-		const contactList = required(
-			findNode(tree, (node) => node.kind === "contact-list"),
-			"contact list",
-		);
-		const rows = contactList.children.filter(({ kind }) => kind === "template-part");
-
-		expect(rows.map(({ attributes }) => attributes.name)).toEqual(["contact-row-primary", "contact-row-secondary"]);
-		expect(rows.map((row) => row.children.map(({ attributes }) => attributes.name))).toEqual([
-			["email", "phone", "location"],
-			["website", "custom"],
-		]);
-	});
-
-	it("models Meowth's education inline header and grade row as sibling hosts", () => {
-		const data = structuredClone(defaultResumeData);
-		data.sections.education.items = [
-			{
-				id: "education-1",
-				hidden: false,
-				school: "University of London",
-				area: "Mathematics",
-				degree: "BSc",
-				grade: "First",
-				location: "London",
-				period: "1835",
-				website: { url: "", label: "", inlineLink: false },
-				description: "",
-			},
-		];
-		const tree = buildSemanticTree({
-			data,
-			template: "meowth",
-			page: { fullWidth: true, main: ["education"], sidebar: [] },
-			pageNumber: 1,
-			showHeader: false,
-		});
-		const item = required(
-			findNode(tree, (node) => node.id === "education-1"),
-			"education item",
-		);
-		const header = required(
-			item.children.find(({ kind }) => kind === "item-header"),
-			"education header",
-		);
-		const gradeRow = required(
-			item.children.find(({ attributes }) => attributes.name === "education-grade-row"),
-			"education grade row",
-		);
-
-		expect(header.children.map(({ attributes }) => attributes.name)).toEqual([
-			"inline-item-header-leading",
-			"inline-item-header-middle",
-			"inline-item-header-trailing",
-		]);
-		expect(gradeRow.kind).toBe("template-part");
-		expect(gradeRow.children.map(({ attributes }) => attributes.name)).toEqual(["education-grade-location"]);
-		expect(gradeRow.children[0]?.kind).toBe("combined-text");
-		expect(gradeRow.children[0]?.children.map(({ attributes }) => attributes.name)).toEqual(["grade", "location"]);
-	});
-
-	it.each([
-		["en-US", ["list-marker", "list-item-content"]],
-		["ar-SA", ["list-item-content", "list-marker"]],
-	] as const)("models %s rich-list row children in their authored physical order", (locale, kinds) => {
-		const data = structuredClone(defaultResumeData);
-		data.metadata.page.locale = locale;
-		data.summary.content = "<ul><li>Item</li></ul>";
-		const tree = buildSemanticTree({
-			data,
-			template: "onyx",
-			page: { fullWidth: true, main: ["summary"], sidebar: [] },
-			pageNumber: 1,
-			showHeader: false,
-		});
-		const item = required(
-			findNode(tree, (node) => node.kind === "list-item"),
-			"rich list item",
-		);
-
-		expect(item.children.map(({ kind }) => kind)).toEqual([...kinds]);
-		expect(item.children.every(({ key }) => key.startsWith(`${item.key}/`))).toBe(true);
 	});
 });

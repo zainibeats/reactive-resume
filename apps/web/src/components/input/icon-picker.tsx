@@ -3,7 +3,7 @@ import type { CellComponentProps } from "react-window";
 import { t } from "@lingui/core/macro";
 import { ProhibitIcon } from "@phosphor-icons/react";
 import Fuse from "fuse.js";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Grid } from "react-window";
 import { icons } from "@reactive-resume/schema/icons";
 import { Button } from "@reactive-resume/ui/components/button";
@@ -60,7 +60,7 @@ function IconCellComponent({ columnIndex, rowIndex, style, icons, onChange }: Ic
 			onClick={() => {
 				if (typeof icon === "string") onChange(icon);
 			}}
-			className="flex size-full items-center justify-center hover:bg-accent"
+			className="flex size-full items-center justify-center hover:bg-hover"
 		>
 			{icon ? <i className={cn("ph text-base", `ph-${icon}`)} /> : <ProhibitIcon />}
 		</button>
@@ -81,14 +81,14 @@ type IconPickerProps = Omit<React.ComponentProps<typeof Button>, "value" | "onCh
 export function IconPicker({ value, onChange, popoverProps, ...props }: IconPickerProps) {
 	const [search, setSearch] = useState("");
 
-	const searchedIcons = useMemo(() => searchIcons(search), [search]);
+	const searchedIcons = searchIcons(search);
 	const rowCount = Math.ceil(searchedIcons.length / columnCount);
 
 	return (
 		<Popover {...popoverProps}>
 			<PopoverTrigger
 				render={
-					<Button size="icon" variant="outline" aria-label={t`Pick an icon`} {...props}>
+					<Button size="icon" variant="secondary" aria-label={t`Pick an icon`} {...props}>
 						<i className={cn("ph size-4 text-base", `ph-${value}`)} />
 					</Button>
 				}

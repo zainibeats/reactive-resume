@@ -1,20 +1,55 @@
 import z from "zod";
 
-// Pipeline stages are a fixed enum for v1. If per-user custom stages are ever needed,
-// promote this to a table. `rejected` is a terminal stage; `archived` (a boolean on the
-// row) hides an application from the board without deleting it.
-export const applicationStatusSchema = z.enum(["saved", "applied", "screening", "interview", "offer", "rejected"]);
+// Pipeline stages are a fixed enum. If per-user custom stages are ever needed, promote this to a table.
+// `closed` is the terminal stage, with a reason; it replaced the old `rejected` stage and the `archived` flag.
+export const APPLICATION_STATUSES = ["saved", "applied", "screening", "interview", "offer", "closed"] as const;
+
+export const applicationStatusSchema = z.enum(APPLICATION_STATUSES);
 
 export type ApplicationStatus = z.infer<typeof applicationStatusSchema>;
 
+/** How the bounded posting snapshot was obtained; retrieval time is not an origin freshness claim. */
+export const postingSourceSchema = z.object({
+	method: z.enum(["paste", "builtin", "firecrawl", "tavily", "exa"]),
+	format: z.enum(["text", "markdown"]),
+	requestedUrl: z.url({ protocol: /^https?$/ }).optional(),
+	resolvedUrl: z.url({ protocol: /^https?$/ }).optional(),
+	retrievedAt: z.iso.datetime({ offset: true }).optional(),
+	providerFetchedAt: z.iso.datetime({ offset: true }).optional(),
+	truncated: z.boolean(),
+	completeness: z.enum(["unknown", "incomplete"]),
+	fallbackReason: z
+		.enum([
+			"unsafe-url",
+			"unreachable",
+			"not-a-page",
+			"too-large",
+			"auth",
+			"quota",
+			"malformed",
+			"empty",
+			"challenge",
+			"timeout",
+			"unavailable",
+			"rate-limit",
+		])
+		.optional(),
+});
+
+export type PostingSource = z.infer<typeof postingSourceSchema>;
+
+export const applicationClosedReasonSchema = z.enum(["not-selected", "withdrew", "accepted-other", "no-response"]);
+
+export type ApplicationClosedReason = z.infer<typeof applicationClosedReasonSchema>;
+
 // Ordered stage metadata shared by the API (validation) and the web board (columns/colors).
 export const STAGES = [
-	{ value: "saved", label: "Saved", color: "oklch(0.62 0 0)" },
-	{ value: "applied", label: "Applied", color: "oklch(0.52 0.19 285)" },
-	{ value: "screening", label: "Screening", color: "oklch(0.45 0.08 195)" },
-	{ value: "interview", label: "Interview", color: "oklch(0.5 0.1 70)" },
-	{ value: "offer", label: "Offer", color: "oklch(0.55 0.15 152)" },
-	{ value: "rejected", label: "Rejected", color: "oklch(0.63 0.12 22)" },
+	{ value: "saved", label: "Saved", color: "oklch(0.64 0.02 95)" },
+	{ value: "applied", label: "Applied", color: "oklch(0.64 0.11 250)" },
+	{ value: "screening", label: "Screening", color: "oklch(0.64 0.11 200)" },
+	{ value: "interview", label: "Interview", color: "oklch(0.64 0.11 80)" },
+	{ value: "offer", label: "Offer", color: "oklch(0.64 0.11 150)" },
+	{ value: "closed", label: "Closed", color: "oklch(0.64 0.11 27)" },
 ] as const satisfies ReadonlyArray<{ value: ApplicationStatus; label: string; color: string }>;
 
 export const contactSchema = z.object({

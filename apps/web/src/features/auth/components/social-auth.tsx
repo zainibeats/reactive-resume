@@ -1,16 +1,19 @@
 import type { RouterOutput } from "@/libs/orpc/client";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { FingerprintIcon, GithubLogoIcon, GoogleLogoIcon, LinkedinLogoIcon, VaultIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { GithubLogoIcon, GoogleLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearch } from "@tanstack/react-router";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Skeleton } from "@reactive-resume/ui/components/skeleton";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
-import { authClient } from "@/libs/auth/client";
-import { orpc } from "@/libs/orpc/client";
 import { getAuthRedirectOptions, getOAuthPasskeyOptions, getOAuthSignInOptions, isOAuthRedirect } from "../redirect";
+import { authClient } from "@/libs/auth/client";
+import { ENTER_CLASS } from "@/libs/motion";
+import { orpc } from "@/libs/orpc/client";
+import { sessionQueryKey } from "@/libs/root-context";
 
 export function SocialAuth() {
 	const { data: providers = {}, isLoading } = useQuery(orpc.auth.providers.list.queryOptions());
@@ -19,7 +22,7 @@ export function SocialAuth() {
 		<>
 			<div className="flex items-center gap-x-2">
 				<hr className="flex-1" />
-				<span className="font-medium text-xs tracking-wide">
+				<span className="text-xs font-medium tracking-wide">
 					<Trans context="Choose to authenticate with a social provider (Google, GitHub, etc.) instead of email and password">
 						or continue with
 					</Trans>
@@ -49,10 +52,11 @@ type SocialAuthButtonsProps = {
 
 function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const { callbackURL } = useSearch({ from: "/auth" });
 
 	const runSignIn = async (
-		fn: () => Promise<{ data?: unknown; error: { message?: string } | null }>,
+		fn: () => Promise<{ data?: unknown; error: { message?: string | undefined } | null }>,
 		isPasskey = false,
 	) => {
 		const toastId = toast.add({ type: "loading", description: t`Signing in...` });
@@ -72,12 +76,13 @@ function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
 		}
 		toast.close(toastId);
 		if (isOAuthRedirect(data)) return;
+		await queryClient.invalidateQueries({ queryKey: sessionQueryKey });
 		await router.invalidate();
 		if (isPasskey) void router.navigate(getAuthRedirectOptions(callbackURL));
 	};
 
 	return (
-		<div className="grid grid-cols-2 gap-4">
+		<div className={cn(ENTER_CLASS, "grid grid-cols-2 gap-4")}>
 			<Button
 				variant="secondary"
 				onClick={() =>
@@ -91,7 +96,7 @@ function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
 				}
 				className={cn("hidden", "custom" in providers && "inline-flex")}
 			>
-				<VaultIcon />
+				<Icon name="key" size={16} />
 				{providers.custom}
 			</Button>
 
@@ -102,7 +107,7 @@ function SocialAuthButtons({ providers }: SocialAuthButtonsProps) {
 				}
 				className={cn("hidden", "passkey" in providers && "inline-flex")}
 			>
-				<FingerprintIcon />
+				<Icon name="fingerprint" size={16} />
 				<Trans comment="Label for passkey sign-in button">Passkey</Trans>
 			</Button>
 

@@ -14,22 +14,16 @@ export const getQueryClient = () => {
 					return JSON.stringify({ json, meta });
 				},
 			},
-			dehydrate: {
-				serializeData(data) {
-					const [json, meta] = serializer.serialize(data);
-					return { json, meta };
-				},
-			},
-			hydrate: {
-				deserializeData(data) {
-					return serializer.deserialize(data.json, data.meta);
-				},
-			},
 		},
 		mutationCache: new MutationCache({
 			onSettled: (_1, _2, _3, _4, _5, context) => {
 				if (context?.meta?.noInvalidate) return;
-				void queryClient.invalidateQueries();
+				void queryClient.invalidateQueries({
+					predicate: (query) => {
+						const key = query.queryKey[0];
+						return key !== "auth" && key !== "flags";
+					},
+				});
 			},
 		}),
 	});

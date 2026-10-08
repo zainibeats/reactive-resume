@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { applyPatches, enablePatches, produce, produceWithPatches } from "immer";
+import { assert, describe, expect, it } from "vitest";
+import { i18n } from "@lingui/core";
+import { produce } from "immer";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
-import { moveItem } from "./move-item";
+import { getCompatibleMoveTargets, getSourceSectionTitle, moveItem } from "./move-item";
 
 const company = (id: string) => ({
 	id,
@@ -25,15 +26,29 @@ const split = () =>
 	});
 
 describe("moving the last custom-section item (#3180)", () => {
+	it("labels blank custom move destinations with their section type", () => {
+		i18n.load("en", {});
+		i18n.activate("en");
+		const moved = produce(split(), (draft) => {
+			const section = draft.customSections[0];
+			if (!section) throw new Error("Missing custom section fixture");
+			section.title = " ";
+		});
+		const targets = getCompatibleMoveTargets(moved, "experience", undefined);
+		expect(targets.find((page) => page.pageIndex === 1)?.sections[0]?.sectionTitle).toBe("Experience");
+		expect(getSourceSectionTitle(moved, "experience", moved.customSections[0]?.id)).toBe("Experience");
+	});
 	it("restores the original JSON after moving an experience item to a new page and back", () => {
 		const initial = base();
 		const moved = split();
+		const section = moved.customSections[0];
+		assert.exists(section);
 		expect(moved.metadata.layout.pages).toHaveLength(2);
 		const restored = produce(moved, (draft) => {
 			moveItem(draft, {
 				itemId: "2",
 				type: "experience",
-				customSectionId: moved.customSections[0].id,
+				customSectionId: section.id,
 				target: { type: "section", sectionId: "experience" },
 			});
 		});
@@ -42,13 +57,16 @@ describe("moving the last custom-section item (#3180)", () => {
 	it("preserves unrelated blank pages and pages with other section references", () => {
 		const moved = produce(split(), (draft) => {
 			draft.metadata.layout.pages.push({ fullWidth: true, main: [], sidebar: [] });
+			assert.exists(draft.metadata.layout.pages[1]);
 			draft.metadata.layout.pages[1].sidebar.push("skills");
 		});
+		const section = moved.customSections[0];
+		assert.exists(section);
 		const restored = produce(moved, (draft) => {
 			moveItem(draft, {
 				itemId: "2",
 				type: "experience",
-				customSectionId: moved.customSections[0].id,
+				customSectionId: section.id,
 				target: { type: "section", sectionId: "experience" },
 			});
 		});
@@ -63,11 +81,13 @@ describe("moving the last custom-section item (#3180)", () => {
 		const moved = produce(split(), (draft) => {
 			draft.metadata.layout.pages.reverse();
 		});
+		const section = moved.customSections[0];
+		assert.exists(section);
 		const restored = produce(moved, (draft) => {
 			moveItem(draft, {
 				itemId: "2",
 				type: "experience",
-				customSectionId: moved.customSections[0].id,
+				customSectionId: section.id,
 				target: { type: "section", sectionId: "experience" },
 			});
 		});
@@ -80,16 +100,19 @@ describe("moving the last custom-section item (#3180)", () => {
 		const moved = produce(split(), (draft) => {
 			draft.metadata.layout.pages.push({ fullWidth: true, main: [], sidebar: ["skills"] });
 		});
+		const section = moved.customSections[0];
+		assert.exists(section);
 		const restored = produce(moved, (draft) => {
 			moveItem(draft, {
 				itemId: "2",
 				type: "experience",
-				customSectionId: moved.customSections[0].id,
+				customSectionId: section.id,
 				target: { type: "new-section", pageIndex: 2, title: "Later" },
 			});
 		});
 		expect(restored.metadata.layout.pages).toHaveLength(2);
 		expect(restored.customSections).toHaveLength(1);
+		assert.exists(restored.customSections[0]);
 		expect(restored.customSections[0]).toMatchObject({ title: "Later", items: [company("2")] });
 		expect(restored.metadata.layout.pages[1]).toEqual({
 			fullWidth: true,
@@ -99,16 +122,20 @@ describe("moving the last custom-section item (#3180)", () => {
 	});
 	it("keeps a custom section with hidden remaining items", () => {
 		const moved = produce(split(), (draft) => {
+			assert.exists(draft.customSections[0]);
 			draft.customSections[0].items.push({ ...company("3"), hidden: true });
 		});
+		const section = moved.customSections[0];
+		assert.exists(section);
 		const restored = produce(moved, (draft) => {
 			moveItem(draft, {
 				itemId: "2",
 				type: "experience",
-				customSectionId: moved.customSections[0].id,
+				customSectionId: section.id,
 				target: { type: "section", sectionId: "experience" },
 			});
 		});
+		assert.exists(restored.customSections[0]);
 		expect(restored.customSections[0].items).toEqual([{ ...company("3"), hidden: true }]);
 		expect(restored.metadata.layout.pages).toHaveLength(2);
 	});
@@ -118,69 +145,12 @@ describe("moving the last custom-section item (#3180)", () => {
 		{ type: "new-section", pageIndex: 99, title: "Missing" },
 	] as const)("leaves data intact for an invalid destination $type", (target) => {
 		const moved = split();
+		const section = moved.customSections[0];
+		assert.exists(section);
 		expect(
 			produce(moved, (draft) => {
-				moveItem(draft, { itemId: "2", type: "experience", customSectionId: moved.customSections[0].id, target });
+				moveItem(draft, { itemId: "2", type: "experience", customSectionId: section.id, target });
 			}),
 		).toEqual(moved);
-	});
-
-	it("keeps data intact when the source is missing or destination is the source", () => {
-		const moved = split();
-		const sourceId = moved.customSections[0].id;
-		for (const [itemId, sectionId] of [
-			["missing", "experience"],
-			["2", sourceId],
-		]) {
-			expect(
-				produce(moved, (draft) => {
-					moveItem(draft, {
-						itemId,
-						type: "experience",
-						customSectionId: sourceId,
-						target: { type: "section", sectionId },
-					});
-				}),
-			).toEqual(moved);
-		}
-	});
-	it("cleans the source sidebar while preserving unrelated blank pages when moving to a new page", () => {
-		const moved = produce(split(), (draft) => {
-			const page = draft.metadata.layout.pages[1];
-			page.sidebar = page.main;
-			page.main = [];
-			draft.metadata.layout.pages.push({ fullWidth: true, main: [], sidebar: [] });
-		});
-		const restored = produce(moved, (draft) => {
-			moveItem(draft, {
-				itemId: "2",
-				type: "experience",
-				customSectionId: moved.customSections[0].id,
-				target: { type: "new-page", title: "New destination" },
-			});
-		});
-		expect(restored.customSections).toHaveLength(1);
-		expect(restored.metadata.layout.pages).toEqual([
-			{ fullWidth: false, main: ["experience"], sidebar: [] },
-			{ fullWidth: true, main: [], sidebar: [] },
-			{ fullWidth: false, main: [restored.customSections[0].id], sidebar: [] },
-		]);
-		expect(restored.customSections[0].items).toEqual([company("2")]);
-	});
-	it("undo restores the custom section, layout page, and custom settings", () => {
-		enablePatches();
-		const moved = produce(split(), (draft) => {
-			Object.assign(draft.customSections[0], { title: "Custom title", icon: "star", columns: 2, keepTogether: true });
-		});
-		const [restored, , inverse] = produceWithPatches(moved, (draft) => {
-			moveItem(draft, {
-				itemId: "2",
-				type: "experience",
-				customSectionId: moved.customSections[0].id,
-				target: { type: "section", sectionId: "experience" },
-			});
-		});
-		expect(restored.customSections).toEqual([]);
-		expect(applyPatches(restored, inverse)).toEqual(moved);
 	});
 });

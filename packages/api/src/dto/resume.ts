@@ -4,6 +4,7 @@ import * as schema from "@reactive-resume/db/schema";
 import { jsonPatchOperationSchema } from "@reactive-resume/resume/patch";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
 import { writableResumeDataSchema } from "@reactive-resume/schema/resume/write";
+import { paginationShape } from "../pagination";
 
 const resumeSchema = createSelectSchema(schema.resume, {
 	id: z.string().describe("The ID of the resume."),
@@ -29,10 +30,24 @@ const resumeSchema = createSelectSchema(schema.resume, {
 	userId: z.string().describe("The ID of the user who owns the resume."),
 	createdAt: z.date().describe("The date and time the resume was created."),
 	updatedAt: z.date().describe("The date and time the resume was last updated."),
+})
+	// Trash and automatic naming stay internal to the documents API. getById exposes the application link
+	// explicitly because the editor uses it to select the application a tailored copy belongs to.
+	.omit({ applicationId: true, trashedAt: true, autoName: true });
+
+const versionSchema = z.object({
+	id: z.string().describe("The ID of the version."),
+	kind: z
+		.enum(schema.RESUME_VERSION_KINDS)
+		.describe(
+			"What made the version: created, import, auto (an editing session's autosave), named, before-restore, restored, ai (an AI or API edit) or sent.",
+		),
+	name: z.string().nullable().describe("The user's name for a named version."),
+	createdAt: z.date().describe("When this state was saved."),
 });
 
 const resumeOutputSchema = resumeSchema
-	.omit({ password: true, userId: true, createdAt: true, parentData: true })
+	.omit({ password: true, userId: true, parentData: true })
 	.extend({ hasPassword: z.boolean() });
 
 const syncDiffSchema = z.object({
@@ -50,17 +65,33 @@ export const resumeDto = {
 	list: {
 		input: z
 			.object({
-				tags: z.array(z.string()).optional().default([]),
+				...paginationShape,
+				tags: z
+					.union([z.string().transform((tag) => [tag]), z.array(z.string())])
+					.optional()
+					.default([]),
 				sort: z.enum(["lastUpdatedAt", "createdAt", "name"]).optional().default("lastUpdatedAt"),
 			})
 			.optional()
 			.default({ tags: [], sort: "lastUpdatedAt" }),
-		output: z.array(resumeSchema.omit({ data: true, password: true, userId: true, parentData: true })),
+		output: z.array(
+			resumeSchema.omit({
+				data: true,
+				password: true,
+				userId: true,
+				revision: true,
+				parentId: true,
+				parentRevision: true,
+				parentData: true,
+			}),
+		),
 	},
 
 	getById: {
 		input: resumeSchema.pick({ id: true }),
-		output: resumeOutputSchema,
+		output: resumeOutputSchema.extend({
+			applicationId: z.string().nullable().describe("The job application this resume was made for, if any."),
+		}),
 	},
 
 	getBySlug: {
@@ -85,9 +116,16 @@ export const resumeDto = {
 	},
 
 	create: {
-		input: resumeSchema
-			.pick({ name: true, slug: true, tags: true })
-			.extend({ withSampleData: z.boolean().default(false) }),
+		input: resumeSchema.pick({ name: true, tags: true }).extend({
+			autoName: z
+				.boolean()
+				.optional()
+				.describe("While true, the resume's name follows its headline until someone renames it."),
+			slug: resumeSchema.shape.slug
+				.optional()
+				.describe("The slug of the resume. Generated from the name, and made unique, when omitted."),
+			withSampleData: z.boolean().default(false),
+		}),
 		output: z.string().describe("The ID of the created resume."),
 	},
 
@@ -100,8 +138,34 @@ export const resumeDto = {
 		input: resumeSchema
 			.pick({ name: true, slug: true, tags: true, data: true, isPublic: true, showDownloadButtons: true })
 			.partial()
-			.extend({ id: z.string(), data: writableResumeDataSchema.optional() }),
+			.extend({
+				id: z.string(),
+				data: writableResumeDataSchema.optional(),
+				sessionId: z
+					.string()
+					.max(64)
+					.optional()
+					.describe(
+						"Identifies one editing session. Saves that share it keep one autosave version, refreshed at most every two minutes.",
+					),
+			}),
 		output: resumeOutputSchema,
+	},
+
+	checkSlug: {
+		input: z.object({
+			resumeId: z.string().describe("The ID of the resume the slug is for."),
+			slug: z.string().max(64).describe("The slug to check."),
+		}),
+		output: z.object({
+			status: z
+				.enum(["available", "current", "invalid", "taken"])
+				.describe(
+					"available: free to use. current: this resume's slug already. invalid: not lowercase letters, numbers and single dashes. taken: another of the user's resumes uses it.",
+				),
+			takenBy: z.string().optional().describe("The name of the resume that uses the slug, when taken."),
+			suggestion: z.string().optional().describe("A slug that would work instead."),
+		}),
 	},
 
 	setLocked: {
@@ -135,12 +199,22 @@ export const resumeDto = {
 	},
 
 	duplicate: {
-		input: resumeSchema.pick({ id: true, name: true, slug: true, tags: true }),
+		input: resumeSchema.pick({ id: true }).extend({
+			name: resumeSchema.shape.name.optional(),
+			tags: resumeSchema.shape.tags.optional(),
+			slug: resumeSchema.shape.slug
+				.optional()
+				.describe("The slug of the copy. Generated from the name, and made unique, when omitted."),
+		}),
 		output: z.string().describe("The ID of the duplicated resume."),
 	},
 
 	createDerived: {
-		input: resumeSchema.pick({ id: true, name: true, slug: true, tags: true }),
+		input: resumeSchema.pick({ id: true, name: true, tags: true }).extend({
+			slug: resumeSchema.shape.slug
+				.optional()
+				.describe("The slug of the child resume. Generated from the name, and made unique, when omitted."),
+		}),
 		output: z.string().describe("The ID of the derived resume."),
 	},
 
@@ -186,14 +260,44 @@ export const resumeDto = {
 	},
 
 	listVersions: {
-		input: z.object({ resumeId: z.string().describe("The ID of the resume whose version history to list.") }),
-		output: z.array(
-			z.object({
-				id: z.string().describe("The ID of the version snapshot."),
-				label: z.string().describe("A short description of what triggered the snapshot."),
-				createdAt: z.date().describe("The date and time the snapshot was taken."),
-			}),
-		),
+		input: z.object({
+			...paginationShape,
+			resumeId: z.string().describe("The ID of the resume whose version history to list."),
+		}),
+		output: z.array(versionSchema),
+	},
+
+	getVersion: {
+		input: z.object({
+			resumeId: z.string().describe("The ID of the resume the version belongs to."),
+			versionId: z.string().describe("The ID of the version."),
+		}),
+		output: versionSchema.extend({ data: resumeDataSchema }),
+	},
+
+	createVersion: {
+		input: z.object({
+			resumeId: z.string().describe("The ID of the resume to name a version of."),
+			name: z.string().trim().min(1).max(80).describe("The version's name, e.g. 'Sent to Lumen'."),
+		}),
+		output: versionSchema,
+	},
+
+	renameVersion: {
+		input: z.object({
+			resumeId: z.string().describe("The ID of the resume the version belongs to."),
+			versionId: z.string().describe("The ID of the named version."),
+			name: z.string().trim().min(1).max(80).describe("The version's new name."),
+		}),
+		output: versionSchema,
+	},
+
+	deleteVersion: {
+		input: z.object({
+			resumeId: z.string().describe("The ID of the resume the version belongs to."),
+			versionId: z.string().describe("The ID of the named version."),
+		}),
+		output: z.void(),
 	},
 
 	restoreVersion: {

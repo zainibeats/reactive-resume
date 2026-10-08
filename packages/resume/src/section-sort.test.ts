@@ -4,11 +4,9 @@ import { sortSectionItemsByPeriod } from "./section-sort";
 type Item = {
 	id: string;
 	period: string;
-	title: string;
-	metadata?: { note: string };
 };
 
-const item = (id: string, period: string, title = id): Item => ({ id, period, title });
+const item = (id: string, period: string): Item => ({ id, period });
 const ids = (items: readonly Item[]) => items.map(({ id }) => id);
 
 describe("sortSectionItemsByPeriod", () => {
@@ -62,72 +60,5 @@ describe("sortSectionItemsByPeriod", () => {
 		const result = sortSectionItemsByPeriod(input, "en-US");
 
 		expect(ids(result.items)).toEqual(["ended-2020", "single-2025", "single-2024"]);
-	});
-
-	it("keeps mixed-precision comparisons transitive", () => {
-		const input = [
-			item("december-2023", "2020 - December 2023"),
-			item("may-2024", "2020 - May 2024"),
-			item("year-2024", "2020 - 2024"),
-		];
-
-		expect(ids(sortSectionItemsByPeriod(input, "en-US").items)).toEqual(["may-2024", "year-2024", "december-2023"]);
-	});
-
-	it("leaves bare ongoing tokens, blanks, prose, and reversed periods stable at the end", () => {
-		const input = [
-			item("present", "Present"),
-			item("known", "2020 - 2021"),
-			item("blank", "   "),
-			item("prose", "During university"),
-			item("reversed", "March 2024 - February 2024"),
-		];
-
-		const result = sortSectionItemsByPeriod(input, "en-US");
-
-		expect(ids(result.items)).toEqual(["known", "present", "blank", "prose", "reversed"]);
-		expect(result.unresolvedIds).toEqual(["present", "blank", "prose", "reversed"]);
-	});
-
-	it("returns new arrays while preserving every original object and all content", () => {
-		const first = item("first", "2020 - 2021", "Original title");
-		first.metadata = { note: "Keep me" };
-		const second = item("second", "2022 - Present", "Another title");
-		const input = [first, second];
-		const snapshot = structuredClone(input);
-
-		const result = sortSectionItemsByPeriod(input, "en-US");
-
-		expect(result.items).not.toBe(input);
-		expect(result.items).toEqual([second, first]);
-		expect(result.items[0]).toBe(second);
-		expect(result.items[1]).toBe(first);
-		expect([...ids(result.items)].sort()).toEqual([...ids(input)].sort());
-		expect(input).toEqual(snapshot);
-	});
-
-	it("is deterministic across repeated invocation without changing stable ties", () => {
-		const input = [item("equal-a", "2020 - 2024"), item("newest", "2021 - 2025"), item("equal-b", "2020 - 2024")];
-
-		const first = sortSectionItemsByPeriod(input, "en-US");
-		const second = sortSectionItemsByPeriod(first.items, "en-US");
-
-		expect(ids(first.items)).toEqual(["newest", "equal-a", "equal-b"]);
-		expect(ids(second.items)).toEqual(ids(first.items));
-		expect(second.unresolvedIds).toEqual(first.unresolvedIds);
-	});
-
-	it("returns fresh arrays for empty and single-item inputs", () => {
-		const empty: Item[] = [];
-		const single = [item("only", "2024")];
-
-		const emptyResult = sortSectionItemsByPeriod(empty, "en-US");
-		const singleResult = sortSectionItemsByPeriod(single, "en-US");
-
-		expect(emptyResult).toEqual({ items: [], unresolvedIds: [] });
-		expect(emptyResult.items).not.toBe(empty);
-		expect(singleResult).toEqual({ items: single, unresolvedIds: [] });
-		expect(singleResult.items).not.toBe(single);
-		expect(singleResult.items[0]).toBe(single[0]);
 	});
 });

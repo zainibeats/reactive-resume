@@ -1,20 +1,17 @@
-// biome-ignore-all lint/style/noNonNullAssertion: These tests assert registered tool names before exercising handlers.
+// oxlint-disable typescript/no-non-null-assertion -- These tests assert registered tool names before exercising handlers.
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ORPCError } from "@orpc/server";
-
-const mocks = vi.hoisted(() => ({
-	resolveUserFromRequestHeaders: vi.fn(),
-	createResumePdfDownloadUrl: vi.fn(),
-}));
+import { TOOL_META } from "./tool-meta";
 
 vi.mock("@reactive-resume/api/context", () => ({
-	resolveUserFromRequestHeaders: mocks.resolveUserFromRequestHeaders,
+	resolveUserFromRequestHeaders: vi.fn(),
 }));
 
+vi.mock("./files", () => ({ readMcpFile: vi.fn() }));
+
 vi.mock("@reactive-resume/api/features/resume/export", () => ({
-	MAX_PDF_DOWNLOAD_URL_TTL_SECONDS: 600,
-	createResumePdfDownloadUrl: mocks.createResumePdfDownloadUrl,
+	createResumePdfDownloadUrl: vi.fn(),
 }));
 
 vi.mock("@reactive-resume/env/server", () => ({
@@ -29,6 +26,7 @@ const { registerTools } = await import("./tools");
 type ToolHandler = (input: Record<string, unknown>) => Promise<{
 	content: Array<{ type: "text"; text: string }>;
 	isError?: boolean;
+	structuredContent?: Record<string, unknown>;
 }>;
 
 type Registration = {
@@ -72,120 +70,72 @@ describe("registerTools", () => {
 		vi.clearAllMocks();
 	});
 
-	it("registers a PDF download URL tool that validates access before signing", async () => {
-		clientMock.resume.getById.mockResolvedValueOnce({ id: "resume-1", name: "Scizor" });
-		mocks.resolveUserFromRequestHeaders.mockResolvedValueOnce({ id: "user-1" });
-		mocks.createResumePdfDownloadUrl.mockReturnValueOnce({
-			url: "https://example.com/api/resumes/resume-1/pdf?token=signed",
-			expiresAt: "2026-06-01T10:10:00.000Z",
-			expiresInSeconds: 600,
-		});
-
-		const requestHeaders = new Headers({ "x-api-key": "key" });
-		const { server, registered } = makeFakeServer();
-		registerTools(server as never, clientMock as never, requestHeaders);
-
-		const tool = registered.find((item) => item.name === "download_resume_pdf")!;
-		const result = await tool.handler({ id: "resume-1" });
-		const payload = JSON.parse(result.content[0]!.text);
-
-		expect(tool.config.title).toBe("Download Resume PDF");
-		expect(clientMock.resume.getById).toHaveBeenCalledWith({ id: "resume-1" });
-		expect(mocks.resolveUserFromRequestHeaders).toHaveBeenCalledWith(requestHeaders);
-		expect(mocks.createResumePdfDownloadUrl).toHaveBeenCalledWith({
-			resumeId: "resume-1",
-			userId: "user-1",
-			target: "resume",
-		});
-		expect(payload).toEqual({
-			resumeId: "resume-1",
-			target: "resume",
-			name: "Scizor",
-			downloadUrl: "https://example.com/api/resumes/resume-1/pdf?token=signed",
-			expiresAt: "2026-06-01T10:10:00.000Z",
-			expiresInSeconds: 600,
-			contentType: "application/pdf",
-		});
-	});
-
-	it("creates a cover-letter PDF URL and reports cover-letter metadata", async () => {
-		clientMock.resume.getById.mockResolvedValueOnce({
-			id: "resume-1",
-			name: "Scizor",
-			data: { customSections: [{ type: "cover-letter", hidden: false, items: [{ hidden: false }] }] },
-		});
-		mocks.resolveUserFromRequestHeaders.mockResolvedValueOnce({ id: "user-1" });
-		mocks.createResumePdfDownloadUrl.mockReturnValueOnce({
-			url: "https://example.com/api/resumes/resume-1/pdf?token=signed&target=cover-letter",
-			expiresAt: "2026-06-01T10:10:00.000Z",
-			expiresInSeconds: 600,
-		});
-
+	it("creates and duplicates with an automatically generated address", async () => {
 		const { server, registered } = makeFakeServer();
 		registerTools(server as never, clientMock as never, new Headers());
-
-		const tool = registered.find((item) => item.name === "download_resume_pdf")!;
-		const result = await tool.handler({ id: "resume-1", target: "cover-letter" });
-
-		expect(mocks.createResumePdfDownloadUrl).toHaveBeenCalledWith({
-			resumeId: "resume-1",
-			userId: "user-1",
-			target: "cover-letter",
-		});
-		expect(JSON.parse(result.content[0]!.text)).toEqual({
-			resumeId: "resume-1",
-			target: "cover-letter",
-			name: "Scizor Cover Letter",
-			downloadUrl: "https://example.com/api/resumes/resume-1/pdf?token=signed&target=cover-letter",
-			expiresAt: "2026-06-01T10:10:00.000Z",
-			expiresInSeconds: 600,
-			contentType: "application/pdf",
-		});
+		clientMock.resume.create.mockResolvedValueOnce("created");
+		clientMock.resume.duplicate.mockResolvedValueOnce("copied");
+		const create = registered.find((tool) => tool.name === MCP_TOOL_NAME.createResume)!;
+		const duplicate = registered.find((tool) => tool.name === MCP_TOOL_NAME.duplicateResume)!;
+		await create.handler(TOOL_META[MCP_TOOL_NAME.createResume].inputSchema.parse({ name: "Resume" }));
+		await duplicate.handler(TOOL_META[MCP_TOOL_NAME.duplicateResume].inputSchema.parse({ id: "r1" }));
+		expect(clientMock.resume.create).toHaveBeenCalledWith({ name: "Resume", tags: [], withSampleData: false });
+		expect(clientMock.resume.duplicate).toHaveBeenCalledWith({ id: "r1" });
 	});
 
-	for (const [name, data] of [
-		["missing", { customSections: [] }],
-		["hidden", { customSections: [{ type: "cover-letter", hidden: true, items: [{ hidden: false }] }] }],
-	] as const) {
-		it(`does not create a cover-letter URL when the cover letter is ${name}`, async () => {
-			clientMock.resume.getById.mockResolvedValueOnce({ id: "resume-1", name: "Scizor", data });
-			mocks.resolveUserFromRequestHeaders.mockResolvedValueOnce({ id: "user-1" });
+	it("returns resume revision metadata and forwards the timestamp when patching", async () => {
+		const updatedAt = new Date("2026-10-01T10:00:00.000Z");
+		const resume = { id: "r1", name: "Resume", updatedAt, data: { basics: { name: "Before" } } };
+		clientMock.resume.getById.mockResolvedValueOnce(resume);
+		clientMock.resume.patch.mockResolvedValueOnce(resume);
+		const { server, registered } = makeFakeServer();
+		registerTools(server as never, clientMock as never, new Headers());
+		const read = registered.find((tool) => tool.name === MCP_TOOL_NAME.getResume)!;
+		const patch = registered.find((tool) => tool.name === MCP_TOOL_NAME.patchResume)!;
+		const result = await read.handler({ id: "r1" });
+		expect(result.structuredContent?.updatedAt).toBe("2026-10-01T10:00:00.000Z");
+		expect(JSON.parse(result.content[0]!.text)).toEqual(resume.data);
+		await patch.handler(
+			TOOL_META[MCP_TOOL_NAME.patchResume].inputSchema.parse({
+				id: "r1",
+				expectedUpdatedAt: result.structuredContent?.updatedAt,
+				operations: [{ op: "replace", path: "/basics/name", value: "After" }],
+			}),
+		);
+		expect(clientMock.resume.patch.mock.calls[0]?.[0].expectedUpdatedAt).toEqual(updatedAt);
+	});
+
+	describe("error hints", () => {
+		const readResume = (error: unknown) => {
+			clientMock.resume.getById.mockRejectedValueOnce(error);
 
 			const { server, registered } = makeFakeServer();
 			registerTools(server as never, clientMock as never, new Headers());
 
-			const tool = registered.find((item) => item.name === "download_resume_pdf")!;
-			const result = await tool.handler({ id: "resume-1", target: "cover-letter" });
+			const tool = registered.find((item) => item.name === MCP_TOOL_NAME.getResume)!;
+			return tool.handler({ id: "resume-1" });
+		};
+
+		it("hides unexpected internal failure details", async () => {
+			const result = await readResume(new Error("postgresql://private-credentials/internal"));
+			expect(result.isError).toBe(true);
+			expect(result.content[0]!.text).toContain("Unexpected failure");
+			expect(result.content[0]!.text).not.toContain("private-credentials");
+		});
+
+		// Procedures throw these without a message, so the message is the code itself
+		// (or oRPC's default, "Not Found") and the status never appears in it.
+		it.each([
+			["RESUME_LOCKED", undefined, `Ask the user before unlocking with \`${MCP_TOOL_NAME.unlockResume}\`.`],
+			["NOT_FOUND", undefined, `\`${MCP_TOOL_NAME.listResumes}\` returns valid resume IDs.`],
+			["RESUME_SLUG_ALREADY_EXISTS", 400, "The slug is already in use."],
+			["FORBIDDEN", undefined, "Permission denied."],
+			["BAD_REQUEST", undefined, "Check the input parameters against the tool's schema."],
+		])("hints on %s", async (code, status, expected) => {
+			const result = await readResume(new ORPCError(code, status ? { status } : undefined));
 
 			expect(result.isError).toBe(true);
-			expect(result.content[0]?.text).toContain("No visible cover letter found for this resume.");
-			expect(mocks.createResumePdfDownloadUrl).not.toHaveBeenCalled();
+			expect(result.content[0]!.text).toContain(expected);
 		});
-	}
-
-	it("keeps the tool name stable", () => {
-		expect(MCP_TOOL_NAME.downloadResumePdf).toBe("download_resume_pdf");
-	});
-
-	it("points a failed patch at the document structure rather than the tool schema", async () => {
-		clientMock.resume.patch.mockRejectedValueOnce(
-			new ORPCError("INVALID_PATCH_OPERATIONS", {
-				status: 400,
-				message: "Cannot perform the operation at a path that does not exist. Path: /sections/summary/content.",
-			}),
-		);
-
-		const { server, registered } = makeFakeServer();
-		registerTools(server as never, clientMock as never, new Headers());
-
-		const tool = registered.find((item) => item.name === "apply_resume_patch")!;
-		const result = await tool.handler({
-			id: "resume-1",
-			operations: [{ op: "replace", path: "/sections/summary/content", value: "x" }],
-		});
-
-		expect(result.isError).toBe(true);
-		expect(result.content[0]?.text).toContain("deepest path that exists");
-		expect(result.content[0]?.text).not.toContain("Check the input parameters against the tool's schema");
 	});
 });

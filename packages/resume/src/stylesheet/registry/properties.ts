@@ -21,8 +21,8 @@ export type PropertyDefinition = {
 
 export type PropertyRegistry = Readonly<Record<string, PropertyDefinition | undefined>>;
 
-export const SEMANTIC_CSS_CSS_WIDE_KEYWORDS_V1 = ["inherit", "initial", "revert", "unset"] as const;
-export const SEMANTIC_CSS_LENGTH_UNITS_V1 = ["pt", "px", "in", "mm", "cm", "%", "vw", "vh", "em", "rem"] as const;
+export const SEMANTIC_CSS_CSS_WIDE_KEYWORDS_V1 = ["inherit", "initial"] as const;
+export const SEMANTIC_CSS_LENGTH_UNITS_V1 = ["pt", "px", "in", "mm", "cm", "%", "em", "rem"] as const;
 export const SEMANTIC_CSS_BORDER_STYLE_VALUES_V1 = ["dotted", "dashed", "solid"] as const;
 export const SEMANTIC_CSS_LENGTH_VALUE_KEYWORDS_V1 = [
 	"auto",
@@ -118,7 +118,7 @@ const linkContainerNodes = [...containerNodes, "link"] as SemanticNodeKind[];
 const textAndLinkNodes = [...textNodes, "link"] as SemanticNodeKind[];
 const colorNodes = [...containerNodes, ...textNodes, "link", "icon", "level"] as SemanticNodeKind[];
 const spacingNodes = [...containerNodes, ...textNodes, "link", "picture"] as SemanticNodeKind[];
-const structuralNodes = [...SEMANTIC_NODE_KINDS.filter((kind) => kind !== "resume")] as SemanticNodeKind[];
+const structuralNodes = SEMANTIC_NODE_KINDS.filter((kind) => kind !== "resume") as SemanticNodeKind[];
 const lengthProperties = new Set<string>(SEMANTIC_CSS_LENGTH_PROPERTIES_V1);
 const numericLengthUnits = SEMANTIC_CSS_LENGTH_UNITS_V1.filter((unit) => unit !== "%");
 const borderStyleProperties = /^(?:border-style|border-(?:top|right|bottom|left)-style)$/;

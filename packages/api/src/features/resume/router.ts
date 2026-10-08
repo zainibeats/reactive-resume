@@ -8,7 +8,7 @@ import { tagsRouter } from "./tags";
 import { versionsRouter } from "./versions";
 
 export const resumeRouter = {
-	getRoot: publicProcedure.handler(({ context }) =>
+	getRoot: publicProcedure.route({ tags: ["Internal"] }).handler(({ context }) =>
 		getRootResume({
 			requestHeaders: context.reqHeaders,
 			...(context.user?.id ? { currentUserId: context.user.id } : {}),
@@ -21,6 +21,7 @@ export const resumeRouter = {
 	list: crudRouter.list,
 	getById: crudRouter.getById,
 	getBySlug: sharingRouter.getBySlug,
+	checkSlug: sharingRouter.checkSlug,
 	create: crudRouter.create,
 	import: crudRouter.import,
 	update: crudRouter.update,
@@ -36,5 +37,9 @@ export const resumeRouter = {
 	dismissParentUpdates: crudRouter.dismissParentUpdates,
 	delete: crudRouter.delete,
 	listVersions: versionsRouter.listVersions,
+	getVersion: versionsRouter.getVersion,
+	createVersion: versionsRouter.createVersion,
+	renameVersion: versionsRouter.renameVersion,
+	deleteVersion: versionsRouter.deleteVersion,
 	restoreVersion: versionsRouter.restoreVersion,
 };

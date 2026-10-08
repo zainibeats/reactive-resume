@@ -33,14 +33,12 @@ export function handleRobots(options?: StaticSeoOptions) {
 
 export function handleSitemap(options?: StaticSeoOptions) {
 	const baseUrl = appUrl();
+	// The instance root is the only indexable page; the signed-in app and public resumes are served noindex.
 	const body = [
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
 		"  <url>",
 		`    <loc>${baseUrl}/</loc>`,
-		"  </url>",
-		"  <url>",
-		`    <loc>${baseUrl}/ats-checker</loc>`,
 		"  </url>",
 		"</urlset>",
 		"",

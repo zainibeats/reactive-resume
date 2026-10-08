@@ -1,5 +1,5 @@
-import type { APIRequestContext, Browser, BrowserContext, Page } from "@playwright/test";
 import type { E2EAccount } from "./data";
+import type { APIRequestContext, Browser, BrowserContext, Page } from "@playwright/test";
 
 async function assertAuthResponse(response: Awaited<ReturnType<APIRequestContext["post"]>>) {
 	if (response.ok()) return;
@@ -27,9 +27,13 @@ export async function loginViaUi(page: Page, account: E2EAccount) {
 }
 
 export async function logoutViaUi(page: Page, account: E2EAccount) {
-	await page.getByText(account.email).click();
+	// The avatar row at the foot of the sidebar opens the account menu.
+	await page
+		.getByRole("complementary")
+		.getByRole("button", { name: new RegExp(account.name) })
+		.click();
 	await page.getByRole("menuitem", { name: "Sign out" }).click();
-	await page.goto("/auth/login");
+	await page.waitForURL(/\/auth\/login/);
 }
 
 async function registerViaApi(request: APIRequestContext, account: E2EAccount, baseURL: string) {

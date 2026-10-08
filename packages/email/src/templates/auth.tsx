@@ -37,8 +37,8 @@ function AuthEmailLayout({ preview, heading, intro, details, actionLabel, action
 					<Preview>{preview}</Preview>
 					<Container className="mx-auto w-full max-w-xl bg-zinc-900 p-6 text-zinc-50">
 						<Section>
-							<Text className="font-medium text-base">{appName}</Text>
-							<Heading className="mt-6 whitespace-break-spaces font-medium text-2xl leading-0 tracking-tighter md:text-5xl">
+							<Text className="text-base font-medium">{appName}</Text>
+							<Heading className="mt-6 text-2xl leading-0 font-medium tracking-tighter whitespace-break-spaces md:text-5xl">
 								{heading}
 							</Heading>
 
@@ -60,7 +60,7 @@ function AuthEmailLayout({ preview, heading, intro, details, actionLabel, action
 								<Text className="leading-0">
 									If the button does not work, copy and paste this link into your browser:
 								</Text>
-								<Link className="text-zinc-200/60 leading-0 underline underline-offset-2" href={actionUrl}>
+								<Link className="leading-0 text-zinc-200/60 underline underline-offset-2" href={actionUrl}>
 									{actionUrl}
 								</Link>
 							</Section>

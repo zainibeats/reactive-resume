@@ -14,7 +14,7 @@ type PdfRuleReference =
 	| { severity: "warning"; category: PdfCategory; deduction: 5 | 10 | 15 }
 	| { severity: "tip"; category: PdfCategory };
 
-export const PDF_ATS_RULE_CATALOG_V1 = {
+const PDF_ATS_RULE_CATALOG_V1 = {
 	// -------------------------------------------------------------------------
 	// Parseability — can software recover the words at all?
 	// -------------------------------------------------------------------------

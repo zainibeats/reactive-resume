@@ -1,14 +1,14 @@
-import type { ApplicationStatus } from "@reactive-resume/schema/applications/data";
 import type { Application } from "../types";
 import type { FileAttachment } from "./file-attachment-field";
+import type { ApplicationStatus } from "@reactive-resume/schema/applications/data";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { SparkleIcon, XIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { STAGES } from "@reactive-resume/schema/applications/data";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@reactive-resume/ui/components/accordion";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
 import {
@@ -21,10 +21,12 @@ import {
 } from "@reactive-resume/ui/components/sheet";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { toast } from "@reactive-resume/ui/components/toast";
-import { Combobox } from "@/components/ui/combobox";
-import { orpc } from "@/libs/orpc/client";
 import { applicationsListQueryKey } from "../queries";
 import { FileAttachmentField } from "./file-attachment-field";
+import { Combobox } from "@/components/ui/combobox";
+import { useClosingValue } from "@/hooks/use-closing-value";
+import { isImeComposing } from "@/libs/keyboard";
+import { orpc } from "@/libs/orpc/client";
 
 // Preset source suggestions surfaced via a <datalist>; the field itself stays free-text.
 const SOURCE_OPTIONS = ["LinkedIn", "Indeed", "Company Website", "Referral", "Recruiter", "Other"];
@@ -49,8 +51,8 @@ const emptyForm = () => ({
 	followUpAt: "",
 	followUpNote: "",
 	notes: "",
-	resumeFile: null as FileAttachment | null,
-	coverLetter: null as FileAttachment | null,
+	resumeFile: null as FileAttachment | File | null,
+	coverLetter: null as FileAttachment | File | null,
 });
 
 type FormState = ReturnType<typeof emptyForm>;
@@ -79,6 +81,114 @@ function toForm(app: Application): FormState {
 	};
 }
 
+function toPayload(form: FormState) {
+	return {
+		company: form.company.trim(),
+		role: form.role.trim(),
+		status: form.status,
+		location: form.location.trim() || null,
+		salary: form.salary.trim() || null,
+		source: form.source.trim() || null,
+		resumeId: form.resumeId || null,
+		tags: form.tags,
+		sourceUrl: form.sourceUrl.trim() || null,
+		jobDescription: form.jobDescription.trim() || null,
+		notes: form.notes.trim() || null,
+		followUpNote: form.followUpNote.trim() || null,
+		followUpAt: form.followUpAt ? new Date(form.followUpAt) : null,
+		resumeFileUrl: form.resumeFile instanceof File ? null : (form.resumeFile?.url ?? null),
+		...(form.resumeFile instanceof File ? { resumeFile: form.resumeFile } : {}),
+		resumeFileName: form.resumeFile?.name ?? null,
+		coverLetterUrl: form.coverLetter instanceof File ? null : (form.coverLetter?.url ?? null),
+		...(form.coverLetter instanceof File ? { coverLetterFile: form.coverLetter } : {}),
+		coverLetterName: form.coverLetter?.name ?? null,
+	};
+}
+
+type AutofillResult = {
+	company?: string | null;
+	role?: string | null;
+	location?: string | null;
+	salary?: string | null;
+};
+
+type JobDescriptionAutofillProps = {
+	value: string;
+	onChange: (value: string) => void;
+	onFill: (result: AutofillResult) => void;
+};
+
+// Pasted job description: stored with the application and used for every AI action.
+// Collapsed by default so the form stays short.
+function JobDescriptionAutofill({ value, onChange, onFill }: JobDescriptionAutofillProps) {
+	const autofill = useMutation(
+		orpc.applications.ai.autofill.mutationOptions({
+			onSuccess: (result) => {
+				onFill(result);
+				toast.add({ type: "success", description: t`Filled in what we could from the posting.` });
+			},
+			onError: (error) => toast.add({ type: "error", description: error.message || t`Auto-fill failed.` }),
+		}),
+	);
+
+	const runAutofill = (jobDescription: string) => {
+		const posting = jobDescription.trim();
+		if (posting.length < MIN_AUTOFILL_CHARS || autofill.isPending) return;
+		autofill.mutate({ jobDescription: posting.slice(0, MAX_JOB_DESCRIPTION_CHARS) });
+	};
+
+	return (
+		<Accordion className="rounded-lg border border-dashed border-line px-3">
+			<AccordionItem value="job-description">
+				<AccordionTrigger>
+					<span className="flex items-center gap-1.5">
+						<Icon name="auto_awesome" size={16} className="text-accent-text" />
+						<Trans>Job description</Trans>
+					</span>
+				</AccordionTrigger>
+				<AccordionContent className="flex flex-col gap-2">
+					<p className="text-xs text-ink-3">
+						<Trans>
+							Copy the entire job description from the posting and paste it below. We'll fill in the fields for you and
+							keep the text with this application for match scoring and tailoring.
+						</Trans>
+					</p>
+					<Textarea
+						// Fixed height: the accordion panel measures its content once, so a textarea that
+						// grew with the pasted text would overflow the clipped panel.
+						className="field-sizing-fixed h-40"
+						value={value}
+						rows={8}
+						maxLength={MAX_JOB_DESCRIPTION_CHARS}
+						placeholder={t`Paste the full job description here…`}
+						onChange={(event) => onChange(event.target.value)}
+						onPaste={(event) => runAutofill(event.clipboardData.getData("text"))}
+					/>
+					<div className="flex items-center justify-between gap-2">
+						<p className="text-[11px] text-ink-3">
+							{autofill.isPending ? (
+								<Trans>Reading the posting…</Trans>
+							) : (
+								<Trans>Pasting fills the fields automatically.</Trans>
+							)}
+						</p>
+						<Button
+							type="button"
+							size="sm"
+							variant="secondary"
+							disabled={value.trim().length < MIN_AUTOFILL_CHARS || autofill.isPending}
+							onClick={() => runAutofill(value)}
+						>
+							<Icon name="auto_awesome" size={16} />
+							<Trans>Fill fields</Trans>
+						</Button>
+					</div>
+				</AccordionContent>
+			</AccordionItem>
+		</Accordion>
+	);
+}
+
 type Props = {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -86,8 +196,10 @@ type Props = {
 	application?: Application | null;
 };
 
-export function ApplicationFormSheet({ open, onOpenChange, application }: Props) {
+export function ApplicationFormSheet({ open, onOpenChange, application: requested }: Props) {
 	const queryClient = useQueryClient();
+	// Closing keeps the application (title and fields) on screen until the sheet has slid away.
+	const [application, onApplicationOpenChangeComplete] = useClosingValue(requested ?? null);
 	const isEditing = !!application;
 
 	const [form, setForm] = useState<FormState>(() => (application ? toForm(application) : emptyForm()));
@@ -126,11 +238,10 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 		orpc.applications.create.mutationOptions({
 			onSuccess: () => {
 				invalidate();
-				toast.add({ type: "success", description: t`Job saved.` });
-				setForm(emptyForm());
+				toast.add({ type: "success", description: t`Application added to your pipeline.` });
 				onOpenChange(false);
 			},
-			onError: () => toast.add({ type: "error", description: t`Couldn't save the job. Please try again.` }),
+			onError: () => toast.add({ type: "error", description: t`Couldn't add the application. Please try again.` }),
 		}),
 	);
 
@@ -138,259 +249,252 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 		orpc.applications.update.mutationOptions({
 			onSuccess: () => {
 				invalidate();
-				toast.add({ type: "success", description: t`Saved job updated.` });
+				toast.add({ type: "success", description: t`Application updated.` });
 				onOpenChange(false);
 			},
 			onError: () => toast.add({ type: "error", description: t`Couldn't save your changes. Please try again.` }),
 		}),
 	);
 
-	const autofill = useMutation(
-		orpc.applications.ai.autofill.mutationOptions({
-			onSuccess: (result) => {
-				setForm((prev) => ({
-					...prev,
-					company: result.company || prev.company,
-					role: result.role || prev.role,
-					location: result.location || prev.location,
-					salary: result.salary || prev.salary,
-				}));
-				toast.add({ type: "success", description: t`Filled in what we could from the posting.` });
-			},
-			onError: (error) => toast.add({ type: "error", description: error.message || t`Auto-fill failed.` }),
-		}),
-	);
-
-	const runAutofill = (jobDescription: string) => {
-		const posting = jobDescription.trim();
-		if (posting.length < MIN_AUTOFILL_CHARS || autofill.isPending) return;
-		autofill.mutate({ jobDescription: posting.slice(0, MAX_JOB_DESCRIPTION_CHARS) });
-	};
-
 	const pending = create.isPending || update.isPending;
 
 	const submit = () => {
 		if (!form.company.trim() || !form.role.trim()) return;
-		const payload = {
-			company: form.company.trim(),
-			role: form.role.trim(),
-			status: form.status,
-			location: form.location.trim() || null,
-			salary: form.salary.trim() || null,
-			source: form.source.trim() || null,
-			resumeId: form.resumeId || null,
-			tags: form.tags,
-			sourceUrl: form.sourceUrl.trim() || null,
-			jobDescription: form.jobDescription.trim() || null,
-			notes: form.notes.trim() || null,
-			followUpNote: form.followUpNote.trim() || null,
-			followUpAt: form.followUpAt ? new Date(form.followUpAt) : null,
-			resumeFileUrl: form.resumeFile?.url ?? null,
-			resumeFileName: form.resumeFile?.name ?? null,
-			coverLetterUrl: form.coverLetter?.url ?? null,
-			coverLetterName: form.coverLetter?.name ?? null,
-		};
+		const payload = toPayload(form);
 		if (application) update.mutate({ id: application.id, ...payload });
 		else create.mutate({ ...payload, stageEnteredAt: form.stageEnteredAt || undefined });
 	};
 
 	return (
-		<Sheet open={open} onOpenChange={onOpenChange}>
+		<Sheet
+			open={open}
+			onOpenChange={(nextOpen) => {
+				if (!pending) onOpenChange(nextOpen);
+			}}
+			onOpenChangeComplete={(next) => {
+				onApplicationOpenChangeComplete(next);
+				// After adding, the fields clear once the sheet has closed; closing without saving keeps the draft.
+				if (!next && create.isSuccess) {
+					setForm(emptyForm());
+					create.reset();
+				}
+			}}
+		>
 			<SheetContent side="right" className="w-full gap-0 data-[side=right]:sm:max-w-lg">
 				<SheetHeader>
-					<SheetTitle>{isEditing ? <Trans>Edit saved job</Trans> : <Trans>Add job</Trans>}</SheetTitle>
+					<SheetTitle>{isEditing ? <Trans>Edit application</Trans> : <Trans>Add application</Trans>}</SheetTitle>
 					<SheetDescription>
 						{isEditing ? (
-							<Trans>Update this saved job and posting details.</Trans>
+							<Trans>Update this application's details.</Trans>
 						) : (
-							<Trans>Save a posting, link a resume, and tailor a copy when the fit looks right.</Trans>
+							<Trans>Track a job you're applying to and link the resume you sent.</Trans>
 						)}
 					</SheetDescription>
 				</SheetHeader>
 
-				<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4 [&>*]:shrink-0">
-					{/* Pasted job description: stored with the application and used for every AI action.
-					    Collapsed by default so the form stays short; hidden entirely when AI is off. */}
+				<div className="-mt-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-4 [&>*]:shrink-0">
+					{/* Hidden entirely when AI is off. */}
+					{!aiEnabled && (
+						<Field label={t`Job description`}>
+							{(id) => (
+								<Textarea
+									id={id}
+									rows={6}
+									maxLength={MAX_JOB_DESCRIPTION_CHARS}
+									value={form.jobDescription}
+									onChange={(event) => set("jobDescription", event.target.value)}
+								/>
+							)}
+						</Field>
+					)}
 					{aiEnabled && (
-						<Accordion className="rounded-lg border border-border border-dashed px-3">
-							<AccordionItem value="job-description">
-								<AccordionTrigger>
-									<span className="flex items-center gap-1.5">
-										<SparkleIcon className="text-primary" />
-										<Trans>Job description</Trans>
-									</span>
-								</AccordionTrigger>
-								<AccordionContent className="flex flex-col gap-2">
-									<p className="text-muted-foreground text-xs">
-										<Trans>
-											Copy the entire job description from the posting and paste it below. We'll fill in the fields for
-											you and keep the text with this application for match scoring and tailoring.
-										</Trans>
-									</p>
-									<Textarea
-										// Fixed height: the accordion panel measures its content once, so a textarea that
-										// grew with the pasted text would overflow the clipped panel.
-										className="field-sizing-fixed h-40"
-										value={form.jobDescription}
-										rows={8}
-										maxLength={MAX_JOB_DESCRIPTION_CHARS}
-										placeholder={t`Paste the full job description here…`}
-										onChange={(event) => set("jobDescription", event.target.value)}
-										onPaste={(event) => runAutofill(event.clipboardData.getData("text"))}
-									/>
-									<div className="flex items-center justify-between gap-2">
-										<p className="text-[11px] text-muted-foreground">
-											{autofill.isPending ? (
-												<Trans>Reading the posting…</Trans>
-											) : (
-												<Trans>Pasting fills the fields automatically.</Trans>
-											)}
-										</p>
-										<Button
-											type="button"
-											size="sm"
-											variant="outline"
-											disabled={form.jobDescription.trim().length < MIN_AUTOFILL_CHARS || autofill.isPending}
-											onClick={() => runAutofill(form.jobDescription)}
-										>
-											<SparkleIcon />
-											<Trans>Fill fields</Trans>
-										</Button>
-									</div>
-								</AccordionContent>
-							</AccordionItem>
-						</Accordion>
+						<JobDescriptionAutofill
+							value={form.jobDescription}
+							onChange={(value) => set("jobDescription", value)}
+							onFill={(result) =>
+								setForm((prev) => ({
+									...prev,
+									company: result.company || prev.company,
+									role: result.role || prev.role,
+									location: result.location || prev.location,
+									salary: result.salary || prev.salary,
+								}))
+							}
+						/>
 					)}
 
 					<Field label={t`Company`} required>
-						<Input value={form.company} onChange={(event) => set("company", event.target.value)} />
+						{(id) => <Input id={id} value={form.company} onChange={(event) => set("company", event.target.value)} />}
 					</Field>
 					<Field label={t`Role / title`} required>
-						<Input value={form.role} onChange={(event) => set("role", event.target.value)} />
+						{(id) => <Input id={id} value={form.role} onChange={(event) => set("role", event.target.value)} />}
 					</Field>
 
 					<div className="grid grid-cols-2 gap-3">
 						<Field label={t`Location`}>
-							<Input
-								value={form.location}
-								list="application-locations"
-								placeholder={t`Remote, Hybrid, a city…`}
-								onChange={(event) => set("location", event.target.value)}
-							/>
-							<datalist id="application-locations">
-								<option value="Remote" />
-								<option value="Hybrid" />
-								<option value="In-office" />
-							</datalist>
+							{(id) => (
+								<>
+									<Input
+										id={id}
+										value={form.location}
+										list="application-locations"
+										placeholder={t`Remote, Hybrid, a city…`}
+										onChange={(event) => set("location", event.target.value)}
+									/>
+									<datalist id="application-locations">
+										<option value="Remote" />
+										<option value="Hybrid" />
+										<option value="In-office" />
+									</datalist>
+								</>
+							)}
 						</Field>
 						<Field label={t`Salary range`}>
-							<Input value={form.salary} onChange={(event) => set("salary", event.target.value)} />
+							{(id) => <Input id={id} value={form.salary} onChange={(event) => set("salary", event.target.value)} />}
 						</Field>
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
 						<Field label={t`Source`}>
-							<Input
-								value={form.source}
-								list="application-sources"
-								placeholder={t`LinkedIn, Referral…`}
-								onChange={(event) => set("source", event.target.value)}
-							/>
-							<datalist id="application-sources">
-								{SOURCE_OPTIONS.map((option) => (
-									<option key={option} value={option} />
-								))}
-							</datalist>
+							{(id) => (
+								<>
+									<Input
+										id={id}
+										value={form.source}
+										list="application-sources"
+										placeholder={t`LinkedIn, Referral…`}
+										onChange={(event) => set("source", event.target.value)}
+									/>
+									<datalist id="application-sources">
+										{SOURCE_OPTIONS.map((option) => (
+											<option key={option} value={option} />
+										))}
+									</datalist>
+								</>
+							)}
 						</Field>
 						<Field label={t`Stage`}>
-							<Combobox
-								className="w-full"
-								value={form.status}
-								options={STAGES.map((s) => ({ value: s.value, label: s.label }))}
-								onValueChange={(value) => value && set("status", value)}
-							/>
+							{(id) => (
+								<Combobox
+									id={id}
+									className="w-full"
+									value={form.status}
+									options={STAGES.map((s) => ({ value: s.value, label: s.label }))}
+									onValueChange={(value) => value && set("status", value)}
+								/>
+							)}
 						</Field>
 					</div>
 
 					<Field label={t`Job posting link`}>
-						<Input
-							type="url"
-							value={form.sourceUrl}
-							placeholder="https://…"
-							onChange={(event) => set("sourceUrl", event.target.value)}
-						/>
+						{(id) => (
+							<Input
+								id={id}
+								type="url"
+								value={form.sourceUrl}
+								placeholder="https://…"
+								onChange={(event) => set("sourceUrl", event.target.value)}
+							/>
+						)}
 					</Field>
 
 					{!isEditing && (
 						<Field label={t`Stage date`}>
-							<Input
-								type="date"
-								value={form.stageEnteredAt}
-								onChange={(event) => set("stageEnteredAt", event.target.value)}
-							/>
+							{(id) => (
+								<Input
+									id={id}
+									type="date"
+									value={form.stageEnteredAt}
+									onChange={(event) => set("stageEnteredAt", event.target.value)}
+								/>
+							)}
 						</Field>
 					)}
 
 					{/* Resume: link a live Reactive Resume (unlocks AI) or upload the exact PDF you sent. */}
 					<Field label={t`Resume`}>
-						<div className="flex flex-col gap-2">
-							<Combobox
-								className="w-full"
-								value={form.resumeId || null}
-								options={resumeOptions}
-								placeholder={t`Link a Reactive Resume (recommended)`}
-								showClear
-								emptyMessage={t`No resumes yet.`}
-								onValueChange={(value) => set("resumeId", value ?? "")}
-							/>
-							<FileAttachmentField
-								value={form.resumeFile}
-								attachLabel={t`Or upload a resume PDF`}
-								onChange={(value) => set("resumeFile", value)}
-							/>
-							<p className="text-[11px] text-muted-foreground">
-								<Trans>Link a Reactive Resume to use AI match scoring and tailoring.</Trans>
-							</p>
-						</div>
+						{(id) => (
+							<div className="flex flex-col gap-2">
+								<Combobox
+									id={id}
+									className="w-full"
+									value={form.resumeId || null}
+									options={resumeOptions}
+									placeholder={t`Link a Reactive Resume (recommended)`}
+									showClear
+									emptyMessage={t`No resumes yet.`}
+									onValueChange={(value) => set("resumeId", value ?? "")}
+								/>
+								<FileAttachmentField
+									value={form.resumeFile}
+									attachLabel={t`Or upload a resume PDF`}
+									onChange={(value) => set("resumeFile", value)}
+								/>
+								<p className="text-[11px] text-ink-3">
+									<Trans>Link a Reactive Resume to use AI match scoring and tailoring.</Trans>
+								</p>
+							</div>
+						)}
 					</Field>
 
+					{/* The attach button below names itself; the file picker has no labelable control. */}
 					<Field label={t`Cover letter`}>
-						<FileAttachmentField
-							value={form.coverLetter}
-							attachLabel={t`Attach a cover letter (PDF)`}
-							onChange={(value) => set("coverLetter", value)}
-						/>
+						{() => (
+							<FileAttachmentField
+								value={form.coverLetter}
+								attachLabel={t`Attach a cover letter (PDF)`}
+								onChange={(value) => set("coverLetter", value)}
+							/>
+						)}
 					</Field>
 
 					<Field label={t`Tags`}>
-						<TagsField value={form.tags} suggestions={allTags ?? []} onChange={(tags) => set("tags", tags)} />
+						{(id) => (
+							<TagsField id={id} value={form.tags} suggestions={allTags ?? []} onChange={(tags) => set("tags", tags)} />
+						)}
 					</Field>
 
 					<div className="grid grid-cols-2 gap-3">
 						<Field label={t`Follow-up date`}>
-							<Input type="date" value={form.followUpAt} onChange={(event) => set("followUpAt", event.target.value)} />
+							{(id) => (
+								<Input
+									id={id}
+									type="date"
+									value={form.followUpAt}
+									onChange={(event) => set("followUpAt", event.target.value)}
+								/>
+							)}
 						</Field>
 						<Field label={t`Follow-up note`}>
-							<Input value={form.followUpNote} onChange={(event) => set("followUpNote", event.target.value)} />
+							{(id) => (
+								<Input
+									id={id}
+									value={form.followUpNote}
+									onChange={(event) => set("followUpNote", event.target.value)}
+								/>
+							)}
 						</Field>
 					</div>
 
 					<Field label={t`Notes`}>
-						<Textarea
-							value={form.notes}
-							rows={3}
-							placeholder={t`Referred by…, things to emphasize, etc.`}
-							onChange={(event) => set("notes", event.target.value)}
-						/>
+						{(id) => (
+							<Textarea
+								id={id}
+								value={form.notes}
+								rows={3}
+								placeholder={t`Referred by…, things to emphasize, etc.`}
+								onChange={(event) => set("notes", event.target.value)}
+							/>
+						)}
 					</Field>
 				</div>
 
 				<SheetFooter className="flex-row justify-end gap-2">
-					<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+					<Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
 						<Trans>Cancel</Trans>
 					</Button>
 					<Button type="button" disabled={!form.company.trim() || !form.role.trim() || pending} onClick={submit}>
-						{isEditing ? <Trans>Save changes</Trans> : <Trans>Save job</Trans>}
+						{isEditing ? <Trans>Save changes</Trans> : <Trans>Add to pipeline</Trans>}
 					</Button>
 				</SheetFooter>
 			</SheetContent>
@@ -398,26 +502,35 @@ export function ApplicationFormSheet({ open, onOpenChange, application }: Props)
 	);
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+type FieldProps = {
+	label: string;
+	required?: boolean;
+	// Render prop: receives the id to put on the labelled control.
+	children: (id: string) => React.ReactNode;
+};
+
+function Field({ label, required, children }: FieldProps) {
+	const id = useId();
 	return (
 		<div className="grid gap-1.5">
-			<Label className="text-muted-foreground text-xs">
+			<Label htmlFor={id} className="text-xs text-ink-3">
 				{label}
-				{required && <span className="text-destructive"> *</span>}
+				{required && <span className="text-danger-text"> *</span>}
 			</Label>
-			{children}
+			{children(id)}
 		</div>
 	);
 }
 
 type TagsFieldProps = {
+	id: string;
 	value: string[];
 	suggestions: string[];
 	onChange: (tags: string[]) => void;
 };
 
 // Type-and-Enter tag input with chips + an autocomplete datalist of the user's existing tags.
-function TagsField({ value, suggestions, onChange }: TagsFieldProps) {
+function TagsField({ id, value, suggestions, onChange }: TagsFieldProps) {
 	const [draft, setDraft] = useState("");
 
 	const add = () => {
@@ -433,11 +546,13 @@ function TagsField({ value, suggestions, onChange }: TagsFieldProps) {
 	return (
 		<div className="flex flex-col gap-2">
 			<Input
+				id={id}
 				value={draft}
 				list="application-tags"
 				placeholder={t`Add a tag and press Enter…`}
 				onChange={(event) => setDraft(event.target.value)}
 				onKeyDown={(event) => {
+					if (isImeComposing(event)) return;
 					if (event.key === "Enter") {
 						event.preventDefault();
 						add();
@@ -455,16 +570,16 @@ function TagsField({ value, suggestions, onChange }: TagsFieldProps) {
 					{value.map((tag) => (
 						<span
 							key={tag}
-							className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-muted-foreground text-xs"
+							className="inline-flex items-center gap-1 rounded-full bg-sunken px-2 py-0.5 text-xs text-ink-3"
 						>
 							{tag}
 							<button
 								type="button"
 								title={t`Remove tag`}
-								className="hover:text-destructive"
+								className="hover:text-danger-text"
 								onClick={() => onChange(value.filter((t) => t !== tag))}
 							>
-								<XIcon className="size-3" />
+								<Icon name="close" size={12} />
 							</button>
 						</span>
 					))}

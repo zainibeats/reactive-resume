@@ -3,13 +3,30 @@ import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
-import { authClient } from "@/libs/auth/client";
+import { cn } from "@reactive-resume/utils/style";
 import { isOAuthRedirect } from "../redirect";
+import { authClient } from "@/libs/auth/client";
+import { ENTER_CLASS } from "@/libs/motion";
 
 type OAuthConsentPageProps = {
 	oauthQuery: string;
 	email: string;
 };
+
+/** Resolves with an error message, or null when Better Auth's redirect plugin takes over. */
+async function requestConsent(accept: boolean, oauthQuery: string) {
+	const failure = t`Could not complete this connection. Restart the connection from your client and try again.`;
+	try {
+		// This is the only point that grants access: an explicit button press.
+		// Better Auth validates the signed request, session, and request origin.
+		const { data, error } = await authClient.oauth2.consent({ accept, oauth_query: oauthQuery });
+		if (error || !isOAuthRedirect(data)) return failure;
+		// Better Auth's redirect plugin follows a successful provider response.
+		return null;
+	} catch {
+		return failure;
+	}
+}
 
 export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 	const [pending, setPending] = useState(false);
@@ -37,17 +54,9 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 		if (pending || !client || !validRequest) return;
 		setPending(true);
 		setError(undefined);
-		try {
-			// This is the only point that grants access: an explicit button press.
-			// Better Auth validates the signed request, session, and request origin.
-			const { data, error } = await authClient.oauth2.consent({ accept, oauth_query: oauthQuery });
-			if (error || !isOAuthRedirect(data)) {
-				setError(t`Could not complete this connection. Restart the connection from your client and try again.`);
-				setPending(false);
-			}
-			// Better Auth's redirect plugin follows a successful provider response.
-		} catch {
-			setError(t`Could not complete this connection. Restart the connection from your client and try again.`);
+		const failure = await requestConsent(accept, oauthQuery);
+		if (failure) {
+			setError(failure);
 			setPending(false);
 		}
 	}
@@ -55,15 +64,15 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 	return (
 		<>
 			<div className="space-y-2 text-center">
-				<h1 className="font-semibold text-2xl tracking-tight">
+				<h1 className="text-2xl font-semibold tracking-tight">
 					<Trans>Connect an application</Trans>
 				</h1>
-				<p className="wrap-anywhere text-muted-foreground text-sm">
+				<p className="text-sm wrap-anywhere text-ink-3">
 					<Trans>Signed in as {email}</Trans>
 				</p>
 			</div>
 			{!validRequest || isError ? (
-				<p role="alert">
+				<p key="invalid" role="alert" className={ENTER_CLASS}>
 					<Trans>This connection request is invalid or has expired.</Trans>
 				</p>
 			) : isPending ? (
@@ -71,10 +80,10 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 					<Trans>Loading connection request...</Trans>
 				</p>
 			) : client ? (
-				<div className="space-y-4">
-					<div className="wrap-anywhere space-y-1">
+				<div className={cn(ENTER_CLASS, "space-y-4")}>
+					<div className="space-y-1 wrap-anywhere">
 						<p className="font-medium">{client.client_name || clientId}</p>
-						<p className="text-muted-foreground text-xs">
+						<p className="text-xs text-ink-3">
 							<Trans>Client ID</Trans>: {clientId}
 						</p>
 					</div>
@@ -82,11 +91,32 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 						<Trans>Only allow applications you trust. This application will be able to:</Trans>
 					</p>
 					<ul className="list-disc space-y-2 pl-5 text-sm">
-						<li>
-							<Trans>
-								Access your account through the API, including reading and changing your resumes and job applications.
-							</Trans>
-						</li>
+						{["api:read", "api:write", "api:delete"].some((scope) => scopes.has(scope)) ? (
+							<>
+								{scopes.has("api:read") && (
+									<li>
+										<Trans>Read your documents and job applications.</Trans>
+									</li>
+								)}
+								{scopes.has("api:write") && (
+									<li>
+										<Trans>Create and change your documents and job applications.</Trans>
+									</li>
+								)}
+								{scopes.has("api:delete") && (
+									<li>
+										<Trans>Delete your documents and account data.</Trans>
+									</li>
+								)}
+							</>
+						) : (
+							<li>
+								<Trans>
+									Access your account through the API, including reading, changing and deleting your documents and job
+									applications.
+								</Trans>
+							</li>
+						)}
 						{scopes.has("profile") && (
 							<li>
 								<Trans>Read your profile information.</Trans>
@@ -104,12 +134,12 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 						)}
 					</ul>
 					{error && (
-						<p role="alert" className="text-destructive text-sm">
+						<p role="alert" className={cn(ENTER_CLASS, "text-sm text-danger-text")}>
 							{error}
 						</p>
 					)}
 					<div className="flex gap-2">
-						<Button className="flex-1" variant="outline" disabled={pending} onClick={() => void submit(false)}>
+						<Button className="flex-1" variant="secondary" disabled={pending} onClick={() => void submit(false)}>
 							<Trans>Deny</Trans>
 						</Button>
 						<Button className="flex-1" disabled={pending} onClick={() => void submit(true)}>

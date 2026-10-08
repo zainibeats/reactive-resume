@@ -5,13 +5,10 @@ import React from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
 	ComboboxClear,
-	ComboboxCollection,
 	ComboboxContent,
 	ComboboxEmpty,
-	ComboboxGroup,
 	ComboboxInput,
 	ComboboxItem,
-	ComboboxLabel,
 	ComboboxList,
 	ComboboxRoot,
 	ComboboxTrigger,
@@ -28,31 +25,19 @@ type ComboboxOption<TValue extends string | number = string> = {
 	// Plain-text label used for the collapsed trigger and filtering when `label` is a ReactNode.
 	// Without it, a JSX label falls back to String(value) (e.g. a raw enum or locale code) in the trigger.
 	textValue?: string;
-	group?: string | ComboboxOptionGroup;
 	keywords?: string[];
 	disabled?: boolean;
 };
 
-type ComboboxOptionGroup = {
-	value: string;
-	label: React.ReactNode;
-};
-
-type GroupedComboboxOption<TValue extends string | number = string> = ComboboxOptionGroup & {
-	key: string;
-	items: ComboboxOption<TValue>[];
-};
-
 type SingleComboboxProps<TValue extends string | number = string> = {
 	options: ComboboxOption<TValue>[];
-	value?: TValue | null;
-	defaultValue?: TValue | null;
+	value?: TValue | null | undefined;
+	defaultValue?: TValue | null | undefined;
 	onValueChange?: (value: TValue | null) => void;
 	multiple?: false;
 	disabled?: boolean;
 	showClear?: boolean;
 	placeholder?: string;
-	searchPlaceholder?: string;
 	emptyMessage?: React.ReactNode;
 	className?: string;
 	id?: string;
@@ -62,14 +47,13 @@ type SingleComboboxProps<TValue extends string | number = string> = {
 
 type MultiComboboxProps<TValue extends string | number = string> = {
 	options: ComboboxOption<TValue>[];
-	value?: TValue[] | null;
-	defaultValue?: TValue[] | null;
+	value?: TValue[] | null | undefined;
+	defaultValue?: TValue[] | null | undefined;
 	onValueChange?: (value: TValue[] | null) => void;
 	multiple: true;
 	disabled?: boolean;
 	showClear?: boolean;
 	placeholder?: string;
-	searchPlaceholder?: string;
 	emptyMessage?: React.ReactNode;
 	className?: string;
 	id?: string;
@@ -85,13 +69,6 @@ const listContent = <TValue extends string | number>(item: ComboboxOption<TValue
 	</ComboboxItem>
 );
 
-const groupedListContent = <TValue extends string | number>(group: GroupedComboboxOption<TValue>) => (
-	<ComboboxGroup key={group.key} items={group.items}>
-		{group.label !== null && group.label !== undefined ? <ComboboxLabel>{group.label}</ComboboxLabel> : null}
-		<ComboboxCollection>{listContent}</ComboboxCollection>
-	</ComboboxGroup>
-);
-
 function Combobox<TValue extends string | number = string>(props: ComboboxProps<TValue>) {
 	const {
 		options,
@@ -99,7 +76,6 @@ function Combobox<TValue extends string | number = string>(props: ComboboxProps<
 		disabled = false,
 		showClear = false,
 		placeholder,
-		searchPlaceholder,
 		emptyMessage,
 		className,
 		id,
@@ -110,40 +86,6 @@ function Combobox<TValue extends string | number = string>(props: ComboboxProps<
 	const { contains } = useFilter();
 
 	const optionMap = React.useMemo(() => new Map(options.map((opt) => [String(opt.value), opt])), [options]);
-
-	const optionGroups = React.useMemo(() => {
-		const groups: GroupedComboboxOption<TValue>[] = [];
-		const groupMap = new Map<string, GroupedComboboxOption<TValue>>();
-		let ungroupedGroup: GroupedComboboxOption<TValue> | null = null;
-		let hasGroupedOptions = false;
-
-		for (const option of options) {
-			if (option.group === undefined) {
-				if (!ungroupedGroup) {
-					ungroupedGroup = { key: "ungrouped", value: "", label: null, items: [] };
-					groups.push(ungroupedGroup);
-				}
-
-				ungroupedGroup.items.push(option);
-				continue;
-			}
-
-			hasGroupedOptions = true;
-
-			const group = typeof option.group === "string" ? { value: option.group, label: option.group } : option.group;
-			let optionGroup = groupMap.get(group.value);
-
-			if (!optionGroup) {
-				optionGroup = { ...group, key: `group:${group.value}`, items: [] };
-				groupMap.set(group.value, optionGroup);
-				groups.push(optionGroup);
-			}
-
-			optionGroup.items.push(option);
-		}
-
-		return hasGroupedOptions ? groups : null;
-	}, [options]);
 
 	const findOption = React.useCallback(
 		(v: TValue | TValue[] | null | undefined) => {
@@ -223,8 +165,8 @@ function Combobox<TValue extends string | number = string>(props: ComboboxProps<
 			render={
 				render ?? (
 					<Button
-						variant="outline"
-						className={cn("justify-start text-left font-normal hover:bg-muted/20", className)}
+						variant="secondary"
+						className={cn("justify-start text-left font-normal hover:bg-sunken/20", className)}
 					/>
 				)
 			}
@@ -238,7 +180,7 @@ function Combobox<TValue extends string | number = string>(props: ComboboxProps<
 	return (
 		<ComboboxRoot
 			name={name}
-			items={optionGroups ?? options}
+			items={options}
 			filter={filter}
 			disabled={disabled}
 			value={selectedValue as ComboboxOption<TValue>[] & ComboboxOption<TValue>}
@@ -254,7 +196,7 @@ function Combobox<TValue extends string | number = string>(props: ComboboxProps<
 						<ComboboxClear
 							aria-label={t`Clear selection`}
 							disabled={disabled}
-							className="absolute end-7 top-1/2 z-10 -translate-y-1/2 text-muted-foreground opacity-70 hover:opacity-100 focus-visible:opacity-100"
+							className="absolute end-7 top-1/2 z-10 -translate-y-1/2 text-ink-3 opacity-70 hover:opacity-100 focus-visible:opacity-100"
 						/>
 					)}
 				</div>
@@ -262,14 +204,13 @@ function Combobox<TValue extends string | number = string>(props: ComboboxProps<
 				triggerNode
 			)}
 
-			<ComboboxContent>
+			<ComboboxContent aria-label={placeholder ?? t`Options`}>
 				<ComboboxInput
-					showTrigger={false}
-					placeholder={searchPlaceholder ?? placeholder ?? t`Search...`}
+					placeholder={placeholder ?? t`Search...`}
 					render={<Input disabled={disabled} className="border-none focus-visible:border-none focus-visible:ring-0" />}
 				/>
 				<ComboboxEmpty>{emptyMessage ?? t`No results found.`}</ComboboxEmpty>
-				<ComboboxList>{optionGroups ? groupedListContent : listContent}</ComboboxList>
+				<ComboboxList>{listContent}</ComboboxList>
 			</ComboboxContent>
 		</ComboboxRoot>
 	);

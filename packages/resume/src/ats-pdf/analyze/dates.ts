@@ -1,5 +1,10 @@
 import type { DateToken, ExtractedDocument } from "../types";
-import { isFutureEndpoint, isReversedPeriod, parsePeriod, parseSingleDate } from "../../ats/period";
+import {
+	isFutureEndpoint,
+	isReversedPeriod,
+	parsePeriod,
+	parseSingleDate,
+} from "@reactive-resume/schema/resume/period";
 
 const MONTH_WORD = String.raw`[A-Za-z]{3,9}\.?`;
 const ENDPOINT = String.raw`(?:${MONTH_WORD}\s*'?\d{2,4}|\d{1,2}[/.\-]\d{2,4}|\d{4})`;

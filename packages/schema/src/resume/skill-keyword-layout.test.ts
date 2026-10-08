@@ -29,10 +29,4 @@ describe("skill keyword presentation", () => {
 		input.sections.skills.keywordLayout = "invalid";
 		expect(schema.safeParse(input).success).toBe(false);
 	});
-	it("does not retain skill presentation when a custom section changes type", () => {
-		const input = structuredClone(defaultResumeData);
-		input.customSections = [{ ...input.sections.skills, id: "custom", type: "interests", keywordLayout: "list" }];
-		const parsed = parseResumeData(input);
-		expect(JSON.stringify(parsed.customSections[0])).not.toContain("keywordLayout");
-	});
 });

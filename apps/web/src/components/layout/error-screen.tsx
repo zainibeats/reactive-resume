@@ -1,10 +1,10 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { Trans } from "@lingui/react/macro";
-import { ArrowClockwiseIcon, HouseIcon, WarningIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { Alert, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
 import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { Button, buttonVariants } from "@reactive-resume/ui/components/button";
+import { Icon } from "@reactive-resume/ui/components/icon";
 
 export function ErrorScreen({ reset }: ErrorComponentProps) {
 	return (
@@ -12,7 +12,7 @@ export function ErrorScreen({ reset }: ErrorComponentProps) {
 			<BrandIcon variant="logo" className="size-12" />
 
 			<Alert>
-				<WarningIcon />
+				<Icon name="warning" size={16} />
 				<AlertTitle>
 					<Trans>Something went wrong</Trans>
 				</AlertTitle>
@@ -23,12 +23,12 @@ export function ErrorScreen({ reset }: ErrorComponentProps) {
 
 			<div className="flex items-center gap-x-2">
 				<Button onClick={reset}>
-					<ArrowClockwiseIcon />
+					<Icon name="refresh" size={16} />
 					<Trans>Try again</Trans>
 				</Button>
 
 				<Link to="/dashboard" className={buttonVariants({ variant: "secondary" })}>
-					<HouseIcon />
+					<Icon name="home" size={16} />
 					<Trans>Go to dashboard</Trans>
 				</Link>
 			</div>

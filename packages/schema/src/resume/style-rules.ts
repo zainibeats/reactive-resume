@@ -26,8 +26,6 @@ const builtInSectionTypes = new Set<SectionType>([
 	"references",
 ]);
 
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-
 export const getSectionStyleRuleContext = (data: ResumeData, sectionId: string): SectionStyleRuleContext => {
 	if (sectionId === "summary") return { sectionId, sectionType: "summary" };
 	if (builtInSectionTypes.has(sectionId as SectionType)) {
@@ -61,14 +59,4 @@ export const resolveStyleIntentForSlot = (data: ResumeData, options: ResolveStyl
 	});
 
 	return Object.assign({}, ...bySpecificity.map((rule) => rule.slots[options.slot]));
-};
-
-export const resolveStyleRuleFontSize = (
-	data: ResumeData,
-	options: ResolveStyleRuleSlotOptions,
-): number | undefined => {
-	const fontSize = resolveStyleIntentForSlot(data, options).fontSize;
-	if (fontSize === undefined) return undefined;
-
-	return clamp(fontSize, 6, 48);
 };

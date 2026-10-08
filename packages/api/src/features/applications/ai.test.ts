@@ -1,70 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { APICallError, generateText, LoadAPIKeyError, RetryError } from "ai";
+import { call } from "@orpc/server";
+import { APICallError, generateText, RetryError } from "ai";
 import { z } from "zod";
-
-const protectedProcedureMock = vi.hoisted(() => {
-	const chain = {
-		route: vi.fn(() => chain),
-		input: vi.fn(() => chain),
-		use: vi.fn(() => chain),
-		output: vi.fn(() => chain),
-		errors: vi.fn(() => chain),
-		handler: vi.fn(() => chain),
-	};
-	return chain;
-});
 
 vi.mock("ai", async (importOriginal) => ({
 	...(await importOriginal<typeof import("ai")>()),
 	generateText: vi.fn(),
 }));
-vi.mock("../../context", () => ({ protectedProcedure: protectedProcedureMock }));
-vi.mock("../../middleware/rate-limit", () => ({ aiRequestRateLimit: vi.fn() }));
+vi.mock("../../context", async () => ({ protectedProcedure: (await import("@orpc/server")).os }));
+vi.mock("../../middleware/rate-limit", () => ({ aiRequestRateLimit: ({ next }: { next: () => unknown }) => next() }));
 vi.mock("../ai/service", () => ({ getModel: vi.fn() }));
 vi.mock("../ai-providers/service", () => ({ aiProvidersService: { getDefaultRunnable: vi.fn() } }));
 vi.mock("../resume/service", () => ({ resumeService: { getById: vi.fn(), create: vi.fn() } }));
 vi.mock("../cover-letters/service", () => ({ coverLetterService: { create: vi.fn() } }));
+vi.mock("../web-access/credentials", () => ({ webAccessService: { resolve: vi.fn().mockResolvedValue(null) } }));
+vi.mock("./posting", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./posting")>()),
+	fetchJobPosting: vi.fn(),
+}));
 vi.mock("./service", () => ({
 	applicationService: { getById: vi.fn(), setAiResult: vi.fn(), update: vi.fn(), addNote: vi.fn() },
 }));
 
-const { autofillInputSchema, generateJson, generatePlainText } = await import("./ai");
-
-describe("autofillInputSchema", () => {
-	it("rejects oversized pasted job descriptions", () => {
-		expect(() => autofillInputSchema.parse({ jobDescription: "x".repeat(20_001) })).toThrow();
-	});
-
-	it("rejects blank pasted job descriptions", () => {
-		expect(() => autofillInputSchema.parse({ jobDescription: "   " })).toThrow();
-		expect(() => autofillInputSchema.parse({})).toThrow();
-	});
-
-	it("accepts a pasted posting", () => {
-		expect(autofillInputSchema.parse({ jobDescription: "  Senior Engineer at Acme  " }).jobDescription).toBe(
-			"Senior Engineer at Acme",
-		);
-	});
-});
+const { aiRouter, generateJson, generatePlainText } = await import("./ai");
+const { aiProvidersService } = await import("../ai-providers/service");
+const { fetchJobPosting } = await import("./posting");
 
 describe("copilot provider-failure translation", () => {
 	const schema = z.object({ summary: z.string() });
 
 	beforeEach(() => {
 		vi.mocked(generateText).mockReset();
-	});
-
-	it("translates APICallError provider failures to BAD_GATEWAY in generatePlainText", async () => {
-		vi.mocked(generateText).mockRejectedValue(
-			new APICallError({
-				message: "Provider returned 401",
-				url: "https://api.openai.com/v1/chat/completions",
-				requestBodyValues: undefined,
-				statusCode: 401,
-			}),
-		);
-
-		await expect(generatePlainText({} as never, "prompt")).rejects.toMatchObject({ code: "BAD_GATEWAY" });
 	});
 
 	it("translates APICallError provider failures to BAD_GATEWAY in generateJson", async () => {
@@ -115,26 +81,62 @@ describe("copilot provider-failure translation", () => {
 		expect(error.code).toBe("BAD_GATEWAY");
 		expect(error.cause).toBe(providerError);
 	});
+});
 
-	it("rethrows non-provider SDK errors unchanged", async () => {
-		const credentialError = new LoadAPIKeyError({ message: "The OPENAI_API_KEY is not set" });
-		vi.mocked(generateText).mockRejectedValue(credentialError);
-
-		await expect(generatePlainText({} as never, "prompt")).rejects.toBe(credentialError);
-		await expect(generateJson({} as never, { prompt: "prompt" }, schema)).rejects.toBe(credentialError);
+describe("posting import", () => {
+	const context = {
+		user: {
+			id: "u1",
+			name: "Test",
+			email: "test@example.com",
+			emailVerified: true,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		},
+		locale: "en-US" as const,
+		reqHeaders: new Headers(),
+	};
+	beforeEach(() => {
+		vi.mocked(generateText).mockReset();
+		vi.mocked(aiProvidersService.getDefaultRunnable).mockReset();
 	});
-
-	it("rethrows non-AI errors unchanged", async () => {
-		const unrelated = new Error("network dropped mid-call");
-		vi.mocked(generateText).mockRejectedValue(unrelated);
-
-		await expect(generatePlainText({} as never, "prompt")).rejects.toBe(unrelated);
-		await expect(generateJson({} as never, { prompt: "prompt" }, schema)).rejects.toBe(unrelated);
+	it("retains fetched evidence and page fields when optional AI enrichment fails", async () => {
+		const source = {
+			method: "builtin" as const,
+			format: "text" as const,
+			requestedUrl: "https://example.com/job",
+			retrievedAt: "2026-09-30T12:00:00.000Z",
+			truncated: false,
+			completeness: "unknown" as const,
+		};
+		vi.mocked(fetchJobPosting).mockResolvedValue({
+			page: { role: "Engineer", company: "Example", location: "Berlin", description: "Actual posting" },
+			text: "Actual posting",
+			source,
+		});
+		vi.mocked(aiProvidersService.getDefaultRunnable).mockResolvedValue({
+			provider: "openai",
+			model: "gpt-5",
+			apiKey: "test",
+		} as never);
+		vi.mocked(generateText).mockRejectedValue(new Error("quota reached"));
+		await expect(call(aiRouter.parsePosting, { input: source.requestedUrl }, { context })).resolves.toMatchObject({
+			role: "Engineer",
+			company: "Example",
+			location: "Berlin",
+			jobDescription: "Actual posting",
+			sourceUrl: source.requestedUrl,
+			postingSource: source,
+			filledBy: "page",
+			enrichmentWarning: "ai-unavailable",
+		});
 	});
-
-	it("still returns parsed JSON on success", async () => {
-		vi.mocked(generateText).mockResolvedValue({ text: '```json\n{"summary":"<p>Hi</p>"}\n```' } as never);
-
-		await expect(generateJson({} as never, { prompt: "prompt" }, schema)).resolves.toEqual({ summary: "<p>Hi</p>" });
+	it("bounds pasted text and declares truncation without needing any provider", async () => {
+		vi.mocked(aiProvidersService.getDefaultRunnable).mockResolvedValue(null);
+		const text = "description ".repeat(2000);
+		const result = await call(aiRouter.parsePosting, { input: text }, { context });
+		expect(result.jobDescription).toBe(text.trim().slice(0, 20_000));
+		expect(result.postingSource).toMatchObject({ method: "paste", truncated: true, completeness: "incomplete" });
+		expect(generateText).not.toHaveBeenCalled();
 	});
 });

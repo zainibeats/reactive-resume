@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { Fragment, useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -16,7 +16,6 @@ import {
 import { TemplateProvider } from "../shared/context";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
-import { PageMarginBackground } from "../shared/page-margin-background";
 import { hasTemplatePicture } from "../shared/picture";
 import {
 	Heading,
@@ -28,6 +27,7 @@ import {
 	Text,
 } from "../shared/primitives";
 import { Section } from "../shared/sections";
+import { SidebarBackground } from "../shared/sidebar-background";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
 import { createIconSlot, useTemplateBase } from "../shared/template-base";
 
@@ -61,6 +61,7 @@ export const ChikoritaPage = ({ page, pageSize, pageMinHeightStyle, showHeader, 
 	const { metadata, picture } = data;
 	const { colors, styles } = useChikoritaTemplate();
 	const metrics = getTemplateMetrics(metadata.page);
+	const { r } = useTemplateBase();
 	const hasPicture = hasTemplatePicture(picture);
 	const sidebarSections = useRenderedSectionIds(pageNodeKey, filterSections(page.sidebar, data));
 	const mainSections = useRenderedSectionIds(pageNodeKey, filterSections(page.main, data));
@@ -78,13 +79,22 @@ export const ChikoritaPage = ({ page, pageSize, pageMinHeightStyle, showHeader, 
 			)}
 		>
 			<TemplateProvider pageNodeKey={pageNodeKey} styles={styles} colors={colors}>
+				{!page.fullWidth && (
+					<SidebarBackground
+						end
+						color={String(sidebarStyle?.backgroundColor ?? colors.primary)}
+						width={`${metadata.layout.sidebarWidth}%`}
+					/>
+				)}
 				<SemanticRegionView
 					region="main"
 					style={composeStyles(styles.mainColumn, {
 						marginTop: -metrics.page.paddingVertical,
 						paddingTop: metrics.page.paddingVertical,
-						paddingRight: page.fullWidth ? metrics.page.paddingHorizontal : metrics.columnGap,
-						paddingLeft: metrics.page.paddingHorizontal,
+						...r.columnInset(
+							metrics.page.paddingHorizontal,
+							page.fullWidth ? metrics.page.paddingHorizontal : metrics.columnGap,
+						),
 						rowGap: metrics.sectionGap,
 					})}
 				>
@@ -105,15 +115,10 @@ export const ChikoritaPage = ({ page, pageSize, pageMinHeightStyle, showHeader, 
 							showHeader && hasPicture
 								? metrics.page.paddingVertical + picture.size + metrics.itemGapY * 3
 								: metrics.page.paddingVertical,
-						paddingRight: metrics.page.paddingHorizontal,
-						paddingLeft: metrics.columnGap,
+						...r.columnInset(metrics.columnGap, metrics.page.paddingHorizontal),
 						rowGap: metrics.sectionGap,
 					})}
 				>
-					<PageMarginBackground
-						color={sidebarStyle?.backgroundColor ?? colors.primary}
-						margin={metrics.page.paddingVertical}
-					/>
 					{sidebarSections.map((section) => (
 						<Fragment key={section}>
 							<Section section={section} placement="sidebar" />
@@ -175,7 +180,7 @@ const useChikoritaTemplate = (): ChikoritaTemplate => {
 			inline: { ...base.inline, columnGap: metrics.gapX(0.25) },
 			page: {
 				...base.page,
-				flexDirection: r.row,
+				flexDirection: r.columns,
 			},
 			section: {
 				flexDirection: "column",
@@ -279,5 +284,5 @@ const useChikoritaTemplate = (): ChikoritaTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies ChikoritaStyles,
 		};
-	}, [metadata, r.row, r.headerIdentity, metrics.gapX, primary, foreground, base, metrics.gapY, background]);
+	}, [metadata, r, metrics, primary, foreground, base, background]);
 };

@@ -10,3 +10,4 @@ Review the resume below and return the JSON object described in your instruction
 
 {{FINDINGS}}
 {{JOB_DESCRIPTION_SECTION}}
+{{PASSAGES_SECTION}}

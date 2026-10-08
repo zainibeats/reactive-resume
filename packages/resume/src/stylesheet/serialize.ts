@@ -43,5 +43,5 @@ export function serializeGeneratedStylesheet(stylesheet: GeneratedStylesheet): s
 		return `${comment}${block.selector} {\n${declarations}\n}`;
 	});
 
-	return `@version ${stylesheet.languageVersion};\n${blocks.length > 0 ? `\n${blocks.join("\n\n")}\n` : ""}`;
+	return blocks.length > 0 ? `${blocks.join("\n\n")}\n` : "";
 }

@@ -1,33 +1,34 @@
+import type { ResumeRenderOptions } from "./context";
+import type { SectionTitleResolver } from "./section-title";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
-import type { SectionTitleResolver } from "./section-title";
-import { createElement } from "react";
+import * as forme from "@formepdf/core";
 import { parseResumeData } from "@reactive-resume/schema/resume/data";
-import { renderToBuffer } from "#react-pdf-renderer";
-import { ResumeDocument } from "./document";
+import { readServerImage } from "./forme/images.node.ts";
+import { assertPdfText, renderResume } from "./forme/render";
+
+export { configureOwnPictureReader } from "./forme/images.node";
 
 export type CreateResumePdfFileOptions = {
 	data: ResumeData;
 	filename: string;
 	template?: Template | undefined;
+	renderOptions?: ResumeRenderOptions | undefined;
 	resolveSectionTitle?: SectionTitleResolver | undefined;
+	/** Operator-configured app origin; only its public picture upload paths may use private addresses. */
+	uploadOrigin?: string | undefined;
 };
 
 export const createResumePdfFile = async ({
-	data: input,
 	filename,
-	template,
-	resolveSectionTitle,
+	uploadOrigin,
+	...input
 }: CreateResumePdfFileOptions): Promise<File> => {
-	const data = parseResumeData(input);
-	const document = createElement(ResumeDocument, {
-		data,
-		template: template ?? data.metadata.template,
-		resolveSectionTitle,
-	}) as Parameters<typeof renderToBuffer>[0];
-	const buffer = await renderToBuffer(document);
-	const bytes = new Uint8Array(new ArrayBuffer(buffer.byteLength));
-	bytes.set(buffer);
-
-	return new File([bytes], filename, { type: "application/pdf" });
+	const result = await renderResume(forme, {
+		...input,
+		data: parseResumeData(input.data),
+		readImage: (source) => readServerImage(source, uploadOrigin),
+	});
+	assertPdfText(result);
+	return new File([result.pdf as Uint8Array<ArrayBuffer>], filename, { type: "application/pdf" });
 };

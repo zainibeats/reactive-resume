@@ -4,8 +4,6 @@ import { protectedProcedure } from "../../context";
 import { storageDeleteRateLimit, storageUploadRateLimit } from "../../middleware/rate-limit";
 import { getStorageService, isImageFile, processImageForUpload, uploadFile } from "./service";
 
-const storageService = getStorageService();
-
 const fileSchema = z.file().max(10 * 1024 * 1024, "File size must be less than 10MB");
 
 const filenameSchema = z.object({
@@ -20,6 +18,12 @@ function isUnsafeStorageKey(key: string): boolean {
 	return key.split("/").some((segment) => segment === "." || segment === "..");
 }
 
+export const uploadFileOutputSchema = z.object({
+	url: z.string().describe("The download URL. Profile images are public; other files require owner authentication."),
+	path: z.string().describe("The storage path of the uploaded file."),
+	contentType: z.string().describe("The MIME type of the uploaded file."),
+});
+
 export const storageRouter = {
 	uploadFile: protectedProcedure
 		.route({
@@ -32,13 +36,7 @@ export const storageRouter = {
 		})
 		.input(fileSchema)
 		.use(storageUploadRateLimit)
-		.output(
-			z.object({
-				url: z.string().describe("The public URL to access the uploaded file."),
-				path: z.string().describe("The storage path of the uploaded file."),
-				contentType: z.string().describe("The MIME type of the uploaded file."),
-			}),
-		)
+		.output(uploadFileOutputSchema)
 		.handler(async ({ context, input: file }) => {
 			const originalMimeType = file.type;
 			const isImage = isImageFile(originalMimeType);
@@ -98,7 +96,7 @@ export const storageRouter = {
 				throw new ORPCError("FORBIDDEN");
 			}
 
-			const deleted = await storageService.delete(key);
+			const deleted = await getStorageService().delete(key);
 
 			if (!deleted) throw new ORPCError("NOT_FOUND");
 		}),

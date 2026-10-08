@@ -1,9 +1,12 @@
-import type { PeriodEndpoint } from "./ats/period";
-import { isReversedPeriod, parsePeriod } from "./ats/period";
+import type { ResumeDates } from "@reactive-resume/schema/resume/dates";
+import type { PeriodEndpoint } from "@reactive-resume/schema/resume/period";
+import { resumeDatesToPeriod } from "@reactive-resume/schema/resume/dates";
+import { isReversedPeriod, parsePeriod } from "@reactive-resume/schema/resume/period";
 
 type SectionItemWithPeriod = {
 	id: string;
 	period: string;
+	dates?: ResumeDates | undefined;
 };
 
 export type SortSectionItemsByPeriodResult<T> = {
@@ -30,7 +33,7 @@ function compareEndpointDescending(left: PeriodEndpoint | undefined, right: Peri
 }
 
 function rankItem<T extends SectionItemWithPeriod>(item: T, index: number, locale: string): RankedItem<T> {
-	const period = parsePeriod(item.period, locale);
+	const period = item.dates ? resumeDatesToPeriod(item.dates) : parsePeriod(item.period, locale);
 	if (!period?.start || (period.end && isReversedPeriod(period.start, period.end))) {
 		return { item, index, group: "unresolved" };
 	}

@@ -1,11 +1,9 @@
-import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRouterClient } from "@orpc/server";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 
 const mocks = vi.hoisted(() => ({
 	create: vi.fn(),
-	getById: vi.fn(),
 	update: vi.fn(),
 	snapshot: vi.fn(),
 }));
@@ -24,59 +22,12 @@ vi.mock("../../context", async () => {
 vi.mock("./service", () => ({
 	resumeService: {
 		create: mocks.create,
-		getById: mocks.getById,
 		update: mocks.update,
 		versions: { snapshot: mocks.snapshot },
 	},
 }));
 
 const { crudRouter } = await import("./crud");
-
-const rendererUnsafeData = (): ResumeData =>
-	({
-		...structuredClone(defaultResumeData),
-		customSections: [
-			{
-				id: "custom-experience",
-				type: "experience",
-				title: "Experience",
-				icon: "",
-				columns: 1,
-				hidden: false,
-				keepTogether: false,
-				startOnNewPage: false,
-				items: [{ id: "summary-item", hidden: false, content: "<p>Missing company</p>" }],
-			},
-		],
-	}) as unknown as ResumeData;
-
-describe("resume duplicate route", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-		mocks.create.mockResolvedValue("copy-id");
-	});
-
-	it("rejects invalid stored source data before calling the shared create service", async () => {
-		mocks.getById.mockResolvedValue({
-			id: "resume-id",
-			name: "Resume",
-			slug: "resume",
-			tags: [],
-			data: rendererUnsafeData(),
-		});
-		const client = createRouterClient(crudRouter, {
-			context: { locale: "en-US", reqHeaders: new Headers(), user: { id: "user-id" } } as never,
-		});
-
-		const error = await client
-			.duplicate({ id: "resume-id", name: "Copy", slug: "copy", tags: [] })
-			.catch((caught: unknown) => caught);
-
-		expect(error).toMatchObject({ code: "INTERNAL_SERVER_ERROR", status: 500 });
-		expect(error).toHaveProperty("cause.issues.0.path", ["customSections", 0, "items", 0, "company"]);
-		expect(mocks.create).not.toHaveBeenCalled();
-	});
-});
 
 describe("resume write route validation", () => {
 	beforeEach(() => {
@@ -102,34 +53,19 @@ describe("resume write route validation", () => {
 		expect(mocks.update).not.toHaveBeenCalled();
 		expect(mocks.snapshot).not.toHaveBeenCalled();
 	});
-});
 
-describe("resume sharing update route", () => {
-	it.each([false, true])(
-		"passes showDownloadButtons=%s through the authenticated update procedure",
-		async (showDownloadButtons) => {
-			const row = {
-				id: "resume-id",
-				name: "Resume",
-				slug: "resume",
-				tags: [],
-				data: defaultResumeData,
-				isPublic: true,
-				isLocked: false,
-				hasPassword: false,
-				showDownloadButtons,
-				revision: 1,
-				parentId: null,
-				parentRevision: null,
-				updatedAt: new Date(),
-			};
-			mocks.update.mockResolvedValue(row);
-			const client = createRouterClient(crudRouter, {
-				context: { locale: "en-US", reqHeaders: new Headers(), user: { id: "user-id" } } as never,
-			});
-			const result = await client.update({ id: "resume-id", showDownloadButtons });
-			expect(mocks.update).toHaveBeenCalledWith({ id: "resume-id", userId: "user-id", showDownloadButtons });
-			expect(result.showDownloadButtons).toBe(showDownloadButtons);
-		},
-	);
+	it.each([false, true])("puts the account holder's name on a new resume (sample data: %s)", async (withSampleData) => {
+		const client = createRouterClient(crudRouter, {
+			context: { locale: "en-US", reqHeaders: new Headers(), user: { id: "user-id", name: "Sam Taylor" } } as never,
+		});
+
+		await client.create({ name: "Outstanding Blue Whale", tags: [], withSampleData });
+
+		expect(mocks.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "Outstanding Blue Whale",
+				data: expect.objectContaining({ basics: expect.objectContaining({ name: "Sam Taylor" }) }),
+			}),
+		);
+	});
 });

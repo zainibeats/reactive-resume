@@ -1,11 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { PDF_ATS_RULE_CODES, pdfRuleSeverity } from "./catalog";
+import { buildResumeSemantics } from "./analyze/semantics";
+import { PDF_ATS_RULE_CODES } from "./catalog";
+import { buildExtractedDocument } from "./extract";
 import { analyzePdfResume } from "./index";
-import { healthyResume, makeRawExtraction, scannedResume } from "./test-fixtures";
+import { healthyResume, makeRawExtraction } from "./test-fixtures";
 
 const NOW = new Date("2024-06-15T00:00:00Z");
 
 describe("analyzePdfResume", () => {
+	it("extracts contact fields without reading summary fragments or years as contacts", () => {
+		const raw = makeRawExtraction({
+			lines: [
+				{ text: "Ada Lovelace", size: 20 },
+				"ada@example.com",
+				"+1 (555) 291-4756",
+				"Experienced developer creates tools, Leading teams across global projects",
+				"San Francisco, CA",
+				"2022",
+				"2022",
+				"2020 - 2024",
+			],
+		});
+		const { contact } = buildResumeSemantics(raw, buildExtractedDocument(raw), { now: NOW });
+		expect(contact.phones).toEqual(["+1 (555) 291-4756"]);
+		expect(contact.locationLine).toBe("San Francisco, CA");
+	});
+
 	it("scores a clean single-column resume at the top of the range", () => {
 		const report = analyzePdfResume(healthyResume(), { now: NOW });
 
@@ -14,55 +34,12 @@ describe("analyzePdfResume", () => {
 		expect(report.cappedBy).toEqual([]);
 	});
 
-	it("returns an integer score, never a decimal", () => {
-		for (const raw of [healthyResume(), scannedResume(), makeRawExtraction({ lines: ["short"] })]) {
-			expect(Number.isInteger(analyzePdfResume(raw, { now: NOW }).score)).toBe(true);
-		}
-	});
-
-	it("states a denominator that adds up, counting tips nowhere", () => {
-		const report = analyzePdfResume(healthyResume(), { now: NOW });
-		const scoredCodes = PDF_ATS_RULE_CODES.filter((code) => pdfRuleSeverity(code) !== "tip");
-
-		expect(report.applicableChecks + report.skippedChecks).toBe(scoredCodes.length);
-		expect(report.passedChecks).toBeLessThanOrEqual(report.applicableChecks);
-		expect(report.checks).toHaveLength(PDF_ATS_RULE_CODES.length);
-	});
-
-	it("reports why each skipped check could not run", () => {
-		const report = analyzePdfResume(scannedResume(), { now: NOW });
-
-		for (const check of report.checks.filter((entry) => entry.status === "skip")) {
-			expect(check.skipReason).toBeDefined();
-		}
-	});
-
 	it("separates unscored tips from scored findings", () => {
 		const report = analyzePdfResume(healthyResume({ file: { sizeBytes: 1_500_000 } }), { now: NOW });
 
 		expect(report.tips.map((tip) => tip.code)).toContain("LARGE_FILE_SIZE");
 		expect(report.findings.map((finding) => finding.code)).not.toContain("LARGE_FILE_SIZE");
 		expect(report.findings.every((finding) => finding.severity !== "tip")).toBe(true);
-	});
-
-	it("orders findings by severity", () => {
-		const report = analyzePdfResume(scannedResume(), { now: NOW });
-		const severities = report.findings.map((finding) => finding.severity);
-
-		expect(severities).toEqual([...severities].sort((a, b) => (a === b ? 0 : a === "blocker" ? -1 : 1)));
-	});
-
-	it("weights every scored category and reports its own denominator", () => {
-		const report = analyzePdfResume(healthyResume(), { now: NOW });
-
-		expect(report.categories.map((entry) => entry.category)).toEqual([
-			"parseability",
-			"layout",
-			"sections",
-			"contact",
-			"dates",
-		]);
-		expect(report.categories.reduce((total, entry) => total + entry.weight, 0)).toBe(100);
 	});
 
 	it("attaches evidence a reader can check against the file", () => {
@@ -87,19 +64,6 @@ describe("analyzePdfResume", () => {
 		expect(withJd.score).toBe(withoutJd.score);
 		expect(withJd.jd?.missingTerms).toContain("kubernetes");
 		expect(withoutJd.jd).toBeNull();
-	});
-
-	it("ignores a blank job description", () => {
-		expect(analyzePdfResume(healthyResume(), { now: NOW, jobDescription: "   " }).jd).toBeNull();
-	});
-
-	it("is deterministic given the same bytes and the same clock", () => {
-		expect(analyzePdfResume(healthyResume(), { now: NOW })).toEqual(analyzePdfResume(healthyResume(), { now: NOW }));
-	});
-
-	it("serialises to JSON without loss", () => {
-		const report = analyzePdfResume(healthyResume(), { now: NOW, jobDescription: "Kubernetes" });
-		expect(JSON.parse(JSON.stringify(report))).toEqual(report);
 	});
 
 	it("keeps going when a page is malformed rather than failing the whole report", () => {

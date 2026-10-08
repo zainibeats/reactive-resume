@@ -57,7 +57,7 @@ export function getSourceSectionTitle(
 ): string {
 	if (customSectionId) {
 		const customSection = resumeData.customSections.find((s) => s.id === customSectionId);
-		return customSection?.title ?? getDefaultSectionTitle(type);
+		return customSection?.title.trim() || getDefaultSectionTitle(type);
 	}
 
 	return getDefaultSectionTitle(type);
@@ -81,8 +81,7 @@ export function getCompatibleMoveTargets(
 	const customSectionById = new Map(resumeData.customSections.map((section) => [section.id, section]));
 	const result: MoveTargetPage[] = [];
 
-	for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-		const page = pages[pageIndex];
+	for (const [pageIndex, page] of pages.entries()) {
 		const allSectionIds = [...page.main, ...page.sidebar];
 		const compatibleSections: MoveTargetSection[] = [];
 
@@ -107,7 +106,7 @@ export function getCompatibleMoveTargets(
 			if (customSection && customSection.type === sourceType) {
 				compatibleSections.push({
 					sectionId: customSection.id,
-					sectionTitle: customSection.title,
+					sectionTitle: customSection.title.trim() || getDefaultSectionTitle(customSection.type),
 					isStandard: false,
 				});
 			}
@@ -128,7 +127,7 @@ export function getCompatibleMoveTargets(
  * @param customSectionId - The custom section ID (if applicable)
  * @returns The removed item, or null if not found
  */
-export function removeItemFromSource(
+function removeItemFromSource(
 	draft: WritableDraft<ResumeData>,
 	itemId: string,
 	type: CustomSectionType,
@@ -164,7 +163,7 @@ export function removeItemFromSource(
  * @param targetSectionId - The target section ID
  * @param type - The section type
  */
-export function addItemToSection(
+function addItemToSection(
 	draft: WritableDraft<ResumeData>,
 	item: SectionItem,
 	targetSectionId: string,
@@ -211,7 +210,7 @@ function makeCustomSection(id: string, type: CustomSectionType, title: string, i
 	};
 }
 
-export function createCustomSectionWithItem(
+function createCustomSectionWithItem(
 	draft: WritableDraft<ResumeData>,
 	item: SectionItem,
 	type: CustomSectionType,
@@ -227,7 +226,7 @@ export function createCustomSectionWithItem(
 	return newSectionId;
 }
 
-export function createPageWithSection(
+function createPageWithSection(
 	draft: WritableDraft<ResumeData>,
 	item: SectionItem,
 	type: CustomSectionType,

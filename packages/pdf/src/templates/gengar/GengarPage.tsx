@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateFeatures, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { Fragment, useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -113,7 +113,7 @@ export const GengarPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 							partKeys={["featured-summary"]}
 							style={styles.specialContainer}
 						>
-							<Section section={featuredSummarySection} placement="main" showHeading={false} />
+							<Section section={featuredSummarySection} placement="main" />
 						</SemanticRegionTemplatePartView>
 					)}
 
@@ -199,7 +199,7 @@ const useGengarTemplate = (): GengarTemplate => {
 			...base,
 			page: {
 				...base.page,
-				flexDirection: r.row,
+				flexDirection: r.columns,
 			},
 			section: {
 				flexDirection: "column",
@@ -320,18 +320,5 @@ const useGengarTemplate = (): GengarTemplate => {
 				}),
 			} satisfies GengarStyles,
 		};
-	}, [
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.sectionGap,
-		metrics.gapY,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		base,
-		metrics.page.paddingHorizontal,
-		foreground,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, base, foreground, background]);
 };

@@ -1,13 +1,13 @@
+import type { SemanticCssColorToken } from "./color-tokens";
+import type { SemanticCssEditorMetadata } from "./protocol";
 import type { Extension } from "@codemirror/state";
 import type { SemanticCssDiagnostic, SemanticNode } from "@reactive-resume/resume/stylesheet";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { StylesheetSource } from "@reactive-resume/schema/resume/stylesheet";
-import type { SemanticCssColorToken } from "./color-tokens";
-import type { SemanticCssEditorMetadata } from "./protocol";
-import { defaultKeymap, indentWithTab } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { css } from "@codemirror/lang-css";
-import { defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
-import { Annotation, Compartment, EditorState, Prec, Transaction } from "@codemirror/state";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { Annotation, Compartment, EditorState, Transaction } from "@codemirror/state";
 import {
 	drawSelection,
 	EditorView,
@@ -16,11 +16,10 @@ import {
 	keymap,
 	lineNumbers,
 } from "@codemirror/view";
+import { tags } from "@lezer/highlight";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { BookOpenIcon } from "@phosphor-icons/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { convertLegacyStyleRules } from "@reactive-resume/pdf/semantic-legacy";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
 	buildSemanticTree,
 	getTemplateSemanticManifest,
@@ -28,21 +27,25 @@ import {
 	shouldShowResumeHeader,
 } from "@reactive-resume/pdf/semantic-tree";
 import { isFatalStylesheetDiagnostic } from "@reactive-resume/resume/stylesheet";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { PopoverTrigger } from "@reactive-resume/ui/components/popover";
 import { Sheet, SheetContent, SheetTitle } from "@reactive-resume/ui/components/sheet";
-import { useIsMobile } from "@reactive-resume/ui/hooks/use-mobile";
+import { useEditorStore } from "../editor/store";
+import { serializeStylesheetColor, toStylesheetPickerColor } from "./color-format";
+import {
+	compositionAwareDocumentListener,
+	createSemanticCssEditorExtensions,
+	revealStyleRule,
+} from "./editor-extensions";
+import { formatEditorDocument } from "./formatter";
+import { matchedNodeKeys } from "./highlight";
+import { listStyleTargets, styleTargetFor } from "./targets";
+import { StylesheetToolbar } from "./toolbar";
+import { createCompileWorkerClient } from "./worker-client";
 import { ColorPicker } from "@/components/input/color-picker";
 import { useIsResumeLocked, useResumeData, useResumeStore, useUpdateResumeData } from "@/features/resume/builder/draft";
 import { useTheme } from "@/features/theme/provider";
-import { useBuilderSidebarStore } from "@/routes/builder/$resumeId/-store/sidebar";
-import { serializeStylesheetColor, toStylesheetPickerColor } from "./color-format";
-import { compositionAwareDocumentListener, createSemanticCssEditorExtensions } from "./editor-extensions";
-import { enterStylesheetFocusMode } from "./focus-mode";
-import { formatEditorDocument } from "./formatter";
-import { LegacyStylesheetBanner } from "./legacy-banner";
-import { StylesheetStatus } from "./status";
-import { StylesheetToolbar } from "./toolbar";
-import { createCompileWorkerClient } from "./worker-client";
+import { useClosingValue } from "@/hooks/use-closing-value";
 
 const externalReplacement = Annotation.define<boolean>();
 const colorPickerEdit = Annotation.define<boolean>();
@@ -57,27 +60,40 @@ type EditorCompartments = {
 	intelligence: Compartment;
 };
 
+/** CSS in the app's own inks, so it reads the same in light and dark. */
+const highlightStyle = HighlightStyle.define([
+	{ tag: [tags.comment, tags.meta], color: "var(--ink-3)", fontStyle: "italic" },
+	{ tag: [tags.tagName, tags.className, tags.labelName], color: "var(--accent-text)" },
+	{ tag: [tags.propertyName, tags.attributeName], color: "var(--info-text)" },
+	{ tag: [tags.string, tags.number, tags.unit, tags.color, tags.atom], color: "var(--warn-text)" },
+	{ tag: [tags.keyword, tags.modifier, tags.definitionKeyword, tags.controlKeyword], color: "var(--danger-text)" },
+	{ tag: [tags.variableName, tags.function(tags.variableName)], color: "var(--ink)", fontWeight: "500" },
+	{ tag: [tags.punctuation, tags.operator, tags.bracket], color: "var(--ink-2)" },
+	{ tag: tags.invalid, color: "var(--danger-text)", textDecoration: "underline wavy" },
+]);
+
 const editorTheme = (dark: boolean): Extension =>
 	EditorView.theme(
 		{
 			"&": {
 				height: "100%",
-				backgroundColor: "var(--background)",
-				color: "var(--foreground)",
+				backgroundColor: "var(--raised)",
+				color: "var(--ink)",
 				direction: "ltr",
 			},
 			".cm-scroller": {
 				overflow: "auto",
-				fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+				fontFamily: "var(--font-mono)",
 				lineHeight: "1.5",
 			},
 			".cm-content": { minHeight: "100%", padding: "0.75rem 0" },
 			".cm-gutters": {
-				backgroundColor: "var(--muted)",
-				borderRight: "1px solid var(--border)",
+				backgroundColor: "var(--sunken)",
+				color: "var(--ink-3)",
+				borderRight: "1px solid var(--line)",
 			},
 			".cm-activeLine, .cm-activeLineGutter": {
-				backgroundColor: "var(--accent)",
+				backgroundColor: "var(--hover)",
 			},
 			"&.cm-focused": { outline: "none" },
 		},
@@ -89,9 +105,8 @@ const readOnlyExtensions = (readOnly: boolean): Extension => [
 	EditorView.editable.of(!readOnly),
 ];
 
-export type StylesheetCodeEditorProps = {
+type StylesheetCodeEditorProps = {
 	value: string;
-	diagnostics: readonly SemanticCssDiagnostic[];
 	colorTokens?: readonly SemanticCssColorToken[];
 	metadata?: SemanticCssEditorMetadata;
 	theme: "light" | "dark";
@@ -99,14 +114,13 @@ export type StylesheetCodeEditorProps = {
 	label?: string;
 	onChange(value: string): void;
 	onFocusChange?(focused: boolean): void;
+	/** Where the cursor is while the editor has focus; null once it loses focus. */
+	onCursorChange?(offset: number | null): void;
 	onReady?(view: EditorView | null): void;
-	onUndo(): void;
-	onRedo(): void;
 };
 
-export function StylesheetCodeEditor({
+function StylesheetCodeEditor({
 	value,
-	diagnostics,
 	colorTokens = [],
 	metadata = emptyMetadata,
 	theme,
@@ -114,35 +128,36 @@ export function StylesheetCodeEditor({
 	label = "Semantic CSS stylesheet",
 	onChange,
 	onFocusChange,
+	onCursorChange,
 	onReady,
-	onUndo,
-	onRedo,
 }: StylesheetCodeEditorProps) {
 	const hostRef = useRef<HTMLDivElement | null>(null);
 	const viewRef = useRef<EditorView | null>(null);
 	const compartmentsRef = useRef<EditorCompartments | null>(null);
-	const initialPropsRef = useRef({ value, diagnostics, colorTokens, metadata, theme, readOnly, label });
+	const initialPropsRef = useRef({ value, colorTokens, metadata, theme, readOnly, label });
 	const onChangeRef = useRef(onChange);
 	const onFocusChangeRef = useRef(onFocusChange);
+	const onCursorChangeRef = useRef(onCursorChange);
 	const onReadyRef = useRef(onReady);
-	const onUndoRef = useRef(onUndo);
-	const onRedoRef = useRef(onRedo);
 	const [selectedColor, setSelectedColor] = useState<{
 		token: SemanticCssColorToken;
 		left: number;
 		top: number;
 	} | null>(null);
+	// Closing keeps the picker on its swatch until it has faded out.
+	const [shownColor, onColorOpenChangeComplete] = useClosingValue(selectedColor);
 	const selectColor = useCallback((token: SemanticCssColorToken, rect: DOMRect) => {
 		const hostRect = hostRef.current?.getBoundingClientRect();
 		if (!hostRect) return;
 		setSelectedColor({ token, left: rect.left - hostRect.left, top: rect.top - hostRect.top });
 	}, []);
 
-	onChangeRef.current = onChange;
-	onFocusChangeRef.current = onFocusChange;
-	onReadyRef.current = onReady;
-	onUndoRef.current = onUndo;
-	onRedoRef.current = onRedo;
+	useLayoutEffect(() => {
+		onChangeRef.current = onChange;
+		onFocusChangeRef.current = onFocusChange;
+		onCursorChangeRef.current = onCursorChange;
+		onReadyRef.current = onReady;
+	});
 
 	useEffect(() => {
 		const parent = hostRef.current;
@@ -164,35 +179,11 @@ export function StylesheetCodeEditor({
 				drawSelection(),
 				highlightActiveLine(),
 				css(),
-				syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+				syntaxHighlighting(highlightStyle),
 				EditorView.editorAttributes.of({ dir: "ltr" }),
 				EditorView.contentAttributes.of({ "aria-label": initial.label, dir: "ltr", spellcheck: "false" }),
-				Prec.high(
-					keymap.of([
-						{
-							key: "Mod-z",
-							run: () => {
-								onUndoRef.current();
-								return true;
-							},
-						},
-						{
-							key: "Mod-Shift-z",
-							run: () => {
-								onRedoRef.current();
-								return true;
-							},
-						},
-						{
-							key: "Mod-y",
-							run: () => {
-								onRedoRef.current();
-								return true;
-							},
-						},
-					]),
-				),
-				keymap.of([indentWithTab, ...defaultKeymap]),
+				history(),
+				keymap.of([...historyKeymap, indentWithTab, ...defaultKeymap]),
 				EditorView.domEventHandlers({
 					focus: () => {
 						onFocusChangeRef.current?.(true);
@@ -206,6 +197,8 @@ export function StylesheetCodeEditor({
 					(update) => update.transactions.some((transaction) => transaction.annotation(externalReplacement)),
 				),
 				EditorView.updateListener.of((update) => {
+					if (update.selectionSet || update.docChanged || update.focusChanged)
+						onCursorChangeRef.current?.(update.view.hasFocus ? update.state.selection.main.head : null);
 					if (
 						update.transactions.some(
 							(transaction) => transaction.docChanged && !transaction.annotation(colorPickerEdit),
@@ -219,7 +212,6 @@ export function StylesheetCodeEditor({
 				compartments.intelligence.of(
 					createSemanticCssEditorExtensions({
 						metadata: initial.metadata,
-						diagnostics: initial.diagnostics,
 						colorTokens: initial.colorTokens,
 						onColorSelect: selectColor,
 					}),
@@ -259,20 +251,19 @@ export function StylesheetCodeEditor({
 			effects: compartments.intelligence.reconfigure(
 				createSemanticCssEditorExtensions({
 					metadata,
-					diagnostics,
 					colorTokens,
 					onColorSelect: selectColor,
 				}),
 			),
 		});
-	}, [colorTokens, diagnostics, metadata, selectColor]);
+	}, [colorTokens, metadata, selectColor]);
 
 	useEffect(() => {
 		const view = viewRef.current;
 		if (!view || view.state.doc.toString() === value) return;
 		view.dispatch({
 			changes: { from: 0, to: view.state.doc.length, insert: value },
-			annotations: externalReplacement.of(true),
+			annotations: [externalReplacement.of(true), Transaction.addToHistory.of(false)],
 		});
 	}, [value]);
 
@@ -308,10 +299,11 @@ export function StylesheetCodeEditor({
 
 	return (
 		<div ref={hostRef} className="relative h-full overflow-hidden rounded-md border text-xs" dir="ltr">
-			{selectedColor && (
-				<div className="pointer-events-none absolute z-20" style={{ left: selectedColor.left, top: selectedColor.top }}>
+			{shownColor && (
+				<div className="pointer-events-none absolute z-20" style={{ left: shownColor.left, top: shownColor.top }}>
 					<ColorPicker
-						open
+						open={selectedColor !== null}
+						onOpenChangeComplete={onColorOpenChangeComplete}
 						onOpenChange={(open, details) => {
 							const target = details.event.target;
 							if (
@@ -322,7 +314,7 @@ export function StylesheetCodeEditor({
 								return;
 							if (!open) setSelectedColor(null);
 						}}
-						value={toStylesheetPickerColor(selectedColor.token.value)}
+						value={toStylesheetPickerColor(shownColor.token.value)}
 						onChange={updateColor}
 						trigger={
 							<PopoverTrigger
@@ -330,10 +322,10 @@ export function StylesheetCodeEditor({
 									<button
 										data-semantic-css-color-picker-trigger=""
 										type="button"
-										title={t`Edit color ${selectedColor.token.value}`}
-										aria-label={t`Edit color ${selectedColor.token.value}`}
-										className="pointer-events-auto size-3 rounded-full border border-foreground/40"
-										style={{ backgroundColor: selectedColor.token.value }}
+										title={t`Edit color ${shownColor.token.value}`}
+										aria-label={t`Edit color ${shownColor.token.value}`}
+										className="pointer-events-auto size-3 rounded-full border border-ink/40"
+										style={{ backgroundColor: shownColor.token.value }}
 									/>
 								}
 							/>
@@ -377,18 +369,21 @@ const createEditorMetadata = (data: ResumeData): SemanticCssEditorMetadata => {
 	return {
 		semanticTree,
 		templateParts: getTemplateSemanticManifest(data.metadata.template).parts.map(({ name }) => name),
+		targets: listStyleTargets(data, semanticTree),
 	};
 };
 
+const NO_TOKENS: readonly SemanticCssColorToken[] = [];
+
 function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps) {
-	const { theme } = useTheme();
-	const isMobile = useIsMobile();
+	const { resolvedTheme: theme } = useTheme();
 	const [focusOpen, setFocusOpen] = useState(false);
-	const [diagnostics, setDiagnostics] = useState<readonly SemanticCssDiagnostic[]>([]);
-	const [colorTokens, setColorTokens] = useState<readonly SemanticCssColorToken[]>([]);
-	const [status, setStatus] = useState<"idle" | "compiling" | "error">("compiling");
+	const [compiled, setCompiled] = useState<{
+		source: StylesheetSource;
+		tokens: readonly SemanticCssColorToken[];
+		diagnostics: readonly SemanticCssDiagnostic[];
+	}>();
 	const [compiler, setCompiler] = useState<ReturnType<typeof createCompileWorkerClient>>();
-	const restoreDesktopRef = useRef<(() => void) | null>(null);
 	const data = useResumeData();
 	const updateResumeData = useUpdateResumeData();
 	const isLocked = useIsResumeLocked();
@@ -406,35 +401,46 @@ function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps)
 					name: "semantic-css-compiler",
 				}),
 		);
+		// oxlint-disable-next-line react/set-state-in-effect -- the worker is created here so it can be destroyed on unmount
 		setCompiler(client);
 		return () => client.destroy();
 	}, []);
 	const stylesheet = data?.metadata.stylesheet;
-	const mode = stylesheet?.mode ?? "legacy";
 	const source = useMemo<StylesheetSource>(
-		() =>
-			stylesheet?.source ??
-			(data ? convertLegacyStyleRules(data).source : { languageVersion: 1, text: "@version 1;\n" }),
-		[data, stylesheet],
+		// Resumes reach the builder with legacy rules already converted (the API does it), so there is one stylesheet.
+		() => stylesheet?.source ?? { languageVersion: 1, text: "" },
+		[stylesheet],
 	);
 	const metadata = useMemo(() => (data ? createEditorMetadata(data) : emptyMetadata), [data]);
-	const hasFatalErrors = status === "error" || diagnostics.some(isFatalStylesheetDiagnostic);
-	const isChecking = status === "compiling";
 	const disabled = readOnly || isLocked;
+	// Swatches belong to the source they were compiled from; they go once it changes.
+	const colorTokens = compiled?.source === source ? compiled.tokens : NO_TOKENS;
 
-	useEffect(
-		() => () => {
-			restoreDesktopRef.current?.();
-		},
-		[],
-	);
+	// Picking something on the page (Design) aims the stylesheet at it: its rule, added if there isn't one.
+	useEffect(() => {
+		if (disabled || !data) return;
+		return useEditorStore.subscribe((state, previous) => {
+			const view = editorViewRef.current;
+			if (!view || !state.selection || state.selection === previous.selection) return;
+			revealStyleRule(view, styleTargetFor(data, state.selection));
+		});
+	}, [data, disabled]);
+
+	// The rule under the cursor is outlined on the page, and nothing is once the editor loses focus or closes.
+	useEffect(() => () => useEditorStore.getState().setStyleHighlight([]), []);
+	const highlightRuleAt = (offset: number | null) => {
+		const view = editorViewRef.current;
+		const keys =
+			offset === null || !view ? [] : matchedNodeKeys(view.state.doc.toString(), offset, metadata.semanticTree);
+		const { styleHighlight, setStyleHighlight } = useEditorStore.getState();
+		if (keys.length !== styleHighlight.length || keys.some((key, index) => key !== styleHighlight[index]))
+			setStyleHighlight(keys);
+	};
 
 	useEffect(() => {
 		if (!compiler || !data) return;
 		let cancelled = false;
 		const editGeneration = ++compileGenerationRef.current;
-		setStatus("compiling");
-		setColorTokens([]);
 		const timer = window.setTimeout(() => {
 			void compiler
 				.compile({
@@ -453,13 +459,14 @@ function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps)
 				})
 				.then((result) => {
 					if (cancelled || result.editGeneration !== compileGenerationRef.current) return;
-					setDiagnostics(result.diagnostics);
-					setColorTokens(result.colorTokens ?? []);
-					setStatus(result.program && !result.diagnostics.some(isFatalStylesheetDiagnostic) ? "idle" : "error");
+					setCompiled({
+						source,
+						tokens: result.colorTokens ?? [],
+						diagnostics: result.diagnostics.filter(isFatalStylesheetDiagnostic),
+					});
 				})
-				.catch(() => {
-					if (!cancelled && editGeneration === compileGenerationRef.current) setStatus("error");
-				});
+				// Swatches are a nicety: a stylesheet that doesn't compile just shows none.
+				.catch(() => undefined);
 		}, 180);
 
 		return () => {
@@ -470,67 +477,39 @@ function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps)
 
 	if (!data) return null;
 
-	const setSourceText = (text: string) => {
-		if (disabled || text === source.text) return;
+	// Stylesheets saved before the version moved out of the text start with `@version 1;`: it isn't shown, and the
+	// first edit drops it (the compiler ignores it either way).
+	const text = source.text.replace(/^\s*@version\s+\d+\s*;[ \t]*\r?\n?/, "");
+
+	const setSourceText = (next: string) => {
+		if (disabled || next === text) return;
 		updateResumeData((draft) => {
-			draft.metadata.stylesheet = { mode, source: { ...source, text } };
+			draft.metadata.stylesheet = { mode: "semantic", source: { ...source, text: next } };
 		});
 	};
 
-	const activate = () => {
-		if (disabled || mode === "semantic" || hasFatalErrors || isChecking) return;
-		updateResumeData((draft) => {
-			draft.metadata.stylesheet = { mode: "semantic", source };
-		});
-	};
-
-	const toggleFocus = () => {
-		if (isMobile) {
-			setFocusOpen((open) => !open);
-			return;
-		}
-
-		if (restoreDesktopRef.current) {
-			restoreDesktopRef.current();
-			restoreDesktopRef.current = null;
-			setFocusOpen(false);
-			return;
-		}
-
-		const { rightSidebar, layout, setLayout } = useBuilderSidebarStore.getState();
-		restoreDesktopRef.current = enterStylesheetFocusMode({
-			rightPanel: rightSidebar,
-			currentLayout: layout,
-			setLayout,
-		});
-		setFocusOpen(true);
-	};
+	// Focus mode opens the editor in a large dialog; the editor panel has a fixed width.
+	const toggleFocus = () => setFocusOpen((open) => !open);
 
 	const editor = (
 		<StylesheetCodeEditor
-			value={source.text}
-			diagnostics={diagnostics}
+			value={text}
 			colorTokens={colorTokens}
 			metadata={metadata}
 			theme={theme}
 			readOnly={disabled}
 			label={t`Semantic CSS stylesheet`}
 			onChange={setSourceText}
+			onCursorChange={highlightRuleAt}
 			onReady={(view) => {
 				editorViewRef.current = view;
 			}}
-			onUndo={undo}
-			onRedo={redo}
 		/>
 	);
 	const editorChrome = (
 		<div className="space-y-3">
-			{mode === "legacy" && (
-				<LegacyStylesheetBanner disabled={disabled || hasFatalErrors || isChecking} onActivate={activate} />
-			)}
-
 			<StylesheetToolbar
-				source={source.text}
+				source={text}
 				canUndo={canUndo}
 				canRedo={canRedo}
 				focused={focusOpen}
@@ -543,13 +522,38 @@ function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps)
 				}}
 				onFocusToggle={toggleFocus}
 			/>
+			{compiled?.source === source && compiled.diagnostics.length > 0 && (
+				<div role="alert" className="text-xs text-danger-text">
+					<p>
+						<Trans>Custom styles aren't applied. Fix these errors to apply them:</Trans>
+					</p>
+					<ul className="list-inside list-disc">
+						{compiled.diagnostics.map((diagnostic, index) => (
+							<li key={`${diagnostic.code}-${index}`}>{diagnostic.message}</li>
+						))}
+					</ul>
+				</div>
+			)}
+			<p className="text-xs text-ink-3">
+				<Trans>
+					PDF styles support a subset of CSS. Rotation, dashed and dotted borders, and some layout properties are
+					ignored.
+				</Trans>
+			</p>
 
-			<p className="flex items-center gap-1.5 text-muted-foreground text-xs">
-				<BookOpenIcon aria-hidden="true" className="shrink-0" />
+			<p className="flex items-center gap-1.5 text-xs text-ink-3">
+				<Icon name="ink_highlighter" size={16} aria-hidden="true" className="shrink-0" />
+				<span>
+					<Trans>Click anything on the page to style it. The rule you're in is outlined on the page.</Trans>
+				</span>
+			</p>
+
+			<p className="flex items-center gap-1.5 text-xs text-ink-3">
+				<Icon name="menu_book" size={16} aria-hidden="true" className="shrink-0" />
 				<span>
 					<Trans>Not sure what to write?</Trans>{" "}
 					<a
-						className="text-primary underline underline-offset-4"
+						className="text-accent-text underline underline-offset-4"
 						href="https://docs.rxresu.me/applying-custom-styles"
 						target="_blank"
 						rel="noopener noreferrer"
@@ -563,21 +567,19 @@ function StylesheetEditorShell({ readOnly = false }: StylesheetEditorShellProps)
 				</span>
 			</p>
 
-			<div className={focusOpen ? (isMobile ? "h-[55svh]" : "h-[calc(100svh-14rem)]") : "h-72"}>{editor}</div>
-
-			<StylesheetStatus mode={mode} status={status} diagnostics={diagnostics} />
+			<div className={focusOpen ? "h-[55svh] sm:h-[calc(100svh-14rem)]" : "h-72"}>{editor}</div>
 		</div>
 	);
 
 	return (
 		<div>
-			{!(isMobile && focusOpen) && editorChrome}
-			<Sheet open={isMobile && focusOpen} onOpenChange={setFocusOpen}>
+			{!focusOpen && editorChrome}
+			<Sheet open={focusOpen} onOpenChange={setFocusOpen}>
 				<SheetContent side="right" className="w-full max-w-full gap-3 overflow-hidden p-4 sm:max-w-full">
 					<SheetTitle>
 						<Trans>Semantic CSS stylesheet</Trans>
 					</SheetTitle>
-					<div className="min-h-0 flex-1 overflow-y-auto">{isMobile && focusOpen ? editorChrome : null}</div>
+					<div className="min-h-0 flex-1 overflow-y-auto">{focusOpen ? editorChrome : null}</div>
 				</SheetContent>
 			</Sheet>
 		</div>

@@ -7,26 +7,6 @@ type DiagnosticReference = {
 };
 
 export const SEMANTIC_CSS_DIAGNOSTIC_CATALOG_V1 = {
-	MISSING_VERSION_DIRECTIVE: {
-		severity: "warning",
-		meaning: "The stylesheet omitted @version.",
-		action: "Add @version 1; as the first statement.",
-	},
-	DUPLICATE_VERSION_DIRECTIVE: {
-		severity: "error",
-		meaning: "More than one @version directive was found.",
-		action: "Keep exactly one version directive.",
-	},
-	INVALID_VERSION: {
-		severity: "error",
-		meaning: "The version directive is not one positive integer without a block.",
-		action: "Use @version 1;.",
-	},
-	VERSION_MISMATCH: {
-		severity: "error",
-		meaning: "The directive and stored language version disagree.",
-		action: "Set both to version 1.",
-	},
 	UNSUPPORTED_VERSION: {
 		severity: "error",
 		meaning: "The requested Semantic CSS version is not implemented.",
@@ -50,7 +30,7 @@ export const SEMANTIC_CSS_DIAGNOSTIC_CATALOG_V1 = {
 	UNSUPPORTED_AT_RULE: {
 		severity: "error",
 		meaning: "The at-rule is not part of Semantic CSS version 1.",
-		action: "Use only @version and documented @media queries.",
+		action: "Use only documented @media queries.",
 	},
 	INVALID_MEDIA_QUERY: {
 		severity: "error",
@@ -122,13 +102,7 @@ export const SEMANTIC_CSS_DIAGNOSTIC_CATALOG_V1 = {
 
 export type SemanticCssCompilerDiagnosticCode = keyof typeof SEMANTIC_CSS_DIAGNOSTIC_CATALOG_V1;
 
-const FATAL_DIAGNOSTIC_CODES = new Set<string>([
-	"DUPLICATE_VERSION_DIRECTIVE",
-	"INVALID_VERSION",
-	"RESOURCE_LIMIT",
-	"UNSUPPORTED_VERSION",
-	"VERSION_MISMATCH",
-]);
+const FATAL_DIAGNOSTIC_CODES = new Set<string>(["RESOURCE_LIMIT", "UNSUPPORTED_VERSION"]);
 
 export function isFatalStylesheetDiagnostic({ code }: Pick<SemanticCssDiagnostic, "code">): boolean {
 	return FATAL_DIAGNOSTIC_CODES.has(code);

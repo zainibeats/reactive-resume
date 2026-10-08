@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -219,7 +219,7 @@ const useLeafishTemplate = (): LeafishTemplate => {
 				columnGap: metrics.gapX(1 / 6),
 			},
 			body: {
-				flexDirection: r.row,
+				flexDirection: r.columns,
 				columnGap: metrics.columnGap,
 				paddingHorizontal: metrics.page.paddingHorizontal,
 				paddingTop: metrics.page.paddingVertical,
@@ -244,18 +244,5 @@ const useLeafishTemplate = (): LeafishTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies LeafishStyles,
 		};
-	}, [
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.gapY,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		base,
-		metrics.page.paddingHorizontal,
-		metrics.columnGap,
-		foreground,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, base, foreground, background]);
 };

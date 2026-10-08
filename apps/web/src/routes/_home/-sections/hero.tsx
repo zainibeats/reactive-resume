@@ -12,11 +12,11 @@ export function Hero() {
 				<div>
 					<div className="max-w-2xl space-y-6">
 						<div className="space-y-3">
-							<h1 className="font-semibold text-4xl tracking-tight md:text-5xl lg:text-6xl">
+							<h1 className="text-4xl font-semibold tracking-tight md:text-5xl lg:text-6xl">
 								<Trans>A free and open-source resume builder</Trans>
 							</h1>
 
-							<p className="max-w-xl text-base text-muted-foreground leading-relaxed md:text-lg">
+							<p className="max-w-xl text-base leading-relaxed text-ink-2 md:text-lg">
 								<Trans>
 									Reactive Resume is a free and open-source resume builder that simplifies the process of creating,
 									updating, and sharing your resume.
@@ -43,7 +43,7 @@ export function Hero() {
 
 						<div className="flex flex-col gap-3 sm:flex-row">
 							<Button
-								variant="outline"
+								variant="secondary"
 								nativeButton={false}
 								className="gap-2"
 								render={
@@ -76,7 +76,7 @@ type HomeActionProps = {
 	title: React.ReactNode;
 	description: React.ReactNode;
 	intent: ResumeStartIntent;
-	to: React.ComponentProps<typeof Link>["to"];
+	to: "/dashboard";
 };
 
 function HomeAction({ icon, title, description, intent, to }: HomeActionProps) {
@@ -84,11 +84,11 @@ function HomeAction({ icon, title, description, intent, to }: HomeActionProps) {
 		<Link
 			to={to}
 			onClick={() => saveResumeStartIntent(intent)}
-			className="group rounded-lg border bg-card p-4 text-start transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+			className="group rounded-lg border bg-surface p-4 text-start transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
 		>
-			<div className="mb-3 text-foreground transition-transform group-hover:translate-x-0.5">{icon}</div>
-			<div className="font-medium text-sm">{title}</div>
-			<div className="mt-1 text-muted-foreground text-xs">{description}</div>
+			<div className="mb-3 text-ink transition-transform group-hover:translate-x-0.5">{icon}</div>
+			<div className="text-sm font-medium">{title}</div>
+			<div className="mt-1 text-xs text-ink-2">{description}</div>
 		</Link>
 	);
 }
@@ -103,7 +103,7 @@ function TemplatePreview({ name, src }: TemplatePreviewProps) {
 		<img
 			src={src}
 			alt={name}
-			className="aspect-[210/297] w-full rounded-md border bg-muted object-cover shadow-sm"
+			className="aspect-[210/297] w-full rounded-md border bg-sunken object-cover shadow-sm"
 			loading="eager"
 		/>
 	);

@@ -8,7 +8,7 @@ most common English sense, and gets it wrong. Every entry below has been mistran
 in at least one shipped locale.
 
 **If you are translating, read the term here before translating it.** When the English word has
-a common sense that is *not* the one used here, that wrong sense is listed explicitly.
+a common sense that is _not_ the one used here, that wrong sense is listed explicitly.
 
 Terms are grouped by the part of the product they belong to. Source references point at where the
 string is defined, so you can read the surrounding code when this file is not enough.
@@ -21,12 +21,26 @@ the catalog already uses one consistently):
 Reactive Resume, GitHub, Crowdin, Docker, PostgreSQL, Better Auth, TanStack, Microsoft Word,
 PDF, DOCX, JSON, CSV, API, MCP, oRPC, SSO, CSS, URL, JSON Resume.
 
+Also keep LinkedIn, Discord, Figma, Claude Desktop, PDF.js, models.dev, iOS, MIT License,
+and WCAG 2.1 AA unchanged. **Word**, when naming an import or download format, means
+**Microsoft Word**; do not translate it as the ordinary noun "word".
+
+Names in sample documents and job postings are proper nouns too: Alex Morgan, Amruth Pillai,
+Fieldnote, Northwind Labs, Parcel & Co., Lumen, and University of Porto. Keep these names
+unchanged, including inside longer sentences. Translate surrounding job titles and descriptions,
+not the person's, company's, or institution's name. Preserve place names such as Lisbon, Porto,
+and Portugal in these examples as well.
+
+Configuration identifiers such as `ENCRYPTION_SECRET`, file extensions, example email addresses,
+and literal URLs are syntax, not translatable prose. Keep them exactly as written.
+
 AI provider names are brand names and stay in English: OpenAI, Anthropic Claude, Google
 Gemini, Vercel AI Gateway, OpenRouter, Mistral AI, Cohere, xAI Grok, Groq, DeepSeek, Together.ai,
-Fireworks, Cerebras, Perplexity, Ollama Cloud.
+Fireworks, Cerebras, Perplexity, Ollama.
 
 Template names are proper nouns and are never translated: Azurill, Bronzor, Chikorita, Ditgar,
-Ditto, Gengar, Glalie, Kakuna, Lapras, Leafish, Meowth, Onyx, Pikachu, Rhyhorn, Scizor.
+Ditto, Gengar, Glalie, Kakuna, Lapras, Leafish, Meowth, Onyx, Pikachu, Porygon, Rhyhorn, Scizor,
+Smeargle.
 
 ## The document
 
@@ -38,8 +52,10 @@ Where a locale's normal word for this document is CV, use CV.
 
 **Resumes** — plural of the above. A list of the user's documents.
 
-**Cover letter** — the letter accompanying a resume. Stored as a resume section, not a separate
-document.
+**Cover letter** — the letter accompanying a resume. Stored as its own document, with optional links to a resume and an application.
+
+**Letter / Letters** — shorthand for cover letter(s) in the document library and letter editor.
+Not an alphabetic character.
 
 **Builder** — the editor where a resume is composed. A tool, not a construction worker or a
 person who builds.
@@ -95,6 +111,20 @@ Not a theatre stage or a phase of construction.
 **Source** — where the user found the job listing (a job board, a referral, a company site).
 Singular, and specific to one application. Not a source code file and not a data source.
 
+**Posting / Job posting** — the employer's advertisement for an open position, including its
+description and requirements. Not a social-media post, a postal delivery, or a transaction entry.
+`Posting terms` are keywords from that advertisement, not terms and conditions.
+
+**Role** — a job position, either the position being applied for or a past position in Experience.
+Not a theatrical role or an account permission. `Contact role` describes the contact person's job,
+such as recruiter or hiring manager.
+
+**Follow up / Follow-up** — contacting a recruiter again about an application, or the reminder
+to do so. `Follow up` is a button action; `Set a follow-up` schedules that reminder.
+
+**Screening** — an initial interview to assess a candidate, often a short phone call. Not a
+medical screening or a display screen.
+
 **Pipeline** — the sequence of stages an application moves through. A recruiting funnel, not a
 physical pipe, duct, conduit, or oil pipeline. Seven locales translated it as plumbing.
 
@@ -138,7 +168,7 @@ variant, and not a "style" or "pattern".
 
 **Working resume** — the resume a thread is currently editing. "Working" describes the draft
 being worked on, not the user's employment. It is not their work history, not a "job resume",
-and not a *functional résumé*, which is a real and different résumé format.
+and not a _functional résumé_, which is a real and different résumé format.
 
 **Tailor** — a verb: to adapt a resume to a specific job description. Nothing to do with
 dressmaking or sewing.
@@ -165,10 +195,16 @@ order, not the builder's layout settings.
 **Blocker, Warning, Tip** — the three severity levels of a finding.
 
 **Note** — the label for an informational finding, in
-`apps/web/src/routes/builder/$resumeId/-sidebar/right/sections/ats-check.tsx`. A severity label,
+the resume editor's Check panel. A severity label,
 not a written note. Unrelated to **Notes** in the application tracker.
 
 **Parse / parsing** — software reading text out of the PDF.
+
+**Bullet / Bullets** — a list entry describing experience or an achievement; sometimes its list
+marker. Never ammunition. `Find weak bullets` asks for review of the writing in those entries.
+
+**Issue / Issues** — findings that may make a resume hard for software to read. Not a magazine
+edition or a GitHub issue. `Open issues` means unresolved findings.
 
 ## Account and security
 
@@ -208,7 +244,59 @@ section, above.
 **Custom** — in `color-picker.tsx`, a user-chosen color as opposed to a preset. An adjective.
 
 **Public URL** — the shareable address of a published resume. Use one term consistently; the
-English strings say "public URL" rather than "public link".
+English interface strings say "Public link"; URL refers to the address itself.
+
+## Redesigned workspace
+
+These terms arrive with the redesigned interface (see `DESIGN.md`).
+
+**Documents** — the library that holds resumes and cover letters together. A plural noun, not the
+verb "to document".
+
+**Trash** — where deleted documents wait 30 days before they're removed for good. A place (noun),
+like a recycle bin. Not the verb "to trash".
+
+**Write · Design · Check** — the three modes of the editor, shown side by side as a switch. Each is
+the name of a mode, so translate them as short, parallel labels. **Write** is editing the content,
+**Design** is choosing how the resume looks (a noun here), and **Check** is reviewing whether
+software can read it (a noun here, like "review"), not a bank cheque or a checkmark.
+
+**Share & export** — the sheet with the public link, downloads and version history.
+
+**Assistant** — the AI panel beside the page. It replaces both the "AI agent" page and the "AI
+assistant" sheet, so there is now only one AI term.
+
+**Proposed edit** — a change the assistant or Check suggests but hasn't made. It becomes part of the
+resume only when the person accepts it. **Accept** and **Reject** are imperative verbs on buttons;
+**Out of date** means the line was edited by hand after the suggestion was made.
+
+**Version** — a saved state of a document in its history, which can be previewed and restored. Not
+a software release.
+
+**Next step** — the next thing to do for a job application, such as an interview or a follow-up.
+
+**Closed** — the final stage of an application, whatever the outcome (not selected, withdrawn,
+another offer accepted, no response). Not "shut" or "locked".
+
+**System** — in Appearance, the option that follows the operating system's light or dark setting.
+
+**Type**, in Design or `Font pairing` descriptions — typography: the chosen fonts and their
+appearance. Not a document category, a personality type, or the verb "to type". `Document type`
+and `Interview type` do mean categories; `Type … to confirm` is the verb for entering text.
+
+**Accent / Accent colour** — the visual highlight colour used for headings and icons. Not a
+pronunciation accent or an accented letter.
+
+**Fit**, in `Fit to one page`, `Fit page to width`, and similar layout controls — make the
+document fit within a page count or the available display width. Distinct from suitability for a
+job in `How well do I fit this role?`.
+
+**Present**, in date ranges such as `2021 – Present` — continuing up to now, for a current job
+or education entry. Not a gift, attendance status, or the verb "to present".
+
+**Sent / Submitted** — documents actually used when submitting a job application. Merely linking
+a resume or letter to the application does not mean it was sent. `Version sent` is the saved
+document state used for that submission.
 
 ## Verbs that read as adjectives or nouns
 
@@ -216,10 +304,10 @@ Button labels and `aria-label` strings are usually **imperative verbs**: they sa
 control does. Read as a noun or an adjective, they turn into nonsense. This is the most common
 error in the catalogs after the ambiguous nouns above.
 
-**Open** — the verb. `Open AI agent` means *open the AI agent panel*; it does not describe an
+**Open** — the verb. `Open AI agent` means _open the AI agent panel_; it does not describe an
 agent that is "open", and it is **not a reference to OpenAI, the company**. Around forty-five of
 the fifty-three catalogs got this wrong, split between "an open AI agent" and a transliteration
-of *OpenAI*. The same applies to `Open in builder`.
+of _OpenAI_. The same applies to `Open in builder`.
 
 **Close** — likewise the verb, as in `Close AI assistant`. Not "an assistant for closing things",
 and not the adjective "close/nearby".

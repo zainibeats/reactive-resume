@@ -3,18 +3,14 @@ import { Trans } from "@lingui/react/macro";
 import * as React from "react";
 import { metadataSchema } from "@reactive-resume/schema/resume/data";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-	InputGroupText,
-} from "@reactive-resume/ui/components/input-group";
+import { InputGroup, InputGroupAddon, InputGroupText } from "@reactive-resume/ui/components/input-group";
 import { Slider } from "@reactive-resume/ui/components/slider";
+import { SectionBase } from "../../shared/section-base";
+import { LayoutPages } from "./pages";
+import { NumberInput } from "@/components/input/number-input";
 import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
 import { useSyncFormValues } from "@/hooks/use-sync-form-values";
 import { useAppForm } from "@/libs/tanstack-form";
-import { SectionBase } from "../../shared/section-base";
-import { LayoutPages } from "./pages";
 
 export function LayoutSectionBuilder() {
 	return (
@@ -86,18 +82,15 @@ function LayoutSectionForm() {
 							<FormControl
 								render={
 									<InputGroup className="w-auto shrink-0">
-										<InputGroupInput
+										<NumberInput
 											name={field.name}
 											value={field.state.value}
-											type="number"
 											min={10}
 											max={50}
 											step={0.1}
 											onBlur={field.handleBlur}
-											onChange={(e) => {
-												const value = e.target.value;
-												if (value === "") field.handleChange("" as unknown as number);
-												else field.handleChange(Number(value));
+											onValueChange={(value) => {
+												field.handleChange(value);
 												handleAutoSave();
 											}}
 										/>

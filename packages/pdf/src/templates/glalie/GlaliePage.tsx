@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateFeatures, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -10,7 +10,6 @@ import { getPrimaryTint } from "../shared/color-helpers";
 import { TemplateProvider } from "../shared/context";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
-import { PageMarginBackground } from "../shared/page-margin-background";
 import { SemanticRegionView, SemanticTemplatePartView } from "../shared/primitives";
 import { Section } from "../shared/sections";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
@@ -31,6 +30,7 @@ type GlalieStyles = Omit<TemplateStyleSlots, "page"> & {
 	headerName: Style;
 	contactList: Style;
 	contactItem: Style;
+	contactText: Style;
 };
 
 type GlalieTemplate = {
@@ -85,10 +85,6 @@ export const GlaliePage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 								width: `${metadata.layout.sidebarWidth}%`,
 							})}
 						>
-							<PageMarginBackground
-								color={colors.sidebarBackground ?? colors.background}
-								margin={metrics.page.paddingVertical}
-							/>
 							{showHeader && <Header styles={styles} />}
 
 							{!page.fullWidth && (
@@ -127,6 +123,7 @@ const Header = ({ styles }: GlalieHeaderProps) => (
 			name: styles.headerName,
 			contactList: styles.contactList,
 			contactItem: styles.contactItem,
+			contactText: styles.contactText,
 		}}
 		contactListOutsideTitle
 	/>
@@ -136,7 +133,9 @@ const useGlalieTemplate = (): GlalieTemplate => {
 	const { metadata, r, foreground, background, primary, metrics, base } = useTemplateBase();
 
 	return useMemo(() => {
-		const primaryTint = getPrimaryTint(metadata.design.colors.primary, 0.2);
+		// One band at the tint the former column-over-band pair of 20% layers added up to: the column no longer paints
+		// its own, so a custom band colour shows as authored, margins included.
+		const primaryTint = getPrimaryTint(metadata.design.colors.primary, 0.36);
 		const colors: TemplateColorRoles = {
 			foreground,
 			background,
@@ -171,17 +170,15 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				position: "absolute",
 				top: 0,
 				bottom: 0,
-				...r.anchorToStart(0),
+				...r.anchorToColumnStart(0),
 				width: `${metadata.layout.sidebarWidth}%`,
 				backgroundColor: primaryTint,
 			},
 			layout: {
-				flexDirection: r.row,
+				flexDirection: r.columns,
 				minHeight: "100%",
 			},
 			sidebarColumn: {
-				zIndex: 1,
-				backgroundColor: primaryTint,
 				paddingHorizontal: metrics.page.paddingHorizontal,
 				paddingTop: metrics.page.paddingVertical,
 				rowGap: metrics.sectionGap,
@@ -191,7 +188,6 @@ const useGlalieTemplate = (): GlalieTemplate => {
 			},
 			mainColumn: {
 				flex: 1,
-				zIndex: 1,
 			},
 			mainContent: {
 				paddingHorizontal: metrics.page.paddingHorizontal,
@@ -227,6 +223,11 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				alignItems: "center",
 				columnGap: metrics.gapX(1 / 6),
 			},
+			// The text takes the rest of the row, so a long email or link wraps inside the box instead of running out.
+			contactText: {
+				flexGrow: 1,
+				flexBasis: 0,
+			},
 		});
 
 		const accentFor = ({ colors }: TemplateStyleContext) => colors.primary;
@@ -250,18 +251,5 @@ const useGlalieTemplate = (): GlalieTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies GlalieStyles,
 		};
-	}, [
-		metadata,
-		r.row,
-		r.anchorToStart,
-		primary,
-		metrics.sectionGap,
-		metrics.gapY,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		base,
-		metrics.page.paddingHorizontal,
-		foreground,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, base, foreground, background]);
 };

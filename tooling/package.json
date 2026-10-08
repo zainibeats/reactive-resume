@@ -7,27 +7,30 @@
 		"db:reset": "tsx database/reset.ts",
 		"docs:gen": "tsx semantic-css/generate-reference.ts",
 		"test": "vitest run --passWithNoTests",
-		"test:ci": "vitest run --coverage --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
 		"typecheck": "tsgo --noEmit",
-		"pdf:translations": "tsx locales/generate.ts"
+		"pdf:translations": "tsx locales/generate.ts",
+		"icons:build": "tsx icons/material-symbols.ts",
+		"icons:pdf": "tsx icons/phosphor-pdf.ts"
 	},
 	"dependencies": {
 		"@reactive-resume/schema": "workspace:*"
 	},
 	"devDependencies": {
-		"@lingui/format-po": "^6.8.0",
+		"@lingui/format-po": "^6.9.0",
+		"@phosphor-icons/react": "^2.1.10",
 		"@reactive-resume/config": "workspace:*",
-		"@reactive-resume/docx": "workspace:*",
 		"@reactive-resume/env": "workspace:*",
-		"@reactive-resume/pdf": "workspace:*",
 		"@reactive-resume/resume": "workspace:*",
-		"@types/pg": "^8.23.1",
-		"pdfjs-dist": "6.3.289",
-		"jszip": "3.10.2",
-		"@typescript/native-preview": "7.0.0-dev.20260707.2",
-		"drizzle-orm": "1.0.0-rc.4",
-		"pg": "^8.23.0",
+		"@types/pg": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@typescript/native-preview": "catalog:",
+		"drizzle-orm": "catalog:",
+		"pg": "catalog:",
+		"react": "19.3.0",
+		"react-dom": "19.3.0",
 		"tsx": "^4.23.15",
-		"vitest": "^5.0.2"
+		"vitest": "catalog:"
 	}
 }

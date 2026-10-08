@@ -1,4 +1,3 @@
-import type { CssLocation, CssNode } from "css-tree";
 import type { SemanticCssCompilerDiagnosticCode } from "./diagnostics";
 import type {
 	CompiledDeclaration,
@@ -10,6 +9,7 @@ import type {
 	SourceRange,
 	StyleProgram,
 } from "./types";
+import type { CssLocation, CssNode } from "css-tree";
 import * as csstree from "css-tree";
 import { createDiagnostic, EMPTY_SOURCE_RANGE, isFatalStylesheetDiagnostic } from "./diagnostics";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
@@ -510,9 +510,7 @@ function parseMedia(node: AstNode, diagnostics: SemanticCssDiagnostic[]): readon
 	const invalidValue = queries.some((query) =>
 		query?.features.some((feature) => {
 			if (feature.name === "orientation") return false;
-			const match = feature.value.match(
-				/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:pt|px|in|mm|cm|vw|vh|em|rem)?$/i,
-			);
+			const match = feature.value.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:pt|px|in|mm|cm|em|rem)?$/i);
 			if (!match) {
 				return true;
 			}
@@ -648,6 +646,7 @@ export function compileProgram(stylesheet: ParsedStylesheet, languageVersion: nu
 			}
 			if (node.type !== "Atrule" || !node.name) continue;
 			const name = identifier(node.name).toLowerCase();
+			// Stylesheets saved before the version moved out of the text start with `@version 1;`.
 			if (name === "version") continue;
 			if (name !== "media") {
 				diagnostic(

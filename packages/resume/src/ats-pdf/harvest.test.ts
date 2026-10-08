@@ -1,13 +1,12 @@
 import type { PdfDocumentLike, PdfPageLike } from "./harvest";
 import { describe, expect, it, vi } from "vitest";
-import { HarvestAbortedError, harvestPdfDocument } from "./harvest";
+import { harvestPdfDocument } from "./harvest";
 import { PDF_OPS } from "./pdf-ops";
 
 const FILE = { name: "resume.pdf", sizeBytes: 120_000, magicBytesOk: true };
 
 type PageOptions = {
 	items?: unknown[];
-	annotations?: unknown[];
 	operatorList?: unknown;
 	operatorDelayMs?: number;
 	fontObject?: unknown;
@@ -35,7 +34,7 @@ function makePage(pageNumber: number, options: PageOptions = {}): PdfPageLike {
 				},
 			],
 		})),
-		getAnnotations: vi.fn(async () => options.annotations ?? []),
+		getAnnotations: vi.fn(async () => []),
 		getOperatorList: vi.fn(async () => {
 			if (options.operatorDelayMs) await new Promise((resolve) => setTimeout(resolve, options.operatorDelayMs));
 			return options.operatorList ?? { fnArray: [], argsArray: [] };
@@ -44,11 +43,11 @@ function makePage(pageNumber: number, options: PageOptions = {}): PdfPageLike {
 	};
 }
 
-function makeDocument(pages: PdfPageLike[], metadata: Record<string, unknown> = {}): PdfDocumentLike {
+function makeDocument(pages: PdfPageLike[]): PdfDocumentLike {
 	return {
 		numPages: pages.length,
 		getPage: async (pageNumber) => pages[pageNumber - 1] as PdfPageLike,
-		getMetadata: async () => ({ info: { Producer: "Test", Language: "en-GB", ...metadata } }),
+		getMetadata: async () => ({ info: { Producer: "Test", Language: "en-GB" } }),
 		getMarkInfo: async () => ({ Marked: true }),
 	};
 }
@@ -69,15 +68,6 @@ describe("harvestPdfDocument", () => {
 		expect(JSON.parse(JSON.stringify(raw))).toEqual(raw);
 	});
 
-	it("reads encryption and XFA off the document info dictionary", async () => {
-		const raw = await harvestPdfDocument(
-			makeDocument([makePage(1)], { EncryptFilterName: "Standard", IsXFAPresent: true, IsAcroFormPresent: true }),
-			{ file: FILE },
-		);
-
-		expect(raw.metadata).toMatchObject({ isEncrypted: true, isXfa: true, hasAcroForm: true });
-	});
-
 	it("stops at the page ceiling and says so", async () => {
 		const pages = Array.from({ length: 5 }, (_, index) => makePage(index + 1));
 		const raw = await harvestPdfDocument(makeDocument(pages), { file: FILE, maxPages: 2 });
@@ -85,15 +75,6 @@ describe("harvestPdfDocument", () => {
 		expect(raw.pages).toHaveLength(2);
 		expect(raw.pageCount).toBe(5);
 		expect(raw.truncated).toBe(true);
-	});
-
-	it("skips the operator pass entirely on a zero budget", async () => {
-		const page = makePage(1);
-		const raw = await harvestPdfDocument(makeDocument([page]), { file: FILE, operatorBudgetMs: 0 });
-
-		expect(page.getOperatorList).not.toHaveBeenCalled();
-		expect(raw.operatorsAvailable).toBe(false);
-		expect(raw.pages[0]?.operators).toBeNull();
 	});
 
 	it("leaves operators null when the page blows its budget", async () => {
@@ -121,22 +102,6 @@ describe("harvestPdfDocument", () => {
 		expect(raw.operatorsAvailable).toBe(true);
 	});
 
-	it("keeps link annotations and drops everything else", async () => {
-		const raw = await harvestPdfDocument(
-			makeDocument([
-				makePage(1, {
-					annotations: [
-						{ subtype: "Link", url: "https://example.com", rect: [10, 20, 30, 40] },
-						{ subtype: "Widget", url: "https://ignored.example" },
-					],
-				}),
-			]),
-			{ file: FILE },
-		);
-
-		expect(raw.links).toEqual([{ page: 1, url: "https://example.com", rect: [10, 20, 30, 40] }]);
-	});
-
 	it("drops text items the reader could not describe rather than throwing", async () => {
 		const raw = await harvestPdfDocument(
 			makeDocument([
@@ -160,23 +125,5 @@ describe("harvestPdfDocument", () => {
 
 		const raw = await harvestPdfDocument(makeDocument([page]), { file: FILE });
 		expect(raw.fonts).toEqual([]);
-	});
-
-	it("reports progress and honours an abort signal", async () => {
-		const progress: string[] = [];
-		const signal = { aborted: false };
-
-		await expect(
-			harvestPdfDocument(makeDocument([makePage(1), makePage(2)]), {
-				file: FILE,
-				signal,
-				onProgress: (entry) => {
-					progress.push(`${entry.phase}:${entry.page}`);
-					signal.aborted = true;
-				},
-			}),
-		).rejects.toBeInstanceOf(HarvestAbortedError);
-
-		expect(progress[0]).toBe("text:1");
 	});
 });

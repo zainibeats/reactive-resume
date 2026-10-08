@@ -1,17 +1,27 @@
+import type { PageMap } from "@reactive-resume/pdf/page-map";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Spinner } from "@reactive-resume/ui/components/spinner";
 import { cn } from "@reactive-resume/utils/style";
 import { DEFAULT_PDF_PAGE_SIZE, getResumePreviewGapValue, getScaledPreviewPageSize } from "./preview.shared.utils";
 
 export type ResumePreviewProps = {
 	className?: string;
-	data?: ResumeData;
+	data?: ResumeData | undefined;
 	pageGap?: CSSProperties["gap"];
 	pageLayout?: "horizontal" | "vertical";
 	pageScale?: number;
-	pageClassName?: string;
+	pageClassName?: string | undefined;
 	showPageNumbers?: boolean;
+	/** Letters show the sender's header, which a document with only a letter otherwise leaves out. */
+	includeCoverLetterHeader?: boolean;
+	/** Drawn above each page (e.g. "Page 1 · Letter"). Replaces the small page-number caption. */
+	renderPageCaption?: (page: { pageNumber: number; totalPages: number }) => ReactNode;
+	/** Drawn over each page, in page-relative coordinates; receives the page map of the render on screen. */
+	renderPageOverlay?: (page: { pageIndex: number; pageMap: PageMap | undefined }) => ReactNode;
+	/** Called whenever the render on screen changes, with its physical page count and page map. */
+	/** Each render on screen: its page count, page map and the PDF itself. */
+	onRender?: (render: { pageCount: number; pageMap: PageMap | undefined; file: Blob }) => void;
 };
 
 export type ResolvedResumePreviewProps = ResumePreviewProps & {
@@ -56,7 +66,7 @@ export function ResumePreviewLoader({
 				return (
 					<figure key={pageNumber} className="shrink-0">
 						{showPageNumbers ? (
-							<figcaption className="mb-1 font-medium text-[0.625rem] text-muted-foreground">
+							<figcaption className="mb-1 text-[0.625rem] font-medium text-ink-3">
 								Page {pageNumber} of {pageCount}
 							</figcaption>
 						) : null}
@@ -66,7 +76,7 @@ export function ResumePreviewLoader({
 							aria-label={`Loading resume page ${pageNumber} of ${pageCount}`}
 							style={pageSize}
 							className={cn(
-								"flex aspect-page items-center justify-center overflow-hidden rounded-md bg-white text-neutral-400",
+								"flex aspect-page items-center justify-center overflow-hidden rounded-md bg-white text-ink-3",
 								pageClassName,
 							)}
 						>

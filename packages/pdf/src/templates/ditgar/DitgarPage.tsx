@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateFeatures, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -18,7 +18,6 @@ import { TemplateProvider } from "../shared/context";
 import { getFeaturedSummaryLayout } from "../shared/featured-summary";
 import { filterSections } from "../shared/filtering";
 import { getTemplateMetrics } from "../shared/metrics";
-import { PageMarginBackground } from "../shared/page-margin-background";
 import { hasTemplatePicture } from "../shared/picture";
 import {
 	Heading,
@@ -30,6 +29,7 @@ import {
 	Text,
 } from "../shared/primitives";
 import { Section } from "../shared/sections";
+import { SidebarBackground } from "../shared/sidebar-background";
 import { composeStyles, headerNameLineHeight, resolvePlacementColor } from "../shared/styles";
 import { useTemplateBase } from "../shared/template-base";
 
@@ -97,16 +97,18 @@ export const DitgarPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 		>
 			<TemplateProvider pageNodeKey={pageNodeKey} styles={styles} colors={colors} features={ditgarFeatures}>
 				{showSidebar && (
+					<SidebarBackground
+						color={colors.sidebarBackground ?? colors.background}
+						width={`${metadata.layout.sidebarWidth}%`}
+					/>
+				)}
+				{showSidebar && (
 					<View
 						style={composeStyles(styles.sidebarColumn, {
 							width: `${metadata.layout.sidebarWidth}%`,
 							marginTop: -metrics.page.paddingVertical,
 						})}
 					>
-						<PageMarginBackground
-							color={colors.sidebarBackground ?? colors.background}
-							margin={metrics.page.paddingVertical}
-						/>
 						{showHeader && <Header styles={styles} colors={colors} />}
 
 						{!page.fullWidth && (
@@ -129,7 +131,7 @@ export const DitgarPage = ({ page, pageSize, pageMinHeightStyle, showHeader, pag
 							partKeys={["featured-summary"]}
 							style={styles.specialContainer}
 						>
-							<Section section={featuredSummarySection} placement="main" showHeading={false} />
+							<Section section={featuredSummarySection} placement="main" />
 						</SemanticRegionTemplatePartView>
 					)}
 
@@ -216,7 +218,7 @@ const useDitgarTemplate = (): DitgarTemplate => {
 			...base,
 			page: {
 				...base.page,
-				flexDirection: r.row,
+				flexDirection: r.columns,
 			},
 			section: {
 				flexDirection: "column",
@@ -342,17 +344,5 @@ const useDitgarTemplate = (): DitgarTemplate => {
 				}),
 			} satisfies DitgarStyles,
 		};
-	}, [
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.gapY,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		base,
-		metrics.page.paddingHorizontal,
-		foreground,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, base, foreground, background]);
 };

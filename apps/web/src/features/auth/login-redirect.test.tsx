@@ -18,18 +18,21 @@ const mocks = vi.hoisted(() => ({
 	verifyBackupCode: vi.fn(),
 	signup: vi.fn(),
 	continueOAuth: vi.fn(),
+	queryClient: { invalidateQueries: vi.fn(async () => {}) },
 }));
 
 vi.mock("@tanstack/react-query", () => ({
 	useQuery: () => ({
 		data: { google: "Google", github: "GitHub", linkedin: "LinkedIn", custom: "SSO", passkey: true },
 	}),
+	useQueryClient: () => mocks.queryClient,
 }));
 vi.mock("@tanstack/react-router", () => ({
 	useSearch: () => ({ callbackURL: mocks.callbackURL }),
 	useRouter: () => ({ navigate: mocks.navigate, invalidate: mocks.invalidate }),
 	useNavigate: () => mocks.navigate,
 	Link: ({ to, search: _search, ...props }: ComponentProps<"a"> & { to: string; search?: unknown }) => (
+		// oxlint-disable-next-line jsx-a11y/anchor-has-content -- The Link mock forwards children through props.
 		<a href={to} {...props} />
 	),
 }));
@@ -75,17 +78,37 @@ function renderLogin() {
 	);
 }
 
-function submitLogin(container: HTMLElement, identifier: string) {
+function submitLogin(container: HTMLElement, identifier: string, passwordValue = "password123") {
 	const input = container.querySelector('input[name="identifier"]');
 	const password = container.querySelector('input[name="password"]');
 	const form = container.querySelector("form");
 	if (!input || !password || !form) throw new Error("Login form is missing");
 	fireEvent.change(input, { target: { value: identifier } });
-	fireEvent.change(password, { target: { value: "password123" } });
+	fireEvent.change(password, { target: { value: passwordValue } });
 	fireEvent.submit(form);
 }
 
 describe("OAuth callback after sign-in", () => {
+	it("accepts a legacy password and prevents duplicate sign-in until a failed request finishes", async () => {
+		let finish: (() => void) | undefined;
+		mocks.email.mockReturnValue(
+			new Promise((resolve) => {
+				finish = () => resolve({ error: { message: "Invalid credentials" } });
+			}),
+		);
+		const { container } = renderLogin();
+		const submit = screen.getByRole<HTMLButtonElement>("button", { name: "Sign in" });
+		submitLogin(container, "john@example.com", "old123");
+		await waitFor(() => expect(mocks.email).toHaveBeenCalledOnce());
+		expect(mocks.email).toHaveBeenCalledWith(expect.objectContaining({ password: "old123" }));
+		expect(submit.disabled).toBe(true);
+		fireEvent.click(submit);
+		expect(mocks.email).toHaveBeenCalledOnce();
+		finish?.();
+		await waitFor(() => expect(submit.disabled).toBe(false));
+		expect(mocks.navigate).not.toHaveBeenCalled();
+	});
+
 	it.each(["john@example.com", "john"])(
 		"resumes the signed server callback after email/username sign-in (%s)",
 		async (identifier) => {
@@ -149,17 +172,25 @@ describe("OAuth callback after sign-in", () => {
 		);
 		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
-
-	it("stays on login when credentials are rejected", async () => {
-		mocks.email.mockResolvedValueOnce({ data: null, error: { message: "Invalid credentials" } });
-		const { container } = renderLogin();
-		submitLogin(container, "john@example.com");
-		await waitFor(() => expect(mocks.email).toHaveBeenCalled());
-		expect(mocks.navigate).not.toHaveBeenCalled();
-	});
 });
 
 describe("OAuth callback after two-factor verification", () => {
+	it.each(["82cNKqaOiN", "82cNK-qaOiN"])("submits a complete backup code entered as %s", async (code) => {
+		const { container } = render(
+			<I18nProvider i18n={i18n}>
+				<VerifyTwoFactorBackupPage />
+			</I18nProvider>,
+		);
+		const input = container.querySelector<HTMLInputElement>('input[name="code"]');
+		const form = container.querySelector("form");
+		if (!input || !form) throw new Error("Verification form is missing");
+		expect(input.maxLength).toBeGreaterThanOrEqual(code.length);
+		fireEvent.change(input, { target: { value: code } });
+		fireEvent.submit(form);
+		await waitFor(() =>
+			expect(mocks.verifyBackupCode).toHaveBeenCalledWith(expect.objectContaining({ code: "82cNK-qaOiN" })),
+		);
+	});
 	it.each([false, true])("resumes the callback after verifying a code (backup: %s)", async (backup) => {
 		const { container } = render(
 			<I18nProvider i18n={i18n}>{backup ? <VerifyTwoFactorBackupPage /> : <VerifyTwoFactorPage />}</I18nProvider>,
@@ -176,6 +207,28 @@ describe("OAuth callback after two-factor verification", () => {
 });
 
 describe("OAuth account creation", () => {
+	it("rejects a seven-character new password before contacting auth", async () => {
+		const { container } = render(
+			<I18nProvider i18n={i18n}>
+				<RegisterPage disableEmailAuth={false} />
+			</I18nProvider>,
+		);
+		for (const [name, value] of Object.entries({
+			name: "New User",
+			username: "newuser",
+			email: "new@example.com",
+			password: "1234567",
+		})) {
+			const input = container.querySelector(`input[name="${name}"]`);
+			if (!input) throw new Error(`Missing ${name} field`);
+			fireEvent.change(input, { target: { value } });
+		}
+		const form = container.querySelector("form");
+		if (!form) throw new Error("Missing registration form");
+		fireEvent.submit(form);
+		await waitFor(() => expect(screen.getByText(/>=8/)).toBeDefined());
+		expect(mocks.signup).not.toHaveBeenCalled();
+	});
 	it("continues a create prompt only after successful signup", async () => {
 		mocks.callbackURL += "&prompt=create";
 		mocks.signup.mockResolvedValueOnce({ data: { token: "session" }, error: null });

@@ -1,5 +1,6 @@
 import type { PreviewPageSize } from "./preview.shared.utils";
 import type { ResumeThumbnailSize } from "./resume-thumbnail.shared";
+import type { QueryClient } from "@tanstack/react-query";
 import { getResumeThumbnailRenderSize } from "./resume-thumbnail.shared";
 
 const canvasToBlob = (canvas: HTMLCanvasElement) =>
@@ -79,3 +80,31 @@ export const createPdfFirstPageImageUrl = async (file: Blob, targetSize: ResumeT
 		void destroy();
 	}
 };
+
+const releasedCaches = new Map<string, WeakSet<object>>();
+
+/**
+ * Revokes a thumbnail's object URL once its query is replaced or dropped from the cache, for queries whose
+ * key starts with `key` (e.g. "resume-thumbnail"). Safe to call on every render.
+ */
+export function releaseThumbnailUrls(queryClient: QueryClient, key: string) {
+	const queryCache = queryClient.getQueryCache();
+	const seen = releasedCaches.get(key) ?? new WeakSet<object>();
+	releasedCaches.set(key, seen);
+	if (seen.has(queryCache)) return;
+	seen.add(queryCache);
+
+	// Cache updates have already replaced state.data, so retain each query's previous URL.
+	const urls = new WeakMap<object, unknown>(
+		queryCache.findAll({ queryKey: [key] }).map((query) => [query, query.state.data]),
+	);
+	queryCache.subscribe((event) => {
+		if (event.query.queryKey[0] !== key) return;
+		if (event.type !== "updated" && event.type !== "removed") return;
+		const previousUrl = urls.get(event.query);
+		const url = event.type === "removed" ? undefined : event.query.state.data;
+		if (typeof previousUrl === "string" && previousUrl !== url) URL.revokeObjectURL(previousUrl);
+		if (typeof url === "string") urls.set(event.query, url);
+		else urls.delete(event.query);
+	});
+}

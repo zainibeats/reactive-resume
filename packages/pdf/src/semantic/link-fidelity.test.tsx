@@ -1,9 +1,9 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { describe, expect, it } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../document";
+import { pdf } from "../forme/testing";
 
 type HostNode = {
 	type: string;
@@ -12,24 +12,14 @@ type HostNode = {
 	children?: HostNode[];
 };
 
-const emptyStylesheet = { languageVersion: 1, text: "@version 1;" };
-
-const buildFixture = (
-	mode: "missing" | "legacy" | "semantic",
-	hideLinkUnderline: boolean,
-	text = emptyStylesheet.text,
-): ResumeData => {
+const buildFixture = (hideLinkUnderline: boolean): ResumeData => {
 	const data = structuredClone(defaultResumeData);
 	data.picture.hidden = true;
 	data.basics.name = "Ada Lovelace";
 	data.basics.email = "ada@example.com";
 	data.metadata.page.hideLinkUnderline = hideLinkUnderline;
 	data.metadata.layout.pages = [{ fullWidth: true, main: [], sidebar: [] }];
-
-	if (mode !== "missing") {
-		const stylesheet = { languageVersion: 1, text };
-		data.metadata.stylesheet = { mode, source: stylesheet };
-	}
+	data.metadata.stylesheet = { mode: "semantic", source: { languageVersion: 1, text: "@version 1;" } };
 
 	return data;
 };
@@ -56,19 +46,9 @@ const finalLinkDecoration = async (data: ResumeData) => {
 
 describe("PDF link decoration fidelity", () => {
 	it.each([
-		["missing", false, "underline"],
-		["missing", true, "none"],
-		["legacy", false, "underline"],
-		["legacy", true, "none"],
-		["semantic", false, "underline"],
-		["semantic", true, "none"],
-	] as const)("%s stylesheet with hideLinkUnderline=%s resolves to %s", async (mode, hidden, expected) => {
-		expect(await finalLinkDecoration(buildFixture(mode, hidden))).toBe(expected);
-	});
-
-	it("lets semantic none override an underlined builder baseline (#3134)", async () => {
-		const data = buildFixture("semantic", false, "@version 1; link { text-decoration: none; }");
-
-		expect(await finalLinkDecoration(data)).toBe("none");
+		[false, "underline"],
+		[true, "none"],
+	] as const)("semantic stylesheet with hideLinkUnderline=%s resolves to %s", async (hidden, expected) => {
+		expect(await finalLinkDecoration(buildFixture(hidden))).toBe(expected);
 	});
 });

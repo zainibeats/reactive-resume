@@ -35,6 +35,3 @@ export function buildPatchGuide(serverName: string): string {
 		"- When the user describes a change in prose, restate the concrete edit you are about to make before making it.",
 	].join("\n");
 }
-
-/** The prompt section for the default `resume` namespace. */
-export const PATCH_GUIDE: string = buildPatchGuide("resume");

@@ -1,14 +1,15 @@
+import type { ResumeUpdatedEvent } from "./events";
+import type { DbOrTx } from "@reactive-resume/db/client";
 import type { JsonPatchOperation } from "@reactive-resume/resume/patch";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Locale } from "@reactive-resume/utils/locale";
-import type { ResumeUpdatedEvent } from "./events";
 import { ORPCError } from "@orpc/client";
-import { compare, hash } from "bcrypt";
-import { and, arrayContains, asc, desc, eq, gte, isNotNull, notInArray, sql } from "drizzle-orm";
-import { get } from "es-toolkit/compat";
+import { compare, hash } from "bcryptjs";
+import { and, arrayContains, asc, desc, eq, gte, isNotNull, isNull, sql } from "drizzle-orm";
 import { match } from "ts-pattern";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
+import { detachEmbeddedLetters } from "@reactive-resume/resume/cover-letter";
 import {
 	applyResumePatches,
 	createResumePatches,
@@ -18,14 +19,22 @@ import {
 } from "@reactive-resume/resume/patch";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
+import { adoptEmbeddedLetters } from "../cover-letters/embedded";
 import { getStorageService } from "../storage/service";
 import { grantResumeAccess, hasResumeAccess } from "./access";
 import { assertCanView, isOwner, redactResumeForViewer, shouldCountForStatistics } from "./access-policy";
 import { publishResumeUpdated } from "./events";
 import { parseStoredResumeData, parseWritableResumeData } from "./resume-data-validation";
+import { checkSlug, findFreeSlug, matchesSlug, recordSlugChange, SLUG_PATTERN } from "./slugs";
+import {
+	deleteVersion,
+	getVersion,
+	listVersions,
+	renameVersion,
+	saveSessionVersion,
+	writeVersion,
+} from "./version-history";
 import { clientKeyFromHeaders, shouldCountView } from "./view-dedup";
-
-type DbOrTx = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 type ResumeSyncDiff = {
 	op: JsonPatchOperation["op"];
@@ -51,13 +60,12 @@ function resumeVersionConflict(updatedAt: Date) {
 	});
 }
 
-function invalidPatchOperation(message: string, index?: number, operation?: JsonPatchOperation) {
-	if (index !== undefined && operation !== undefined) {
-		return new ORPCError("INVALID_PATCH_OPERATIONS", { status: 400, message, data: { index, operation } });
-	}
-
-	return new ORPCError("INVALID_PATCH_OPERATIONS", { status: 400, message });
+function invalidPatchOperation(message: string, index: number, operation: JsonPatchOperation) {
+	return new ORPCError("INVALID_PATCH_OPERATIONS", { status: 400, message, data: { index, operation } });
 }
+
+/** The unique constraint a Postgres insert or update broke, if that's why it failed. */
+const uniqueConstraint = (error: unknown) => (error as { cause?: { constraint?: string } } | null)?.cause?.constraint;
 
 function isValidJsonPointer(pointer: string): boolean {
 	if (pointer === "") return true;
@@ -83,56 +91,6 @@ function assertValidPatchPointers(operation: JsonPatchOperation, index: number) 
 	}
 }
 
-// Version history: keep a bounded, rolling window of snapshots per resume.
-const MAX_VERSIONS_PER_RESUME = 30;
-// Manual-save milestones are debounced server-side: an autosave only checkpoints if the newest
-// snapshot is older than this. Explicit milestones (import, AI edit, restore) always checkpoint.
-const SNAPSHOT_THROTTLE_MS = 2 * 60 * 1000;
-
-async function writeResumeVersion(
-	client: DbOrTx,
-	input: { resumeId: string; userId: string; data: ResumeData; label: string },
-) {
-	const data = parseWritableResumeData(input.data);
-
-	await client.insert(schema.resumeVersion).values({
-		resumeId: input.resumeId,
-		userId: input.userId,
-		data,
-		label: input.label,
-	});
-
-	// Prune everything beyond the newest N snapshots for this resume.
-	const keep = client
-		.select({ id: schema.resumeVersion.id })
-		.from(schema.resumeVersion)
-		.where(eq(schema.resumeVersion.resumeId, input.resumeId))
-		.orderBy(desc(schema.resumeVersion.createdAt))
-		.limit(MAX_VERSIONS_PER_RESUME);
-
-	await client
-		.delete(schema.resumeVersion)
-		.where(and(eq(schema.resumeVersion.resumeId, input.resumeId), notInArray(schema.resumeVersion.id, keep)));
-}
-
-// Best-effort, throttled snapshot on the autosave/manual-save path. Never blocks or fails the save.
-async function maybeSnapshotOnSave(input: { resumeId: string; userId: string; data: ResumeData; label: string }) {
-	try {
-		const [latest] = await db
-			.select({ createdAt: schema.resumeVersion.createdAt })
-			.from(schema.resumeVersion)
-			.where(eq(schema.resumeVersion.resumeId, input.resumeId))
-			.orderBy(desc(schema.resumeVersion.createdAt))
-			.limit(1);
-
-		if (latest && Date.now() - latest.createdAt.getTime() < SNAPSHOT_THROTTLE_MS) return;
-
-		await writeResumeVersion(db, input);
-	} catch (error) {
-		console.warn("Failed to snapshot resume version:", error);
-	}
-}
-
 async function applyResumePatchTx(
 	client: DbOrTx,
 	input: {
@@ -140,11 +98,11 @@ async function applyResumePatchTx(
 		userId: string;
 		operations: JsonPatchOperation[];
 		expectedUpdatedAt?: Date;
-		versionLabel?: string;
 	},
 ) {
 	const [existing] = await client
 		.select({
+			name: schema.resume.name,
 			data: schema.resume.data,
 			isLocked: schema.resume.isLocked,
 			updatedAt: schema.resume.updatedAt,
@@ -154,7 +112,7 @@ async function applyResumePatchTx(
 		.for("update");
 
 	if (!existing) throw new ORPCError("NOT_FOUND");
-	if (existing.isLocked) throw new ORPCError("RESUME_LOCKED");
+	if (existing.isLocked) throw new ORPCError("RESUME_LOCKED", { status: 403 });
 	if (input.expectedUpdatedAt && existing.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
 		throw resumeVersionConflict(existing.updatedAt);
 	}
@@ -162,9 +120,10 @@ async function applyResumePatchTx(
 	input.operations.forEach(assertValidPatchPointers);
 
 	let patchedData: ResumeData;
+	const storedData = parseStoredResumeData(existing.data);
 
 	try {
-		patchedData = applyResumePatches(parseStoredResumeData(existing.data), input.operations);
+		patchedData = applyResumePatches(storedData, input.operations);
 	} catch (error) {
 		if (error instanceof ResumePatchError) {
 			throw new ORPCError("INVALID_PATCH_OPERATIONS", {
@@ -181,6 +140,12 @@ async function applyResumePatchTx(
 	}
 
 	patchedData = parseWritableResumeData(patchedData);
+	await adoptEmbeddedLetters(client, {
+		userId: input.userId,
+		resumeId: input.id,
+		resumeName: existing.name,
+		data: patchedData,
+	});
 	// The version guard is the ms-precision JS check above, under the SELECT ... FOR UPDATE lock.
 	// Never compare expectedUpdatedAt in SQL: rows stamped by Postgres now() (defaultNow() on
 	// insert) carry microseconds, while JS Dates are ms-truncated — SQL equality then matches
@@ -206,6 +171,7 @@ async function applyResumePatchTx(
 			isPublic: schema.resume.isPublic,
 			isLocked: schema.resume.isLocked,
 			showDownloadButtons: schema.resume.showDownloadButtons,
+			createdAt: schema.resume.createdAt,
 			updatedAt: schema.resume.updatedAt,
 			hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 		});
@@ -216,12 +182,12 @@ async function applyResumePatchTx(
 	}
 
 	// Checkpoint every patch (AI/API edit) atomically within the same transaction as the edit.
-	// ponytail: a multi-patch agent turn writes one row per patch; the prune cap (30) bounds it.
-	await writeResumeVersion(client, {
+	// ponytail: a multi-patch agent turn writes one row per patch; 90-day retention bounds it.
+	await writeVersion(client, {
 		resumeId: resume.id,
 		userId: input.userId,
 		data: resume.data,
-		label: input.versionLabel ?? "AI edit",
+		kind: "ai",
 	});
 
 	return resume;
@@ -254,12 +220,22 @@ const statistics = {
 			})
 			.from(schema.resume)
 			.innerJoin(schema.user, eq(schema.resume.userId, schema.user.id))
-			.where(and(eq(schema.resume.slug, input.slug), eq(schema.user.username, input.username)));
+			.where(
+				and(
+					eq(schema.resume.slug, input.slug),
+					eq(schema.user.username, input.username),
+					isNull(schema.resume.trashedAt),
+				),
+			);
 
 		if (!resume) throw new ORPCError("NOT_FOUND");
 		const viewer = input.currentUserId ? { id: input.currentUserId } : null;
 		assertCanView(resume, viewer);
-		if (resume.passwordHash && !hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)) {
+		if (
+			resume.passwordHash &&
+			!isOwner(resume, viewer) &&
+			!hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)
+		) {
 			throw new ORPCError("NEED_PASSWORD", {
 				status: 401,
 				data: { username: input.username, slug: input.slug },
@@ -484,34 +460,24 @@ export const resumeService = {
 	tags,
 	statistics,
 
+	checkSlug,
+
 	versions: {
-		list: async (input: { resumeId: string; userId: string }) => {
-			const [owner] = await db
-				.select({ id: schema.resume.id })
-				.from(schema.resume)
-				.where(and(eq(schema.resume.id, input.resumeId), eq(schema.resume.userId, input.userId)));
+		list: listVersions,
+		get: getVersion,
+		rename: renameVersion,
+		delete: deleteVersion,
 
-			if (!owner) throw new ORPCError("NOT_FOUND");
-
-			return db
-				.select({
-					id: schema.resumeVersion.id,
-					label: schema.resumeVersion.label,
-					createdAt: schema.resumeVersion.createdAt,
-				})
-				.from(schema.resumeVersion)
-				.where(eq(schema.resumeVersion.resumeId, input.resumeId))
-				.orderBy(desc(schema.resumeVersion.createdAt))
-				.limit(MAX_VERSIONS_PER_RESUME);
-		},
-
-		// Best-effort checkpoint used by non-transactional milestones (e.g. import).
-		snapshot: async (input: { resumeId: string; userId: string; data: ResumeData; label: string }) => {
-			try {
-				await writeResumeVersion(db, input);
-			} catch (error) {
-				console.warn("Failed to snapshot resume version:", error);
-			}
+		/** "Name this version": keeps the resume as it is now, until the user deletes it. */
+		create: async (input: { resumeId: string; userId: string; name: string }) => {
+			const current = await resumeService.getById({ id: input.resumeId, userId: input.userId });
+			return writeVersion(db, {
+				resumeId: input.resumeId,
+				userId: input.userId,
+				data: current.data,
+				kind: "named",
+				name: input.name,
+			});
 		},
 
 		// Non-destructive restore: writes the snapshot's data back through the normal update path, so
@@ -519,43 +485,30 @@ export const resumeService = {
 		restore: async (input: { resumeId: string; versionId: string; userId: string }) => {
 			// Check lock state before loading or validating historical data so locked resumes fail without expensive work.
 			const current = await resumeService.getById({ id: input.resumeId, userId: input.userId });
-			if (current.isLocked) throw new ORPCError("RESUME_LOCKED");
+			if (current.isLocked) throw new ORPCError("RESUME_LOCKED", { status: 403 });
 
-			const [version] = await db
-				.select({ data: schema.resumeVersion.data })
-				.from(schema.resumeVersion)
-				.innerJoin(schema.resume, eq(schema.resumeVersion.resumeId, schema.resume.id))
-				.where(
-					and(
-						eq(schema.resumeVersion.id, input.versionId),
-						eq(schema.resumeVersion.resumeId, input.resumeId),
-						eq(schema.resume.userId, input.userId),
-					),
-				);
-
-			if (!version) throw new ORPCError("NOT_FOUND");
-			const versionData = parseStoredResumeData(version.data);
+			const version = await getVersion(input);
 
 			// Capture the pre-restore state first so the restore itself is undoable.
-			await resumeService.versions.snapshot({
+			await writeVersion(db, {
 				resumeId: input.resumeId,
 				userId: input.userId,
 				data: current.data,
-				label: "Before restore",
+				kind: "before-restore",
 			});
 
 			const updated = await resumeService.update({
 				id: input.resumeId,
 				userId: input.userId,
-				data: versionData,
+				data: version.data,
 				skipAutoSnapshot: true,
 			});
 
-			await resumeService.versions.snapshot({
+			await writeVersion(db, {
 				resumeId: input.resumeId,
 				userId: input.userId,
 				data: updated.data,
-				label: "Restored version",
+				kind: "restored",
 			});
 
 			return updated;
@@ -582,9 +535,8 @@ export const resumeService = {
 			.where(
 				and(
 					eq(schema.resume.userId, input.userId),
-					match(input.tags.length)
-						.with(0, () => undefined)
-						.otherwise(() => arrayContains(schema.resume.tags, input.tags)),
+					isNull(schema.resume.trashedAt),
+					input.tags.length > 0 ? arrayContains(schema.resume.tags, input.tags) : undefined,
 				),
 			)
 			.orderBy(
@@ -609,21 +561,25 @@ export const resumeService = {
 				isPublic: schema.resume.isPublic,
 				isLocked: schema.resume.isLocked,
 				showDownloadButtons: schema.resume.showDownloadButtons,
+				createdAt: schema.resume.createdAt,
 				updatedAt: schema.resume.updatedAt,
 				hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
+				applicationId: schema.resume.applicationId,
 			})
 			.from(schema.resume)
 			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
 
 		if (!resume) throw new ORPCError("NOT_FOUND");
 
-		return resume;
+		// Clients get the current data shape (structured dates and their text in step), not the stored one.
+		return { ...resume, data: parseStoredResumeData(resume.data) };
 	},
 
 	getBySlug: async (input: {
 		username: string;
 		slug: string;
 		requestHeaders: Headers;
+		trustedClient?: string;
 		currentUserId?: string;
 		requirePublic?: boolean;
 		expectedResumeId?: string;
@@ -644,7 +600,10 @@ export const resumeService = {
 			})
 			.from(schema.resume)
 			.innerJoin(schema.user, eq(schema.resume.userId, schema.user.id))
-			.where(and(eq(schema.resume.slug, input.slug), eq(schema.user.username, input.username)));
+			.where(and(matchesSlug(input.slug), eq(schema.user.username, input.username), isNull(schema.resume.trashedAt)))
+			// A resume's current slug wins over another's redirect (renames delete clashing redirects anyway).
+			.orderBy(desc(sql`${schema.resume.slug} = ${input.slug}`))
+			.limit(1);
 
 		if (
 			!resume ||
@@ -656,7 +615,11 @@ export const resumeService = {
 		const viewer = input.currentUserId ? { id: input.currentUserId } : null;
 		assertCanView(resume, viewer);
 
-		if (resume.hasPassword && !hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)) {
+		if (
+			resume.hasPassword &&
+			!isOwner(resume, viewer) &&
+			!hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)
+		) {
 			throw new ORPCError("NEED_PASSWORD", {
 				status: 401,
 				data: { username: input.username, slug: input.slug },
@@ -664,38 +627,57 @@ export const resumeService = {
 		}
 
 		if (shouldCountForStatistics(resume, viewer)) {
-			const key = `${resume.id}:${clientKeyFromHeaders(input.requestHeaders)}`;
+			const key = `${resume.id}:${clientKeyFromHeaders(input.trustedClient)}`;
 			if (await shouldCountView(key, Date.now())) {
 				await resumeService.statistics.increment({ id: resume.id, views: true });
 			}
 		}
 
-		return toSharedResumeResponse(redactResumeForViewer(resume, isOwner(resume, viewer)), resume.hasPassword);
+		const current = { ...resume, data: parseStoredResumeData(resume.data) };
+		return toSharedResumeResponse(redactResumeForViewer(current, isOwner(current, viewer)), resume.hasPassword);
 	},
 
 	create: async (input: {
 		id?: string;
 		userId: string;
 		name: string;
-		slug: string;
+		/** Generated from the name, and made unique among the user's resumes, when omitted. */
+		slug?: string;
 		tags: string[];
 		locale: Locale;
 		data?: ResumeData;
+		/** The first version in History: "created", or "import" for an imported document. */
+		origin?: "created" | "import";
+		/** The name follows the headline until someone renames the resume. */
+		autoName?: boolean;
 	}) => {
 		const id = input.id ?? generateId();
 		const data = parseWritableResumeData(structuredClone(input.data ?? defaultResumeData));
 		data.metadata.page.locale = input.locale;
 
 		try {
-			await db.insert(schema.resume).values({
-				id,
-				name: input.name,
-				slug: input.slug,
-				tags: input.tags,
-				userId: input.userId,
-				data,
-				revision: 1,
+			const slug = input.slug ?? (await findFreeSlug(db, input.userId, input.name));
+			await db.transaction(async (tx) => {
+				// The resume row comes first: letters an imported file carried are saved linked to it.
+				const stored = structuredClone(data);
+				detachEmbeddedLetters(stored);
+				await tx.insert(schema.resume).values({
+					id,
+					name: input.name,
+					autoName: input.autoName ?? false,
+					slug,
+					tags: input.tags,
+					userId: input.userId,
+					data: stored,
+					revision: 1,
+				});
+				await adoptEmbeddedLetters(tx, { userId: input.userId, resumeId: id, resumeName: input.name, data });
 			});
+
+			// History is never empty: its first entry is where the document came from (best effort).
+			await writeVersion(db, { resumeId: id, userId: input.userId, data, kind: input.origin ?? "created" }).catch(
+				(error: unknown) => console.warn("Failed to save the first version:", error),
+			);
 
 			await notifyResumeUpdated({
 				type: "resume.updated",
@@ -707,7 +689,7 @@ export const resumeService = {
 
 			return id;
 		} catch (error) {
-			const constraint = get(error, "cause.constraint") as string | undefined;
+			const constraint = uniqueConstraint(error);
 
 			if (constraint === "resume_slug_user_id_unique") {
 				throw new ORPCError("RESUME_SLUG_ALREADY_EXISTS", { status: 400 });
@@ -718,24 +700,33 @@ export const resumeService = {
 		}
 	},
 
-	createDerived: async (input: { id: string; userId: string; name: string; slug: string; tags: string[] }) => {
+	createDerived: async (input: {
+		id: string;
+		userId: string;
+		name: string;
+		slug?: string | undefined;
+		tags: string[];
+	}) => {
 		const [parent] = await db
 			.select({
 				data: schema.resume.data,
 				revision: schema.resume.revision,
 			})
 			.from(schema.resume)
-			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
+			.where(
+				and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId), isNull(schema.resume.trashedAt)),
+			);
 
 		if (!parent) throw new ORPCError("NOT_FOUND");
 
 		const id = generateId();
 
 		try {
+			const slug = input.slug ?? (await findFreeSlug(db, input.userId, input.name));
 			await db.insert(schema.resume).values({
 				id,
 				name: input.name,
-				slug: input.slug,
+				slug,
 				tags: input.tags,
 				userId: input.userId,
 				data: parent.data,
@@ -744,6 +735,11 @@ export const resumeService = {
 				parentRevision: parent.revision,
 				parentData: parent.data,
 			});
+
+			// History is never empty: its first entry is where the document came from (best effort).
+			await writeVersion(db, { resumeId: id, userId: input.userId, data: parent.data, kind: "created" }).catch(
+				(error: unknown) => console.warn("Failed to save the first version:", error),
+			);
 
 			await notifyResumeUpdated({
 				type: "resume.updated",
@@ -755,7 +751,7 @@ export const resumeService = {
 
 			return id;
 		} catch (error) {
-			if (get(error, "cause.constraint") === "resume_slug_user_id_unique") {
+			if (uniqueConstraint(error) === "resume_slug_user_id_unique") {
 				throw new ORPCError("RESUME_SLUG_ALREADY_EXISTS", { status: 400 });
 			}
 
@@ -929,6 +925,7 @@ export const resumeService = {
 					isPublic: schema.resume.isPublic,
 					isLocked: schema.resume.isLocked,
 					showDownloadButtons: schema.resume.showDownloadButtons,
+					createdAt: schema.resume.createdAt,
 					updatedAt: schema.resume.updatedAt,
 					hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 				});
@@ -994,6 +991,7 @@ export const resumeService = {
 					isPublic: schema.resume.isPublic,
 					isLocked: schema.resume.isLocked,
 					showDownloadButtons: schema.resume.showDownloadButtons,
+					createdAt: schema.resume.createdAt,
 					updatedAt: schema.resume.updatedAt,
 					hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 				});
@@ -1024,23 +1022,56 @@ export const resumeService = {
 		isPublic?: boolean;
 		showDownloadButtons?: boolean;
 		skipAutoSnapshot?: boolean;
+		/** The editor visit this save belongs to; its autosaves share one version. */
+		sessionId?: string;
 	}) => {
 		const resume = await db
 			.transaction(async (tx) => {
 				const [existing] = await tx
 					.select({
+						name: schema.resume.name,
 						data: schema.resume.data,
+						slug: schema.resume.slug,
 						isLocked: schema.resume.isLocked,
+						autoName: schema.resume.autoName,
 					})
 					.from(schema.resume)
 					.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
 					.for("update");
 
 				if (!existing) throw new ORPCError("NOT_FOUND");
-				if (existing.isLocked) throw new ORPCError("RESUME_LOCKED");
+				if (existing.isLocked) throw new ORPCError("RESUME_LOCKED", { status: 403 });
+
+				// A new address must follow the pattern; existing ones that don't keep working until changed.
+				const renamed = input.slug !== undefined && input.slug !== existing.slug;
+				if (renamed && !SLUG_PATTERN.test(input.slug as string)) {
+					throw new ORPCError("INVALID_SLUG", { status: 400 });
+				}
+				if (renamed) {
+					await recordSlugChange(tx, {
+						userId: input.userId,
+						resumeId: input.id,
+						from: existing.slug,
+						to: input.slug as string,
+					});
+				}
+
 				const normalizedData = input.data ? parseWritableResumeData(input.data) : undefined;
+				if (normalizedData)
+					await adoptEmbeddedLetters(tx, {
+						userId: input.userId,
+						resumeId: input.id,
+						resumeName: input.name ?? existing.name,
+						data: normalizedData,
+					});
+				// A blank resume is named after its headline until someone names it by hand.
+				const followedName =
+					existing.autoName && input.name === undefined && normalizedData
+						? normalizedData.basics.headline.trim().slice(0, 100) || undefined
+						: undefined;
 				const updateData: Partial<typeof schema.resume.$inferSelect> = {
-					...(input.name !== undefined ? { name: input.name } : {}),
+					...(input.name !== undefined ? { name: input.name, autoName: false } : {}),
+					...(followedName ? { name: followedName } : {}),
 					...(input.slug !== undefined ? { slug: input.slug } : {}),
 					...(input.tags !== undefined ? { tags: input.tags } : {}),
 					...(normalizedData ? { data: normalizedData } : {}),
@@ -1070,6 +1101,7 @@ export const resumeService = {
 						isPublic: schema.resume.isPublic,
 						isLocked: schema.resume.isLocked,
 						showDownloadButtons: schema.resume.showDownloadButtons,
+						createdAt: schema.resume.createdAt,
 						updatedAt: schema.resume.updatedAt,
 						hasPassword: sql<boolean>`${schema.resume.password} IS NOT NULL`,
 					});
@@ -1080,7 +1112,7 @@ export const resumeService = {
 			.catch((error: unknown) => {
 				if (error instanceof ORPCError) throw error;
 
-				if (get(error, "cause.constraint") === "resume_slug_user_id_unique") {
+				if (uniqueConstraint(error) === "resume_slug_user_id_unique") {
 					throw new ORPCError("RESUME_SLUG_ALREADY_EXISTS", { status: 400 });
 				}
 
@@ -1088,14 +1120,13 @@ export const resumeService = {
 				throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update resume" });
 			});
 
-		// Debounced manual-save milestone: only snapshots data edits, and only when the previous
-		// snapshot is old enough (see SNAPSHOT_THROTTLE_MS). Covers template switches and typing.
+		// Data edits refresh this editing session's version (see saveSessionVersion).
 		if (input.data !== undefined && !input.skipAutoSnapshot) {
-			await maybeSnapshotOnSave({
+			await saveSessionVersion({
 				resumeId: resume.id,
 				userId: input.userId,
 				data: resume.data,
-				label: "Manual save",
+				...(input.sessionId ? { sessionId: input.sessionId } : {}),
 			});
 		}
 
@@ -1125,16 +1156,6 @@ export const resumeService = {
 	},
 
 	patchInTransaction: applyResumePatchTx,
-
-	notifyResumePatched: async (input: { resumeId: string; userId: string; updatedAt: Date }) => {
-		await notifyResumeUpdated({
-			type: "resume.updated",
-			resumeId: input.resumeId,
-			userId: input.userId,
-			updatedAt: input.updatedAt.toISOString(),
-			mutation: "patch",
-		});
-	},
 
 	setLocked: async (input: { id: string; userId: string; isLocked: boolean }) => {
 		const [resume] = await db
@@ -1182,10 +1203,13 @@ export const resumeService = {
 			.where(
 				and(
 					isNotNull(schema.resume.password),
-					eq(schema.resume.slug, input.slug),
+					matchesSlug(input.slug),
 					eq(schema.user.username, input.username),
+					isNull(schema.resume.trashedAt),
 				),
-			);
+			)
+			.orderBy(desc(sql`${schema.resume.slug} = ${input.slug}`))
+			.limit(1);
 
 		if (!resume) throw new ORPCError("INVALID_PASSWORD", { status: 401 });
 
@@ -1225,7 +1249,7 @@ export const resumeService = {
 				.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
 
 			if (!resume) throw new ORPCError("NOT_FOUND");
-			if (resume.isLocked) throw new ORPCError("RESUME_LOCKED");
+			if (resume.isLocked) throw new ORPCError("RESUME_LOCKED", { status: 403 });
 
 			await tx.delete(schema.resume).where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)));
 		});

@@ -1,26 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { mapCsvToApplications, parseCsv } from "./csv";
+import { mapCsvToApplications, parseCsv, rowsToCsv } from "./csv";
 
 describe("parseCsv", () => {
 	it("parses quoted fields with commas and newlines", () => {
 		const table = parseCsv('Company,Role\n"Acme, Inc.","Eng, Sr"\nBeta,"Line1\nLine2"');
 		expect(table[1]).toEqual(["Acme, Inc.", "Eng, Sr"]);
 		expect(table[2]).toEqual(["Beta", "Line1\nLine2"]);
-	});
-
-	it("handles escaped quotes and CRLF", () => {
-		const table = parseCsv('A,B\r\n"say ""hi""",x\r\n');
-		expect(table[1]).toEqual(['say "hi"', "x"]);
-	});
-
-	it("drops fully blank rows", () => {
-		expect(parseCsv("A,B\n\n1,2\n").length).toBe(2);
-	});
-
-	it("strips a UTF-8 BOM so the first header still maps", () => {
-		const { rows } = mapCsvToApplications(parseCsv("﻿Company,Role\nStripe,Eng"));
-		expect(rows).toHaveLength(1);
-		expect(rows[0]?.company).toBe("Stripe");
 	});
 });
 
@@ -65,15 +50,21 @@ describe("mapCsvToApplications", () => {
 		expect(skipped).toBe(0);
 		expect(contactsSkipped).toBe(1);
 	});
+});
 
-	it("keeps the application when contact fields are present but the contact name is missing", () => {
-		const { rows, skipped, contactsSkipped } = mapCsvToApplications(
-			parseCsv("Company,Role,Contact Email,Contact Phone\nStripe,Eng,jane@example.com,+1 555 0100"),
-		);
+describe("column matching", () => {
+	const table = parseCsv(
+		"Employer,Job Title,Status,Archived,Mystery\nAcme,Designer,rejected,false,x\nKiln,Engineer,applied,true,y\n,No company,saved,false,z",
+	);
 
-		expect(rows).toHaveLength(1);
-		expect(rows[0]?.contacts).toBeUndefined();
-		expect(skipped).toBe(0);
-		expect(contactsSkipped).toBe(1);
+	it("uses the confirmed match, reads retired stages as closed, and keeps skipped rows to download", () => {
+		const result = mapCsvToApplications(table, ["company", "role", "status", "archived", "notes"]);
+
+		expect(result.rows.map((row) => [row.company, row.status, row.notes])).toEqual([
+			["Acme", "closed", "x"],
+			["Kiln", "closed", "y"],
+		]);
+		expect(result.skippedRows).toEqual([["", "No company", "saved", "false", "z"]]);
+		expect(rowsToCsv(["Company", "Role"], [["", 'Say "hi"']])).toBe('"Company","Role"\r\n"","Say ""hi"""\r\n');
 	});
 });

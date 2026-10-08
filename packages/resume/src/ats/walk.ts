@@ -30,9 +30,10 @@ function buildPlacement(data: ResumeData): ReadonlyMap<string, SectionPlacement>
 			if (!placement.has(id)) placement.set(id, "main");
 		}
 
-		const sidebarPlacement: SectionPlacement = page.fullWidth ? "main" : "sidebar";
+		// A full-width page prints no sidebar at all, so its sidebar sections only print if another page places them.
+		if (page.fullWidth) continue;
 		for (const id of page.sidebar) {
-			if (!placement.has(id)) placement.set(id, sidebarPlacement);
+			if (!placement.has(id)) placement.set(id, "sidebar");
 		}
 	}
 

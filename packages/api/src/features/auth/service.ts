@@ -1,13 +1,14 @@
 import type { AuthProvider } from "@reactive-resume/auth/types";
 import { ORPCError } from "@orpc/client";
 import { eq } from "drizzle-orm";
+import { isCustomOAuthProviderEnabled } from "@reactive-resume/auth/config";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
-import { coverLetterSchema } from "@reactive-resume/schema/cover-letter/data";
+import { coverLetterService } from "../cover-letters/service";
 import { getStorageService } from "../storage/service";
 
-export type ProviderList = Partial<Record<AuthProvider, string>>;
+type ProviderList = Partial<Record<AuthProvider, string>>;
 
 const providers = {
 	list: (): ProviderList => {
@@ -16,7 +17,7 @@ const providers = {
 		if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) providers.google = "Google";
 		if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) providers.github = "GitHub";
 		if (env.LINKEDIN_CLIENT_ID && env.LINKEDIN_CLIENT_SECRET) providers.linkedin = "LinkedIn";
-		if (env.OAUTH_CLIENT_ID && env.OAUTH_CLIENT_SECRET) providers.custom = env.OAUTH_PROVIDER_NAME ?? "Custom OAuth";
+		if (isCustomOAuthProviderEnabled()) providers.custom = env.OAUTH_PROVIDER_NAME ?? "Custom OAuth";
 
 		return providers;
 	},
@@ -62,11 +63,15 @@ export const authService = {
 			.where(eq(schema.resume.userId, input.userId));
 
 		const coverLetters = await db.select().from(schema.coverLetter).where(eq(schema.coverLetter.userId, input.userId));
+		const applications = await db.select().from(schema.application).where(eq(schema.application.userId, input.userId));
 		return {
 			exportedAt: new Date().toISOString(),
 			user: userRecord,
 			resumes,
-			coverLetters: coverLetters.map((letter) => coverLetterSchema.parse(letter)),
+			coverLetters: await Promise.all(
+				coverLetters.map(({ id }) => coverLetterService.getById({ id, userId: input.userId })),
+			),
+			applications: applications.map(({ userId: _userId, ...application }) => application),
 		};
 	},
 

@@ -1,17 +1,21 @@
+import type { ApplicationDocumentKind } from "../../dto/application";
 import type {
 	AiMetadata,
+	ApplicationClosedReason,
 	ApplicationStatus,
 	ApplicationTimelineEntry,
 	Contact,
 	InterviewDetails,
 } from "@reactive-resume/schema/applications/data";
-import type { ApplicationDocumentKind } from "../../dto/application";
 import { ORPCError } from "@orpc/client";
 import { and, arrayContains, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
+import { lintResumeForAts } from "@reactive-resume/resume/ats";
 import { generateId } from "@reactive-resume/utils/string";
+import { coverLetterService } from "../cover-letters/service";
 import { resumeService } from "../resume/service";
+import { writeVersion } from "../resume/version-history";
 import { getStorageService, uploadFile } from "../storage/service";
 
 function timelineDate(value: Date | string): Date {
@@ -103,6 +107,7 @@ type EditableFields = {
 	source?: string | null | undefined;
 	sourceUrl?: string | null | undefined;
 	jobDescription?: string | null | undefined;
+	postingSource?: import("@reactive-resume/schema/applications/data").PostingSource | null | undefined;
 	notes?: string | null | undefined;
 	resumeFileUrl?: string | null | undefined;
 	resumeFileName?: string | null | undefined;
@@ -112,6 +117,8 @@ type EditableFields = {
 	followUpNote?: string | null | undefined;
 	contacts?: Contact[] | undefined;
 	resumeId?: string | null | undefined;
+	coverLetterId?: string | null | undefined;
+	requirements?: string[] | undefined;
 	tags?: string[] | undefined;
 };
 
@@ -128,6 +135,64 @@ async function requireOwned(id: string, userId: string) {
 async function assertOwnedResume(userId: string, resumeId: string | null | undefined) {
 	if (!resumeId) return;
 	await resumeService.getById({ id: resumeId, userId });
+}
+
+async function assertOwnedCoverLetter(userId: string, coverLetterId: string | null | undefined) {
+	if (!coverLetterId) return;
+	await coverLetterService.getById({ id: coverLetterId, userId });
+}
+
+// Stages at which an application has been sent.
+const SENT_STAGES = new Set<ApplicationStatus>(["applied", "screening", "interview", "offer"]);
+
+type ApplicationRow = typeof schema.application.$inferSelect;
+
+/**
+ * Once an application has been sent (Applied or later), its linked resume is saved as a "sent" version, named after
+ * the company, with its Check score at the time, and so is its linked letter. The application keeps pointing at
+ * them, so it can open exactly what went out while the documents move on.
+ */
+async function recordSentResume(row: ApplicationRow): Promise<ApplicationRow> {
+	if (!SENT_STAGES.has(row.status)) return row;
+	const changes: Partial<ApplicationRow> = {};
+
+	if (row.resumeId && !row.sentResumeVersionId) {
+		const resume = await resumeService.getById({ id: row.resumeId, userId: row.userId });
+		const version = await writeVersion(db, {
+			resumeId: row.resumeId,
+			userId: row.userId,
+			data: resume.data,
+			kind: "sent",
+			name: row.company,
+		});
+		changes.sentResumeVersionId = version.id;
+		changes.sentCheckScore = lintResumeForAts(resume.data).score;
+	}
+
+	// The letter sent with it is kept the same way.
+	if (row.coverLetterId && !row.sentCoverLetterVersionId) {
+		const version = await coverLetterService.recordSent({
+			id: row.coverLetterId,
+			userId: row.userId,
+			company: row.company,
+		});
+		changes.sentCoverLetterVersionId = version.id;
+	}
+
+	if (Object.keys(changes).length === 0) return row;
+	const [updated] = await db
+		.update(schema.application)
+		.set(changes)
+		.where(eq(schema.application.id, row.id))
+		.returning();
+	return updated ?? row;
+}
+
+/** Closing keeps (or takes) a reason; any other stage clears it. */
+function stageFields(status: ApplicationStatus | undefined, closedReason: ApplicationClosedReason | null | undefined) {
+	if (status === undefined) return closedReason !== undefined ? { closedReason } : {};
+	if (status === "closed") return closedReason !== undefined ? { closedReason } : {};
+	return { closedReason: null };
 }
 
 async function assertOwnedResumes(userId: string, resumeIds: (string | null | undefined)[]) {
@@ -154,7 +219,7 @@ function storageKeyFromApplicationUrl(userId: string, value: string | null | und
 
 async function deleteApplicationAttachments(
 	userId: string,
-	applications: { resumeFileUrl?: string | null; coverLetterUrl?: string | null }[],
+	applications: Pick<EditableFields, "resumeFileUrl" | "coverLetterUrl">[],
 ) {
 	const candidateKeys = [
 		...new Set(
@@ -191,13 +256,54 @@ async function deleteApplicationAttachments(
 function documentFields(kind: ApplicationDocumentKind) {
 	return kind === "resume"
 		? ({
+				file: "resumeFile",
 				url: "resumeFileUrl",
 				name: "resumeFileName",
 			} as const)
 		: ({
+				file: "coverLetterFile",
 				url: "coverLetterUrl",
 				name: "coverLetterName",
 			} as const);
+}
+
+type UploadedDocumentFields = Pick<
+	EditableFields,
+	"resumeFileUrl" | "resumeFileName" | "coverLetterUrl" | "coverLetterName"
+>;
+
+type DocumentFiles = { resumeFile?: File | undefined; coverLetterFile?: File | undefined };
+
+// One request owns the uploads and record write; browser dismissal cannot strand an upload.
+async function withDocumentFiles<T>(
+	userId: string,
+	files: DocumentFiles,
+	save: (fields: UploadedDocumentFields) => Promise<T>,
+) {
+	const uploadedFields: UploadedDocumentFields = {};
+	try {
+		// ponytail: at most two sequential uploads; use allSettled if measured latency warrants concurrency.
+		for (const kind of ["resume", "cover-letter"] as const) {
+			const fields = documentFields(kind);
+			const file = files[fields.file];
+			if (!file) continue;
+			if (file.type !== "application/pdf") {
+				throw new ORPCError("BAD_REQUEST", { message: "Application documents must be PDF files." });
+			}
+			const uploaded = await uploadFile({
+				userId,
+				data: new Uint8Array(await file.arrayBuffer()),
+				contentType: file.type,
+			});
+			uploadedFields[fields.url] = uploaded.url;
+			uploadedFields[fields.name] = file.name;
+		}
+		return await save(uploadedFields);
+	} catch (error) {
+		// The record may already have committed before later work failed. Never delete referenced files.
+		await deleteApplicationAttachments(userId, [uploadedFields]).catch(() => {});
+		throw error;
+	}
 }
 
 const stripUserId = <T extends { userId: string; activity?: ApplicationTimelineEntry[] }>(row: T) => {
@@ -206,7 +312,7 @@ const stripUserId = <T extends { userId: string; activity?: ApplicationTimelineE
 };
 
 export const applicationService = {
-	list: async (input: { userId: string; status?: ApplicationStatus; tags?: string[]; includeArchived?: boolean }) => {
+	list: async (input: { userId: string; status?: ApplicationStatus; tags?: string[] }) => {
 		const rows = await db
 			.select()
 			.from(schema.application)
@@ -219,7 +325,7 @@ export const applicationService = {
 			)
 			.orderBy(desc(schema.application.updatedAt));
 
-		return rows.filter((row) => input.includeArchived || !row.archived).map(stripUserId);
+		return rows.map(stripUserId);
 	},
 
 	getById: async (input: { id: string; userId: string }) => {
@@ -227,31 +333,42 @@ export const applicationService = {
 	},
 
 	create: async (
-		input: EditableFields & {
-			userId: string;
-			company: string;
-			role: string;
-			status?: ApplicationStatus | undefined;
-			stageEnteredAt?: string | undefined;
-		},
+		input: EditableFields &
+			DocumentFiles & {
+				userId: string;
+				company: string;
+				role: string;
+				status?: ApplicationStatus | undefined;
+				closedReason?: ApplicationClosedReason | null | undefined;
+				stageEnteredAt?: string | undefined;
+			},
 	) => {
-		const { userId, status, stageEnteredAt, ...fields } = input;
+		const { userId, status, stageEnteredAt, closedReason, resumeFile, coverLetterFile, ...fields } = input;
 		const id = generateId();
 		const initialStatus = status ?? "saved";
 		const activity = [stageEntry(initialStatus, stageEnteredAt)];
 
 		await assertOwnedResume(userId, fields.resumeId);
+		await assertOwnedCoverLetter(userId, fields.coverLetterId);
 
-		await db.insert(schema.application).values({
-			id,
-			userId,
-			status: initialStatus,
-			activity,
-			appliedAt: appliedAtFromTimeline(activity, new Date()),
-			...fields,
+		return withDocumentFiles(userId, { resumeFile, coverLetterFile }, async (uploadedFields) => {
+			const [row] = await db
+				.insert(schema.application)
+				.values({
+					id,
+					userId,
+					status: initialStatus,
+					...(initialStatus === "closed" && closedReason ? { closedReason } : {}),
+					activity,
+					appliedAt: appliedAtFromTimeline(activity, new Date()),
+					...fields,
+					...uploadedFields,
+				})
+				.returning();
+
+			if (row) await recordSentResume(row);
+			return id;
 		});
-
-		return id;
 	},
 
 	importMany: async (input: {
@@ -288,19 +405,33 @@ export const applicationService = {
 	},
 
 	update: async (
-		input: EditableFields & {
-			id: string;
-			userId: string;
-			status?: ApplicationStatus | undefined;
-			archived?: boolean | undefined;
-		},
+		input: EditableFields &
+			DocumentFiles & {
+				id: string;
+				userId: string;
+				status?: ApplicationStatus | undefined;
+				stageEnteredAt?: string | undefined;
+				closedReason?: ApplicationClosedReason | null | undefined;
+			},
 	) => {
-		await requireOwned(input.id, input.userId);
+		const existing = await requireOwned(input.id, input.userId);
 
-		const { id, userId, status, archived, ...fields } = input;
+		const { id, userId, status, stageEnteredAt, closedReason, resumeFile, coverLetterFile, ...fields } = input;
+		if (
+			(existing.sentResumeVersionId && fields.resumeId !== undefined && fields.resumeId !== existing.resumeId) ||
+			(existing.sentCoverLetterVersionId &&
+				fields.coverLetterId !== undefined &&
+				fields.coverLetterId !== existing.coverLetterId)
+		) {
+			throw new ORPCError("BAD_REQUEST", {
+				message:
+					"Recorded submitted documents cannot be replaced. Prepare a copy to keep the submitted versions intact.",
+			});
+		}
 		await assertOwnedResume(userId, fields.resumeId);
+		await assertOwnedCoverLetter(userId, fields.coverLetterId);
 
-		const statusEntry = status !== undefined ? stageEntry(status) : undefined;
+		const statusEntry = status !== undefined ? stageEntry(status, stageEnteredAt) : undefined;
 		// Append in SQL so concurrent notes/stage events are not overwritten by a stale array.
 		const activityExpr =
 			statusEntry !== undefined
@@ -315,84 +446,36 @@ export const applicationService = {
 						else ${schema.application.appliedAt} end`
 				: undefined;
 
-		const [updated] = await db
-			.update(schema.application)
-			.set({
-				...fields,
-				...(status !== undefined ? { status } : {}),
-				...(appliedAtExpr ? { appliedAt: appliedAtExpr } : {}),
-				...(archived !== undefined ? { archived } : {}),
-				...(activityExpr ? { activity: activityExpr } : {}),
-			})
-			.where(and(eq(schema.application.id, id), eq(schema.application.userId, userId)))
-			.returning();
+		return withDocumentFiles(userId, { resumeFile, coverLetterFile }, async (uploadedFields) => {
+			const [updated] = await db
+				.update(schema.application)
+				.set({
+					...fields,
+					...uploadedFields,
+					...(status !== undefined ? { status } : {}),
+					...(appliedAtExpr ? { appliedAt: appliedAtExpr } : {}),
+					...stageFields(status, closedReason),
+					...(activityExpr ? { activity: activityExpr } : {}),
+				})
+				.where(and(eq(schema.application.id, id), eq(schema.application.userId, userId)))
+				.returning();
 
-		if (!updated) throw new ORPCError("NOT_FOUND");
-		return stripUserId(updated);
+			if (!updated) throw new ORPCError("NOT_FOUND");
+			if (fields.resumeFileUrl !== undefined || fields.coverLetterUrl !== undefined || resumeFile || coverLetterFile) {
+				await deleteApplicationAttachments(userId, [existing]).catch(() => {});
+			}
+			return stripUserId(await recordSentResume(updated));
+		});
 	},
 
-	attachDocument: async (input: {
-		id: string;
-		userId: string;
-		kind: ApplicationDocumentKind;
-		fileName: string;
-		data: Uint8Array;
-		contentType: string;
-	}) => {
-		if (input.contentType !== "application/pdf") {
-			throw new ORPCError("BAD_REQUEST", { message: "Application documents must be PDF files." });
-		}
-
-		const existing = await requireOwned(input.id, input.userId);
+	attachDocument: (input: { id: string; userId: string; kind: ApplicationDocumentKind; file: File }) => {
 		const fields = documentFields(input.kind);
-		const uploaded = await uploadFile({
-			userId: input.userId,
-			data: input.data,
-			contentType: input.contentType,
-		});
-
-		try {
-			const updated = await applicationService.update({
-				id: input.id,
-				userId: input.userId,
-				[fields.url]: uploaded.url,
-				[fields.name]: input.fileName,
-			});
-
-			await deleteApplicationAttachments(input.userId, [
-				{
-					resumeFileUrl: fields.url === "resumeFileUrl" ? existing.resumeFileUrl : null,
-					coverLetterUrl: fields.url === "coverLetterUrl" ? existing.coverLetterUrl : null,
-				},
-			]);
-
-			return updated;
-		} catch (error) {
-			await getStorageService()
-				.delete(uploaded.key)
-				.catch(() => false);
-			throw error;
-		}
+		return applicationService.update({ id: input.id, userId: input.userId, [fields.file]: input.file });
 	},
 
-	removeDocument: async (input: { id: string; userId: string; kind: ApplicationDocumentKind }) => {
-		const existing = await requireOwned(input.id, input.userId);
+	removeDocument: (input: { id: string; userId: string; kind: ApplicationDocumentKind }) => {
 		const fields = documentFields(input.kind);
-		const updated = await applicationService.update({
-			id: input.id,
-			userId: input.userId,
-			[fields.url]: null,
-			[fields.name]: null,
-		});
-
-		await deleteApplicationAttachments(input.userId, [
-			{
-				resumeFileUrl: fields.url === "resumeFileUrl" ? existing.resumeFileUrl : null,
-				coverLetterUrl: fields.url === "coverLetterUrl" ? existing.coverLetterUrl : null,
-			},
-		]);
-
-		return updated;
+		return applicationService.update({ id: input.id, userId: input.userId, [fields.url]: null, [fields.name]: null });
 	},
 
 	// Persist AI-owned enrichment (match score + freeform metadata). Separate from the editable
@@ -456,16 +539,11 @@ export const applicationService = {
 		const patch = Object.fromEntries(Object.entries(details).filter(([, value]) => value !== undefined));
 
 		return db.transaction(async (tx) => {
-			await tx.execute(sql`
-				select 1 from ${schema.application}
-				where ${schema.application.id} = ${id} and ${schema.application.userId} = ${userId}
-				for update
-			`);
-
 			const [existing] = await tx
 				.select()
 				.from(schema.application)
-				.where(and(eq(schema.application.id, id), eq(schema.application.userId, userId)));
+				.where(and(eq(schema.application.id, id), eq(schema.application.userId, userId)))
+				.for("update");
 			if (!existing) throw new ORPCError("NOT_FOUND");
 
 			const target = existing.activity.find((entry) => entry.id === entryId);
@@ -497,16 +575,11 @@ export const applicationService = {
 		text?: string | undefined;
 	}) => {
 		return db.transaction(async (tx) => {
-			await tx.execute(sql`
-				select 1 from ${schema.application}
-				where ${schema.application.id} = ${input.id} and ${schema.application.userId} = ${input.userId}
-				for update
-			`);
-
 			const [existing] = await tx
 				.select()
 				.from(schema.application)
-				.where(and(eq(schema.application.id, input.id), eq(schema.application.userId, input.userId)));
+				.where(and(eq(schema.application.id, input.id), eq(schema.application.userId, input.userId)))
+				.for("update");
 			if (!existing) throw new ORPCError("NOT_FOUND");
 
 			const activity = existing.activity.map((entry) => {
@@ -549,16 +622,11 @@ export const applicationService = {
 
 	deleteTimelineEntry: (input: { id: string; userId: string; entryId: string }) => {
 		return db.transaction(async (tx) => {
-			await tx.execute(sql`
-				select 1 from ${schema.application}
-				where ${schema.application.id} = ${input.id} and ${schema.application.userId} = ${input.userId}
-				for update
-			`);
-
 			const [existing] = await tx
 				.select()
 				.from(schema.application)
-				.where(and(eq(schema.application.id, input.id), eq(schema.application.userId, input.userId)));
+				.where(and(eq(schema.application.id, input.id), eq(schema.application.userId, input.userId)))
+				.for("update");
 			if (!existing) throw new ORPCError("NOT_FOUND");
 
 			const entry = existing.activity.find((item) => item.id === input.entryId);
@@ -600,7 +668,7 @@ export const applicationService = {
 		userId: string;
 		ids: string[];
 		status?: ApplicationStatus | undefined;
-		archived?: boolean | undefined;
+		closedReason?: ApplicationClosedReason | null | undefined;
 		addTags?: string[] | undefined;
 	}) => {
 		const scope = and(inArray(schema.application.id, input.ids), eq(schema.application.userId, input.userId));
@@ -638,12 +706,13 @@ export const applicationService = {
 				...(input.status !== undefined ? { status: input.status } : {}),
 				...(appliedAtExpr ? { appliedAt: appliedAtExpr } : {}),
 				...(activityExpr ? { activity: activityExpr } : {}),
-				...(input.archived !== undefined ? { archived: input.archived } : {}),
+				...stageFields(input.status, input.closedReason),
 				...(tagsExpr ? { tags: tagsExpr } : {}),
 			})
 			.where(scope)
-			.returning({ id: schema.application.id });
+			.returning();
 
+		for (const row of rows) await recordSentResume(row);
 		return { updated: rows.length };
 	},
 
@@ -665,7 +734,7 @@ export const applicationService = {
 
 	// Raw counts for Insights; funnel/sankey/tiles are derived client-side from these.
 	stats: async (input: { userId: string }) => {
-		const scope = and(eq(schema.application.userId, input.userId), eq(schema.application.archived, false));
+		const scope = eq(schema.application.userId, input.userId);
 
 		const byStage = await db
 			.select({ status: schema.application.status, count: sql<number>`count(*)::int` })

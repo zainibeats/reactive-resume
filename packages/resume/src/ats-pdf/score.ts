@@ -3,7 +3,7 @@ import type { PdfCategory, PdfCategoryScore, PdfCheckResult } from "./types";
 import { pdfRuleCap, pdfRuleDeduction } from "./catalog";
 
 /** Contribution of each scored category to the overall score. Sums to 100 by construction. */
-export const CATEGORY_WEIGHTS = {
+const CATEGORY_WEIGHTS = {
 	parseability: 35,
 	layout: 20,
 	sections: 20,
@@ -11,7 +11,7 @@ export const CATEGORY_WEIGHTS = {
 	dates: 10,
 } as const satisfies Record<Exclude<PdfCategory, "content">, number>;
 
-export const SCORED_CATEGORIES = Object.keys(CATEGORY_WEIGHTS) as readonly Exclude<PdfCategory, "content">[];
+const SCORED_CATEGORIES = Object.keys(CATEGORY_WEIGHTS) as readonly Exclude<PdfCategory, "content">[];
 
 /** What a blocker costs its own category, on top of the ceiling it puts on the overall score. */
 const BLOCKER_CATEGORY_PENALTY = 60;

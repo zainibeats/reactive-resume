@@ -42,6 +42,11 @@ export function assertCanView(resume: Resume, viewer: Viewer): void {
  *     contains personal context like "Senior Eng @ Foo — final draft").
  *   - `resume.data.metadata.notes` — explicitly documented as "only visible
  *     to the author when editing" in the resume schema.
+ *   - `resume.data.metadata.check` — the author's Check choices (ignored
+ *     issues, job-posting terms hidden as "not true for me").
+ *   - Everything the author hid: hidden sections, summary, picture and items
+ *     "aren't printed or shared". Hidden custom sections are dropped; built-in
+ *     ones keep their (now empty) slot because the schema requires it.
  *
  * Everything else (including `data.basics.name`, the person's name on the
  * resume itself) is part of the public payload and is returned unchanged.
@@ -53,17 +58,20 @@ export function redactResumeForViewer<T extends { name: string; data: ResumeData
 	viewerIsOwner: boolean,
 ): T {
 	if (viewerIsOwner) return resume;
-	return {
-		...resume,
-		name: "Resume",
-		data: {
-			...resume.data,
-			metadata: {
-				...resume.data.metadata,
-				notes: "",
-			},
-		},
-	};
+
+	const data = structuredClone(resume.data);
+	data.metadata.notes = "";
+	data.metadata.check = undefined;
+	if (data.picture.hidden) data.picture.url = "";
+	if (data.summary.hidden) data.summary.content = "";
+	data.customSections = data.customSections.filter((section) => !section.hidden);
+	const sections: { hidden: boolean; items: { hidden: boolean }[] }[] = [
+		...Object.values(data.sections),
+		...data.customSections,
+	];
+	for (const section of sections) section.items = section.hidden ? [] : section.items.filter((item) => !item.hidden);
+
+	return { ...resume, name: "Resume", data };
 }
 
 /**

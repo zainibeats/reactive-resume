@@ -1,6 +1,6 @@
 {
 	"name": "dsh-plugin-reactive-resume",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "DeepSeek Harness plugin for Reactive Resume: bridges your resumes and job applications into a Harness session over MCP.",
 	"keywords": [
 		"dsh-plugin",
@@ -45,27 +45,27 @@
 		"typecheck": "tsgo --noEmit",
 		"test": "vitest run --passWithNoTests",
 		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:ci": "vitest run --coverage --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
 		"test:agent": "vitest run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests",
 		"prepublishOnly": "pnpm build"
 	},
 	"peerDependencies": {
 		"@deepseek-ai/cordis": "^4.0.1",
-		"@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.6",
-		"@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6",
+		"@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.6 || ^0.2.0-rc.1",
+		"@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6 || ^0.2.0-rc.1",
 		"@deepseek-ai/schemastery": "^3.18.1"
 	},
 	"devDependencies": {
 		"@deepseek-ai/cordis": "^4.0.4",
-		"@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.8",
-		"@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.8",
+		"@deepseek-ai/dsh-mcp-client": "^0.2.0-rc.2",
+		"@deepseek-ai/dsh-system-prompt": "^0.2.0-rc.2",
 		"@deepseek-ai/schemastery": "^3.18.4",
 		"@reactive-resume/config": "workspace:*",
 		"@reactive-resume/mcp": "workspace:*",
-		"@typescript/native-preview": "7.0.0-dev.20260707.2",
+		"@typescript/native-preview": "catalog:",
 		"tsdown": "^0.23.0",
-		"typescript": "^7.0.2",
-		"vitest": "^5.0.2"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	},
 	"dsh": {
 		"bundle": {

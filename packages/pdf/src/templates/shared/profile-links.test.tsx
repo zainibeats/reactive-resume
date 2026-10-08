@@ -1,10 +1,10 @@
 import type { LanguageItem, ProfileItem, ResumeData } from "@reactive-resume/schema/resume/data";
 import type { StylesheetMode } from "@reactive-resume/schema/resume/stylesheet";
 import { describe, expect, it } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../../document";
+import { pdf } from "../../forme/testing";
 
 type HostNode = {
 	type: string;

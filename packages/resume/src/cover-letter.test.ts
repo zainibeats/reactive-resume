@@ -1,6 +1,39 @@
 import { describe, expect, it } from "vitest";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
-import { copyCoverLetterStyle, coverLetterTextToHtml, createCoverLetterResumeData } from "./cover-letter";
+import {
+	composeCoverLetter,
+	copyCoverLetterStyle,
+	coverLetterTextToHtml,
+	createCoverLetterResumeData,
+	detachEmbeddedLetters,
+	greetingName,
+} from "./cover-letter";
+
+describe("detachEmbeddedLetters", () => {
+	it("takes letters out of the resume and its layout, and returns each one", () => {
+		const data = structuredClone(defaultResumeData);
+		const letter = createCoverLetterResumeData({
+			name: "Letter",
+			recipient: "<p>Acme</p>",
+			content: "<p>Hello</p>",
+			style: copyCoverLetterStyle(data, "letters", "letter-1"),
+		}).customSections[0];
+		if (!letter) throw new Error("Missing letter section.");
+		data.customSections = [
+			{ ...letter, items: [...letter.items, { ...letter.items[0], id: "letter-2", hidden: true } as never] },
+		];
+		data.metadata.layout.pages = [
+			{ fullWidth: false, main: ["experience", "letters"], sidebar: ["letters", "skills"] },
+		];
+
+		expect(detachEmbeddedLetters(data)).toEqual([
+			{ sectionId: "letters", itemId: "letter-1", title: "Letter", recipient: "<p>Acme</p>", content: "<p>Hello</p>" },
+			{ sectionId: "letters", itemId: "letter-2", title: "Letter", recipient: "<p>Acme</p>", content: "<p>Hello</p>" },
+		]);
+		expect(data.customSections).toEqual([]);
+		expect(data.metadata.layout.pages).toEqual([{ fullWidth: false, main: ["experience"], sidebar: ["skills"] }]);
+	});
+});
 
 describe("independent cover letters", () => {
 	it("copies sender and style without linking source mutations or retaining private notes", () => {
@@ -17,33 +50,53 @@ describe("independent cover letters", () => {
 		expect(style).toMatchObject({ sectionId: "old-section", itemId: "old-item" });
 	});
 
-	it("renders only saved letter content while preserving sender and target identifiers", () => {
-		const style = copyCoverLetterStyle(defaultResumeData, "letter-section", "letter-item");
-		style.basics.name = "Ada";
-		const data = createCoverLetterResumeData({
-			name: "Example",
-			recipient: "<p>Recruiter</p>",
-			content: "<p>Hello</p>",
-			style,
-		});
-		expect(data.basics.name).toBe("Ada");
-		expect(data.metadata.notes).toBe("");
-		expect(Object.values(data.sections).every((section) => section.items.length === 0)).toBe(true);
-		expect(data.customSections).toHaveLength(1);
-		expect(data.customSections[0]).toMatchObject({
-			id: "letter-section",
-			type: "cover-letter",
-			items: [{ id: "letter-item", recipient: "<p>Recruiter</p>", content: "<p>Hello</p>" }],
-		});
-		expect(data.metadata.layout.pages).toEqual([{ fullWidth: true, main: ["letter-section"], sidebar: [] }]);
-		data.basics.name = "Independent render copy";
-		expect(style.basics.name).toBe("Ada");
-	});
-
 	it("escapes generated plain text before inserting paragraph markup", () => {
 		expect(coverLetterTextToHtml("  Hello <script>alert('x')</script> & team\nnext\n\nThanks\"  ")).toBe(
 			"<p>Hello &lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt; &amp; team<br />next</p><p>Thanks&quot;</p>",
 		);
 		expect(coverLetterTextToHtml("  ")).toBe("");
+	});
+
+	it("greets a first name, a title with the surname, a team as written, or the hiring team", () => {
+		expect(greetingName("Dana Reyes")).toBe("Dana");
+		expect(greetingName("  Dana  ")).toBe("Dana");
+		expect(greetingName("Dr. Dana Reyes")).toBe("Dr. Reyes");
+		expect(greetingName("ms Reyes")).toBe("ms Reyes");
+		expect(greetingName("Design team")).toBe("Design team");
+		expect(greetingName("Hiring Team")).toBeNull();
+		expect(greetingName(" ")).toBeNull();
+	});
+
+	const words = {
+		greeting: (name: string) => `Dear ${name},`,
+		teamGreeting: "Dear hiring team,",
+		hiringTeam: "Hiring team",
+		signOff: "Kind regards,",
+		formatDate: (date: string) => `on ${date}`,
+	};
+
+	it("composes structured letters around the body and leaves freeform letters as written", () => {
+		const style = copyCoverLetterStyle(defaultResumeData);
+		style.basics.name = "Jordan <Reyes>";
+		const letter = {
+			layout: "structured" as const,
+			recipient: "<p>Unused</p>",
+			content: "<p>Body</p>",
+			recipientName: "Dana Reyes",
+			recipientCompany: "Lumen & Co",
+			letterDate: "2026-09-28",
+			style,
+		};
+		expect(composeCoverLetter(letter, words)).toEqual({
+			recipient: "<p>Dana Reyes<br />Lumen &amp; Co</p><p>on 2026-09-28</p>",
+			content: "<p>Dear Dana,</p><p>Body</p><p>Kind regards,<br />Jordan &lt;Reyes&gt;</p>",
+		});
+		expect(
+			composeCoverLetter({ ...letter, recipientName: "", recipientCompany: "", letterDate: null }, words),
+		).toMatchObject({ recipient: "<p>Hiring team</p>", content: expect.stringMatching(/^<p>Dear hiring team,<\/p>/) });
+		expect(composeCoverLetter({ ...letter, layout: "freeform" }, words)).toEqual({
+			recipient: "<p>Unused</p>",
+			content: "<p>Body</p>",
+		});
 	});
 });

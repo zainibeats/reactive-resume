@@ -1,9 +1,9 @@
 import type { DialogProps } from "../store";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { EyeIcon, EyeSlashIcon, LockOpenIcon } from "@phosphor-icons/react";
+import { useSelector } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { useToggle } from "usehooks-ts";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -14,13 +14,15 @@ import {
 	DialogTitle,
 } from "@reactive-resume/ui/components/dialog";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
-import { Input } from "@reactive-resume/ui/components/input";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { useDialogStore } from "../store";
+import { PasswordInput } from "@/components/input/password-input";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
+import { sessionQueryKey } from "@/libs/root-context";
 import { useAppForm } from "@/libs/tanstack-form";
-import { useDialogStore } from "../store";
 
 const formSchema = z.object({
 	password: z.string().min(6).max(64),
@@ -28,7 +30,7 @@ const formSchema = z.object({
 
 export function DisableTwoFactorDialog(_: DialogProps<"auth.two-factor.disable">) {
 	const router = useRouter();
-	const [showPassword, toggleShowPassword] = useToggle(false);
+	const queryClient = useQueryClient();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 
 	const form = useAppForm({
@@ -62,11 +64,13 @@ export function DisableTwoFactorDialog(_: DialogProps<"auth.two-factor.disable">
 				description: t`Two-factor authentication is now disabled.`,
 				id: toastId,
 			});
-			void router.invalidate();
+			void queryClient.invalidateQueries({ queryKey: sessionQueryKey }).then(() => router.invalidate());
 			closeDialog();
 			form.reset();
 		},
 	});
+
+	const isSubmitting = useSelector(form.store, (state) => state.isSubmitting);
 
 	useFormBlocker(form);
 
@@ -74,7 +78,7 @@ export function DisableTwoFactorDialog(_: DialogProps<"auth.two-factor.disable">
 		<DialogContent>
 			<DialogHeader>
 				<DialogTitle className="flex items-center gap-x-2">
-					<LockOpenIcon />
+					<Icon name="lock_open" size={16} />
 					<Trans>Disable Two-Factor Authentication</Trans>
 				</DialogTitle>
 				<DialogDescription>
@@ -99,46 +103,26 @@ export function DisableTwoFactorDialog(_: DialogProps<"auth.two-factor.disable">
 							<FormLabel>
 								<Trans>Password</Trans>
 							</FormLabel>
-							<div className="flex items-center gap-x-1.5">
-								<FormControl
-									render={
-										<Input
-											min={6}
-											max={64}
-											type={showPassword ? "text" : "password"}
-											autoComplete="current-password"
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(event) => field.handleChange(event.target.value)}
-										/>
-									}
-								/>
-
-								<Button size="icon" variant="ghost" type="button" onClick={toggleShowPassword}>
-									<span className="sr-only">
-										{showPassword
-											? t({
-													comment:
-														"Accessible label for toggle button that hides the visible password in two-factor disable dialog",
-													message: "Hide password",
-												})
-											: t({
-													comment:
-														"Accessible label for toggle button that reveals the masked password in two-factor disable dialog",
-													message: "Show password",
-												})}
-									</span>
-									{showPassword ? <EyeIcon /> : <EyeSlashIcon />}
-								</Button>
-							</div>
+							<FormControl
+								render={
+									<PasswordInput
+										minLength={6}
+										maxLength={64}
+										autoComplete="current-password"
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(event) => field.handleChange(event.target.value)}
+									/>
+								}
+							/>
 							<FormMessage errors={field.state.meta.errors} />
 						</FormItem>
 					)}
 				</form.Field>
 
 				<DialogFooter>
-					<Button type="submit" variant="destructive">
+					<Button type="submit" variant="danger" disabled={isSubmitting}>
 						<Trans comment="Destructive action button to turn off two-factor authentication">Disable 2FA</Trans>
 					</Button>
 				</DialogFooter>

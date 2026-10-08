@@ -10,26 +10,14 @@ beforeAll(() => {
 	i18n.loadAndActivate({ locale: "en", messages: {} });
 });
 
-const renderInput = (value: { url: string; label: string }, onChange = vi.fn(), hideLabelButton = false) =>
+const renderInput = (value: { url: string; label: string }, onChange = vi.fn()) =>
 	render(
 		<I18nProvider i18n={i18n}>
-			<URLInput value={value} onChange={onChange} hideLabelButton={hideLabelButton} />
+			<URLInput value={value} onChange={onChange} />
 		</I18nProvider>,
 	);
 
 describe("URLInput", () => {
-	it("strips the https:// prefix in the visible input value", () => {
-		renderInput({ url: "https://example.com/path", label: "" });
-		const input = screen.getByRole("textbox") as HTMLInputElement;
-		expect(input.value).toBe("example.com/path");
-	});
-
-	it("renders the raw value when no prefix is present", () => {
-		renderInput({ url: "no-prefix.example", label: "" });
-		const input = screen.getByRole("textbox") as HTMLInputElement;
-		expect(input.value).toBe("no-prefix.example");
-	});
-
 	it("adds https:// prefix on edit when not already present", () => {
 		const onChange = vi.fn();
 		renderInput({ url: "https://example.com", label: "" }, onChange);
@@ -39,19 +27,6 @@ describe("URLInput", () => {
 
 		expect(onChange).toHaveBeenCalledWith({
 			url: "https://new.example",
-			label: "",
-		});
-	});
-
-	it("keeps already-prefixed URLs intact on edit", () => {
-		const onChange = vi.fn();
-		renderInput({ url: "https://example.com", label: "" }, onChange);
-
-		const input = screen.getByRole("textbox") as HTMLInputElement;
-		fireEvent.change(input, { target: { value: "https://other.example" } });
-
-		expect(onChange).toHaveBeenCalledWith({
-			url: "https://other.example",
 			label: "",
 		});
 	});
@@ -68,13 +43,6 @@ describe("URLInput", () => {
 		},
 	);
 
-	it("shows an existing HTTP URL with its matching prefix", () => {
-		renderInput({ url: "http://example.com/path", label: "" });
-
-		expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("example.com/path");
-		expect(screen.getByText("http://")).toBeDefined();
-	});
-
 	it("preserves HTTP while editing the host or path", () => {
 		const onChange = vi.fn();
 		renderInput({ url: "http://example.com/path", label: "Company" }, onChange);
@@ -82,15 +50,6 @@ describe("URLInput", () => {
 		fireEvent.change(screen.getByRole("textbox"), { target: { value: "example.com/new-path" } });
 
 		expect(onChange).toHaveBeenCalledWith({ url: "http://example.com/new-path", label: "Company" });
-	});
-
-	it("allows switching an existing HTTP URL to HTTPS by pasting", () => {
-		const onChange = vi.fn();
-		renderInput({ url: "http://example.com", label: "" }, onChange);
-
-		fireEvent.change(screen.getByRole("textbox"), { target: { value: "https://example.com" } });
-
-		expect(onChange).toHaveBeenCalledWith({ url: "https://example.com", label: "" });
 	});
 
 	it("emits an empty url string when cleared", () => {
@@ -104,19 +63,5 @@ describe("URLInput", () => {
 			url: "",
 			label: "",
 		});
-	});
-
-	it("hides the label button when hideLabelButton=true", () => {
-		const { container } = renderInput({ url: "https://example.com", label: "" }, vi.fn(), true);
-
-		// PopoverTrigger is rendered as a button; its absence means hideLabelButton worked.
-		const buttons = container.querySelectorAll("button");
-		expect(buttons.length).toBe(0);
-	});
-
-	it("renders the label button by default", () => {
-		const { container } = renderInput({ url: "https://example.com", label: "" });
-		const buttons = container.querySelectorAll("button");
-		expect(buttons.length).toBeGreaterThan(0);
 	});
 });

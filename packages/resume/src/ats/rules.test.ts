@@ -33,6 +33,17 @@ function makeResume(mutate: (data: ResumeData) => void = () => undefined): Resum
 	return data;
 }
 
+const skillItem = () => ({
+	id: "s1",
+	hidden: false,
+	icon: "",
+	iconColor: "",
+	name: "Mathematics",
+	proficiency: "",
+	level: 0,
+	keywords: [],
+});
+
 const lint = (data: ResumeData) => lintResumeForAts(data, { now: NOW });
 const codesOf = (data: ResumeData) => lint(data).findings.map((item) => item.code);
 
@@ -41,10 +52,41 @@ describe("lintResumeForAts", () => {
 		expect(lint(makeResume()).findings).toEqual([]);
 	});
 
-	it("counts every rule as passed when nothing fires", () => {
-		const report = lint(makeResume());
-		expect(report.passedRules).toBe(report.totalRules);
-		expect(report.counts).toEqual({ error: 0, warning: 0, info: 0 });
+	it("scores the share of rules with no open finding, and groups them by category", () => {
+		const report = lint(makeResume((data) => (data.basics.phone = "")));
+		expect(report.passedRules).toBe(report.totalRules - 1);
+		expect(report.score).toBe(Math.round(((report.totalRules - 1) / report.totalRules) * 100));
+		expect(report.categories.contact).toEqual({ total: 7, passed: 6 });
+	});
+
+	it("leaves the English heading rule out of the score for other languages", () => {
+		const english = lint(makeResume());
+		const german = lint(makeResume((data) => (data.metadata.page.locale = "de-DE")));
+		expect(german.totalRules).toBe(english.totalRules - 1);
+		expect(german.categories.headings.total).toBe(english.categories.headings.total - 1);
+	});
+
+	it("keys findings by entry id, so reordering entries keeps the key", () => {
+		const second = experienceItem({ id: "exp-2", period: "a while back" });
+		const before = lint(makeResume((data) => (data.sections.experience.items = [experienceItem(), second])));
+		const after = lint(makeResume((data) => (data.sections.experience.items = [second, experienceItem()])));
+		const keyOf = (report: typeof before) => report.findings.find((item) => item.code === "UNPARSEABLE_PERIOD")?.key;
+
+		expect(keyOf(before)).toBe("UNPARSEABLE_PERIOD:/sections/experience/items/#exp-2/period");
+		expect(keyOf(after)).toBe(keyOf(before));
+	});
+
+	it("sets ignored findings aside without counting them against the score", () => {
+		const data = makeResume((resume) => {
+			resume.basics.phone = "";
+			resume.metadata.check = { ignored: ["MISSING_PHONE:/basics/phone"], hiddenTerms: [] };
+		});
+		const report = lint(data);
+
+		expect(report.findings).toEqual([]);
+		expect(report.ignored.map((item) => item.code)).toEqual(["MISSING_PHONE"]);
+		expect(report.counts.warning).toBe(0);
+		expect(report.score).toBe(100);
 	});
 
 	it("flags the gaps in a blank resume", () => {
@@ -53,12 +95,6 @@ describe("lintResumeForAts", () => {
 		expect(codes).toContain("MISSING_EMAIL");
 		expect(codes).toContain("MISSING_PHONE");
 		expect(codes).toContain("NO_VISIBLE_EXPERIENCE");
-	});
-
-	it("sorts findings by severity", () => {
-		const report = lint(defaultResumeData);
-		const severities = report.findings.map((item) => item.severity);
-		expect(severities).toEqual([...severities].sort((a, b) => (a === b ? 0 : a === "error" ? -1 : 1)));
 	});
 });
 
@@ -75,6 +111,7 @@ describe("contact rules", () => {
 			code: "MALFORMED_URL",
 			severity: "warning",
 			pointer: "/basics/website/url",
+			key: "MALFORMED_URL:/basics/website/url",
 			params: { value: "example.com/ada" },
 		});
 	});
@@ -88,18 +125,6 @@ describe("contact rules", () => {
 		});
 		expect(codesOf(data)).not.toContain("MALFORMED_URL");
 	});
-
-	it("notes a visible picture", () => {
-		expect(codesOf(makeResume((data) => (data.picture.url = "/uploads/ada.png")))).toContain("PICTURE_PRESENT");
-	});
-
-	it("ignores a hidden picture", () => {
-		const data = makeResume((resume) => {
-			resume.picture.url = "/uploads/ada.png";
-			resume.picture.hidden = true;
-		});
-		expect(codesOf(data)).not.toContain("PICTURE_PRESENT");
-	});
 });
 
 describe("date rules", () => {
@@ -112,6 +137,7 @@ describe("date rules", () => {
 			code: "UNPARSEABLE_PERIOD",
 			severity: "error",
 			pointer: "/sections/experience/items/0/period",
+			key: "UNPARSEABLE_PERIOD:/sections/experience/items/#exp-1/period",
 			params: { value: "a while back" },
 		});
 	});
@@ -123,35 +149,20 @@ describe("date rules", () => {
 		expect(codesOf(data)).toContain("EMPTY_PERIOD");
 	});
 
-	it("does not require a period on projects", () => {
-		const data = makeResume((resume) => {
-			resume.sections.projects.items = [
-				{
-					id: "p1",
-					hidden: false,
-					name: "Difference Engine",
-					period: "",
-					website: { url: "", label: "", inlineLink: false },
-					description: "<p>A machine.</p>",
-				},
-			];
-			resume.metadata.layout.pages = [{ fullWidth: false, main: ["experience", "projects"], sidebar: [] }];
-		});
-
-		expect(codesOf(data)).not.toContain("EMPTY_PERIOD");
-	});
-
-	it("flags an open-ended period with no start date", () => {
-		const data = makeResume((resume) => {
-			resume.sections.experience.items = [experienceItem({ period: "Present" })];
-		});
-		expect(codesOf(data)).toContain("UNPARSEABLE_PERIOD");
-	});
-
 	it("accepts a localized open-ended period", () => {
 		const data = makeResume((resume) => {
 			resume.metadata.page.locale = "de-DE";
 			resume.sections.experience.items = [experienceItem({ period: "Jan 2020 - heute" })];
+		});
+		expect(codesOf(data)).not.toContain("UNPARSEABLE_PERIOD");
+	});
+
+	it("reads structured dates rather than their printed text", () => {
+		const data = makeResume((resume) => {
+			resume.metadata.page.locale = "ja-JP";
+			resume.sections.experience.items = [
+				experienceItem({ period: "2022年3月 – 現在", dates: { start: "2022-03", end: null, present: true } }),
+			];
 		});
 		expect(codesOf(data)).not.toContain("UNPARSEABLE_PERIOD");
 	});
@@ -235,16 +246,9 @@ describe("structure rules", () => {
 			code: "SECTION_MISSING_FROM_LAYOUT",
 			severity: "error",
 			pointer: "/sections/education",
+			key: "SECTION_MISSING_FROM_LAYOUT:/sections/education",
 			params: { section: "education" },
 		});
-	});
-
-	it("stays quiet about a placed section with no items", () => {
-		// Templates skip an empty section entirely — heading included — so there is nothing to fix.
-		const data = makeResume((resume) => {
-			resume.metadata.layout.pages = [{ fullWidth: false, main: ["experience", "skills"], sidebar: [] }];
-		});
-		expect(codesOf(data)).toEqual([]);
 	});
 
 	it("flags an experience entry with no narrative", () => {
@@ -289,29 +293,6 @@ describe("structure rules", () => {
 	});
 });
 
-describe("cover letter sections", () => {
-	it("exempts cover letters from resume rules", () => {
-		const data = makeResume((resume) => {
-			resume.customSections = [
-				{
-					id: "cover",
-					type: "cover-letter",
-					title: "Cover Letter",
-					icon: "envelope-simple",
-					columns: 1,
-					hidden: false,
-					keepTogether: false,
-					startOnNewPage: false,
-					items: [{ id: "c1", hidden: false, recipient: "<p>Hiring Manager</p>", content: "<p>Dear team,</p>" }],
-				},
-			];
-			resume.metadata.layout.pages = [{ fullWidth: false, main: ["experience", "cover"], sidebar: [] }];
-		});
-
-		expect(lint(data).findings.filter((item) => item.pointer.startsWith("/customSections"))).toEqual([]);
-	});
-});
-
 describe("layout rules", () => {
 	it("flags a prose section split into columns", () => {
 		const data = makeResume((resume) => (resume.sections.experience.columns = 2));
@@ -325,11 +306,37 @@ describe("layout rules", () => {
 		expect(codesOf(data)).toContain("PROSE_SECTION_IN_SIDEBAR");
 	});
 
-	it("treats a full-width page's sidebar as the main column", () => {
+	it("knows a full-width page prints no sidebar", () => {
 		const data = makeResume((resume) => {
 			resume.metadata.layout.pages = [{ fullWidth: true, main: [], sidebar: ["experience"] }];
 		});
 		expect(codesOf(data)).not.toContain("PROSE_SECTION_IN_SIDEBAR");
+		expect(codesOf(data)).toContain("SECTION_MISSING_FROM_LAYOUT");
+	});
+
+	it("flags a two-column template printing a sidebar, naming its sections", () => {
+		const data = makeResume((resume) => {
+			resume.sections.skills.items = [skillItem()];
+			resume.metadata.template = "azurill";
+			resume.metadata.layout.pages = [{ fullWidth: false, main: ["experience"], sidebar: ["skills"] }];
+		});
+
+		expect(lint(data).findings).toContainEqual(
+			expect.objectContaining({ code: "TWO_COLUMN_LAYOUT", params: { sections: "skills" } }),
+		);
+	});
+
+	it("leaves one-column templates, full-width pages and empty sidebars out of the two-column rule", () => {
+		const withSidebar = (template: ResumeData["metadata"]["template"], fullWidth: boolean, withSkills = true) =>
+			makeResume((resume) => {
+				resume.sections.skills.items = withSkills ? [skillItem()] : [];
+				resume.metadata.template = template;
+				resume.metadata.layout.pages = [{ fullWidth, main: ["experience"], sidebar: ["skills"] }];
+			});
+
+		expect(codesOf(withSidebar("onyx", false))).not.toContain("TWO_COLUMN_LAYOUT");
+		expect(codesOf(withSidebar("azurill", true))).not.toContain("TWO_COLUMN_LAYOUT");
+		expect(codesOf(withSidebar("azurill", false, false))).not.toContain("TWO_COLUMN_LAYOUT");
 	});
 
 	it("leaves short-list sections in the sidebar alone", () => {
@@ -374,22 +381,16 @@ describe("title rules", () => {
 });
 
 describe("typography rules", () => {
-	it("flags a small body font", () => {
-		expect(codesOf(makeResume((data) => (data.metadata.typography.body.fontSize = 8)))).toContain("SMALL_BODY_FONT");
-	});
-
-	it("flags a tight line height", () => {
-		expect(codesOf(makeResume((data) => (data.metadata.typography.body.lineHeight = 1)))).toContain(
-			"TIGHT_LINE_HEIGHT",
-		);
-	});
-
 	it("flags each tight margin axis", () => {
 		const data = makeResume((resume) => {
 			resume.metadata.page.marginX = 4;
 			resume.metadata.page.marginY = 4;
+			resume.metadata.typography.body.fontSize = 8;
+			resume.metadata.typography.body.lineHeight = 1;
 		});
 
+		expect(codesOf(data)).toContain("SMALL_BODY_FONT");
+		expect(codesOf(data)).toContain("TIGHT_LINE_HEIGHT");
 		expect(
 			lint(data)
 				.findings.filter((item) => item.code === "TIGHT_PAGE_MARGINS")

@@ -1,74 +1,18 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { RouterClient } from "@orpc/server";
-import type { resumePatchOperationsSchema } from "@reactive-resume/ai/tools/resume-tool-contracts";
+import type { RequestAuthentication } from "@reactive-resume/api/context";
 import type router from "@reactive-resume/api/routers";
 import type z from "zod";
 import { ORPCError } from "@orpc/server";
 import { resolveUserFromRequestHeaders } from "@reactive-resume/api/context";
+import { resumeDto } from "@reactive-resume/api/dto/resume";
 import { createResumePdfDownloadUrl } from "@reactive-resume/api/features/resume/export";
 import { env } from "@reactive-resume/env/server";
-import { resumeHasCoverLetter } from "@reactive-resume/resume/export-sections";
-import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
 import { MCP_TOOL_NAME } from "./mcp-tool-names";
+import { json, text, withErrorHandling } from "./results";
 import { TOOL_META } from "./tool-meta";
 
-type PatchOperation = z.infer<typeof resumePatchOperationsSchema>[number];
-
 // ── Shared Helpers ───────────────���──────────────────────────────
-
-function errorMessage(error: unknown): string {
-	return error instanceof Error ? error.message : String(error);
-}
-
-/**
- * Maps a failed router call to an actionable next step for the model.
- *
- * Matches on the error's `code` and `status` rather than its message: procedures
- * throw `new ORPCError("RESUME_LOCKED")` and friends without a message, so the
- * message is the code itself (`"RESUME_LOCKED"`) or oRPC's own default
- * (`"Not Found"` for `NOT_FOUND`), and HTTP status never appears in it at all.
- */
-function errorHint(error: unknown): string {
-	if (!(error instanceof ORPCError)) return "";
-
-	const { unlockResume, listResumes, getResume } = MCP_TOOL_NAME;
-	const { code, status } = error;
-
-	// Check codes before statuses: RESUME_SLUG_ALREADY_EXISTS is thrown with status 400.
-	if (code === "RESUME_SLUG_ALREADY_EXISTS") return "\n\nHint: The slug is already in use. Try a different one.";
-	if (code === "RESUME_LOCKED") return `\n\nHint: This resume is locked. Use \`${unlockResume}\` first.`;
-	if (code === "NOT_FOUND" || status === 404)
-		return `\n\nHint: Not found. Check the ID — \`${listResumes}\` returns valid ones.`;
-	if (code === "FORBIDDEN" || status === 403)
-		return "\n\nHint: Permission denied. This account cannot access that record.";
-	if (code === "INVALID_PATCH_OPERATIONS")
-		return `\n\nHint: The operations matched the tool's schema, but a path did not resolve against the document. The message above names the deepest path that exists -- use \`${getResume}\` to confirm the current structure.`;
-	if (status === 400) return "\n\nHint: Invalid request. Check the input parameters against the tool's schema.";
-	return "";
-}
-
-/**
- * Wraps an async tool handler with consistent error formatting.
- * On success, returns the handler's result directly.
- * On failure, returns `{ isError: true, content: [{ type: "text", text }] }` with actionable hints.
- */
-function withErrorHandling<T>(label: string, handler: (params: T) => Promise<CallToolResult>) {
-	return async (params: T): Promise<CallToolResult> => {
-		try {
-			return await handler(params);
-		} catch (error) {
-			return {
-				isError: true,
-				content: [{ type: "text", text: `Error ${label}: ${errorMessage(error)}${errorHint(error)}` }],
-			};
-		}
-	};
-}
-
-function text(value: string): CallToolResult {
-	return { content: [{ type: "text", text: value }] };
-}
 
 function buildResumeShareUrl(username: string, slug: string): string {
 	const base = env.APP_URL.replace(/\/$/, "");
@@ -95,19 +39,26 @@ const T = MCP_TOOL_NAME;
 
 // ── Tool Registration ────────────────────���──────────────────────
 
-export function registerTools(server: McpServer, client: RouterClient<typeof router>, requestHeaders: Headers) {
+export function registerTools(
+	server: McpServer,
+	client: RouterClient<typeof router>,
+	requestHeaders: Headers,
+	authentication?: RequestAuthentication,
+) {
 	// ── List Resumes ──────────────────���───────────────────────────
 	server.registerTool(
 		T.listResumes,
 		TOOL_META[T.listResumes],
 		withErrorHandling(
 			"listing resumes",
-			async ({ tags, sort }: { tags: string[]; sort: "lastUpdatedAt" | "createdAt" | "name" }) => {
-				const resumes = await client.resume.list({ tags, sort });
-
-				if (resumes.length === 0) return text(`No resumes found. Use \`${T.createResume}\` to create one.`);
-
-				return text(JSON.stringify(resumes, null, 2));
+			async (params: z.infer<(typeof TOOL_META)[typeof T.listResumes]["inputSchema"]>) => {
+				const resumes = await client.resume.list(params);
+				return text(JSON.stringify(resumes, null, 2), {
+					items: resumes,
+					limit: params.limit,
+					offset: params.offset,
+					nextOffset: resumes.length === params.limit ? params.offset + resumes.length : null,
+				});
 			},
 		),
 	);
@@ -119,9 +70,7 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		withErrorHandling("listing resume tags", async () => {
 			const tags = await client.resume.tags.list();
 
-			if (tags.length === 0) return text("No tags in use yet. Add tags when creating or updating a resume.");
-
-			return text(JSON.stringify(tags, null, 2));
+			return json(tags);
 		}),
 	);
 
@@ -132,44 +81,30 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		withErrorHandling("getting resume", async ({ id }: { id: string }) => {
 			const resume = await client.resume.getById({ id });
 
-			return text(JSON.stringify(resume.data, null, 2));
+			return text(JSON.stringify(resume.data, null, 2), resume);
 		}),
 	);
 
-	// ── Download Resume or Cover Letter PDF ───────────────────────
+	// ── Download Resume PDF ───────────────────────────────────────
 	server.registerTool(
 		T.downloadResumePdf,
 		TOOL_META[T.downloadResumePdf],
-		withErrorHandling(
-			"creating PDF download URL",
-			async ({ id, target }: { id: string; target?: "resume" | "cover-letter" }) => {
-				const resume = await client.resume.getById({ id });
-				const user = await resolveUserFromRequestHeaders(requestHeaders);
-				if (!user) throw new Error("Unauthorized");
+		withErrorHandling("creating PDF download URL", async ({ id }: { id: string }) => {
+			const resume = await client.resume.getById({ id });
+			const user = authentication?.user ?? (await resolveUserFromRequestHeaders(requestHeaders));
+			if (!user) throw new ORPCError("UNAUTHORIZED");
 
-				const documentTarget = target ?? "resume";
-				if (documentTarget === "cover-letter" && !resumeHasCoverLetter(resume.data))
-					throw new Error("No visible cover letter found for this resume.");
+			const signedUrl = createResumePdfDownloadUrl({ resumeId: id, userId: user.id });
 
-				const signedUrl = createResumePdfDownloadUrl({ resumeId: id, userId: user.id, target: documentTarget });
-
-				return text(
-					JSON.stringify(
-						{
-							resumeId: id,
-							target: documentTarget,
-							name: documentTarget === "cover-letter" ? `${resume.name} Cover Letter` : resume.name,
-							downloadUrl: signedUrl.url,
-							expiresAt: signedUrl.expiresAt,
-							expiresInSeconds: signedUrl.expiresInSeconds,
-							contentType: "application/pdf",
-						},
-						null,
-						2,
-					),
-				);
-			},
-		),
+			return json({
+				resumeId: id,
+				name: resume.name,
+				downloadUrl: signedUrl.url,
+				expiresAt: signedUrl.expiresAt,
+				expiresInSeconds: signedUrl.expiresInSeconds,
+				contentType: "application/pdf",
+			});
+		}),
 	);
 
 	// ── Create Resume ─────────────────────────────────────────────
@@ -178,21 +113,13 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		TOOL_META[T.createResume],
 		withErrorHandling(
 			"creating resume",
-			async ({
-				name,
-				slug,
-				tags,
-				withSampleData,
-			}: {
-				name: string;
-				slug: string;
-				tags: string[];
-				withSampleData: boolean;
-			}) => {
-				const id = await client.resume.create({ name, slug, tags, withSampleData });
+			async (params: z.infer<(typeof TOOL_META)[typeof T.createResume]["inputSchema"]>) => {
+				const { name, slug, withSampleData } = params;
+				const id = await client.resume.create(params);
 
 				return text(
-					`Created resume "${name}" (ID: ${id}) with slug "${slug}".${withSampleData ? " Pre-filled with sample data." : ""}\n\nNext steps: Use \`${T.getResume}\` to view it, or \`${T.patchResume}\` to start editing.`,
+					`Created resume "${name}" (ID: ${id}) ${slug ? `with slug "${slug}"` : "with a generated address"}.${withSampleData ? " Pre-filled with sample data." : ""}\n\nNext steps: Use \`${T.getResume}\` to view it, or \`${T.patchResume}\` to start editing.`,
+					{ id },
 				);
 			},
 		),
@@ -203,7 +130,7 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		T.importResume,
 		TOOL_META[T.importResume],
 		withErrorHandling("importing resume", async ({ data }: { data: unknown }) => {
-			const parsed = resumeDataSchema.safeParse(data);
+			const parsed = resumeDto.import.input.safeParse({ data });
 			if (!parsed.success)
 				return {
 					isError: true,
@@ -215,10 +142,11 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 					],
 				};
 
-			const id = await client.resume.import({ data: parsed.data });
+			const id = await client.resume.import(parsed.data);
 
 			return text(
 				`Imported resume (ID: ${id}).\n\nNext steps: Use \`${T.getResume}\` to inspect metadata (name/slug were auto-generated), or \`${T.updateResume}\` / \`${T.patchResume}\` to adjust.`,
+				{ id },
 			);
 		}),
 	);
@@ -229,11 +157,27 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		TOOL_META[T.duplicateResume],
 		withErrorHandling(
 			"duplicating resume",
-			async ({ id, name, slug, tags }: { id: string; name: string; slug: string; tags: string[] }) => {
-				const newId = await client.resume.duplicate({ id, name, slug, tags });
+			async ({
+				id,
+				name,
+				slug,
+				tags,
+			}: {
+				id: string;
+				name?: string | undefined;
+				slug?: string | undefined;
+				tags?: string[] | undefined;
+			}) => {
+				const newId = await client.resume.duplicate({
+					id,
+					...(name ? { name } : {}),
+					...(slug ? { slug } : {}),
+					...(tags ? { tags } : {}),
+				});
 
 				return text(
-					`Duplicated resume as "${name}" (ID: ${newId}) with slug "${slug}".\n\nNext steps: Use \`${T.getResume}\` to view it, or \`${T.patchResume}\` to customize.`,
+					`Duplicated resume${name ? ` as "${name}"` : ""} (ID: ${newId}) ${slug ? `with slug "${slug}"` : "with a generated address"}.\n\nNext steps: Use \`${T.getResume}\` to view it, or \`${T.patchResume}\` to customize.`,
+					{ id: newId },
 				);
 			},
 		),
@@ -243,12 +187,16 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 	server.registerTool(
 		T.patchResume,
 		TOOL_META[T.patchResume],
-		withErrorHandling("patching resume", async ({ id, operations }: { id: string; operations: PatchOperation[] }) => {
-			const resume = await client.resume.patch({ id, operations });
-			const summary = operations.map((op) => `${op.op} ${op.path}`).join(", ");
+		withErrorHandling(
+			"patching resume",
+			async (params: z.infer<(typeof TOOL_META)[typeof T.patchResume]["inputSchema"]>) => {
+				const { operations } = params;
+				const resume = await client.resume.patch(resumeDto.patch.input.parse(params));
+				const summary = operations.map((op) => `${op.op} ${op.path}`).join(", ");
 
-			return text(`Applied ${operations.length} operation(s) to "${resume.name}": ${summary}`);
-		}),
+				return text(`Applied ${operations.length} operation(s) to "${resume.name}": ${summary}`, resume);
+			},
+		),
 	);
 
 	// ── Update Resume (metadata) ─────────────────��───────────────
@@ -256,25 +204,12 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		T.updateResume,
 		TOOL_META[T.updateResume],
 		withErrorHandling("updating resume", async (params) => {
-			const { id, name, slug, tags, isPublic } = params as {
-				id: string;
-				name?: string;
-				slug?: string;
-				tags?: string[];
-				isPublic?: boolean;
-			};
-			if (name === undefined && slug === undefined && tags === undefined && isPublic === undefined)
-				throw new Error("Provide at least one of: name, slug, tags, isPublic.");
+			const input = resumeDto.update.input.parse(params);
+			if (!Object.entries(input).some(([key, value]) => key !== "id" && key !== "sessionId" && value !== undefined))
+				throw new ORPCError("BAD_REQUEST", { message: "Provide at least one field to update." });
+			const resume = await client.resume.update(input);
 
-			const resume = await client.resume.update({
-				id,
-				...(name !== undefined ? { name } : {}),
-				...(slug !== undefined ? { slug } : {}),
-				...(tags !== undefined ? { tags } : {}),
-				...(isPublic !== undefined ? { isPublic } : {}),
-			});
-
-			const user = await resolveUserFromRequestHeaders(requestHeaders);
+			const user = authentication?.user ?? (await resolveUserFromRequestHeaders(requestHeaders));
 			const username =
 				user && "username" in user && typeof (user as { username: unknown }).username === "string"
 					? (user as { username: string }).username
@@ -300,6 +235,7 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 					"",
 					resumeShareUrlNotes({ isPublic: resume.isPublic, hasPassword: resume.hasPassword }),
 				].join("\n"),
+				payload,
 			);
 		}),
 	);
@@ -311,7 +247,7 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		withErrorHandling("deleting resume", async ({ id }: { id: string }) => {
 			await client.resume.delete({ id });
 
-			return text(`Deleted resume (${id}) and all associated files.`);
+			return text(`Moved resume (${id}) to Trash. Restore it within 30 days.`);
 		}),
 	);
 
@@ -344,7 +280,7 @@ export function registerTools(server: McpServer, client: RouterClient<typeof rou
 		withErrorHandling("getting resume statistics", async ({ id }: { id: string }) => {
 			const stats = await client.resume.statistics.getById({ id });
 
-			return text(JSON.stringify(stats, null, 2));
+			return json(stats);
 		}),
 	);
 }

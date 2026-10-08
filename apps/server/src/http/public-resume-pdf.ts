@@ -15,7 +15,7 @@ export async function handlePublicResumePdf(
 	request: Request,
 	username: string,
 	slug: string,
-	trustedClient = "unknown",
+	trustedClient: string,
 ): Promise<Response> {
 	try {
 		const result = await createPublicResumePdf({

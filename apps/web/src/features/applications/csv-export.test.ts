@@ -7,13 +7,18 @@ const application: Application = {
 	company: 'Müller, "Partners"',
 	role: "Engineer",
 	status: "interview",
-	archived: false,
+	closedReason: null,
+	coverLetterId: null,
+	sentResumeVersionId: null,
+	sentCoverLetterVersionId: null,
+	sentCheckScore: null,
+	requirements: [],
 	location: "Berlin",
 	salary: "€70,000",
 	source: "Referral",
 	sourceUrl: "https://example.com/job",
 	notes: "First line\nSecond line",
-	tags: ["remote", "typescript"],
+	tags: ["customer, success", "typescript|react", "remote;eu"],
 	contacts: [{ name: "Ada", role: "Recruiter", type: "Referral", email: "ada@example.com", phone: "+49 30 123456" }],
 	activity: [
 		{ id: "interview", type: "stage", stage: "interview", at: new Date("2026-08-12T12:00:00Z") },
@@ -25,6 +30,7 @@ const application: Application = {
 	updatedAt: new Date("2026-08-12T12:00:00Z"),
 	resumeId: null,
 	jobDescription: null,
+	postingSource: null,
 	matchScore: null,
 	aiMetadata: null,
 	resumeFileUrl: null,
@@ -41,6 +47,21 @@ function exportedRecord(value: Application) {
 }
 
 describe("application CSV export", () => {
+	it("round-trips saved posting text and retrieval evidence", () => {
+		const source = {
+			method: "tavily" as const,
+			format: "markdown" as const,
+			requestedUrl: "https://example.com/job",
+			retrievedAt: "2026-09-30T12:00:00.000Z",
+			truncated: true,
+			completeness: "incomplete" as const,
+		};
+		const value = { ...application, jobDescription: "Job description\nRequirements", postingSource: source };
+		expect(mapCsvToApplications(parseCsv(exportApplicationsCsv([value]))).rows[0]).toMatchObject({
+			jobDescription: value.jobDescription,
+			postingSource: source,
+		});
+	});
 	it("round-trips quoted Unicode, commas and multiline notes through existing import fields", () => {
 		const csv = exportApplicationsCsv([application]);
 		expect(csv.startsWith("\uFEFF")).toBe(true);
@@ -57,21 +78,9 @@ describe("application CSV export", () => {
 				source: "Referral",
 				sourceUrl: "https://example.com/job",
 				notes: "First line\nSecond line",
-				tags: ["remote", "typescript"],
+				tags: ["customer, success", "typescript|react", "remote;eu"],
 			},
 		]);
-	});
-
-	it("preserves application date and chronological stage and note history separately", () => {
-		expect(exportedRecord(application)).toMatchObject({
-			"Application Date": "2026-08-03",
-			"Stage Date": "2026-08-12",
-			"Stage History": "Applied (2026-08-03) → Interview (2026-08-12)",
-			Timeline: "2026-08-03: Applied\n2026-08-08: Called recruiter\n2026-08-12: Interview",
-			Contacts: "Ada (Recruiter, Referral)",
-			Archived: "false",
-		});
-		expect(application.activity[0]?.id).toBe("interview");
 	});
 
 	it.each([
@@ -98,47 +107,13 @@ describe("application CSV export", () => {
 			notes: company.trim(),
 		});
 	});
-
-	it("keeps an apostrophe the user typed themselves", () => {
-		expect(mapCsvToApplications(parseCsv(`Company,Role\r\n"'Tis Inc","Engineer"\r\n`)).rows).toEqual([
-			{ company: "'Tis Inc", role: "Engineer" },
-		]);
-	});
-
-	it("keeps an authored apostrophe before formula-like text in ordinary imports", () => {
-		expect(mapCsvToApplications(parseCsv(`Company,Role\r\n"'=1+1","Engineer"\r\n`)).rows).toEqual([
-			{ company: "'=1+1", role: "Engineer" },
-		]);
-	});
-
-	it("round-trips tags containing supported legacy delimiters", () => {
-		const tags = ["customer, success", "typescript|react", "remote;eu"];
-		const csv = exportApplicationsCsv([{ ...application, tags }]);
-		expect(mapCsvToApplications(parseCsv(csv)).rows[0]?.tags).toEqual(tags);
-	});
-
-	it("exports headers for empty results and empty optional values without inventing history", () => {
-		expect(parseCsv(exportApplicationsCsv([]))).toHaveLength(1);
-		expect(exportedRecord({ ...application, activity: [], contacts: [], notes: null, sourceUrl: null })).toMatchObject({
-			"Stage Date": "",
-			"Stage History": "",
-			Timeline: "",
-			Contacts: "",
-			Notes: "",
-			URL: "",
-		});
-	});
 });
 
 describe("application export selection", () => {
 	const early = { ...application, id: "early", appliedAt: new Date("2026-08-02T23:59:59Z") };
-	const late = { ...application, id: "late", archived: true, appliedAt: new Date("2026-08-03T23:59:59Z") };
+	const late = { ...application, id: "late", status: "closed" as const, appliedAt: new Date("2026-08-03T23:59:59Z") };
 	const all = [early, application, late];
 
-	it("exports exactly current filtered rows, or all rows including archived", () => {
-		expect(selectApplicationsForExport(all, [application], { scope: "filtered" })).toEqual([application]);
-		expect(selectApplicationsForExport(all, [application], { scope: "all" })).toEqual(all);
-	});
 	it("applies inclusive UTC date boundaries to selected scope without mutating source rows", () => {
 		expect(
 			selectApplicationsForExport(all, [application], { scope: "all", from: "2026-08-03", to: "2026-08-03" }),

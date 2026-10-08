@@ -111,7 +111,7 @@ export const sampleResumeData: ResumeData = {
 					},
 					roles: [],
 					description:
-						"<ul><li><p>Lead gameplay programmer on an unannounced AAA action-adventure title built in Unreal Engine 5 for PC and next-gen consoles</p></li><li><p>Architected and implemented core combat system including hit detection, combo mechanics, and enemy AI behavior trees serving 15+ enemy types</p></li><li><p>Developed custom editor tools in C++ that reduced level designer iteration time by 40% and improved workflow efficiency across the team</p></li><li><p>Optimized rendering pipeline and gameplay systems to maintain 60 FPS performance target on all supported platforms, achieving 95% frame rate stability</p></li><li><p>Ad nostrud enim adipisicing ea proident aliqua veniam nisi amet ea irure et mollit.</p></li></ul><p></p>",
+						"<ul><li><p>Lead gameplay programmer on an unannounced AAA action-adventure title built in Unreal Engine 5 for PC and next-gen consoles</p></li><li><p>Architected and implemented core combat system including hit detection, combo mechanics, and enemy AI behavior trees serving 15+ enemy types</p></li><li><p>Developed custom editor tools in C++ that reduced level designer iteration time by 40% and improved workflow efficiency across the team</p></li><li><p>Optimized rendering pipeline and gameplay systems to maintain 60 FPS performance target on all supported platforms, achieving 95% frame rate stability</p></li><li><p>Collaborated with designers and QA to resolve gameplay defects and ship stable milestone builds.</p></li></ul><p></p>",
 				},
 			],
 		},
@@ -515,7 +515,7 @@ export const sampleResumeData: ResumeData = {
 	},
 	customSections: [
 		{
-			title: "",
+			title: "Earlier experience",
 			icon: "briefcase",
 			columns: 1,
 			hidden: false,
@@ -559,27 +559,6 @@ export const sampleResumeData: ResumeData = {
 				},
 			],
 		},
-		{
-			title: "Cover Letter",
-			icon: "envelope-simple",
-			columns: 1,
-			hidden: false,
-			showHeading: true,
-			keepTogether: false,
-			startOnNewPage: false,
-			id: "019bef5b-0b3d-7e2a-8a7c-12d9e23a4f6b",
-			type: "cover-letter",
-			items: [
-				{
-					id: "019bef5b-0f8d-77d1-9b2a-4a1b65e1b8aa",
-					hidden: false,
-					recipient:
-						'<p>Hiring Manager<br />Sunrise Games Studio<br />Seattle, WA<br /><a href="mailto:hiring@sunrisegames.com">hiring@sunrisegames.com</a></p>',
-					content:
-						"<p>Dear Hiring Manager,</p><p>I'm excited to apply for the Senior Gameplay Engineer role at Sunrise Games Studio. Over the past five years, I have shipped cross-platform titles in Unity and Unreal Engine, leading core gameplay and tooling efforts that improved iteration speed and player experience. At Cascade Studios, I architected combat systems and optimized performance to maintain 60 FPS on console while partnering closely with design and art.</p><p>I thrive in collaborative, cross-disciplinary teams and enjoy mentoring junior engineers. I'd welcome the chance to bring my gameplay systems expertise and tooling focus to your next title.</p><p>Sincerely,<br />David Kowalski</p>",
-				},
-			],
-		},
 	],
 	metadata: {
 		template: "azurill",
@@ -601,11 +580,6 @@ export const sampleResumeData: ResumeData = {
 					main: ["projects", "publications", "volunteer"],
 					sidebar: [],
 				},
-				{
-					fullWidth: true,
-					main: ["019bef5b-0b3d-7e2a-8a7c-12d9e23a4f6b"],
-					sidebar: [],
-				},
 			],
 		},
 		page: {
@@ -625,7 +599,7 @@ export const sampleResumeData: ResumeData = {
 				type: "icon",
 			},
 			colors: {
-				primary: "rgba(0, 132, 209, 1)",
+				primary: "rgba(0, 112, 178, 1)",
 				text: "rgba(0, 0, 0, 1)",
 				background: "rgba(255, 255, 255, 1)",
 			},

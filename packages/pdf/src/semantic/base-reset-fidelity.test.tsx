@@ -1,10 +1,10 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import { describe, expect, it } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../document";
+import { pdf } from "../forme/testing";
 
 type HostNode = {
 	type: string;
@@ -63,10 +63,12 @@ const finalTextStyle = async (template: Template, text: string, rule = "") => {
 	const element = createElement(ResumeDocument, { data, template }) as unknown as Parameters<typeof pdf>[0];
 	const instance = pdf(element);
 	await expect.poll(() => instance.container.document).not.toBeNull();
-	return mergedStyle(findText(instance.container.document as HostNode, text));
+	const node = findText(instance.container.document as HostNode, text);
+	expect(node).toBeDefined();
+	return mergedStyle(node);
 };
 
-const finalOnyxCompanyStyle = async (keyword?: "inherit" | "initial" | "revert" | "unset") => {
+const finalOnyxCompanyStyle = async (keyword?: "inherit" | "initial") => {
 	const data = structuredClone(defaultResumeData);
 	data.picture.hidden = true;
 	data.metadata.typography.body.fontWeights = ["400", "500"];
@@ -97,22 +99,6 @@ const finalOnyxCompanyStyle = async (keyword?: "inherit" | "initial" | "revert" 
 };
 
 describe("PDF semantic base and reset fidelity", () => {
-	it("keeps Bronzor's first heading weight and lets an explicit last weight override it", async () => {
-		expect(await finalTextStyle("bronzor", "Expertise")).toMatchObject({ fontWeight: "400" });
-		expect(await finalTextStyle("bronzor", "Expertise", "section-heading { font-weight: 700; }")).toMatchObject({
-			fontWeight: "700",
-		});
-	});
-
-	it.each(["inherit", "unset", "revert"])(
-		"resets Bronzor's heading weight with %s against the actual host base",
-		async (keyword) => {
-			expect(
-				await finalTextStyle("bronzor", "Expertise", `section-heading { font-weight: ${keyword}; }`),
-			).toMatchObject({ fontWeight: "400" });
-		},
-	);
-
 	it("cancels Bronzor's heading weight with the CSS initial value", async () => {
 		expect(await finalTextStyle("bronzor", "Expertise", "section-heading { font-weight: initial; }")).toMatchObject({
 			fontWeight: undefined,
@@ -126,36 +112,22 @@ describe("PDF semantic base and reset fidelity", () => {
 		});
 	});
 
-	it.each(["inherit", "unset"])(
-		"cancels Chikorita's sidebar field color with %s and emits the inherited parent value",
-		async (keyword) => {
-			expect(
-				await finalTextStyle("chikorita", "TypeScript", `field[name='name'] { color: ${keyword}; }`),
-			).toMatchObject({ color: "#111111" });
-		},
-	);
-
-	it("restores Chikorita's sidebar field color with revert", async () => {
-		expect(await finalTextStyle("chikorita", "TypeScript", "field[name='name'] { color: revert; }")).toMatchObject({
-			color: "#eeeeee",
+	it("cancels Chikorita's sidebar field color with inherit and emits the inherited parent value", async () => {
+		expect(await finalTextStyle("chikorita", "TypeScript", "field[name='name'] { color: inherit; }")).toMatchObject({
+			color: "#111111",
 		});
 	});
 
-	it.each(["inherit", "unset"] as const)(
-		"cancels Onyx's local company weight with %s and emits the inherited parent value",
-		async (keyword) => {
-			expect(await finalOnyxCompanyStyle(keyword)).toMatchObject({ fontWeight: "400" });
-		},
-	);
+	it("cancels Onyx's local company weight with inherit and emits the inherited parent value", async () => {
+		expect(await finalOnyxCompanyStyle("inherit")).toMatchObject({ fontWeight: "400" });
+	});
 
 	it("cancels Onyx's local company weight with initial", async () => {
 		expect(await finalOnyxCompanyStyle("initial")).toMatchObject({ fontWeight: undefined });
 	});
 
-	// The "Bold" toggle resolves to a real bold weight rather than the heaviest body weight (500
-	// here), so `revert` has to restore 700 for the declared base to match what Onyx renders.
-	it("restores Onyx's local company weight with revert", async () => {
+	// The "Bold" toggle resolves to a real bold weight rather than the heaviest body weight (500 here).
+	it("renders Onyx's bold-toggled company at a real bold weight", async () => {
 		expect(await finalOnyxCompanyStyle()).toMatchObject({ fontWeight: 700 });
-		expect(await finalOnyxCompanyStyle("revert")).toMatchObject({ fontWeight: 700 });
 	});
 });

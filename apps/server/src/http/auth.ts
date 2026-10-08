@@ -1,6 +1,8 @@
+import { isIP } from "node:net";
 import { APIError } from "better-auth/api";
 import { auth } from "@reactive-resume/auth/config";
 import { env } from "@reactive-resume/env/server";
+import { TRUSTED_IP_HEADERS } from "@reactive-resume/utils/rate-limit";
 import { isAllowedOAuthRedirectUri } from "@reactive-resume/utils/url-security.node";
 
 const oauthAuthorizeSanitizedParams = [
@@ -134,7 +136,12 @@ async function validateDynamicClientRegistrationRequest(request: Request): Promi
 	}
 }
 
-export async function handleAuth(request: Request) {
+export async function handleAuth(incomingRequest: Request, trustedClient = "unknown") {
+	// Only the server adapter may supply the client address. Never forward client-sent proxy headers to auth.
+	const headers = new Headers(incomingRequest.headers);
+	for (const name of TRUSTED_IP_HEADERS) headers.delete(name);
+	if (isIP(trustedClient)) headers.set("X-Real-IP", trustedClient);
+	const request = new Request(incomingRequest, { headers });
 	const registrationValidationError = await validateDynamicClientRegistrationRequest(request);
 	if (registrationValidationError) return registrationValidationError;
 

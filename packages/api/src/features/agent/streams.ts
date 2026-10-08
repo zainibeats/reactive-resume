@@ -7,7 +7,8 @@ import { getRedis, redisKey } from "@reactive-resume/db/redis";
 type AgentStreamContext = Pick<ResumableStreamContext, "createNewResumableStream" | "resumeExistingStream">;
 
 type AgentStreamLifecycleOptions = {
-	getContext: () => AgentStreamContext;
+	/** Null without Redis: replies still stream, but can't be picked up again after a reload. */
+	getContext: () => AgentStreamContext | null;
 };
 
 let streamContext: AgentStreamContext | null = null;
@@ -30,7 +31,7 @@ export function emptyAgentStream() {
 function getAgentStreamContext() {
 	if (streamContext) return streamContext;
 	const publisher = getRedis();
-	if (!publisher) throw new Error("Agent streaming requires Redis");
+	if (!publisher) return null;
 	streamContext = createResumableStreamContext({
 		keyPrefix: redisKey("agent-stream"),
 		waitUntil,
@@ -44,17 +45,27 @@ function getAgentStreamContext() {
 export function createAgentStreamLifecycle(options: AgentStreamLifecycleOptions) {
 	return {
 		async create(streamId: string, makeStream: () => ReadableStream<UIMessageChunk>) {
-			const stream = await options
-				.getContext()
-				.createNewResumableStream(streamId, () => makeStream().pipeThrough(new JsonToSseTransformStream()));
+			const toSse = () => makeStream().pipeThrough(new JsonToSseTransformStream());
+			const context = options.getContext();
+			if (!context) {
+				if (!waitUntil) return toSse();
+				// Without a resumable store, the run would end with the client's connection. Draining a copy
+				// keeps it going until it finishes or is stopped, so its transcript and claim are always settled.
+				const [client, run] = toSse().tee();
+				waitUntil(run.pipeTo(new WritableStream()));
+				return client;
+			}
 
+			const stream = await context.createNewResumableStream(streamId, toSse);
 			return stream ?? emptyAgentStream();
 		},
 
 		async resume(streamId: string | null | undefined) {
 			if (!streamId) return emptyAgentStream();
+			const context = options.getContext();
+			if (!context) return emptyAgentStream();
 
-			const stream = await options.getContext().resumeExistingStream(streamId);
+			const stream = await context.resumeExistingStream(streamId);
 			return stream ?? emptyAgentStream();
 		},
 	};

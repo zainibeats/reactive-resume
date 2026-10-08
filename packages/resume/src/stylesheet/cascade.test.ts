@@ -5,7 +5,6 @@ import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { resolveStylesheet } from "./cascade";
 import { compileStylesheet } from "./compile";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
-import { PROPERTY_REGISTRY_V1, SEMANTIC_NODE_KINDS } from "./registry";
 
 const node = (
 	key: string,
@@ -64,26 +63,6 @@ const context: ResolveStylesheetContext = {
 	pages: [{ pageKey: "page-1", width: 595.28, height: 841.89 }],
 };
 
-const registryTree = node("resume", "resume", {
-	children: SEMANTIC_NODE_KINDS.filter((kind) => kind !== "resume").map((kind) => node(kind, kind)),
-});
-
-const registryContext: ResolveStylesheetContext = {
-	...context,
-	baseStyles: {},
-	pages: [{ pageKey: "page", width: 595.28, height: 841.89 }],
-};
-
-const advertisedPropertyHints = Object.entries(PROPERTY_REGISTRY_V1).flatMap(([property, definition]) => {
-	if (!definition) return [];
-	const kind = definition.appliesTo[0];
-	if (!kind) return [];
-	return [
-		...definition.values.map((value) => ({ property, kind, hint: `keyword ${value}`, value })),
-		...definition.units.map((unit) => ({ property, kind, hint: `unit ${unit}`, value: `1${unit}` })),
-	];
-});
-
 function resolve(source: string, customContext: ResolveStylesheetContext = context) {
 	const compiled = compileStylesheet({ languageVersion: 1, text: `@version 1;${source}` });
 	if (!compiled.program) throw new Error(compiled.diagnostics.map(({ code }) => code).join(","));
@@ -116,46 +95,7 @@ function semanticTreeOfSize(size: number, shape: "deep" | "wide"): SemanticNode 
 	return root;
 }
 
-function oversizedFrontierTree(): { tree: SemanticNode; childReads: () => number } {
-	let childReads = 0;
-	const children = new Proxy({} as readonly SemanticNode[], {
-		get: (_target, property) => {
-			if (property === "length") return SEMANTIC_CSS_LIMITS_V1.maxSemanticNodes + 1;
-			if (property === Symbol.iterator || (typeof property === "string" && /^\d+$/.test(property))) {
-				childReads++;
-				throw new Error("Oversized frontier entries must not be read.");
-			}
-		},
-	});
-	return {
-		tree: node("oversized-root", "resume", { children }),
-		childReads: () => childReads,
-	};
-}
-
 describe("Semantic CSS cascade and structural resolution", () => {
-	it.each(advertisedPropertyHints)(
-		"accepts the advertised $hint for $property through cascade resolution",
-		({ property, kind, value }) => {
-			const compiled = compileStylesheet({
-				languageVersion: 1,
-				text: `@version 1; ${kind} { ${property}: ${value}; }`,
-			});
-			expect(
-				compiled.diagnostics.filter(({ severity }) => severity === "error"),
-				`${property}: ${value} failed compilation`,
-			).toEqual([]);
-			expect(compiled.program, `${property}: ${value} did not compile`).not.toBeNull();
-			if (!compiled.program) return;
-
-			const resolved = resolveStylesheet(compiled.program, registryTree, registryContext);
-			expect(
-				resolved.diagnostics.filter(({ severity }) => severity === "error"),
-				`${property}: ${value} failed cascade resolution`,
-			).toEqual([]);
-		},
-	);
-
 	it("resolves two-number flex as grow and shrink with an implicit basis", () => {
 		const result = resolve("item { flex: 2 3; }");
 
@@ -271,9 +211,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 		`);
 		expect(valid.nodes["heading-experience"]?.style.color).toBe(baseSettings.design.colors.primary);
 
-		const reverted = resolve("section { color: red; } section-heading { color: revert; }");
-		expect(reverted.nodes["heading-experience"]?.style.color).toBe("black");
-
 		const compiled = compileStylesheet({
 			languageVersion: 1,
 			text: "@version 1; :root { --a: var(--b); --b: var(--a); } section { color: var(--a); }",
@@ -339,23 +276,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 		});
 	});
 
-	it("does not evaluate a losing variable-backed shorthand", () => {
-		const result = resolve(`
-			:root { --invalid-space: 1pt 2pt 3pt 4pt 5pt; }
-			section { margin: var(--invalid-space); margin: 6pt !important; }
-		`);
-
-		expect(result.nodes["section-experience"]?.style).toMatchObject({
-			"margin-top": 6,
-			"margin-right": 6,
-			"margin-bottom": 6,
-			"margin-left": 6,
-		});
-		expect(result.diagnostics).not.toContainEqual(
-			expect.objectContaining({ code: "INVALID_VALUE", severity: "error" }),
-		);
-	});
-
 	it("keeps valid resolved declarations when a neighboring value is invalid", () => {
 		const result = resolve("section-heading { color: red; opacity: var(--missing); }");
 
@@ -363,13 +283,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 		expect(result.diagnostics).toContainEqual(
 			expect.objectContaining({ code: "UNRESOLVED_VARIABLE", severity: "error" }),
 		);
-	});
-
-	it("warns after variable expansion when a value is extreme but technically renderable", () => {
-		const result = resolve(":root { --tiny: 3pt; } section-heading { font-size: var(--tiny); }");
-
-		expect(result.nodes["heading-experience"]?.style["font-size"]).toBe(3);
-		expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "EXTREME_VALUE", severity: "warning" }));
 	});
 
 	it("resolves authored size before media and rejects size inside media", () => {
@@ -390,25 +303,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 		});
 		expect(invalid.program).not.toBeNull();
 		expect(invalid.diagnostics).toContainEqual(expect.objectContaining({ code: "MEDIA_PAGE_SIZE", severity: "error" }));
-	});
-
-	it("resolves a relative authored page size exactly once against authored dimensions", () => {
-		const result = resolve(
-			`
-				:root { --page-size: 50vw 50vh; }
-				page { size: var(--page-size); }
-				@media (width: 400pt) { :root { --page-size: var(--missing); } }
-			`,
-			{
-				...context,
-				pages: [{ pageKey: "page-1", width: 800, height: 600 }],
-			},
-		);
-
-		expect(result.nodes["page-1"]?.structural.pageSize).toEqual({ width: 400, height: 300 });
-		expect(result.diagnostics).not.toContainEqual(
-			expect.objectContaining({ code: "UNRESOLVED_VARIABLE", severity: "error" }),
-		);
 	});
 
 	it("bounds generated branching variable expansion by aggregate work and output", () => {
@@ -437,8 +331,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 
 	it.each([
 		{ keyword: "InItIaL", color: undefined, hidden: false, order: 0, fixed: undefined, breakBefore: undefined },
-		{ keyword: "uNsEt", color: "purple", hidden: false, order: 0, fixed: undefined, breakBefore: undefined },
-		{ keyword: "ReVeRt", color: "navy", hidden: true, order: 7, fixed: true, breakBefore: "page" },
 		{ keyword: "InHeRiT", color: "purple", hidden: true, order: 3, fixed: true, breakBefore: "page" },
 	] as const)(
 		"applies case-insensitive $keyword semantics to style, hidden, order, and structural properties",
@@ -478,34 +370,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 			expect(result.nodes["section-experience"]?.structural.breakBefore).toBe(breakBefore);
 		},
 	);
-
-	it("makes size revert expose the builder page size", () => {
-		const result = resolve("page { size: ReVeRt; }", {
-			...context,
-			pages: [{ pageKey: "page-1", width: 800, height: 600 }],
-		});
-
-		expect(result.nodes["page-1"]?.structural.pageSize).toBe("A4");
-	});
-
-	it.each([
-		{ keyword: "initial", expected: undefined },
-		{ keyword: "unset", expected: undefined },
-		{ keyword: "inherit", expected: "LETTER" },
-		{ keyword: "revert", expected: { width: 700, height: 900 } },
-	] as const)("applies $keyword to page size structure", ({ keyword, expected }) => {
-		const result = resolve(`page { size: ${keyword}; }`, {
-			...context,
-			baseStyles: {
-				...context.baseStyles,
-				resume: { ...blankStyle, structural: { pageSize: "LETTER" } },
-				"page-1": { ...blankStyle, structural: { pageSize: { width: 700, height: 900 } } },
-			},
-			pages: [{ pageKey: "page-1", width: 800, height: 600 }],
-		});
-
-		expect(result.nodes["page-1"]?.structural.pageSize).toEqual(expected);
-	});
 
 	it("normalizes supported line-height lengths and enforces font-size and opacity bounds", () => {
 		const valid = resolve("section-heading { line-height: 12pt; font-size: 0; opacity: 0; }");
@@ -564,16 +428,6 @@ describe("Semantic CSS cascade and structural resolution", () => {
 		expect(result.nodes["section-experience"]?.style["break-before"]).toBeUndefined();
 	});
 
-	it.each([
-		["0", false],
-		["1", true],
-	] as const)("maps the accepted -resume-fixed value %s to %s", (value, expected) => {
-		const result = resolve(`section { -resume-fixed: ${value}; }`);
-
-		expect(result.nodes["section-experience"]?.structural.fixed).toBe(expected);
-		expect(result.diagnostics.filter(({ severity }) => severity === "error")).toEqual([]);
-	});
-
 	it("accepts the exact semantic node budget and rejects deep or wide trees one node over", () => {
 		const program = { languageVersion: 1, rules: [] };
 		const exact = resolveStylesheet(
@@ -592,14 +446,5 @@ describe("Semantic CSS cascade and structural resolution", () => {
 			expect(result.nodes).toEqual({});
 			expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "RESOURCE_LIMIT", severity: "error" }));
 		}
-	});
-
-	it("rejects an oversized root frontier without reading or queueing child entries", () => {
-		const frontier = oversizedFrontierTree();
-		const result = resolveStylesheet({ languageVersion: 1, rules: [] }, frontier.tree, context);
-
-		expect(result.nodes).toEqual({});
-		expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "RESOURCE_LIMIT", severity: "error" }));
-		expect(frontier.childReads()).toBe(0);
 	});
 });

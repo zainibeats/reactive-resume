@@ -13,7 +13,7 @@ vi.mock("./-sections/hero", () => ({ Hero: () => null }));
 const { Route } = await import("./index");
 
 describe("home root mode", () => {
-	it("uses server canonical root for public metadata", async () => {
+	it("leaves the canonical link to the server shell and marks the root resume noindex", async () => {
 		const head = await Route.options.head?.({
 			loaderData: {
 				root: {
@@ -25,7 +25,7 @@ describe("home root mode", () => {
 				},
 			},
 		} as never);
-		expect(head).toMatchObject({ links: [{ rel: "canonical", href: "https://configured.example/" }] });
+		expect(head?.links).toBeUndefined();
 		expect(head?.meta).toContainEqual({ name: "robots", content: "noindex, follow" });
 		expect(head?.scripts).toBeUndefined();
 	});

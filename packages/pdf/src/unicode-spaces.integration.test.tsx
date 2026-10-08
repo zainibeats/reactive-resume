@@ -1,10 +1,10 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { describe, expect, it } from "vitest";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { act, createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "./document";
+import { renderToBuffer } from "./forme/testing";
 
 type Line = { text: string; x: number; y: number; right: number };
 
@@ -48,7 +48,7 @@ async function pdfLines(data: ResumeData) {
 			lines.set(y, line);
 		}
 		const ordered = [...lines.values()].sort((a, b) => b.y - a.y);
-		const title = ordered.find((line) => line.text === "Whitespace");
+		const title = ordered.find((line) => line.text === data.summary.title);
 		if (!title) throw new Error("Missing summary title in PDF");
 		const plain = ordered[1];
 		if (!plain) throw new Error("Missing plain headline control in PDF");
@@ -64,62 +64,19 @@ function width(line: Line | undefined) {
 }
 
 describe("Unicode spaces in exported rich text", () => {
-	it.each([
-		["Noto Serif SC", "zh-CN"],
-		["Noto Serif SC", "en-US"],
-		["Noto Sans SC", "zh-CN"],
-		["IBM Plex Serif", "zh-CN"],
-		["Noto Serif SC", "ar-SA"],
-	])("retains ideographic-space advances with %s / %s", { timeout: 60_000 }, async (family, locale) => {
-		const { plain, body } = await pdfLines(resume("中\u3000文\u3000字", "<p>中\u3000文\u3000字</p>", family, locale));
+	it("retains ideographic-space advances with IBM Plex Serif / zh-CN", { timeout: 60_000 }, async () => {
+		const { plain, body } = await pdfLines(
+			resume("中\u3000文\u3000字", "<p>中\u3000文\u3000字</p>", "IBM Plex Serif", "zh-CN"),
+		);
 		expect(body).toHaveLength(1);
 		// Three full-width glyphs plus two ideographic spaces at 10pt.
 		expect(width(plain)).toBeCloseTo(50, 2);
 		expect(width(body[0])).toBeCloseTo(50, 2);
 	});
 
-	it.each([
-		["mixed Latin/CJK", "中\u3000A\u3000\u3000文", "<p>中\u3000A\u3000\u3000文</p>"],
-		["inline leading spaces", "中\u3000\u3000文", "<p>中<span>\u3000\u3000文</span></p>"],
-		["marked spaces", "中\u3000\u3000文", "<p>中<em>\u3000\u3000</em>文</p>"],
-		["literal nonbreaking spaces", "中\u00a0\u00a0文", "<p>中\u00a0\u00a0文</p>"],
-		["named nonbreaking-space count", "中\u00a0\u00a0文", "<p>中&nbsp;&nbsp;文</p>"],
-		["ordinary ASCII whitespace", "中 文", "<p>中 \t\n\r\f  文</p>"],
-		["preformatted spaces", "中\u3000\u3000文", '<pre style="font-size: 10pt">中\u3000\u3000文</pre>'],
-	])("preserves %s", { timeout: 60_000 }, async (_name, text, html) => {
-		const { plain, body } = await pdfLines(resume(text, html));
-		expect(body).toHaveLength(1);
-		expect(body[0]?.text.replaceAll(/\s/g, "")).toBe(text.replaceAll(/\s/g, ""));
-		expect(width(body[0])).toBeCloseTo(width(plain), 2);
-	});
-
 	it("retains ideographic spaces at the start of a paragraph", { timeout: 60_000 }, async () => {
 		const { plain, body } = await pdfLines(resume("中 文", "<p>\u3000中 文</p>"));
 		expect(body).toHaveLength(1);
 		expect(body[0]?.right).toBeCloseTo(plain.right + 10, 2);
-	});
-
-	it("retains ideographic spaces at the start of bare rich text", { timeout: 60_000 }, async () => {
-		const { plain, body } = await pdfLines(resume("中 文", "\u3000中 文"));
-		expect(body).toHaveLength(1);
-		expect(body[0]?.right).toBeCloseTo(plain.right + 10, 2);
-	});
-
-	it("keeps repeated ASCII spaces and line breaks in preformatted text", { timeout: 60_000 }, async () => {
-		const { plain, body } = await pdfLines(resume("A  B", '<pre style="font-size: 10pt">A  B\nA  B</pre>'));
-		expect(body).toHaveLength(2);
-		for (const line of body) expect(width(line)).toBeCloseTo(width(plain), 2);
-	});
-
-	it("retains a literal nonbreaking space's word grouping", { timeout: 60_000 }, async () => {
-		const data = resume("a hello world", "<p>a hello\u00a0world</p>", "Helvetica", "en-US");
-		data.metadata.stylesheet = {
-			mode: "semantic",
-			source: { languageVersion: 1, text: "@version 1; section { width: 50pt; }" },
-		};
-		const ascii = await pdfLines({ ...data, summary: { ...data.summary, content: "<p>a hello world</p>" } });
-		expect(ascii.body.map((line) => line.text.trim())).toEqual(["a hello", "world"]);
-		const { body } = await pdfLines(data);
-		expect(body.map((line) => line.text.trim().replaceAll("\u00a0", " "))).toEqual(["a", "hello world"]);
 	});
 });

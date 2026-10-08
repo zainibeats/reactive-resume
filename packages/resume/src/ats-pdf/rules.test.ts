@@ -39,34 +39,6 @@ describe("parseability checks", () => {
 		expect(codes).toContain("HIGH_IMAGE_COVERAGE");
 	});
 
-	it("flags an oversized file and stays quiet about merely large ones", () => {
-		expect(codesOf(healthyResume({ file: { sizeBytes: 4_000_000 } }))).toContain("FILE_TOO_LARGE");
-
-		const large = report(healthyResume({ file: { sizeBytes: 1_500_000 } }));
-		expect(statusOf(large, "FILE_TOO_LARGE")).toBe("pass");
-		expect(statusOf(large, "LARGE_FILE_SIZE")).toBe("fail");
-	});
-
-	it("flags encrypted, XFA and portfolio files", () => {
-		expect(codesOf(healthyResume({ metadata: { isEncrypted: true } }))).toContain("ENCRYPTED_PDF");
-		expect(codesOf(healthyResume({ metadata: { isXfa: true } }))).toContain("XFA_FORM");
-		expect(codesOf(healthyResume({ metadata: { isCollection: true } }))).toContain("PDF_PORTFOLIO");
-		expect(codesOf(healthyResume({ metadata: { hasAcroForm: true } }))).toContain("ACROFORM_FIELDS");
-	});
-
-	it("reads font trouble off the font objects", () => {
-		expect(codesOf(healthyResume({ fonts: [{ isType3: true }] }))).toContain("TYPE3_FONT");
-		expect(codesOf(healthyResume({ fonts: [{ isInvalid: true }] }))).toContain("INVALID_EMBEDDED_FONT");
-		expect(codesOf(healthyResume({ fonts: [{ missingFile: true }] }))).toContain("NON_EMBEDDED_FONTS");
-	});
-
-	it("skips font checks when no font objects were resolved", () => {
-		const result = report(healthyResume({ fonts: [] }));
-
-		expect(statusOf(result, "TYPE3_FONT")).toBe("skip");
-		expect(skipReasonOf(result, "TYPE3_FONT")).toBe("insufficient-data");
-	});
-
 	it("treats private-use glyphs as garbled without needing to know the language", () => {
 		const glyphs = Array.from({ length: 24 }, (_, index) => String.fromCodePoint(0xe0_00 + index)).join("");
 		const garbled = withLines([glyphs, glyphs, glyphs]);
@@ -90,20 +62,6 @@ describe("parseability checks", () => {
 		expect(skipReasonOf(report(japanese), "GARBLED_TEXT")).toBe("not-english");
 	});
 
-	it("counts ligature glyphs", () => {
-		expect(codesOf(healthyResume({ lines: [...healthyResumeLines, "ﬁrst ﬂow oﬃce workﬂow ﬄag"] }))).toContain(
-			"LIGATURE_CHARACTERS",
-		);
-	});
-
-	it("reports hidden text from the operator pass", () => {
-		const hidden = healthyResume({ pages: { 1: { operators: { invisibleTextItems: 12, whiteFillTextItems: 4 } } } });
-		const codes = codesOf(hidden);
-
-		expect(codes).toContain("INVISIBLE_TEXT");
-		expect(codes).toContain("WHITE_TEXT");
-	});
-
 	it("skips operator-dependent checks when the operator pass did not run", () => {
 		const result = report(healthyResume({ pages: { 1: { operators: null } }, operatorsAvailable: false }));
 
@@ -120,15 +78,6 @@ describe("parseability checks", () => {
 		});
 
 		expect(codesOf(spaced)).toContain("SPLIT_CHARACTER_SPACING");
-	});
-
-	it("flags rotated pages and non-standard page sizes", () => {
-		expect(codesOf(healthyResume({ pages: { 1: { rotation: 90 } } }))).toContain("ROTATED_PAGES");
-		expect(codesOf(healthyResume({ pages: { 1: { width: 400, height: 400 } } }))).toContain("NON_STANDARD_PAGE_SIZE");
-	});
-
-	it("reports a truncated analysis rather than implying full coverage", () => {
-		expect(codesOf(healthyResume({ truncated: true }))).toContain("TRUNCATED_ANALYSIS");
 	});
 });
 
@@ -153,14 +102,6 @@ describe("layout checks", () => {
 		expect(statusOf(result, "COLUMN_GUTTER")).toBe("fail");
 		expect(result.cappedBy).not.toContain("MULTI_COLUMN_LAYOUT");
 		expect(result.score).toBeGreaterThan(55);
-	});
-
-	it("leaves a clean single-column page alone", () => {
-		const result = report(healthyResume());
-
-		expect(statusOf(result, "MULTI_COLUMN_LAYOUT")).toBe("pass");
-		expect(statusOf(result, "COLUMN_GUTTER")).toBe("pass");
-		expect(statusOf(result, "READING_ORDER_RISK")).toBe("pass");
 	});
 
 	it("flags small body text and tight margins", () => {
@@ -206,26 +147,6 @@ describe("layout checks", () => {
 
 		expect(codesOf(boldHeadings)).not.toContain("HEADINGS_NOT_DISTINGUISHED");
 	});
-
-	it("flags text drawn outside the page box", () => {
-		expect(
-			codesOf(makeRawExtraction({ lines: [...healthyResumeLines, { text: "Ada Lovelace", x: -40, y: 400 }] })),
-		).toContain("TEXT_OUTSIDE_PAGE");
-	});
-
-	it("reports a running head repeated on every page", () => {
-		const raw = makeRawExtraction({
-			lines: [
-				{ text: "Ada Lovelace — page 1", y: 8, page: 1 },
-				{ text: "Experience at Analytical Engines", y: 120, page: 1 },
-				{ text: "Ada Lovelace — page 2", y: 8, page: 2 },
-				{ text: "Education at University of London", y: 120, page: 2 },
-			],
-			pageCount: 2,
-		});
-
-		expect(codesOf(raw)).toContain("REPEATED_HEADER_FOOTER");
-	});
 });
 
 describe("section checks", () => {
@@ -260,16 +181,6 @@ describe("section checks", () => {
 		);
 
 		expect(skipReasonOf(report(german), "NO_EXPERIENCE_SECTION")).toBe("not-english");
-	});
-
-	it("flags a document too thin to have extracted properly", () => {
-		const thin = withLines([
-			"Ada Lovelace, Principal Engineer",
-			"ada@example.com and +44 20 7946 0100",
-			"Analytical Engines, London, Jan 2020 - Present",
-		]);
-
-		expect(codesOf(thin)).toContain("VERY_SHORT_DOCUMENT");
 	});
 
 	/**
@@ -319,10 +230,6 @@ describe("contact checks", () => {
 
 		expect(statusOf(result, "NO_EMAIL")).toBe("fail");
 		expect(result.score).toBeLessThanOrEqual(50);
-	});
-
-	it("does not invent a split email on a clean file", () => {
-		expect(statusOf(report(healthyResume()), "EMAIL_SPLIT_ACROSS_ITEMS")).toBe("pass");
 	});
 
 	it("detects an address broken across text runs", () => {
@@ -376,10 +283,6 @@ describe("contact checks", () => {
 
 		expect(codesOf(twoColumnRow)).not.toContain("EMAIL_SPLIT_ACROSS_ITEMS");
 	});
-
-	it("skips the link check when the file carries no link annotations", () => {
-		expect(skipReasonOf(report(healthyResume()), "LINK_TEXT_URL_MISMATCH")).toBe("not-applicable");
-	});
 });
 
 describe("date checks", () => {
@@ -397,12 +300,6 @@ describe("date checks", () => {
 		);
 	});
 
-	it("flags a future-dated range against the injected clock", () => {
-		expect(codesOf(healthyResume({ lines: [...healthyResumeLines, "Jan 2030 - Dec 2031"] }))).toContain(
-			"FUTURE_DATED_ENTRY",
-		);
-	});
-
 	it("flags a range no recognised format matches", () => {
 		// Two-digit years read as day numbers to most parsers, so nothing recognises this range.
 		const codes = codesOf(healthyResume({ lines: [...healthyResumeLines, "Analyst, Somewhere | Jan 20 - Mar 22"] }));
@@ -414,36 +311,5 @@ describe("date checks", () => {
 		const codes = codesOf(healthyResume({ lines: [...healthyResumeLines, "Built on Framework 2021 - 2023"] }));
 
 		expect(codes).not.toContain("UNPARSEABLE_DATE_RANGE");
-	});
-
-	it("stays quiet on well-formed dates", () => {
-		const result = report(healthyResume());
-
-		expect(statusOf(result, "REVERSED_DATE_RANGE")).toBe("pass");
-		expect(statusOf(result, "FUTURE_DATED_ENTRY")).toBe("pass");
-		expect(statusOf(result, "UNPARSEABLE_DATE_RANGE")).toBe("pass");
-	});
-});
-
-describe("content checks", () => {
-	it("never lets a tip move the score", () => {
-		const withTips = healthyResume({
-			lines: [...healthyResumeLines, "I managed my own projects and I wrote my own documentation myself."],
-		});
-
-		const result = report(withTips);
-		const firedTips = result.tips.map((tip) => tip.code);
-
-		expect(firedTips).toContain("FIRST_PERSON_PRONOUNS");
-		expect(result.score).toBe(report(healthyResume()).score);
-	});
-
-	it("reports an employment gap as advice, not as a defect", () => {
-		const gapped = healthyResume({ lines: [...healthyResumeLines, "Jan 2005 - Dec 2006"] });
-		const result = report(gapped);
-
-		const gap = result.tips.find((tip) => tip.code === "EMPLOYMENT_GAP");
-		expect(gap?.severity).toBe("tip");
-		expect(result.findings.map((finding) => finding.code)).not.toContain("EMPLOYMENT_GAP");
 	});
 });

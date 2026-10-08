@@ -1,9 +1,27 @@
-import type { UIMessage } from "ai";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@reactive-resume/db/client", () => ({ db: {} }));
+vi.mock("@reactive-resume/db/schema", () => ({
+	agentThread: {
+		id: "agent_threads.id",
+		userId: "agent_threads.user_id",
+		activeRunId: "agent_threads.active_run_id",
+		deletedAt: "agent_threads.deleted_at",
+		status: "agent_threads.status",
+		activeStreamId: "agent_threads.active_stream_id",
+	},
+	agentMessage: {},
+	agentAction: {},
+}));
+vi.mock("drizzle-orm", () => ({
+	and: (...conditions: unknown[]) => ({ type: "and", conditions }),
+	eq: (left: unknown, right: unknown) => ({ type: "eq", left, right }),
+	isNull: (value: unknown) => ({ type: "isNull", value }),
+	sql: () => ({}),
+}));
 
-const { appendMissingActionParts, isStaleAgentRun, reapStaleAgentRun, STALE_AGENT_RUN_TTL_MS } = await import("./runs");
+const { claimActiveAgentRun, clearActiveAgentRunIfCurrent, isStaleAgentRun, reapStaleAgentRun } =
+	await import("./runs");
 
 const NOW = new Date("2026-08-20T12:00:00.000Z");
 
@@ -12,65 +30,73 @@ function minutesBefore(minutes: number) {
 }
 
 describe("isStaleAgentRun", () => {
-	it("is false without an active run", () => {
-		expect(isStaleAgentRun({ activeRunId: null, activeRunStartedAt: null }, NOW)).toBe(false);
-	});
-
-	it("is false while the run is younger than the TTL", () => {
-		expect(isStaleAgentRun({ activeRunId: "run-1", activeRunStartedAt: minutesBefore(14) }, NOW)).toBe(false);
-	});
-
 	it("is true once the run outlives the TTL", () => {
+		expect(isStaleAgentRun({ activeRunId: "run-1", activeRunStartedAt: minutesBefore(14) }, NOW)).toBe(false);
 		expect(isStaleAgentRun({ activeRunId: "run-1", activeRunStartedAt: minutesBefore(16) }, NOW)).toBe(true);
-		expect(STALE_AGENT_RUN_TTL_MS).toBe(15 * 60_000);
-	});
-
-	it("treats a legacy claim without a start timestamp as stale", () => {
-		expect(isStaleAgentRun({ activeRunId: "run-1", activeRunStartedAt: null }, NOW)).toBe(true);
 	});
 });
 
-function buildAction(overrides: Record<string, unknown> = {}) {
+function createRunStateDb(returningRows: unknown[] = []) {
+	const returning = vi.fn(async () => returningRows);
+	const where = vi.fn(() => ({ returning }));
+	const set = vi.fn(() => ({ where }));
+	const update = vi.fn(() => ({ set }));
+
 	return {
-		id: "action-1",
-		resumeId: "resume-1",
-		title: "Tighten summary",
-		summary: null,
-		operations: [{ op: "replace" as const, path: "/basics/name", value: "Bob" }],
-		appliedUpdatedAt: NOW,
-		...overrides,
+		database: { update },
+		set,
+		update,
+		where,
 	};
 }
 
-describe("appendMissingActionParts", () => {
-	const draft: UIMessage = { id: "ui-1", role: "assistant", parts: [{ type: "text", text: "Editing…" }] };
+describe("agent run state", () => {
+	it("claims an active run only when the thread still has no active run", async () => {
+		const db = createRunStateDb([{ id: "thread-1" }]);
 
-	it("appends a synthetic call/result pair for an action missing from the parts", () => {
-		const patched = appendMissingActionParts(draft, [buildAction()]);
+		await expect(
+			claimActiveAgentRun(
+				{ threadId: "thread-1", userId: "user-1", runId: "run-1", streamId: "stream-1" },
+				db.database as never,
+			),
+		).resolves.toBe(true);
 
-		expect(patched.parts.at(-1)).toMatchObject({
-			type: "tool-apply_resume_patch",
-			toolCallId: "synthetic-action-1",
-			state: "output-available",
-			output: expect.objectContaining({ actionId: "action-1" }),
+		expect(db.update).toHaveBeenCalledWith(expect.objectContaining({ id: "agent_threads.id" }));
+		expect(db.set).toHaveBeenCalledWith({
+			activeRunId: "run-1",
+			activeStreamId: "stream-1",
+			activeRunStartedAt: expect.any(Date),
+		});
+		expect(db.where).toHaveBeenCalledWith({
+			type: "and",
+			conditions: [
+				{ type: "eq", left: "agent_threads.id", right: "thread-1" },
+				{ type: "eq", left: "agent_threads.user_id", right: "user-1" },
+				{ type: "isNull", value: "agent_threads.active_run_id" },
+				{ type: "isNull", value: "agent_threads.deleted_at" },
+				{ type: "eq", left: "agent_threads.status", right: "active" },
+			],
 		});
 	});
 
-	it("returns the message unchanged when every action is already represented", () => {
-		const withPart: UIMessage = {
-			...draft,
-			parts: [
-				{
-					type: "tool-apply_resume_patch",
-					toolCallId: "call-1",
-					state: "output-available",
-					input: {},
-					output: { actionId: "action-1" },
-				} as UIMessage["parts"][number],
-			],
-		};
+	it("clears active run state only for the matching run and stream", async () => {
+		const db = createRunStateDb();
 
-		expect(appendMissingActionParts(withPart, [buildAction()])).toBe(withPart);
+		await clearActiveAgentRunIfCurrent(
+			{ threadId: "thread-1", userId: "user-1", runId: "run-1", streamId: "stream-1" },
+			db.database as never,
+		);
+
+		expect(db.set).toHaveBeenCalledWith({ activeRunId: null, activeStreamId: null, activeRunStartedAt: null });
+		expect(db.where).toHaveBeenCalledWith({
+			type: "and",
+			conditions: [
+				{ type: "eq", left: "agent_threads.id", right: "thread-1" },
+				{ type: "eq", left: "agent_threads.user_id", right: "user-1" },
+				{ type: "eq", left: "agent_threads.active_run_id", right: "run-1" },
+				{ type: "eq", left: "agent_threads.active_stream_id", right: "stream-1" },
+			],
+		});
 	});
 });
 
@@ -78,11 +104,7 @@ type ScriptedReaperDb = {
 	updates: Array<{ set: unknown }>;
 };
 
-function scriptedReaperDatabase(input: {
-	drafts: Array<Record<string, unknown>>;
-	actions: Array<Record<string, unknown>>;
-	clearMatches?: boolean;
-}) {
+function scriptedReaperDatabase(input: { drafts: Array<Record<string, unknown>>; clearMatches?: boolean }) {
 	const state: ScriptedReaperDb = { updates: [] };
 	let selectCall = 0;
 
@@ -93,7 +115,7 @@ function scriptedReaperDatabase(input: {
 			selectCall += 1;
 			return {
 				from: () => ({
-					where: async () => (call === 0 ? input.drafts : input.actions),
+					where: async () => (call === 0 ? input.drafts : []),
 				}),
 			};
 		},
@@ -112,7 +134,7 @@ function scriptedReaperDatabase(input: {
 }
 
 describe("reapStaleAgentRun", () => {
-	it("clears the run claim and flips streaming drafts to canceled with synthetic action parts", async () => {
+	it("clears the run claim and flips streaming drafts to canceled", async () => {
 		const database = scriptedReaperDatabase({
 			drafts: [
 				{
@@ -120,7 +142,6 @@ describe("reapStaleAgentRun", () => {
 					uiMessage: { id: "ui-1", role: "assistant", parts: [{ type: "text", text: "Editing…" }] },
 				},
 			],
-			actions: [buildAction()],
 		});
 
 		await reapStaleAgentRun(
@@ -131,19 +152,6 @@ describe("reapStaleAgentRun", () => {
 		// First update clears the run claim; second flips the draft.
 		expect(database.state.updates[0]?.set).toMatchObject({ activeRunId: null, activeStreamId: null });
 		expect(database.state.updates[1]?.set).toMatchObject({ status: "canceled" });
-		const uiMessage = (database.state.updates[1]?.set as { uiMessage?: UIMessage } | undefined)?.uiMessage;
-		expect(uiMessage?.parts.at(-1)).toMatchObject({ toolCallId: "synthetic-action-1" });
-	});
-
-	it("only clears the claim when there is no streaming draft", async () => {
-		const database = scriptedReaperDatabase({ drafts: [], actions: [] });
-
-		await reapStaleAgentRun(
-			{ threadId: "thread-1", userId: "user-1", runId: "run-1", streamId: null },
-			database as never,
-		);
-
-		expect(database.state.updates).toHaveLength(1);
 	});
 
 	// Regression: a concurrent request/replica can claim a replacement run (and insert a live
@@ -152,7 +160,6 @@ describe("reapStaleAgentRun", () => {
 	it("does not touch drafts when another reaper already cleared or replaced the run", async () => {
 		const database = scriptedReaperDatabase({
 			drafts: [{ id: "row-live", uiMessage: { id: "ui-live", role: "assistant", parts: [] } }],
-			actions: [],
 			clearMatches: false,
 		});
 

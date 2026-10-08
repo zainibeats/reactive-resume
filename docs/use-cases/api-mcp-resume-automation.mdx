@@ -1,51 +1,59 @@
 ---
-title: "API and MCP Resume Automation"
-description: "Automate resume workflows in Reactive Resume with API keys, the Patch API, the MCP server, AI assistant tools, and the JSON resume schema."
+title: "API and MCP resume automation"
+description: "Automate resumes, cover letters and job applications in Reactive Resume with API keys, the OpenAPI endpoints, the Patch API and the MCP server."
 ---
 
-Reactive Resume supports automation through authenticated API access and an MCP server that lets compatible tools work with resumes. Agents can list, read, create, import, duplicate, patch, lock, export, and share resumes without adding a separate job-tracking workflow.
+Reactive Resume has an authenticated API and an MCP server, so scripts, integrations and AI clients such as Claude or Cursor can work with your documents and job applications. Both use the same account data you see in the app.
 
-## Automation options
+## What you can automate
 
-Use the API for direct programmatic access from scripts, services, or integrations. Use MCP when you want an AI tool or agent that speaks the Model Context Protocol to work with your resumes through exposed tools.
+Through the API and the MCP server, a client acting as you can:
 
-Key docs:
+- **Resumes:** list, read, create, import, duplicate, patch, lock, delete, download as PDF, and read sharing statistics.
+- **Cover letters:** list, read, create, update, duplicate, export, import and delete.
+- **Job applications:** create and update applications, move them through stages, add notes and interviews, edit the activity timeline, attach the documents you sent, bulk-update or delete, and import rows from a spreadsheet.
+- **Job-focused actions:** fill in an application from a job posting, score a resume against it, create a tailored resume copy, and draft a message such as a follow-up.
 
-- [Using the API](/guides/using-the-api)
-- [Using the Patch API](/guides/using-the-patch-api)
-- [Using the MCP Server](/guides/using-the-mcp-server)
-- [AI Assistant Tools](/guides/ai-agent-tools)
-- [JSON Resume Schema](/guides/json-resume-schema)
+The job-focused actions use your own AI provider, connected in **Settings → AI**.
 
-## Common automation workflows
+## API or MCP?
 
-You can build workflows that:
+Use the **API** for scripts, services and integrations you write yourself. It is described by an OpenAPI spec, and large requests are supported.
 
-- Create a resume from structured data.
-- Import a full resume JSON document.
-- Read resume data for review or transformation.
-- Patch targeted fields without replacing the whole resume.
-- Connect an MCP-compatible client to operate on resumes with authenticated tools.
-- Duplicate a resume before tailoring it for a specific role.
-- Lock a final resume to prevent accidental edits.
-- Make a resume public and retrieve the share link.
-- Review saved resume statistics.
+Use the **MCP server** when you want an AI client that speaks the Model Context Protocol to read and edit your resumes through ready-made tools. The address to paste into your client is shown under **MCP server** in **Settings → AI**.
 
-Start with the Patch API for targeted resume updates. It is the safest option because it is built around explicit changes to existing resume data.
+For targeted resume edits, prefer the Patch API (JSON Patch operations) over replacing the whole resume. It changes only the fields you name, so it is less likely to overwrite something by accident.
 
-## Authentication and scope
+## Authentication
 
-API requests use API keys. MCP can use OAuth2 in clients that support it, with API keys as a fallback. If you self-host, use your own instance URL for the API and MCP endpoints.
+Create an API key in **Settings → AI → API keys**. Keys act as you and can read and edit your documents. You choose an expiry of **30 days**, **90 days** or **Never**, the key is shown once, and you can revoke it at any time. MCP clients that support OAuth can sign in without a key.
+
+If you self-host, replace `https://rxresu.me` with your own instance's address in every API and MCP example.
 
 <Info>
-  Automation changes affect the resumes available to the authenticated account or instance. Test workflows on a copy of a
-  resume before using them for important application materials.
+  Automated changes are real changes to your account. Try a new workflow on a duplicate of a resume first, and use
+  History in the editor to go back if something goes wrong.
 </Info>
 
 ## When not to use automation
 
-Do not reach for API or MCP automation when you only need to edit one resume by hand. The builder is faster for one-off changes, template selection, and visual review. Avoid automation for important resume updates unless you can test the exact changes on a copy first.
+For editing one resume by hand, choosing a template or checking the layout, the editor is faster. Automation pays off when you repeat the same change across many documents, keep applications in sync with another tool, or want an AI client to do the typing for you.
 
-## Next action
+## Next steps
 
-For scripts and integrations, create an API key with [Using the API](/guides/using-the-api), then use [Using the patch API](/guides/using-the-patch-api) for targeted edits. For agent workflows, start with [Using the MCP server](/guides/using-the-mcp-server).
+<CardGroup cols={2}>
+  <Card title="Use the API" icon="code" href="/guides/using-the-api">
+    Create a key and make your first request.
+  </Card>
+  <Card title="Use the Patch API" icon="pen-to-square" href="/guides/using-the-patch-api">
+    Change specific resume fields with JSON Patch.
+  </Card>
+  <Card title="Use the MCP server" icon="robot" href="/guides/using-the-mcp-server">
+    Connect Claude, Cursor or another MCP client.
+  </Card>
+  <Card title="Manage applications with MCP" icon="briefcase" href="/guides/managing-applications-with-mcp">
+    Track job applications from an AI client.
+  </Card>
+</CardGroup>
+
+For the shape of resume data, see the [JSON Resume schema](/guides/json-resume-schema). For big payloads, see [Large RPC requests](/guides/large-rpc-requests).

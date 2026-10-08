@@ -1,22 +1,8 @@
-import { t } from "@lingui/core/macro";
-import { KeyIcon } from "@phosphor-icons/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Separator } from "@reactive-resume/ui/components/separator";
-import { ApiKeysSettingsPage } from "@/features/settings/pages/api-keys";
-import { DashboardHeader } from "../-components/header";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Settings became three pages in 6.0; the old address redirects (through 6.0.x).
 export const Route = createFileRoute("/dashboard/settings/api-keys")({
-	component: RouteComponent,
+	beforeLoad: () => {
+		throw redirect({ to: "/dashboard/settings/ai", replace: true });
+	},
 });
-
-function RouteComponent() {
-	return (
-		<div className="space-y-4">
-			<DashboardHeader icon={KeyIcon} title={t`API Keys`} />
-
-			<Separator />
-
-			<ApiKeysSettingsPage />
-		</div>
-	);
-}

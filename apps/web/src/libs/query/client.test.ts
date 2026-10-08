@@ -1,49 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { QueryClient } from "@tanstack/react-query";
 import { getQueryClient } from "./client";
 
-describe("getQueryClient", () => {
-	it("returns a QueryClient instance", () => {
-		const client = getQueryClient();
-		expect(client).toBeInstanceOf(QueryClient);
-	});
+describe("getQueryClient mutationCache", () => {
+	it("invalidates data queries but excludes auth session and flags on mutation settled", async () => {
+		const queryClient = getQueryClient();
 
-	it("returns a fresh client on each call", () => {
-		const a = getQueryClient();
-		const b = getQueryClient();
-		expect(a).not.toBe(b);
-	});
+		queryClient.setQueryData(["auth", "session"], { user: { id: "u-1" } });
+		queryClient.setQueryData(["flags"], { disableSignups: false });
+		queryClient.setQueryData(["resume", "list"], [{ id: "res-1" }]);
 
-	it("hashes the query key into a deterministic JSON string", () => {
-		const client = getQueryClient();
-		const fn = client.getDefaultOptions().queries?.queryKeyHashFn;
-		expect(typeof fn).toBe("function");
+		const authQuery = queryClient.getQueryCache().find({ queryKey: ["auth", "session"] });
+		const flagsQuery = queryClient.getQueryCache().find({ queryKey: ["flags"] });
+		const resumeQuery = queryClient.getQueryCache().find({ queryKey: ["resume", "list"] });
 
-		const hashA = fn?.(["resumes", { id: "abc" }]);
-		const hashB = fn?.(["resumes", { id: "abc" }]);
-		const hashC = fn?.(["resumes", { id: "xyz" }]);
+		expect(authQuery?.isStale()).toBe(false);
+		expect(flagsQuery?.isStale()).toBe(false);
+		expect(resumeQuery?.isStale()).toBe(false);
 
-		expect(hashA).toBe(hashB);
-		expect(hashA).not.toBe(hashC);
-		expect(typeof hashA).toBe("string");
-		// json/meta envelope is included
-		expect(hashA).toContain('"json"');
-	});
+		// Trigger a mutation that settles
+		const mutation = queryClient.getMutationCache().build(queryClient, {
+			mutationFn: async () => "success",
+		});
+		await mutation.execute(undefined);
 
-	it("round-trips data through dehydrate/hydrate via oRPC serializer", () => {
-		const client = getQueryClient();
-		const serializeData = client.getDefaultOptions().dehydrate?.serializeData;
-		const deserializeData = client.getDefaultOptions().hydrate?.deserializeData;
+		// Resume query is invalidated (stale)
+		expect(resumeQuery?.isStale()).toBe(true);
 
-		expect(serializeData).toBeTypeOf("function");
-		expect(deserializeData).toBeTypeOf("function");
-
-		const original = { id: "x", count: 3, when: new Date("2024-01-01T00:00:00Z") };
-		const serialized = serializeData?.(original);
-		const restored = deserializeData?.(serialized) as typeof original;
-
-		expect(restored.id).toBe(original.id);
-		expect(restored.count).toBe(original.count);
-		expect(restored.when.getTime()).toBe(original.when.getTime());
+		// Auth and flags are preserved (not stale)
+		expect(authQuery?.isStale()).toBe(false);
+		expect(flagsQuery?.isStale()).toBe(false);
 	});
 });

@@ -1,27 +1,30 @@
+import type { orpc } from "@/libs/orpc/client";
+import type { Theme } from "@/libs/theme";
 import type { IconProps } from "@phosphor-icons/react";
 import type { FeatureFlags } from "@reactive-resume/api/features/flags";
 import type { AuthSession } from "@reactive-resume/auth/types";
 import type { Locale } from "@reactive-resume/utils/locale";
 import type { QueryClient } from "@tanstack/react-query";
-import type { orpc } from "@/libs/orpc/client";
-import type { Theme } from "@/libs/theme";
+import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { IconContext } from "@phosphor-icons/react";
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { domMax, LazyMotion, MotionConfig } from "motion/react";
 import { useEffect } from "react";
 import { Toaster } from "@reactive-resume/ui/components/toast";
 import { TooltipProvider } from "@reactive-resume/ui/components/tooltip";
+import { isRTL } from "@reactive-resume/utils/locale";
 import { BreakpointIndicator } from "@/components/layout/breakpoint-indicator";
 import { DialogManager } from "@/dialogs/manager";
 import { CommandPalette } from "@/features/command-palette";
 import { ThemeProvider } from "@/features/theme/provider";
 import { ConfirmDialogProvider } from "@/hooks/use-confirm";
-import { PromptDialogProvider } from "@/hooks/use-prompt";
-import { isRTL } from "@/libs/locale";
 import { loadRootContext } from "@/libs/root-context";
 
 type RouterContext = {
@@ -33,53 +36,30 @@ type RouterContext = {
 	flags: FeatureFlags;
 };
 
-const appName = "Reactive Resume";
-const tagline = "A free and open-source resume builder";
-const title = `${appName} — ${tagline}`;
-// Keep under ~120 characters so Google's mobile SERP snippet is not truncated at 3 lines.
+const title = "Reactive Resume — A free and open-source resume builder";
 const description =
 	"Free, open-source resume builder. Create, update, and share your resume, with no ads and no paywall.";
 const iconContextValue: IconProps = { size: 16, weight: "regular" };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
 	component: RootComponent,
+	// index.html carries the tags that never change (charset, viewport, icons, manifest); the server adds each page's
+	// canonical link, social cards and structured data. The router only keeps the title and description current.
 	head: () => {
-		return {
-			links: [
-				// Icons
-				{ rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "128x128" },
-				{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml", sizes: "256x256 any" },
-				{ rel: "apple-touch-icon", href: "/apple-touch-icon-180x180.png", type: "image/png", sizes: "180x180 any" },
-				// Manifest
-				{ rel: "manifest", href: "/manifest.webmanifest", crossOrigin: "use-credentials" },
-			],
-			meta: [
-				{ title },
-				{ charSet: "UTF-8" },
-				{ name: "description", content: description },
-				{ name: "viewport", content: "width=device-width, initial-scale=1" },
-				// Meta Tags
-				{ name: "theme-color", content: "#09090B" },
-				{ name: "application-name", content: "Reactive Resume" },
-				{ name: "mobile-web-app-capable", content: "yes" },
-				{ name: "apple-mobile-web-app-capable", content: "yes" },
-				{ name: "apple-mobile-web-app-title", content: "Reactive Resume" },
-				{ name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-			],
-		};
+		return { meta: [{ title }, { name: "description", content: description }] };
 	},
-	beforeLoad: async () => loadRootContext(),
+	beforeLoad: ({ context }) => loadRootContext(context.queryClient),
 });
 
 function RootComponent() {
 	const { theme, locale, queryClient } = Route.useRouteContext();
 	const dir = isRTL(locale) ? "rtl" : "ltr";
 
+	// The theme class is owned by ThemeProvider, which also follows the system appearance.
 	useEffect(() => {
 		document.documentElement.lang = locale;
 		document.documentElement.dir = dir;
-		document.documentElement.classList.toggle("dark", theme === "dark");
-	}, [dir, locale, theme]);
+	}, [dir, locale]);
 
 	return (
 		<>
@@ -92,9 +72,9 @@ function RootComponent() {
 							<IconContext.Provider value={iconContextValue}>
 								<ThemeProvider theme={theme}>
 									<HotkeysProvider>
-										<TooltipProvider>
-											<ConfirmDialogProvider>
-												<PromptDialogProvider>
+										<DirectionProvider direction={dir}>
+											<TooltipProvider>
+												<ConfirmDialogProvider>
 													<Outlet />
 
 													<DialogManager />
@@ -102,9 +82,24 @@ function RootComponent() {
 													<Toaster />
 
 													{import.meta.env.DEV && <BreakpointIndicator />}
-												</PromptDialogProvider>
-											</ConfirmDialogProvider>
-										</TooltipProvider>
+													{import.meta.env.DEV && (
+														<TanStackDevtools
+															config={{ position: "bottom-left" }}
+															plugins={[
+																{
+																	name: "TanStack Query",
+																	render: <ReactQueryDevtoolsPanel />,
+																},
+																{
+																	name: "TanStack Router",
+																	render: <TanStackRouterDevtoolsPanel />,
+																},
+															]}
+														/>
+													)}
+												</ConfirmDialogProvider>
+											</TooltipProvider>
+										</DirectionProvider>
 									</HotkeysProvider>
 								</ThemeProvider>
 							</IconContext.Provider>

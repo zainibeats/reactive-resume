@@ -13,12 +13,6 @@ function paragraphXml(html: string) {
 }
 
 describe("DOCX literal whitespace (#3397)", () => {
-	it.each(["p", "h2"])("emits exact marked %s spaces with XML preservation", (tag) => {
-		const xml = paragraphXml(`<${tag} data-resume-whitespace="preserve">  Lead  middle end  </${tag}>`);
-		expect(xml).toContain("  Lead  middle end  ");
-		expect(xml).toContain('"xml:space":"preserve"');
-	});
-
 	it("expands marked tabs to four ordinary spaces while leaving unmarked legacy tabs unchanged", () => {
 		const marked = paragraphXml('<p data-resume-whitespace="preserve">A\tB\t\tC</p>');
 		expect(marked).toContain("A    B        C");

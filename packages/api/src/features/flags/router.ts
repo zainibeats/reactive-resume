@@ -23,6 +23,7 @@ export const flagsRouter = {
 				"Returns the current feature flags for this Reactive Resume instance. Feature flags control instance-wide settings such as whether new user signups or email-based authentication are disabled. No authentication required.",
 			successDescription: "The current feature flags for this instance.",
 		})
+		.input(z.object({}).optional())
 		.output(
 			z.object({
 				disableSignups: z.boolean().describe("Whether new user signups are disabled on this instance."),
@@ -30,11 +31,9 @@ export const flagsRouter = {
 				smtpEnabled: z.boolean().describe("Whether outbound email (SMTP) is configured on this instance."),
 			}),
 		)
-		.handler(
-			(): FeatureFlags => ({
-				disableSignups: env.FLAG_DISABLE_SIGNUPS,
-				disableEmailAuth: env.FLAG_DISABLE_EMAIL_AUTH,
-				smtpEnabled: isSmtpEnabled(),
-			}),
-		),
+		.handler((): FeatureFlags => ({
+			disableSignups: env.FLAG_DISABLE_SIGNUPS,
+			disableEmailAuth: env.FLAG_DISABLE_EMAIL_AUTH,
+			smtpEnabled: isSmtpEnabled(),
+		})),
 };

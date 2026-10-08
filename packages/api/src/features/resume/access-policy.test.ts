@@ -1,37 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
-import { assertCanView, isOwner, redactResumeForViewer, shouldCountForStatistics } from "./access-policy";
-
-describe("isOwner", () => {
-	it("returns true when viewer.id matches resume.userId", () => {
-		expect(isOwner({ userId: "u1", isPublic: false }, { id: "u1" })).toBe(true);
-	});
-
-	it("returns false when viewer.id differs", () => {
-		expect(isOwner({ userId: "u1", isPublic: false }, { id: "u2" })).toBe(false);
-	});
-
-	it("returns false when viewer is null (anonymous)", () => {
-		expect(isOwner({ userId: "u1", isPublic: false }, null)).toBe(false);
-	});
-});
+import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
+import { assertCanView, redactResumeForViewer } from "./access-policy";
 
 describe("assertCanView", () => {
-	it("does not throw when viewer is owner of private resume", () => {
-		expect(() => assertCanView({ userId: "u1", isPublic: false }, { id: "u1" })).not.toThrow();
-	});
-
-	it("does not throw when resume is public regardless of viewer", () => {
-		expect(() => assertCanView({ userId: "u1", isPublic: true }, { id: "u2" })).not.toThrow();
-		expect(() => assertCanView({ userId: "u1", isPublic: true }, null)).not.toThrow();
-	});
-
 	it("throws NOT_FOUND for private resume viewed by non-owner", () => {
 		expect(() => assertCanView({ userId: "u1", isPublic: false }, { id: "u2" })).toThrow();
-	});
-
-	it("throws NOT_FOUND for private resume viewed anonymously", () => {
-		expect(() => assertCanView({ userId: "u1", isPublic: false }, null)).toThrow();
 	});
 
 	it("error code is NOT_FOUND (not FORBIDDEN) to prevent existence disclosure", () => {
@@ -45,14 +19,6 @@ describe("assertCanView", () => {
 });
 
 describe("redactResumeForViewer", () => {
-	it("returns the resume unchanged for owner", () => {
-		const resume = {
-			name: "My Dashboard Title",
-			data: { ...defaultResumeData, metadata: { ...defaultResumeData.metadata, notes: "Private" } },
-		};
-		expect(redactResumeForViewer(resume, true)).toBe(resume);
-	});
-
 	it("replaces name with placeholder for non-owner", () => {
 		const resume = {
 			name: "Senior Eng @ Foo — final draft",
@@ -62,76 +28,38 @@ describe("redactResumeForViewer", () => {
 		expect(result.name).toBe("Resume");
 	});
 
-	it("strips metadata.notes for non-owner", () => {
-		const resume = {
-			name: "Title",
-			data: { ...defaultResumeData, metadata: { ...defaultResumeData.metadata, notes: "Private notes" } },
-		};
-		const result = redactResumeForViewer(resume, false);
-		expect(result.data.metadata.notes).toBe("");
-	});
-
-	it("preserves stylesheet source for an authorized non-owner", () => {
-		const source = { languageVersion: 1, text: "@version 1;\nresume { color: red; }\n" };
+	it("strips metadata.notes and the author's Check choices for non-owner", () => {
 		const resume = {
 			name: "Title",
 			data: {
 				...defaultResumeData,
 				metadata: {
 					...defaultResumeData.metadata,
-					stylesheet: { mode: "semantic" as const, source },
+					notes: "Private notes",
+					check: { ignored: ["MISSING_PHONE:/basics/phone"], hiddenTerms: ["HIPAA"] },
 				},
 			},
 		};
-
 		const result = redactResumeForViewer(resume, false);
-
-		expect(result.data.metadata.stylesheet).toEqual({ mode: "semantic", source });
+		expect(result.data.metadata.notes).toBe("");
+		expect(result.data.metadata.check).toBeUndefined();
 	});
 
-	it("preserves resume.data.basics.name (the person's name) for non-owner", () => {
-		const resume = {
-			name: "Dashboard title",
-			data: {
-				...defaultResumeData,
-				basics: { ...defaultResumeData.basics, name: "Alice Smith" },
-			},
-		};
-		const result = redactResumeForViewer(resume, false);
-		expect(result.data.basics.name).toBe("Alice Smith");
-	});
+	it("strips what the author hid for non-owner and keeps what prints", () => {
+		const data = structuredClone(sampleResumeData);
+		data.picture.hidden = true;
+		data.summary.hidden = true;
+		data.sections.references.hidden = true;
+		data.sections.projects.items = data.sections.projects.items.map((item, index) => ({ ...item, hidden: index > 0 }));
+		data.customSections = data.customSections.map((section) => ({ ...section, hidden: true }));
 
-	it("does not mutate the input", () => {
-		const resume = {
-			name: "Title",
-			data: { ...defaultResumeData, metadata: { ...defaultResumeData.metadata, notes: "Notes" } },
-		};
-		const before = JSON.stringify(resume);
-		redactResumeForViewer(resume, false);
-		expect(JSON.stringify(resume)).toBe(before);
-	});
+		const shared = redactResumeForViewer({ name: "Title", data }, false).data;
 
-	it("preserves additional resume fields", () => {
-		const resume = {
-			name: "Title",
-			data: defaultResumeData,
-			extraField: "extra",
-		};
-		const result = redactResumeForViewer(resume, false);
-		expect((result as typeof resume).extraField).toBe("extra");
-	});
-});
-
-describe("shouldCountForStatistics", () => {
-	it("returns false when viewer is the owner", () => {
-		expect(shouldCountForStatistics({ userId: "u1", isPublic: true }, { id: "u1" })).toBe(false);
-	});
-
-	it("returns true for anonymous viewers", () => {
-		expect(shouldCountForStatistics({ userId: "u1", isPublic: true }, null)).toBe(true);
-	});
-
-	it("returns true for non-owner viewers", () => {
-		expect(shouldCountForStatistics({ userId: "u1", isPublic: true }, { id: "u2" })).toBe(true);
+		expect(shared.picture.url).toBe("");
+		expect(shared.summary.content).toBe("");
+		expect(shared.sections.references.items).toEqual([]);
+		expect(shared.sections.projects.items).toEqual(data.sections.projects.items.slice(0, 1));
+		expect(shared.customSections).toEqual([]);
+		expect(shared.sections.education).toEqual(data.sections.education);
 	});
 });

@@ -1,62 +1,49 @@
 import type { Application } from "@/features/applications/types";
-import { msg, t } from "@lingui/core/macro";
-import { useLingui } from "@lingui/react";
+import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import {
-	ArchiveIcon,
-	BriefcaseIcon,
-	CalendarDotsIcon,
-	ChartBarIcon,
-	DownloadSimpleIcon,
-	FunnelIcon,
-	KanbanIcon,
-	MagnifyingGlassIcon,
-	PlusIcon,
-	RowsIcon,
-} from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, stripSearchParams, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@reactive-resume/ui/components/input-group";
-import { Label } from "@reactive-resume/ui/components/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@reactive-resume/ui/components/popover";
-import { Separator } from "@reactive-resume/ui/components/separator";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@reactive-resume/ui/components/dropdown-menu";
+import { Icon } from "@reactive-resume/ui/components/icon";
+import { Input } from "@reactive-resume/ui/components/input";
+import { Skeleton } from "@reactive-resume/ui/components/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@reactive-resume/ui/components/tabs";
-import { Combobox } from "@/components/ui/combobox";
+import { useBreakpoint } from "@reactive-resume/ui/hooks/use-breakpoint";
+import { cn } from "@reactive-resume/utils/style";
+import { AddApplicationDialog } from "@/features/applications/components/add-application-dialog";
 import { ApplicationDetailSheet } from "@/features/applications/components/application-detail-sheet";
 import { ApplicationFormSheet } from "@/features/applications/components/application-form-sheet";
 import { ApplicationBoard } from "@/features/applications/components/board";
 import { ApplicationCalendar } from "@/features/applications/components/calendar-view";
 import { ExportApplicationsSheet } from "@/features/applications/components/export-applications-sheet";
 import { ImportApplicationsSheet } from "@/features/applications/components/import-applications-sheet";
-import { ApplicationInsights } from "@/features/applications/components/insights-view";
-import { ApplicationTable } from "@/features/applications/components/table-view";
+import { ApplicationInsights, InsightsSkeleton } from "@/features/applications/components/insights-view";
+import { ApplicationList } from "@/features/applications/components/list-view";
+import { getNextStep } from "@/features/applications/next-step";
 import { applicationsListQueryOptions } from "@/features/applications/queries";
-import { orpc } from "@/libs/orpc/client";
-import { DashboardHeader } from "../-components/header";
+import { ENTER_CLASS } from "@/libs/motion";
 
-const SORT_OPTIONS = [
-	{ value: "updated", label: msg`Last updated` },
-	{ value: "applied", label: msg`Date applied` },
-	{ value: "company", label: msg`Company A–Z` },
-	{ value: "role", label: msg`Role A–Z` },
-] as const;
-
-type SortKey = (typeof SORT_OPTIONS)[number]["value"];
+const VIEWS = ["list", "board", "insights", "calendar"] as const;
+type View = (typeof VIEWS)[number];
 
 const searchSchema = z.object({
-	search: z.string().default(""),
-	view: z.enum(["board", "table", "calendar", "insights"]).default("board"),
-	tags: z.array(z.string()).default([]),
-	sort: z.enum(["updated", "applied", "company", "role"]).default("updated"),
-	archived: z.boolean().default(false),
-	create: z.boolean().default(false),
-	applicationId: z.string().optional(),
+	q: z.string().default("").catch(""),
+	view: z.enum(VIEWS).default("list").catch("list"),
+	closed: z.boolean().default(false).catch(false),
+	// Deep links: open Add, or one application.
+	create: z.boolean().default(false).catch(false),
+	applicationId: z.string().optional().catch(undefined),
 });
 type Search = z.output<typeof searchSchema>;
-const defaultSearch: Search = { search: "", view: "board", tags: [], sort: "updated", archived: false, create: false };
+const defaultSearch: Search = { q: "", view: "list", closed: false, create: false };
 
 export const Route = createFileRoute("/dashboard/applications/")({
 	component: RouteComponent,
@@ -64,324 +51,337 @@ export const Route = createFileRoute("/dashboard/applications/")({
 	search: { middlewares: [stripSearchParams(defaultSearch)] },
 });
 
+/** Search reads role, company, location, contacts and tags. */
+function matches(application: Application, query: string) {
+	if (!query) return true;
+	const haystack = [
+		application.role,
+		application.company,
+		application.location ?? "",
+		...application.contacts.map((contact) => contact.name),
+		...application.tags,
+	]
+		.join(" ")
+		.toLowerCase();
+	return haystack.includes(query);
+}
+
 function RouteComponent() {
-	const { i18n } = useLingui();
-	const { search, view, tags, sort, archived, create, applicationId } = Route.useSearch();
+	const { q, view, closed, create, applicationId } = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
-
-	const [textSearch, setTextSearch] = useState(search);
-	const [addOpen, setAddOpen] = useState(false);
-	const [importOpen, setImportOpen] = useState(false);
-	const [exportOpen, setExportOpen] = useState(false);
+	const phone = useBreakpoint() === "mobile";
+	// Typing filters at once; the URL only seeds the search.
+	const [query, setQuery] = useState(q);
+	const [adding, setAdding] = useState(false);
+	const [importing, setImporting] = useState(false);
+	const [exporting, setExporting] = useState(false);
 	const [editing, setEditing] = useState<Application | null>(null);
-	const [selected, setSelected] = useState<Application | null>(null);
+	const [selectedId, setSelectedId] = useState<string | null>(null);
+	// Views animate in only after a switch, never on the page's first render.
+	const [viewSwitched, setViewSwitched] = useState(false);
 
-	// Editing from the detail panel: close the panel, open the edit form on the same application.
-	const startEdit = (application: Application) => {
-		setSelected(null);
-		setEditing(application);
-	};
+	const { data: applications, isPending } = useQuery(applicationsListQueryOptions());
+	const setSearch = (patch: Partial<Search>) =>
+		void navigate({ resetScroll: false, search: (prev: Search) => ({ ...prev, ...patch }) });
 
 	useEffect(() => {
 		if (!create) return;
-
-		setAddOpen(true);
-		void navigate({ replace: true, search: (prev: Search) => ({ ...prev, create: false }) });
+		// oxlint-disable-next-line react/set-state-in-effect -- takes the one-shot ?create flag from the address, then clears it
+		setAdding(true);
+		void navigate({ replace: true, resetScroll: false, search: (prev: Search) => ({ ...prev, create: false }) });
 	}, [create, navigate]);
-
-	const { data: applications, isPending } = useQuery(applicationsListQueryOptions());
-	const { data: allTags } = useQuery(orpc.applications.tags.queryOptions());
 
 	useEffect(() => {
 		if (!applicationId || !applications) return;
-
-		setSelected(applications.find((application) => application.id === applicationId) ?? null);
-		void navigate({ replace: true, search: (prev: Search) => ({ ...prev, applicationId: undefined }) });
+		// oxlint-disable-next-line react/set-state-in-effect -- takes the one-shot ?applicationId from the address, then clears it
+		setSelectedId(applicationId);
+		void navigate({
+			replace: true,
+			resetScroll: false,
+			search: (prev: Search) => ({ ...prev, applicationId: undefined }),
+		});
 	}, [applicationId, applications, navigate]);
 
-	// Board & table hide archived; tag/search filters + sort are applied client-side.
-	const filtered = useMemo(() => {
-		const query = textSearch.trim().toLowerCase();
-		const rows = (applications ?? [])
-			.filter((app) => archived || !app.archived)
-			.filter((app) => tags.length === 0 || tags.every((tag: string) => app.tags.includes(tag)))
-			.filter((app) => !query || app.company.toLowerCase().includes(query) || app.role.toLowerCase().includes(query));
-
-		const compare: Record<SortKey, (a: Application, b: Application) => number> = {
-			updated: (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-			applied: (a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime(),
-			company: (a, b) => a.company.localeCompare(b.company),
-			role: (a, b) => a.role.localeCompare(b.role),
-		};
-		return rows.sort(compare[sort as SortKey]);
-	}, [applications, textSearch, tags, sort, archived]);
-
-	const archivedCount = (applications ?? []).filter((app) => app.archived).length;
-
-	// While loading render neither the empty state nor the board; a failed load falls back to the empty state.
-	const isEmpty = !applications?.length;
-
-	const setUrlSearch = (patch: Partial<Search>) => void navigate({ search: (prev: Search) => ({ ...prev, ...patch }) });
+	const text = query.trim().toLowerCase();
+	const filtered = (applications ?? []).filter((application) => matches(application, text));
+	const selected = applications?.find((application) => application.id === selectedId) ?? null;
+	// The board needs room to drag: phones get the list instead.
+	const shown: View = phone && (view === "board" || view === "calendar") ? "list" : view;
+	const empty = !isPending && (applications?.length ?? 0) === 0;
+	const noMatches = !empty && text && filtered.length === 0;
 
 	return (
-		<div className="flex h-[calc(100dvh-2rem)] flex-col gap-4">
-			<DashboardHeader
-				className="max-sm:flex-col max-sm:gap-y-3"
-				icon={BriefcaseIcon}
-				title={t`Job Search`}
-				actions={
-					!isEmpty ? (
-						<>
-							<Button size="sm" variant="outline" onClick={() => setExportOpen(true)}>
-								<DownloadSimpleIcon />
-								<Trans>Export CSV</Trans>
-							</Button>
-							<Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
-								<DownloadSimpleIcon />
-								<Trans>Import CSV</Trans>
-							</Button>
-							<Button size="sm" onClick={() => setAddOpen(true)}>
-								<PlusIcon />
-								<Trans>Add job</Trans>
-							</Button>
-						</>
-					) : undefined
-				}
-			/>
+		<div className="mx-auto grid w-full max-w-[1180px] content-start gap-5 px-8 py-8 max-sm:px-4 max-sm:py-5">
+			<header className="flex flex-wrap items-center justify-between gap-3">
+				<h1 className="font-display text-[30px] leading-9 font-medium">
+					<Trans>Applications</Trans>
+				</h1>
+				<div className="flex items-center gap-2">
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={<Button size="icon" variant="secondary" aria-label={t`Import or export CSV`} />}
+						>
+							<Icon name="import_export" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => setImporting(true)}>
+								<Trans>Import from CSV…</Trans>
+							</DropdownMenuItem>
+							<DropdownMenuItem disabled={empty} onClick={() => setExporting(true)}>
+								<Trans>Export to CSV…</Trans>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+					<Button onClick={() => setAdding(true)}>
+						<Icon name="add" />
+						<Trans>Save job</Trans>
+					</Button>
+				</div>
+			</header>
 
-			<Separator />
+			{applications && <FollowUpNudge applications={applications} onOpen={setSelectedId} />}
 
-			{isPending ? null : isEmpty ? (
-				<EmptyState onAdd={() => setAddOpen(true)} onImport={() => setImportOpen(true)} />
+			{empty ? (
+				<EmptyState onAdd={() => setAdding(true)} onImport={() => setImporting(true)} />
 			) : (
 				<>
-					{/* One row: search grows, filters stay fixed, icon-only view switcher on the right. */}
-					<div className="flex items-center gap-2">
-						<InputGroup className="min-w-24 max-w-72 flex-1">
-							<InputGroupAddon align="inline-start">
-								<MagnifyingGlassIcon />
-							</InputGroupAddon>
-							<InputGroupInput
-								value={textSearch}
-								placeholder={t`Search saved jobs…`}
-								onChange={(event) => setTextSearch(event.target.value)}
-							/>
-						</InputGroup>
-
-						{/* Desktop: filters inline. Mobile: collapsed into the Filters popover below. */}
-						{(allTags?.length ?? 0) > 0 && (
-							<Combobox
-								multiple
-								className="w-40 min-w-0 shrink max-sm:hidden"
-								value={tags}
-								placeholder={t`Filter by tags`}
-								options={(allTags ?? []).map((tag) => ({ value: tag, label: tag }))}
-								onValueChange={(value) => setUrlSearch({ tags: value ?? [] })}
-							/>
-						)}
-
-						{view !== "insights" && view !== "calendar" && (
-							<Combobox
-								className="w-40 min-w-0 shrink max-sm:hidden"
-								value={sort}
-								placeholder={t`Sort by…`}
-								options={SORT_OPTIONS.map((option) => ({ value: option.value, label: i18n.t(option.label) }))}
-								onValueChange={(value) => value && setUrlSearch({ sort: value as SortKey })}
-							/>
-						)}
-
-						{archivedCount > 0 && view !== "insights" && (
-							<Button
-								size="sm"
-								variant={archived ? "secondary" : "outline"}
-								className="shrink-0 max-sm:hidden"
-								onClick={() => setUrlSearch({ archived: !archived })}
-							>
-								<ArchiveIcon />
-								<Trans>Archived</Trans> ({archivedCount})
-							</Button>
-						)}
-
-						{/* Mobile-only: one button holds every filter so the row never overflows on a phone. */}
-						{view !== "insights" && (
-							<Popover>
-								<PopoverTrigger
-									render={
-										<Button size="icon-sm" variant="outline" className="relative shrink-0 sm:hidden">
-											<FunnelIcon />
-											{(tags.length > 0 || archived) && (
-												<span className="absolute end-1 top-1 size-1.5 rounded-full bg-primary" />
-											)}
-										</Button>
-									}
-								/>
-								<PopoverContent align="end" className="w-64 p-3">
-									{(allTags?.length ?? 0) > 0 && (
-										<div className="space-y-1.5">
-											<Label className="text-muted-foreground text-xs">
-												<Trans>Filter by tags</Trans>
-											</Label>
-											<Combobox
-												multiple
-												className="w-full"
-												value={tags}
-												placeholder={t`Any tag`}
-												options={(allTags ?? []).map((tag) => ({ value: tag, label: tag }))}
-												onValueChange={(value) => setUrlSearch({ tags: value ?? [] })}
-											/>
-										</div>
-									)}
-									<div className="space-y-1.5">
-										<Label className="text-muted-foreground text-xs">
-											<Trans>Sort by</Trans>
-										</Label>
-										<Combobox
-											className="w-full"
-											value={sort}
-											options={SORT_OPTIONS.map((option) => ({ value: option.value, label: i18n.t(option.label) }))}
-											onValueChange={(value) => value && setUrlSearch({ sort: value as SortKey })}
-										/>
-									</div>
-									{archivedCount > 0 && (
-										<Button
-											size="sm"
-											variant={archived ? "secondary" : "outline"}
-											className="w-full"
-											onClick={() => setUrlSearch({ archived: !archived })}
-										>
-											<ArchiveIcon />
-											<Trans>Archived</Trans> ({archivedCount})
-										</Button>
-									)}
-								</PopoverContent>
-							</Popover>
-						)}
-
-						<Tabs className="ms-auto shrink-0" value={view}>
-							<TabsList>
-								<TabsTrigger
-									value="board"
-									title={i18n.t(msg`Board`)}
-									nativeButton={false}
-									render={<Link to="." search={(p: Search) => ({ ...p, view: "board" })} />}
-								>
-									<KanbanIcon />
-									<span className="sr-only">{i18n.t(msg`Board`)}</span>
+					<div className="flex flex-wrap items-center gap-2">
+						<Tabs
+							value={shown}
+							onValueChange={(value) => {
+								setViewSwitched(true);
+								setSearch({ view: value as View });
+							}}
+						>
+							<TabsList aria-label={t`View`}>
+								<TabsTrigger value="list">
+									<Icon name="view_agenda" size={18} />
+									<Trans>List</Trans>
 								</TabsTrigger>
-								<TabsTrigger
-									value="table"
-									title={i18n.t(msg`Table`)}
-									nativeButton={false}
-									render={<Link to="." search={(p: Search) => ({ ...p, view: "table" })} />}
-								>
-									<RowsIcon />
-									<span className="sr-only">{i18n.t(msg`Table`)}</span>
+								{!phone && (
+									<TabsTrigger value="board">
+										<Icon name="view_kanban" size={18} />
+										<Trans>Board</Trans>
+									</TabsTrigger>
+								)}
+								<TabsTrigger value="insights">
+									<Icon name="insights" size={18} />
+									<Trans>Insights</Trans>
 								</TabsTrigger>
-								<TabsTrigger
-									value="calendar"
-									title={i18n.t(msg`Calendar`)}
-									nativeButton={false}
-									render={<Link to="." search={(p: Search) => ({ ...p, view: "calendar" })} />}
-								>
-									<CalendarDotsIcon />
-									<span className="sr-only">{i18n.t(msg`Calendar`)}</span>
-								</TabsTrigger>
-								<TabsTrigger
-									value="insights"
-									title={i18n.t(msg`Insights`)}
-									nativeButton={false}
-									render={<Link to="." search={(p: Search) => ({ ...p, view: "insights" })} />}
-								>
-									<ChartBarIcon />
-									<span className="sr-only">{i18n.t(msg`Insights`)}</span>
-								</TabsTrigger>
+								{!phone && (
+									<TabsTrigger value="calendar">
+										<Icon name="calendar_month" size={18} />
+										<Trans>Calendar</Trans>
+									</TabsTrigger>
+								)}
 							</TabsList>
 						</Tabs>
-					</div>
 
-					<div className="flex min-h-0 flex-1 flex-col">
-						{view !== "insights" && filtered.length === 0 ? (
-							<div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
-								<p className="font-medium text-sm">
-									<Trans>No saved jobs match your filters.</Trans>
-								</p>
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => {
-										setTextSearch("");
-										setUrlSearch({ search: "", tags: [], archived: false });
-									}}
-								>
-									<Trans>Clear filters</Trans>
-								</Button>
-							</div>
-						) : (
-							<>
-								{view === "board" && (
-									<ApplicationBoard applications={filtered} onOpen={setSelected} onEdit={setEditing} />
-								)}
-								{view === "table" && (
-									<ApplicationTable applications={filtered} onOpen={setSelected} onEdit={setEditing} />
-								)}
-								{view === "calendar" && (
-									<ApplicationCalendar
-										applications={filtered}
-										allApplications={applications ?? []}
-										onOpen={setSelected}
-									/>
-								)}
-								{view === "insights" && <ApplicationInsights applications={applications ?? []} />}
-							</>
+						<div className="relative max-w-72 min-w-40 flex-1">
+							<Icon
+								name="search"
+								size={18}
+								className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-ink-3"
+							/>
+							<Input
+								type="search"
+								aria-label={t`Search applications`}
+								placeholder={t`Search role, company or contact`}
+								value={query}
+								className="ps-8"
+								onChange={(event) => setQuery(event.target.value)}
+							/>
+						</div>
+
+						{shown !== "insights" && (
+							<Button
+								variant="secondary"
+								aria-pressed={closed}
+								onClick={() => setSearch({ closed: !closed })}
+								className={cn(closed && "bg-sunken")}
+							>
+								<Icon name={closed ? "check_box" : "check_box_outline_blank"} size={18} />
+								<Trans>Show closed</Trans>
+							</Button>
 						)}
 					</div>
+
+					{isPending ? (
+						<ViewSkeleton view={shown} />
+					) : noMatches ? (
+						<div className="grid justify-items-center gap-2 py-16 text-center">
+							<p className="text-sm font-medium">
+								<Trans>No applications match “{query.trim()}”.</Trans>
+							</p>
+							<Button size="sm" variant="secondary" onClick={() => setQuery("")}>
+								<Trans>Clear search</Trans>
+							</Button>
+						</div>
+					) : (
+						<div
+							key={shown}
+							className={cn(
+								viewSwitched
+									? "transition-[opacity,translate] duration-standard ease-enter starting:translate-y-1 starting:opacity-0"
+									: // The list fades in on its first appearance, after its skeleton.
+										shown === "list" && "transition-opacity duration-standard ease-enter starting:opacity-0",
+							)}
+						>
+							{shown === "list" && (
+								<ApplicationList
+									applications={filtered}
+									showClosed={closed}
+									selectedId={selectedId}
+									onOpen={(application) => setSelectedId(application.id)}
+								/>
+							)}
+							{shown === "board" && (
+								<div className="h-[calc(100svh-230px)] min-h-96">
+									<ApplicationBoard
+										applications={filtered}
+										showClosed={closed}
+										onOpen={(application) => setSelectedId(application.id)}
+									/>
+								</div>
+							)}
+							{shown === "insights" && <ApplicationInsights applications={applications ?? []} />}
+							{shown === "calendar" && (
+								<ApplicationCalendar
+									applications={filtered.filter((application) => closed || application.status !== "closed")}
+									allApplications={applications ?? []}
+									onOpen={(application) => setSelectedId(application.id)}
+								/>
+							)}
+						</div>
+					)}
 				</>
 			)}
 
-			<ApplicationFormSheet open={addOpen} onOpenChange={setAddOpen} />
-			<ApplicationFormSheet open={!!editing} application={editing} onOpenChange={(open) => !open && setEditing(null)} />
-			<ImportApplicationsSheet open={importOpen} onOpenChange={setImportOpen} />
+			<AddApplicationDialog open={adding} onOpenChange={setAdding} onAdded={setSelectedId} />
+			<ApplicationFormSheet
+				open={Boolean(editing)}
+				application={editing}
+				onOpenChange={(open) => !open && setEditing(null)}
+			/>
+			<ImportApplicationsSheet open={importing} onOpenChange={setImporting} />
 			<ExportApplicationsSheet
-				open={exportOpen}
-				onOpenChange={setExportOpen}
+				open={exporting}
+				onOpenChange={setExporting}
 				applications={applications ?? []}
-				filtered={filtered}
+				filtered={filtered.filter((application) => closed || application.status !== "closed")}
 			/>
 			<ApplicationDetailSheet
 				application={selected}
-				onOpenChange={(open) => !open && setSelected(null)}
-				onEdit={startEdit}
+				onOpenChange={(open) => !open && setSelectedId(null)}
+				onEditDetails={(application) => {
+					setSelectedId(null);
+					setEditing(application);
+				}}
 			/>
+		</div>
+	);
+}
+
+const NUDGE_STORAGE_KEY = "applications-follow-up-dismissed";
+
+function readDismissed(): string[] {
+	try {
+		return JSON.parse(window.localStorage.getItem(NUDGE_STORAGE_KEY) ?? "[]") as string[];
+	} catch {
+		return [];
+	}
+}
+
+/**
+ * The follow-up nudge: the application waiting longest without a reply (10+ days since applying). Dismissing it is
+ * remembered on this device; it doesn't come back for that application.
+ */
+function FollowUpNudge({ applications, onOpen }: { applications: Application[]; onOpen: (id: string) => void }) {
+	const [dismissed, setDismissed] = useState(readDismissed);
+
+	const dismissedIds = new Set(dismissed);
+	const waiting = applications
+		.filter((application) => !dismissedIds.has(application.id))
+		.flatMap((application) => {
+			const step = getNextStep(application);
+			return step.kind === "no-reply" ? [{ application, days: step.days }] : [];
+		})
+		.sort((a, b) => b.days - a.days)[0];
+	if (!waiting) return null;
+
+	const dismiss = () => {
+		const next = [...dismissed, waiting.application.id].slice(-200);
+		setDismissed(next);
+		try {
+			window.localStorage.setItem(NUDGE_STORAGE_KEY, JSON.stringify(next));
+		} catch {
+			// Without storage the nudge is dismissed for this visit only.
+		}
+	};
+
+	const { company } = waiting.application;
+	const { days } = waiting;
+
+	return (
+		<div
+			key={waiting.application.id}
+			role="status"
+			className={cn(
+				ENTER_CLASS,
+				"flex flex-wrap items-center gap-2 rounded-xl bg-warn-soft px-3 py-2 text-sm text-warn-text",
+			)}
+		>
+			<Icon name="schedule" size={20} />
+			<span className="min-w-0 flex-1">
+				<Trans>
+					{company}: no reply for {days} days. A short follow-up is usually fine now.
+				</Trans>
+			</span>
+			<Button size="sm" variant="secondary" onClick={() => onOpen(waiting.application.id)}>
+				<Trans>Open</Trans>
+			</Button>
+			<Button size="icon-sm" variant="ghost" aria-label={t`Dismiss`} onClick={dismiss} className="text-warn-text">
+				<Icon name="close" size={18} />
+			</Button>
 		</div>
 	);
 }
 
 function EmptyState({ onAdd, onImport }: { onAdd: () => void; onImport: () => void }) {
 	return (
-		<div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-			<div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
-				<BriefcaseIcon className="size-7 text-muted-foreground" />
-			</div>
-			<div className="max-w-md space-y-1.5">
-				<h2 className="font-semibold text-lg">
-					<Trans>Save your first job posting</Trans>
-				</h2>
-				<p className="text-muted-foreground text-sm">
-					<Trans>
-						Keep the posting, link a resume, score your fit, and create a tailored copy when you are ready to apply.
-					</Trans>
-				</p>
-			</div>
+		<div className="grid justify-items-center gap-3 py-20 text-center transition-[opacity,translate] duration-emphasized ease-enter starting:translate-y-2 starting:opacity-0">
+			<span className="grid size-12 place-items-center rounded-xl bg-sunken text-ink-2">
+				<Icon name="work" size={26} />
+			</span>
+			<h2 className="text-lg font-semibold">
+				<Trans>Track your first job</Trans>
+			</h2>
+			<p className="max-w-sm text-sm text-ink-2">
+				<Trans>Paste a job link. We'll save the posting so Check, the assistant and your letter can use it.</Trans>
+			</p>
 			<div className="flex gap-2">
 				<Button onClick={onAdd}>
-					<PlusIcon />
-					<Trans>Add job</Trans>
+					<Icon name="add" />
+					<Trans>Save job</Trans>
 				</Button>
-				<Button variant="outline" onClick={onImport}>
-					<DownloadSimpleIcon />
+				<Button variant="secondary" onClick={onImport}>
 					<Trans>Import from CSV</Trans>
 				</Button>
 			</div>
 		</div>
 	);
+}
+
+/** Each view's shape while applications load, so the first rows land where the placeholders were. */
+function ViewSkeleton({ view }: { view: View }) {
+	if (view === "insights") return <InsightsSkeleton />;
+	if (view === "list")
+		return (
+			<div className="grid gap-2 pt-10">
+				{Array.from({ length: 6 }, (_, index) => (
+					<Skeleton key={index} className="h-[52px]" />
+				))}
+			</div>
+		);
+	return <Skeleton className="h-[calc(100svh-230px)] min-h-96 rounded-xl" />;
 }

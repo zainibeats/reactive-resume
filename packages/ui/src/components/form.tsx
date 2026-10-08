@@ -1,5 +1,6 @@
 import { useRender } from "@base-ui/react";
 import * as React from "react";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Label } from "@reactive-resume/ui/components/label";
 import { cn } from "@reactive-resume/utils/style";
 
@@ -49,7 +50,7 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof Label>) 
 			id={`${id}-form-item-label`}
 			data-slot="form-label"
 			data-error={hasError}
-			className={cn("mb-0.5 data-[error=true]:text-destructive", className)}
+			className={cn("data-[error=true]:text-danger-text", className)}
 			htmlFor={`${id}-form-item`}
 			{...props}
 		/>
@@ -145,7 +146,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
 		<p
 			data-slot="form-description"
 			id={`${id}-form-item-description`}
-			className={cn("text-muted-foreground text-xs leading-normal", className)}
+			className={cn("text-[13px] leading-[18px] text-ink-3", className)}
 			{...props}
 		/>
 	);
@@ -181,13 +182,14 @@ function FormMessage({ className, errors, ...props }: FormMessageProps) {
 			data-error={hasError}
 			data-slot="form-message"
 			className={cn(
-				"line-clamp-1 starting:-translate-y-1 text-xs starting:opacity-0 transition-[opacity,translate] duration-150 ease-out-strong",
-				hasError ? "text-destructive" : "text-muted-foreground",
+				"flex items-start gap-1 text-xs leading-4 transition-opacity duration-quick ease-enter starting:opacity-0",
+				hasError ? "text-danger-text" : "text-ink-3",
 				className,
 			)}
 			{...props}
 		>
-			{body}
+			{hasError && <Icon name="error" size={16} className="shrink-0" />}
+			<span>{body}</span>
 		</p>
 	);
 }

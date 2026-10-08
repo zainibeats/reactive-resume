@@ -1,5 +1,4 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import { ZodError } from "zod";
 import { resumeDataSchema, sectionTypeSchema } from "@reactive-resume/schema/resume/data";
 import { rethrowAsImportError } from "./error";
 
@@ -69,7 +68,6 @@ export function parseReactiveResumeJSON(json: string): ResumeData {
 		const parsed = resumeDataSchema.parse(JSON.parse(json));
 		return resumeDataSchema.parse(normalizeBuiltInSectionsInLayout(parsed));
 	} catch (error) {
-		if (error instanceof ZodError) rethrowAsImportError(error);
-		throw error;
+		rethrowAsImportError(error);
 	}
 }

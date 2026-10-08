@@ -9,22 +9,21 @@
 		"./icons": "./src/icons.ts",
 		"./resume/stylesheet": "./src/resume/stylesheet.ts",
 		"./resume/*": "./src/resume/*.ts",
-		"./schema.json": "./schema.json",
 		"./templates": "./src/templates.ts"
 	},
 	"scripts": {
 		"typecheck": "tsgo --noEmit",
 		"test": "vitest run --passWithNoTests",
 		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:ci": "vitest run --coverage --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
 		"test:agent": "vitest run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
 	},
 	"dependencies": {
-		"zod": "^4.6.5"
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@reactive-resume/config": "workspace:*",
-		"@typescript/native-preview": "7.0.0-dev.20260707.2",
-		"typescript": "^7.0.2"
+		"@typescript/native-preview": "catalog:",
+		"typescript": "catalog:"
 	}
 }

@@ -32,7 +32,6 @@ export type {
 	StructuralPresentation,
 	StyleProgram,
 } from "./types";
-export { analyzeStylesheet } from "./analyze";
 export { resolveStylesheet } from "./cascade";
 export { compileStylesheet } from "./compile";
 export { isFatalStylesheetDiagnostic, SEMANTIC_CSS_DIAGNOSTIC_CATALOG_V1 } from "./diagnostics";

@@ -23,7 +23,7 @@ function digitsIn(value: string): number {
 }
 
 function extractPhones(text: string): string[] {
-	const candidates = text.match(PHONE_PATTERN) ?? [];
+	const candidates = text.split(/\r?\n/).flatMap((line) => line.match(PHONE_PATTERN) ?? []);
 
 	return uniqueStrings(
 		candidates
@@ -31,6 +31,7 @@ function extractPhones(text: string): string[] {
 			.filter((candidate) => {
 				const digits = digitsIn(candidate);
 				if (digits < 7 || digits > 15) return false;
+				if (/^(?:19|20)\d{2}\s*[-–—]?\s*(?:19|20)\d{2}$/.test(candidate)) return false;
 				// A year range or a street number is digits too; a phone number is mostly digits.
 				return digits / candidate.replace(/\s/g, "").length > 0.55;
 			}),
@@ -141,8 +142,14 @@ export function analyzeContact(raw: RawExtraction, document: ExtractedDocument):
 	const locationLine =
 		firstPageLines
 			.slice(0, FIRST_PAGE_CONTACT_LINES)
-			.find((line) => /,\s*[\p{Lu}]/u.test(line.text) && !EMAIL_TEST.test(line.text) && line.text.length < 80)
-			?.text.trim() ?? null;
+			.flatMap((line) => line.text.split(/\s*[·|•]\s*/))
+			.find(
+				(candidate) =>
+					/^[\p{L}\p{M} .'-]+,\s*[\p{L}\p{M} .'-]+$/u.test(candidate) &&
+					!candidate.endsWith(".") &&
+					candidate.trim().split(/\s+/).length <= 6,
+			)
+			?.trim() ?? null;
 
 	return {
 		emails,

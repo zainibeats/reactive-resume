@@ -1,9 +1,10 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
+import type { ResumeDates } from "@reactive-resume/schema/resume/dates";
 import { unzipSync } from "fflate";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
-import { formatDate } from "./date";
+import { formatDate, toRangeDates, toSingleDates } from "./date";
 import { rethrowAsImportError } from "./error";
 import { toHtml } from "./html";
 import { parseLevel } from "./level";
@@ -46,11 +47,18 @@ const MONTHS: Record<string, string> = {
 
 // LinkedIn's "Started On" / "Finished On" cells are "Mon YYYY" (e.g. "Jan 2020") or a bare year.
 // Anything else is kept verbatim rather than dropped.
-function formatLinkedInDate(value = ""): string {
+// LinkedIn writes "Jan 2020" (or a bare year); anything else stays as written and asks for a review.
+function toLinkedInIsoDate(value = ""): string | null {
 	const trimmed = value.trim();
+	if (/^\d{4}$/.test(trimmed)) return trimmed;
 	const monthYear = /^([A-Za-z]{3})[a-z]*\s+(\d{4})$/.exec(trimmed);
 	const month = MONTHS[monthYear?.[1]?.toLowerCase() ?? ""];
-	return monthYear && month ? formatDate(`${monthYear[2]}-${month}`) : trimmed;
+	return monthYear && month ? `${monthYear[2]}-${month}` : null;
+}
+
+function formatLinkedInDate(value = ""): string {
+	const iso = toLinkedInIsoDate(value);
+	return iso ? formatDate(iso) : value.trim();
 }
 
 // Only an empty end cell means the entry is ongoing; an unrecognised one must not read as "Present".
@@ -59,6 +67,19 @@ function formatLinkedInPeriod(start?: string, end?: string): string {
 	const to = formatLinkedInDate(end);
 	if (!from) return to;
 	return `${from} - ${to || "Present"}`;
+}
+
+// Dates only when every cell was read; otherwise the text is read (and flagged if need be) when saved.
+function linkedInPeriodDates(start?: string, end?: string): ResumeDates | undefined {
+	const from = toLinkedInIsoDate(start);
+	const to = toLinkedInIsoDate(end);
+	if (!from || (end?.trim() && !to)) return undefined;
+	return toRangeDates(from, to ?? undefined);
+}
+
+function linkedInSingleDates(value?: string): ResumeDates | undefined {
+	const iso = toLinkedInIsoDate(value);
+	return iso ? toSingleDates(iso) : undefined;
 }
 
 const textToHtml = (text = "") => toHtml(text.split(/\r\n?|\n/));
@@ -203,6 +224,7 @@ export function parseLinkedInExport(zipBytes: Uint8Array): ResumeData {
 				position: position.Title || "",
 				location: position.Location || "",
 				period: formatLinkedInPeriod(position["Started On"], position["Finished On"]),
+				dates: linkedInPeriodDates(position["Started On"], position["Finished On"]),
 				website: emptyWebsite,
 				roles: [],
 				description: textToHtml(position.Description),
@@ -223,6 +245,7 @@ export function parseLinkedInExport(zipBytes: Uint8Array): ResumeData {
 				grade: "",
 				location: "",
 				period: formatLinkedInPeriod(edu["Start Date"], edu["End Date"]),
+				dates: linkedInPeriodDates(edu["Start Date"], edu["End Date"]),
 				website: emptyWebsite,
 				description: textToHtml(edu.Notes),
 			})),
@@ -270,6 +293,7 @@ export function parseLinkedInExport(zipBytes: Uint8Array): ResumeData {
 				title: cert.Name ?? "",
 				issuer: cert.Authority || "",
 				date: formatLinkedInDate(cert["Started On"]),
+				dates: linkedInSingleDates(cert["Started On"]),
 				website: linkWebsite(cert.Url),
 				description: "",
 			})),

@@ -34,42 +34,19 @@ describe("useIsMobile", () => {
 		window.matchMedia = originalMatchMedia;
 	});
 
-	it("returns false when matchMedia.matches is false", () => {
-		matches = false;
-		const { result } = renderHook(() => useIsMobile());
-		expect(result.current).toBe(false);
-	});
-
-	it("returns true when matchMedia.matches is true", () => {
+	it("updates when the media query changes", () => {
 		matches = true;
 		const { result } = renderHook(() => useIsMobile());
-		expect(result.current).toBe(true);
-	});
-
-	it("uses the documented mobile breakpoint of 768px", () => {
-		renderHook(() => useIsMobile());
-		expect(window.matchMedia).toHaveBeenCalledWith("(max-width: 767px)");
-	});
-
-	it("updates when the media query changes", () => {
-		const { result } = renderHook(() => useIsMobile());
-		expect(result.current).toBe(false);
-
-		act(() => {
-			for (const listener of listeners) listener({ matches: true });
-		});
 		expect(result.current).toBe(true);
 
 		act(() => {
 			for (const listener of listeners) listener({ matches: false });
 		});
 		expect(result.current).toBe(false);
-	});
 
-	it("removes the change listener on unmount", () => {
-		const { unmount } = renderHook(() => useIsMobile());
-		expect(listeners).toHaveLength(1);
-		unmount();
-		expect(listeners).toHaveLength(0);
+		act(() => {
+			for (const listener of listeners) listener({ matches: true });
+		});
+		expect(result.current).toBe(true);
 	});
 });

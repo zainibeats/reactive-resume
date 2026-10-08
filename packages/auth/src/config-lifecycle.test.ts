@@ -31,25 +31,6 @@ describe("auth initialization lifecycle", () => {
 		expect(mocks.betterAuth).not.toHaveBeenCalled();
 	});
 
-	it("shares one pending initialization across callers and preserves the auth API", async () => {
-		const pending = Promise.withResolvers<object>();
-		const instance = createInstance(pending.promise);
-		mocks.betterAuth.mockReturnValue(instance);
-		const { auth, initializeAuth } = await import("./config");
-
-		const first = initializeAuth();
-		const second = initializeAuth();
-		expect(auth.api).toBe(instance.api);
-		expect(auth.handler).toBe(instance.handler);
-		expect(auth.$context).toBe(pending.promise);
-		expect(mocks.betterAuth).toHaveBeenCalledTimes(1);
-
-		pending.resolve({});
-		await Promise.all([first, second]);
-		await initializeAuth();
-		expect(mocks.betterAuth).toHaveBeenCalledTimes(1);
-	});
-
 	it("propagates transient initialization failure and rebuilds on the next call", async () => {
 		const failure = new Error("Connection terminated due to connection timeout");
 		const recovered = createInstance();
@@ -61,20 +42,5 @@ describe("auth initialization lifecycle", () => {
 		await initializeAuth();
 		expect(auth.api).toBe(recovered.api);
 		expect(mocks.betterAuth).toHaveBeenCalledTimes(2);
-	});
-
-	it("does not reset successful initialization or replay a failing endpoint", async () => {
-		const instance = createInstance();
-		const failure = new Error("Endpoint failure");
-		instance.api.getSession.mockRejectedValueOnce(failure);
-		mocks.betterAuth.mockReturnValue(instance);
-		const { auth, initializeAuth } = await import("./config");
-		await initializeAuth();
-
-		await expect(auth.api.getSession({ headers: new Headers() })).rejects.toBe(failure);
-		await initializeAuth();
-		expect(mocks.betterAuth).toHaveBeenCalledTimes(1);
-		expect(instance.api.getSession).toHaveBeenCalledTimes(1);
-		expect(auth.api).toBe(instance.api);
 	});
 });

@@ -1,4 +1,4 @@
-import type { Style } from "@react-pdf/types";
+import type { Style } from "../../forme/style-types";
 import type { ReactElement, ReactNode } from "react";
 import { cloneElement, createElement } from "react";
 import { Text as PdfText, View } from "#react-pdf-renderer";
@@ -70,10 +70,16 @@ export const renderWithBoundedIndent = (node: ReactElement<{ style?: Style | Sty
 		typeof rawOffset === "string" && /^\d+(?:\.\d+)?pt$/.test(rawOffset) ? Number.parseFloat(rawOffset) : rawOffset;
 	if (typeof offset !== "number" || !Number.isFinite(offset) || offset <= 0) return node;
 
+	// Forme 0.25 ignores `maxWidth` along a row, so the inset shrinks instead, down to what half the width leaves
+	// it; and it lays `row-reverse` out as `row`, so RTL puts the inset last.
+	const inset = createElement(View, { key: "inset", style: { flexBasis: offset, flexShrink: 1 } });
+	const content = cloneElement(node, {
+		key: "content",
+		style: composeStyles(node.props.style, { [side]: 0, flexBasis: "50%", flexGrow: 1, flexShrink: 0 }),
+	});
 	return createElement(
 		View,
-		{ style: { flexDirection: rtl ? "row-reverse" : "row", alignSelf: "stretch" } },
-		createElement(View, { style: { width: offset, maxWidth: "50%" } }),
-		cloneElement(node, { style: composeStyles(node.props.style, { [side]: 0, flexBasis: 0, flexGrow: 1 }) }),
+		{ style: { flexDirection: "row", alignSelf: "stretch" } },
+		...(rtl ? [content, inset] : [inset, content]),
 	);
 };

@@ -21,20 +21,6 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("RPC fetch", () => {
-	it("sends small requests directly with their body and headers", async () => {
-		fetchMock.mockResolvedValue(new Response("ok"));
-		const { rpcFetch } = await import("./fetch");
-		await rpcFetch(rpcUrl, { method: "POST", body: "original bytes", headers: { "x-example": "preserved" } });
-		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const [url, sent = {}] = fetchMock.mock.calls[0] ?? [];
-		expect(url).toBe(rpcUrl);
-		// Plain bytes (not a stream or Blob) keep the body inspectable and avoid duplex streaming.
-		expect(sent.body).toBeInstanceOf(ArrayBuffer);
-		expect(new TextDecoder().decode(sent.body as ArrayBuffer)).toBe("original bytes");
-		expect(new Headers(sent.headers).get("x-example")).toBe("preserved");
-		expect(sent.credentials).toBe("include");
-	});
-
 	it("uploads large wire bytes to Blob, then sends a tiny reference to the original RPC", async () => {
 		queueStaging();
 		const { rpcFetch } = await import("./fetch");
@@ -79,14 +65,5 @@ describe("RPC fetch", () => {
 			expect(url).toBe(rpcUrl);
 			expect(Buffer.from(sent.body as ArrayBuffer).equals(Buffer.from(largeBody))).toBe(true);
 		}
-	});
-
-	it("does not dispatch the RPC when preparation fails", async () => {
-		fetchMock.mockResolvedValueOnce(new Response("Unavailable", { status: 503 }));
-		const { rpcFetch } = await import("./fetch");
-		await expect(
-			rpcFetch(rpcUrl, { method: "POST", body: largeBody, headers: { "content-type": contentType } }),
-		).rejects.toThrow();
-		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 });

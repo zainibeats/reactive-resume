@@ -1,17 +1,13 @@
 import type { SemanticNode } from "@reactive-resume/resume/stylesheet/types";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { describe, expect, it, vi } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../document";
+import { pdf } from "../forme/testing";
 import { parseNormalizedRichTextHtml, richTextMarkClassName } from "../templates/shared/rich-text-html";
 import { getRichTextSemanticNodeKey } from "./rich-text-keys";
 import { buildSemanticTree } from "./tree";
-
-vi.mock("@react-pdf/renderer", async (importOriginal) => ({
-	...(await importOriginal<typeof import("@react-pdf/renderer")>()),
-}));
 
 type HostNode = {
 	type: string;
@@ -25,11 +21,6 @@ const collectStyles = (node: HostNode): Record<string, unknown>[] => {
 	const current = Array.isArray(style) ? style : style ? [style] : [];
 	return [...(current as Record<string, unknown>[]), ...(node.children ?? []).flatMap(collectStyles)];
 };
-
-const collectNodeKinds = (node: SemanticNode): SemanticNode["kind"][] => [
-	node.kind,
-	...node.children.flatMap(collectNodeKinds),
-];
 
 const collectNodeKeys = (node: SemanticNode): string[] => [node.key, ...node.children.flatMap(collectNodeKeys)];
 
@@ -76,35 +67,6 @@ describe("semantic rich-text bindings", () => {
 		const colors = collectStyles(instance.container.document as HostNode).map(({ color }) => color);
 		expect(colors).toEqual(expect.arrayContaining(["#123456", "#654321", "#abcdef"]));
 	});
-
-	it.each([
-		["ltr", "en-US", "<p>- Alpha<br>- Beta</p>", ["paragraph", "hard-break"]],
-		["rtl", "he-IL", "<p>‏- אלפא<br>‏- בטא</p>", ["list", "list-item", "list-marker", "list-item-content"]],
-	] as const)(
-		"builds the %s descriptor from the same normalized rich-text elements rendered by the PDF",
-		(_direction, locale, content, expectedKinds) => {
-			const data = buildFixture();
-			data.metadata.page.locale = locale;
-			data.summary.content = content;
-			const page = data.metadata.layout.pages[0];
-			if (!page) throw new Error("Expected a page fixture.");
-
-			const tree = buildSemanticTree({
-				data,
-				template: "onyx",
-				page,
-				pageNumber: 1,
-				showHeader: false,
-			});
-			const kinds = collectNodeKinds(tree);
-
-			for (const kind of expectedKinds) expect(kinds).toContain(kind);
-			if (locale === "he-IL") {
-				expect(kinds).not.toContain("paragraph");
-				expect(kinds).not.toContain("hard-break");
-			}
-		},
-	);
 
 	it.each([
 		["ltr", "en-US", ""],

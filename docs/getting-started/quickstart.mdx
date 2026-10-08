@@ -1,212 +1,160 @@
 ---
 title: "Quickstart"
-description: "Sign in to the hosted version of Reactive Resume, or deploy your own self-hosted instance with Docker Compose."
+description: "Create a free account, build a resume from the sample, make it yours, try a template and download your first PDF in about ten minutes."
 ---
 
-## Options
+In this tutorial you'll create a Reactive Resume account, open a sample resume, put your own name on it, try a different
+template and download it as a PDF. It takes about ten minutes, and at the end you'll know your way around the editor.
 
-There are two ways to use Reactive Resume:
+You only need a web browser. The steps use the hosted version at [rxresu.me](https://rxresu.me); if your organization
+runs its own copy, use its address instead.
 
-<CardGroup cols={2}>
-  <Card title="Use the Cloud Version" icon="cloud" href="#using-the-cloud-version">
-    The fastest way to get started, and the right choice for most people.
-  </Card>
-  <Card title="Self-Host with Docker" icon="docker" href="#self-host-with-docker">
-    Deploy your own instance and keep full control. Requires some technical knowledge.
-  </Card>
-</CardGroup>
-
----
-
-## Using the cloud version
-
-The easiest way to use Reactive Resume is our cloud version at [rxresu.me](https://rxresu.me). It is free, and it will stay free.
+## 1. Create your account
 
 <Steps>
-	<Step title="Create an Account">
-		Visit [rxresu.me](https://rxresu.me) and sign up for free using your email, or sign in with your GitHub or Google
-		account.
-	</Step>
-
-    <Step title="Create Your First Resume">
-    	Click the **Create Resume** button on your dashboard. Give your resume a name and select a template to get started.
-    </Step>
-
-    <Step title="Fill in Your Details">
-    	Use the builder to add your personal information, work experience, education, skills, projects, and
-    	anything else the resume needs.
-    </Step>
-
-    <Step title="Export & Share">
-    	When you're ready, export your resume as a PDF or share it at its public URL.
-    </Step>
-
+  <Step title="Open the sign-up page">Go to [rxresu.me/auth/register](https://rxresu.me/auth/register).</Step>
+  <Step title="Fill in your details">
+    Enter your **Name**, a **Username**, your **Email Address** and a **Password**, then select **Sign up**. If you'd
+    rather use an existing Google, GitHub or other account, pick it below the form instead.
+  </Step>
+  <Step title="Continue to your documents">
+    Reactive Resume sends you an email to verify your address. Verifying is optional, but you need it to reset a
+    forgotten password. Select **Continue** to carry on now and verify later.
+  </Step>
 </Steps>
 
-<Tip>Your resume updates in real-time as you type. The preview panel shows exactly how your final PDF will look.</Tip>
+You land on **Documents**, the home page that holds all your resumes and cover letters. It's empty for now.
 
----
+<Frame caption="Documents is empty until you create or import something">
+  <img
+    src="/images/getting-started/quickstart/documents-empty.webp"
+    alt='The empty Documents page with the heading "Let&apos;s start with what you have", a drop zone for a PDF, Word or JSON file with a Choose a file button, and Start blank and Try a sample links underneath.'
+  />
+</Frame>
 
-## Self-host with Docker
+## 2. Open the sample resume
 
-You can deploy Reactive Resume on your own infrastructure using Docker.
+Select **Try a sample**. Reactive Resume creates a complete resume for a game developer and opens it in the editor.
 
-<Info>
-  **From v5.1.0 onwards** — PDF generation now runs entirely client-side via `@react-pdf/renderer`. Self-hosted deployments no longer require Browserless, Chromium, or any external print service as a dependency. The `PRINTER_*` and `BROWSERLESS_*` environment variables are no longer read and can be removed from your `.env`.
-</Info>
+Starting from the sample lets you see what a finished resume looks like before you replace its content with yours.
+The editor has two halves:
 
-### Prerequisites
+- **The panel** on the left, where you write. It starts with the **Basics** card (your name and contact details),
+  followed by your sections, such as Summary, Education and Experience.
+- **The page** on the right, which shows exactly what your PDF will look like. It updates as you type.
 
-Before you begin, ensure you have the following installed:
+The sample's document name and the name on the resume are a random three-word phrase, such as "Slippery Blush
+Marlin". You'll fix both next.
 
-- [Docker](https://docs.docker.com/get-docker/) (v20.10 or higher)
-- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0 or higher)
+## 3. Name your document
 
-### Quick Deployment
+The document name is only for you; it's how you find the resume in **Documents**.
 
 <Steps>
-	<Step title="Clone the Repository">
-		```bash
-		git clone https://github.com/reactive-resume/reactive-resume.git reactive-resume
-		cd reactive-resume
-		```
-	</Step>
-
-    <Step title="Configure Environment Variables">
-	Copy the example configuration, then replace `AUTH_SECRET` and `ENCRYPTION_SECRET` with unique random values:
-
-```bash
-cp .env.example .env
-openssl rand -hex 32
-```
-
-    	<Warning>
-		For production deployments, always use strong, unique values for `AUTH_SECRET`, `ENCRYPTION_SECRET`, and
-		database credentials.
-    	</Warning>
-    </Step>
-
-    <Step title="Start the Services">
-    	```bash
-    	docker compose up -d
-    	```
-
-	This starts:
-	- **PostgreSQL** — Database for storing user data and resumes
-	- **Redis** — Required for AI assistant streams and run state
-	- **Local storage** — File uploads persisted in the mounted `./data` directory
-	- **Reactive Resume** — The main application
-    </Step>
-
-    <Step title="Access Your Instance">
-    	Once all services are running, access your Reactive Resume instance at:
-
-    	```text
-    	http://localhost:3000
-    	```
-    </Step>
-
+  <Step title="Open the document menu">Select the document name at the top left of the editor.</Step>
+  <Step title="Rename it">
+    Select **Rename…**, type a name such as "Game Developer Resume" in **Name**, then select **Save Changes**.
+  </Step>
 </Steps>
 
-### Docker Compose services
+## 4. Put your name on the page
 
-Here's what each service in the stack does:
+<Steps>
+  <Step title="Edit the Basics card">
+    In the **Basics** card, replace the text in **Full name** with your own name.
+  </Step>
+  <Step title="Watch the page">
+    The name at the top of the page changes as you type. Try changing **Headline** to the job title you want too.
+  </Step>
+</Steps>
 
-| Service           | Port | Description                                          |
-| ----------------- | ---- | ---------------------------------------------------- |
-| `postgres`        | 5432 | PostgreSQL database for storing all application data |
-| `redis`           | 6379 | Redis instance required by the AI assistant          |
-| `reactive_resume` | 3000 | The application and local file storage               |
+<Frame caption="What you type in the panel appears on the page right away">
+  <img
+    src="/images/getting-started/quickstart/basics-and-page.webp"
+    alt="The Basics card with Full name set to David Kowalski and a headline, email, phone and location, next to the resume page showing the same name and contact details under a photo."
+  />
+</Frame>
 
-<Note>
-  Saved AI provider management requires `ENCRYPTION_SECRET`, and the AI assistant requires both `REDIS_URL` and
-  `ENCRYPTION_SECRET`. Other Reactive Resume features can run without them.
-</Note>
+You don't need to save. Under the document name, the status changes to **Saving…** and then **Saved**.
 
-### Health checks
+<Tip>
+  Made a mistake? Press <kbd>⌘</kbd> <kbd>Z</kbd> (<kbd>Ctrl</kbd> <kbd>Z</kbd> on Windows and Linux) to undo it.
+</Tip>
 
-All services include health checks. To verify that everything is running:
+## 5. Try another template
 
-```bash
-docker compose ps
-```
+<Steps>
+  <Step title="Switch to Design">
+    Select **Design** at the top of the editor, or press <kbd>2</kbd>.
+  </Step>
+  <Step title="Pick a template">
+    **Template**, at the top of Design, shows all 17 templates filled with your own content. Select one, such as
+    **Bronzor**, and the page switches to it. Your content stays the same; only the look changes.
+  </Step>
+  <Step title="Go back to writing">
+    Select **Write**, or press <kbd>1</kbd>, to return to your content.
+  </Step>
+</Steps>
 
-You should see all services with a `healthy` status.
+<Frame caption="Design mode's template gallery">
+  <img
+    src="/images/getting-started/quickstart/design-template-gallery.webp"
+    alt="The Template tab in Design mode with filters for All, One column, Two columns and ATS-safe, a template counter, and previews of the Azurill (selected), Bronzor, Chikorita and Ditgar templates filled with the sample resume."
+  />
+</Frame>
 
----
+## 6. Download your PDF
 
-## Environment variables reference
+<Steps>
+  <Step title="Select Download PDF">
+    Select **Download PDF** at the top right of the editor. Your browser saves the file, named after the name on your
+    resume (for example, `David-Kowalski-Resume.pdf`).
+  </Step>
+  <Step title="Open the file">Open the PDF. It matches the page you saw in the editor.</Step>
+</Steps>
 
-A complete list of the environment variables you can configure:
+<Frame caption="Download PDF and the arrow next to it, which opens more formats">
+  <img
+    src="/images/getting-started/quickstart/editor-bar-actions.webp"
+    alt="The right side of the editor bar with the History and Assistant icon buttons, a Share button and a green Download PDF button with a small arrow on its right."
+  />
+</Frame>
 
-### Required variables
+To download a different format, select the arrow next to **Download PDF**. The **Share & export** panel opens on its
+**Download** tab, where you can choose **PDF**, **Word**, **Markdown** or **JSON** and change the file name.
 
-| Variable       | Description                    | Example                               |
-| -------------- | ------------------------------ | ------------------------------------- |
-| `DATABASE_URL` | PostgreSQL connection string   | `postgresql://user:pass@host:5432/db` |
-| `AUTH_SECRET`  | Secret key for authentication  | Generate with `openssl rand -hex 32`  |
-| `APP_URL`      | Public URL of your Application | `https://rxresu.me`                   |
+<Frame caption="The Download tab of Share & export">
+  <img
+    src="/images/getting-started/quickstart/share-download-tab.webp"
+    alt="The Share and export panel with Link, Download and History tabs. The Download tab lists PDF (Best for applying), Word, Markdown and JSON, a File name field set to David-Kowalski-Resume, a note that Check has 3 things to review, and a Download PDF button."
+  />
+</Frame>
 
-### Optional variables
+## What you've done
 
-| Variable                              | Description                                                 | Default                |
-| ------------------------------------- | ----------------------------------------------------------- | ---------------------- |
-| `GOOGLE_CLIENT_ID`                    | Google OAuth Client ID                                      | —                      |
-| `GOOGLE_CLIENT_SECRET`                | Google OAuth Client Secret                                  | —                      |
-| `GITHUB_CLIENT_ID`                    | GitHub OAuth Client ID                                      | —                      |
-| `GITHUB_CLIENT_SECRET`                | GitHub OAuth Client Secret                                  | —                      |
-| `LINKEDIN_CLIENT_ID`                  | LinkedIn OAuth Client ID                                    | —                      |
-| `LINKEDIN_CLIENT_SECRET`              | LinkedIn OAuth Client Secret                                | —                      |
-| `OAUTH_PROVIDER_NAME`                 | Custom OAuth Provider Name                                  | —                      |
-| `OAUTH_CLIENT_ID`                     | Custom OAuth Client ID                                      | —                      |
-| `OAUTH_CLIENT_SECRET`                 | Custom OAuth Client Secret                                  | —                      |
-| `OAUTH_DISCOVERY_URL`                 | OIDC Discovery URL (use this OR manual URLs below)          | —                      |
-| `OAUTH_AUTHORIZATION_URL`             | OAuth Authorization URL (manual config)                     | —                      |
-| `OAUTH_TOKEN_URL`                     | OAuth Token URL (manual config)                             | —                      |
-| `OAUTH_USER_INFO_URL`                 | OAuth User Info URL (manual config)                         | —                      |
-| `OAUTH_SCOPES`                        | OAuth Scopes (space-separated)                              | `openid profile email` |
-| `SMTP_HOST`                           | SMTP Server Host (for email features)                       | —                      |
-| `SMTP_PORT`                           | SMTP Server Port                                            | `587`                  |
-| `SMTP_USER`                           | SMTP Username                                               | —                      |
-| `SMTP_PASS`                           | SMTP Password                                               | —                      |
-| `SMTP_FROM`                           | Default FROM address for emails                             | —                      |
-| `SMTP_SECURE`                         | Use secure SMTP connection (`true` or `false`)              | `false`                |
-| `S3_ACCESS_KEY_ID`                    | S3 Access Key                                               | —                      |
-| `S3_SECRET_ACCESS_KEY`                | S3 Secret Key                                               | —                      |
-| `S3_REGION`                           | S3 Region                                                   | `us-east-1`            |
-| `S3_ENDPOINT`                         | S3-compatible Endpoint URL                                  | —                      |
-| `S3_BUCKET`                           | S3 Bucket Name                                              | —                      |
-| `S3_FORCE_PATH_STYLE`                 | Use path-style URLs for S3 (set `true` for MinIO/SeaweedFS) | `false`                |
-| `REDIS_URL`                           | Redis connection string for AI assistant streams/state      | —                      |
-| `ENCRYPTION_SECRET`                   | Encryption secret for saved AI provider credentials         | —                      |
-| `FLAG_DISABLE_SIGNUPS`                | Disables first-owner signup                                 | `false`                |
-| `FLAG_DISABLE_EMAIL_AUTH`             | Disables email/password login (SSO only)                    | `false`                |
-| `FLAG_DISABLE_IMAGE_PROCESSING`       | Disables image processing                                   | `false`                |
-| `FLAG_ALLOW_UNSAFE_OAUTH_REDIRECT_URI` | Allows arbitrary dynamic OAuth redirect URIs                | `false`                |
-| `FLAG_ALLOW_UNSAFE_AI_BASE_URL`       | Allows unsafe/private/non-public AI provider base URLs      | `false`                |
-
-> **Note:** Some variables are only required for using related features (OAuth, SMTP, S3, etc.) and can be left unset if unused.
-
-> **AI features:** Saved AI provider management requires `ENCRYPTION_SECRET`, and the AI assistant requires both `REDIS_URL` and `ENCRYPTION_SECRET`. Live web research depends on the selected AI provider/model supporting native web search. Keep `FLAG_ALLOW_UNSAFE_AI_BASE_URL` disabled unless this is a trusted self-hosted deployment; public HTTPS provider URLs are the safe default.
-
-> **OAuth redirect safety:** Keep `FLAG_ALLOW_UNSAFE_OAUTH_REDIRECT_URI` disabled unless this is a trusted self-hosted deployment. Enabling it allows dynamic OAuth clients to register any parseable redirect URI, including custom schemes, private hosts, and non-loopback `http://` URLs, which can enable phishing or token exfiltration on public or multi-tenant instances.
-
-> **Health check behavior:** `/api/health` reports status for database and storage. A failure in either dependency returns HTTP `503`.
-
----
+You created an account, built a resume from the sample, made it yours, tried a template and downloaded a PDF. From
+here, replace the rest of the sample with your own experience, or start a fresh resume from **New** in the sidebar
+(press <kbd>N</kbd>).
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Development Setup" icon="code" href="/contributing/development">
-    Set up a development environment to contribute or customize Reactive Resume.
+  <Card title="Create your first resume" icon="file-circle-plus" href="/guides/creating-your-first-resume">
+    Start from scratch, or import the resume you already have.
   </Card>
-  <Card title="Project Architecture" icon="folder-open" href="/contributing/architecture">
-    Learn about the project structure and architecture.
+  <Card title="Get to know the editor" icon="table-columns" href="/guides/editor-overview">
+    Learn the editor bar, the three modes and the page view.
+  </Card>
+  <Card title="Check your resume" icon="list-check" href="/guides/checking-your-resume">
+    Fix the issues Check finds and compare your resume with a job posting.
+  </Card>
+  <Card title="Share your resume" icon="share-nodes" href="/guides/sharing-your-resume-publicly">
+    Publish a link that recruiters can open in their browser.
   </Card>
 </CardGroup>
 
-<Note>
-  **Having trouble?** Check our [GitHub Issues](https://github.com/reactive-resume/reactive-resume/issues) or reach out via
-  [email](mailto:hello@amruthpillai.com).
-</Note>
+## Run your own copy
+
+Want to host Reactive Resume on your own server instead? Follow [Self-hosting with Docker](/self-hosting/docker); the
+[environment variables reference](/self-hosting/environment-variables) lists every setting. Developers who want to
+change the code should start with the [development setup](/contributing/development).

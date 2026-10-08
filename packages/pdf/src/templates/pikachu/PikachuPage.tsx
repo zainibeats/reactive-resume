@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateFeatures, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -210,7 +210,7 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				backgroundColor: primary,
 			},
 			layout: {
-				flexDirection: r.row,
+				flexDirection: r.columns,
 				columnGap: metrics.columnGap,
 			},
 			sidebarColumn: {
@@ -288,19 +288,5 @@ const usePikachuTemplate = (): PikachuTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies PikachuStyles,
 		};
-	}, [
-		picture,
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.page.paddingVertical,
-		metrics.page.paddingHorizontal,
-		metrics.columnGap,
-		metrics.gapY,
-		foreground,
-		base,
-		metrics.gapX,
-		background,
-	]);
+	}, [picture, metadata, r, primary, metrics, foreground, base, background]);
 };

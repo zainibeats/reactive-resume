@@ -67,8 +67,27 @@ export function isLocale(value: unknown): value is Locale {
 	return localeSchema.safeParse(value).success;
 }
 
-export function isCJKLocale(locale: Locale): boolean {
-	return locale === "zh-CN" || locale === "zh-TW" || locale === "ja-JP" || locale === "ko-KR";
+/**
+ * A page's address in a locale: the `locale` search parameter picks the language, and the default locale's address
+ * is the plain one. The server and the app both read the parameter, so each language has a URL search engines can
+ * index.
+ */
+export function localizedUrl(pageUrl: string, locale?: Locale) {
+	const url = new URL(pageUrl);
+	if (locale && locale !== defaultLocale) url.searchParams.set("locale", locale);
+	else url.searchParams.delete("locale");
+	return url.href;
+}
+
+// Lingui's pseudo-locale (lingui.config.ts): accented, stretched English for testing layouts, not a translation.
+const pseudoLocale: Locale = "zu-ZA";
+
+/** hreflang alternates for a page: every real locale plus x-default. "sr-SP" isn't a valid region, so it's "sr". */
+export function getLocaleAlternates(pageUrl: string) {
+	const alternates = localeSchema.options
+		.filter((locale) => locale !== pseudoLocale)
+		.map((locale) => ({ hreflang: locale === "sr-SP" ? "sr" : locale, href: localizedUrl(pageUrl, locale) }));
+	return [...alternates, { hreflang: "x-default", href: localizedUrl(pageUrl) }];
 }
 
 // A writing system that needs a dedicated fallback font in the PDF renderer,
@@ -78,7 +97,18 @@ export function isCJKLocale(locale: Locale): boolean {
 // of falling back to a Latin/Han-only font and producing tofu. "emoji" is
 // content-detected only (never locale-derived) and resolves to Noto Emoji so
 // pictographs and regional indicators render instead of mojibake (#3321).
-export type Script = "hangul" | "kana" | "han-traditional" | "han-simplified" | "arabic" | "hebrew" | "thai" | "emoji";
+// "symbols" is content-detected too and resolves to Noto Sans Symbols 2 for
+// text symbols such as ★ that neither Latin fonts nor Noto Emoji cover (#3581).
+export type Script =
+	| "hangul"
+	| "kana"
+	| "han-traditional"
+	| "han-simplified"
+	| "arabic"
+	| "hebrew"
+	| "thai"
+	| "emoji"
+	| "symbols";
 
 // The CJK subset of `Script`. CJK needs extra per-character line breaking that
 // must NOT be applied to Arabic (cursive, joined letters) or Thai (combining

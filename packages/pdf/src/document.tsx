@@ -1,16 +1,16 @@
+import type { ResumeRenderOptions } from "./context";
+import type { SectionTitleResolver } from "./section-title";
+import type { ResolvedResumeRuntime } from "./semantic";
 import type { LayoutPage, ResumeData, Typography } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import type { Locale } from "@reactive-resume/utils/locale";
 import type { ComponentType } from "react";
-import type { ResumeRenderOptions } from "./context";
-import type { SectionTitleResolver } from "./section-title";
-import type { ResolvedResumeRuntime } from "./semantic";
 import { useMemo } from "react";
 import { Document } from "#react-pdf-renderer";
 import { RenderProvider } from "./context";
-import { registerFonts, resumeContentContainsCJK, resumeContentScripts } from "./hooks/use-register-fonts";
+import { resolvePdfFonts, resumeContentContainsCJK, resumeContentScripts } from "./hooks/use-register-fonts";
 import { SemanticRenderProvider } from "./semantic/context";
-import { resolveResumeRuntime, resolveStylesheetMode } from "./semantic/resolve";
+import { resolveResumeRuntime } from "./semantic/resolve";
 import { getTemplatePage } from "./templates";
 import { shouldShowResumeHeader } from "./templates/shared/cover-letter";
 import { getTemplatePageMinHeightStyle, getTemplatePageSize } from "./templates/shared/page-size";
@@ -44,47 +44,49 @@ export const ResumeDocument = ({
 	semanticRuntime,
 }: ResumeDocumentProps) => {
 	const TemplatePageComponent = getTemplatePage(template);
-	const creationDate = useMemo(() => new Date(), []);
 	const hasCjkContent = useMemo(() => resumeContentContainsCJK(data), [data]);
 	const scripts = useMemo(() => resumeContentScripts(data), [data]);
-	const typography = registerFonts(
-		data.metadata.typography,
-		data.metadata.page.locale as Locale,
-		hasCjkContent,
-		scripts,
-	) as Typography;
+	const typography = useMemo(
+		() =>
+			resolvePdfFonts(data.metadata.typography, data.metadata.page.locale as Locale, hasCjkContent, scripts)
+				.typography as Typography,
+		[data.metadata.typography, data.metadata.page.locale, hasCjkContent, scripts],
+	);
 
-	// `registerFonts` widens `fontFamily` to `string | string[]` for CJK
+	// `resolvePdfFonts` widens `fontFamily` to `string | string[]` for CJK
 	// fallback (#2986); the cast carries that wider runtime value through
 	// `ResumeData` without changing the public schema.
 	const resumeData = useMemo(() => ({ ...data, metadata: { ...data.metadata, typography } }), [data, typography]);
 	const pageSize = getTemplatePageSize(resumeData.metadata.page.format);
 	const pageMinHeightStyle = getTemplatePageMinHeightStyle(resumeData.metadata.page.format);
-	const headerResumeData = renderOptions ? { ...resumeData, renderOptions } : resumeData;
-	const stylesheetMode = resolveStylesheetMode(resumeData);
-	const runtime = useMemo(
-		() => semanticRuntime ?? resolveResumeRuntime({ data: resumeData, template, mode: stylesheetMode }),
-		[resumeData, semanticRuntime, stylesheetMode, template],
+	const headerResumeData = useMemo(
+		() => (renderOptions ? { ...resumeData, renderOptions } : resumeData),
+		[resumeData, renderOptions],
 	);
-	const semanticMode = semanticRuntime ? "semantic" : stylesheetMode;
-
+	// The tree is built with the render options, so a letter printed with its header keeps it.
+	const runtime = useMemo(
+		() => semanticRuntime ?? resolveResumeRuntime({ data: headerResumeData, template }),
+		[headerResumeData, semanticRuntime, template],
+	);
 	return (
 		<SemanticRenderProvider
 			presentation={runtime.presentation}
-			mode={semanticMode}
 			sourceTree={runtime.sourceTree}
 			renderTree={runtime.renderTree}
 		>
-			<RenderProvider data={resumeData} resolveSectionTitle={resolveSectionTitle} renderOptions={renderOptions}>
+			<RenderProvider
+				data={resumeData}
+				template={template}
+				resolveSectionTitle={resolveSectionTitle}
+				renderOptions={renderOptions}
+			>
 				<Document
-					pageMode="useNone"
-					creationDate={creationDate}
-					producer="Reactive Resume"
 					title={resumeData.basics.name}
 					author={resumeData.basics.name}
 					creator={resumeData.basics.name}
 					subject={resumeData.basics.headline}
 					language={resumeData.metadata.page.locale}
+					hyphenation={resumeData.metadata.typography.hyphenation === true ? "auto" : "manual"}
 				>
 					{resumeData.metadata.layout.pages.map((page, index) => (
 						<TemplatePageComponent

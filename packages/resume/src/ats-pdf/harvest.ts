@@ -67,8 +67,6 @@ export type HarvestOptions = {
 	operatorBudgetPerPageMs?: number;
 	onProgress?: (progress: HarvestProgress) => void;
 	signal?: { aborted: boolean };
-	/** Injected for tests; defaults to `Date.now`. */
-	monotonicNow?: () => number;
 };
 
 export const HARVEST_DEFAULTS = {
@@ -77,7 +75,7 @@ export const HARVEST_DEFAULTS = {
 	operatorBudgetPerPageMs: 10_000,
 } as const;
 
-export class HarvestAbortedError extends Error {
+class HarvestAbortedError extends Error {
 	constructor() {
 		super("PDF analysis was cancelled.");
 		this.name = "HarvestAbortedError";
@@ -253,7 +251,6 @@ async function withTimeout<T>(work: Promise<T>, budgetMs: number): Promise<T | n
  * short, `operators` stays null and the report says which checks it could not run.
  */
 export async function harvestPdfDocument(document: PdfDocumentLike, options: HarvestOptions): Promise<RawExtraction> {
-	const now = options.monotonicNow ?? Date.now;
 	const maxPages = options.maxPages ?? HARVEST_DEFAULTS.maxPages;
 	const totalBudgetMs = options.operatorBudgetMs ?? HARVEST_DEFAULTS.operatorBudgetMs;
 	const perPageBudgetMs = options.operatorBudgetPerPageMs ?? HARVEST_DEFAULTS.operatorBudgetPerPageMs;
@@ -280,7 +277,7 @@ export async function harvestPdfDocument(document: PdfDocumentLike, options: Har
 	const fontRefs = new Set<string>();
 	const fonts = new Map<string, RawFont>();
 
-	const operatorStartedAt = now();
+	const operatorStartedAt = Date.now();
 	let operatorsAttempted = false;
 	let operatorsSucceeded = false;
 
@@ -311,7 +308,7 @@ export async function harvestPdfDocument(document: PdfDocumentLike, options: Har
 		links.push(...toLinkAnnotations(annotations, pageNumber));
 
 		let operators: PageOperatorSummary | null = null;
-		const elapsed = now() - operatorStartedAt;
+		const elapsed = Date.now() - operatorStartedAt;
 		const remaining = Math.min(perPageBudgetMs, totalBudgetMs - elapsed);
 
 		if (remaining > 0) {

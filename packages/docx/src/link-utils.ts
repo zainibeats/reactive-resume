@@ -1,4 +1,4 @@
-const SAFE_DOCX_LINK_SCHEMES = new Set(["http:", "https:", "mailto:"]);
+const SAFE_DOCX_LINK_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
 
 export function toSafeDocxLink(value: string): string | null {
 	const input = value.trim();

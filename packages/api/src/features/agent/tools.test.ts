@@ -1,117 +1,88 @@
-import type { AIProvider } from "@reactive-resume/ai/types";
-import { describe, expect, it } from "vitest";
-import { buildAgentInstructions, buildAgentTools } from "./tools";
+import type { ReadPageOutput } from "@reactive-resume/ai/tools/agent-tool-contracts";
+import { describe, expect, it, vi } from "vitest";
+import { buildAgentInstructions, buildAgentTools, MAX_AGENT_WEB_CALLS } from "./tools";
 
-const handlers = {
-	readResume: async () => ({
-		id: "resume-1",
-		name: "Resume",
-		updatedAt: "2026-05-13T00:00:00.000Z",
-		data: {},
-	}),
-	readAttachment: async () => ({
-		id: "attachment-1",
-		filename: "job.md",
-		mediaType: "text/markdown",
-		size: 128,
-		content: "Job description",
-	}),
-	applyResumePatch: async () => ({
-		actionId: "action-1",
-		resumeId: "resume-1",
-		title: "Update resume",
-		summary: null,
-		operations: [],
-		appliedUpdatedAt: "2026-05-13T00:00:00.000Z",
-	}),
+const page: ReadPageOutput = {
+	requestedUrl: "https://example.com/job",
+	content: "Job description",
+	format: "text",
+	retrievedAt: "2026-09-30T12:00:00Z",
+	method: "builtin",
+	truncated: false,
+	completeness: "unknown",
 };
-
-function buildTools(
-	provider: AIProvider,
-	options?: { model?: string; baseURL?: string; requirePatchApproval?: boolean },
-) {
-	return buildAgentTools({
-		provider: { provider, model: options?.model ?? "gpt-5-mini", apiKey: "test-key", baseURL: options?.baseURL ?? "" },
-		...(options?.requirePatchApproval !== undefined
-			? { options: { requirePatchApproval: options.requirePatchApproval } }
-			: {}),
+function build(externalSearch = false, signal = new AbortController().signal) {
+	const handlers = {
+		readDocument: vi.fn(async () => ({ text: "Resume" })),
+		readAttachment: vi.fn(async () => ({})),
+		proposeEdits: vi.fn(async () => ({})),
+		searchWeb: vi.fn(async () => [{ url: "https://example.com/job", title: "Job" }]),
+		readPage: vi.fn(async () => page),
+	};
+	return {
 		handlers,
-	});
+		tools: buildAgentTools({
+			provider: { provider: "openai", model: "gpt-5-mini", apiKey: "test" },
+			document: "resume",
+			externalSearch,
+			signal,
+			handlers,
+		}),
+	};
+}
+const options = { toolCallId: "call", messages: [] };
+function execute(tools: ReturnType<typeof buildAgentTools>, name: string, input: unknown) {
+	const run = tools[name]?.execute;
+	if (!run) throw new Error(`Missing executable tool ${name}`);
+	return (run as unknown as (input: unknown, executionOptions: typeof options) => unknown)(input, options);
 }
 
-describe("agent tools", () => {
-	it("adds provider-native web search for direct OpenAI providers", () => {
-		const tools = buildTools("openai");
-
-		expect(tools).toHaveProperty("web_search");
+describe("assistant web tools", () => {
+	it("respects an explicit connection while keeping reading available without search credentials", async () => {
+		const native = build();
+		expect(native.tools.web_search).toBeDefined();
+		expect(native.tools.search_web).toBeUndefined();
+		expect(await execute(native.tools, "read_page", { url: page.requestedUrl })).toEqual(page);
+		const external = build(true);
+		expect(external.tools.web_search).toBeUndefined();
+		expect(await execute(external.tools, "search_web", { query: "Example company" })).toEqual([
+			{ url: "https://example.com/job", title: "Job" },
+		]);
+		expect(external.handlers.searchWeb).toHaveBeenCalledWith("Example company", expect.any(AbortSignal));
 	});
 
-	it("adds provider-native web search for OpenAI providers using the explicit default base URL", () => {
-		const tools = buildTools("openai", { baseURL: "https://api.openai.com/v1" });
-
-		expect(tools).toHaveProperty("web_search");
-	});
-
-	it("does not add provider-native web search for OpenAI providers with a custom base URL", () => {
-		const tools = buildTools("openai", { baseURL: "https://openai-compatible.example.com/v1" });
-
-		expect(tools).not.toHaveProperty("web_search");
-	});
-
-	it.each(["https://api.openai.com/v1?proxy=1", "https://api.openai.com/v1#fragment"])(
-		"does not add provider-native web search for OpenAI providers with non-exact base URL %s",
-		(baseURL) => {
-			const tools = buildTools("openai", { baseURL });
-
-			expect(tools).not.toHaveProperty("web_search");
-		},
-	);
-
-	it("does not add provider-native web search for unsupported OpenAI models", () => {
-		const tools = buildTools("openai", { model: "custom-model" });
-
-		expect(tools).not.toHaveProperty("web_search");
-	});
-
-	it.each<AIProvider>([
-		"anthropic",
-		"gemini",
-		"vercel-ai-gateway",
-		"openrouter",
-		"ollama",
-		"lmstudio",
-		"openai-compatible",
-	])("does not add provider-native web search for %s", (provider) => {
-		const tools = buildTools(provider);
-
-		expect(tools).not.toHaveProperty("web_search");
-	});
-
-	it("marks apply_resume_patch as needing approval only when review is required", () => {
-		const gated = buildTools("openai-compatible", { requirePatchApproval: true });
-		const open = buildTools("openai-compatible");
-
-		expect(gated.apply_resume_patch).toMatchObject({ needsApproval: true });
-		expect(open.apply_resume_patch?.needsApproval).toBeUndefined();
-	});
-
-	it("keeps instructions explicit about native search availability", () => {
-		expect(buildAgentInstructions({ hasProviderNativeSearch: true })).toContain("Use web_search");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: true })).toContain("user-provided public URLs");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).not.toContain("Use web_search");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("Live web research is unavailable");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain(
-			"paste or attach the relevant content",
+	it("shares one allowance across reading and search and never starts an aborted request", async () => {
+		const controller = new AbortController();
+		const { tools, handlers } = build(true, controller.signal);
+		for (let i = 0; i < MAX_AGENT_WEB_CALLS - 1; i++) await execute(tools, "read_page", { url: page.requestedUrl });
+		await execute(tools, "search_web", { query: "Company" });
+		await expect(async () => execute(tools, "read_page", { url: page.requestedUrl })).rejects.toThrow(
+			"Web access limit",
 		);
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("Batch related JSON Patch operations");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("/basics/name");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain(
-			"/sections/experience/items/0/description",
-		);
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain(
-			"/customSections/0/items/0/description",
-		);
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("never prefixed with /data");
-		expect(buildAgentInstructions({ hasProviderNativeSearch: false })).toContain("clean Markdown");
+		expect(handlers.readPage).toHaveBeenCalledTimes(MAX_AGENT_WEB_CALLS - 1);
+		const pending = build(true, controller.signal);
+		controller.abort(new DOMException("Stopped", "AbortError"));
+		await expect(async () => execute(pending.tools, "search_web", { query: "Company" })).rejects.toThrow("Stopped");
+		expect(pending.handlers.searchWeb).not.toHaveBeenCalled();
+	});
+
+	it("describes reader-only capabilities truthfully and names the selected search tool", () => {
+		const reader = buildAgentInstructions({
+			document: null,
+			posting: null,
+			searchTool: null,
+			canReadPage: true,
+		});
+		expect(reader).toContain("Web search is unavailable");
+		expect(reader).toContain("Use `read_page`");
+		expect(reader).not.toContain("can't browse");
+		expect(
+			buildAgentInstructions({
+				document: null,
+				posting: null,
+				searchTool: "google_search",
+				canReadPage: true,
+			}),
+		).toContain("Use `google_search`");
 	});
 });

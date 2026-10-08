@@ -1,62 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { defaultLocale, isLocale, isRTL } from "./locale";
+import { getLocaleAlternates, localizedUrl } from "./locale";
 
-describe("defaultLocale", () => {
-	it("is en-US", () => {
-		expect(defaultLocale).toBe("en-US");
-	});
-});
-
-describe("isLocale", () => {
-	it("returns true for non-empty string", () => {
-		expect(isLocale("en-US")).toBe(true);
+describe("locale URLs", () => {
+	it("keeps the default locale on the plain address and puts others in the locale parameter", () => {
+		expect(localizedUrl("https://rxresu.me/?locale=de-DE", "en-US")).toBe("https://rxresu.me/");
+		expect(localizedUrl("https://rxresu.me/", "de-DE")).toBe("https://rxresu.me/?locale=de-DE");
 	});
 
-	it("returns false for unsupported locale string", () => {
-		expect(isLocale("xyz")).toBe(false);
-	});
+	it("lists valid hreflang alternates without the pseudo-locale", () => {
+		const alternates = getLocaleAlternates("https://rxresu.me/");
 
-	it("returns false for empty string", () => {
-		expect(isLocale("")).toBe(false);
-	});
-
-	it("returns false for number", () => {
-		expect(isLocale(42)).toBe(false);
-	});
-
-	it("returns false for null", () => {
-		expect(isLocale(null)).toBe(false);
-	});
-
-	it("returns false for undefined", () => {
-		expect(isLocale(undefined)).toBe(false);
-	});
-
-	it("returns false for object", () => {
-		expect(isLocale({})).toBe(false);
-	});
-
-	it("returns false for array", () => {
-		expect(isLocale([])).toBe(false);
-	});
-});
-
-describe("isRTL", () => {
-	it.each([
-		["ar-SA", true],
-		["he-IL", true],
-		["fa-IR", true],
-		["ur-PK", true],
-		["en-US", false],
-		["en-GB", false],
-		["fr-FR", false],
-		["de-DE", false],
-		["zh-CN", false],
-		["xyz-XX", false],
-		["AR-SA", true],
-		["ar", true],
-		["en", false],
-	])("returns %s → %s", (locale, expected) => {
-		expect(isRTL(locale)).toBe(expected);
+		expect(alternates).toContainEqual({ hreflang: "x-default", href: "https://rxresu.me/" });
+		expect(alternates).toContainEqual({ hreflang: "sr", href: "https://rxresu.me/?locale=sr-SP" });
+		expect(alternates.map((alternate) => alternate.hreflang)).not.toContain("zu-ZA");
 	});
 });

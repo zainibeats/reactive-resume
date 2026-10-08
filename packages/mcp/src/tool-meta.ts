@@ -5,6 +5,8 @@
 import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import z from "zod";
 import { resumePatchOperationsSchema } from "@reactive-resume/ai/tools/resume-tool-contracts";
+import { resumeDto } from "@reactive-resume/api/dto/resume";
+import { toWireObjectSchema, toWireSchema } from "./contracts";
 import { MCP_TOOL_NAME as T } from "./mcp-tool-names";
 
 const READ_IDEMPOTENT: ToolAnnotations = {
@@ -28,7 +30,7 @@ const WRITE_NON_IDEMPOTENT: ToolAnnotations = {
 const WRITE_DESTRUCTIVE: ToolAnnotations = {
 	readOnlyHint: false,
 	destructiveHint: true,
-	idempotentHint: true,
+	idempotentHint: false,
 	openWorldHint: false,
 };
 const WRITE_IDEMPOTENT: ToolAnnotations = {
@@ -41,7 +43,17 @@ const WRITE_IDEMPOTENT: ToolAnnotations = {
 // ponytail: shared schema fragment; exported so server-card can re-use without re-importing
 const resumeIdSchema = z.string().min(1).describe(`Resume ID. Use \`${T.listResumes}\` to find valid IDs.`);
 
-export const TOOL_META = {
+// SDK discovery requires pure JSON schemas; API handlers still validate native DTOs.
+function wireInput<T extends z.ZodObject>(schema: T): T {
+	const wire = toWireSchema(schema, "input");
+	if (!(wire instanceof z.ZodObject)) throw new Error("MCP tool input must be an object.");
+	return wire as T;
+}
+
+const messageOutput = z.object({ message: z.string() });
+const idOutput = z.object({ id: z.string() });
+
+const BASE_TOOL_META = {
 	[T.listResumes]: {
 		title: "List Resumes",
 		description: [
@@ -54,18 +66,23 @@ export const TOOL_META = {
 			`Call this before \`${T.getResume}\`, \`${T.patchResume}\`, prompts, or \`resources/read\` with \`resume://{id}\`.`,
 			"Results can be filtered by tags and sorted by last updated date, creation date, or name.",
 		].join("\n"),
-		inputSchema: z.object({
-			tags: z
-				.array(z.string())
-				.optional()
-				.default([])
-				.describe("Filter resumes by tags. Only resumes matching ALL specified tags are returned. Default: no filter."),
-			sort: z
-				.enum(["lastUpdatedAt", "createdAt", "name"])
-				.optional()
-				.default("lastUpdatedAt")
-				.describe("Sort order for results. Default: lastUpdatedAt."),
-		}),
+		outputSchema: toWireObjectSchema(resumeDto.list.output),
+		inputSchema: wireInput(
+			z.strictObject({
+				tags: z
+					.array(z.string())
+					.optional()
+					.default([])
+					.describe(
+						"Filter resumes by tags. Only resumes matching ALL specified tags are returned. Default: no filter.",
+					),
+				sort: z
+					.enum(["lastUpdatedAt", "createdAt", "name"])
+					.optional()
+					.default("lastUpdatedAt")
+					.describe("Sort order for results. Default: lastUpdatedAt."),
+			}),
+		),
 		annotations: READ_IDEMPOTENT,
 	},
 	[T.listResumeTags]: {
@@ -74,7 +91,8 @@ export const TOOL_META = {
 			"Returns a sorted list of every distinct tag used across your resumes.",
 			"Useful for choosing tag filters when calling list tools or keeping naming consistent.",
 		].join("\n"),
-		inputSchema: z.object({}),
+		outputSchema: z.object({ items: z.array(z.string()) }),
+		inputSchema: wireInput(z.strictObject({})),
 		annotations: READ_IDEMPOTENT,
 	},
 	[T.getResume]: {
@@ -89,51 +107,57 @@ export const TOOL_META = {
 			`Use \`${T.listResumes}\` first to find valid IDs.`,
 			"The `resume://_meta/schema` resource describes the full data structure for JSON Patch paths.",
 		].join("\n"),
-		inputSchema: z.object({ id: resumeIdSchema }),
+		outputSchema: toWireObjectSchema(resumeDto.getById.output),
+		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
 		annotations: READ_IDEMPOTENT,
 	},
 	[T.downloadResumePdf]: {
 		title: "Download Resume PDF",
 		description: [
-			"Create a short-lived authenticated URL for downloading a resume or its visible cover letter as a PDF.",
-			"The URL expires in 10 minutes and should be used immediately.",
-			"Set target to `cover-letter` to export the visible cover letter separately; omit it (or use `resume`) for the resume.",
-			"Returns JSON containing: resumeId, target, name, downloadUrl, expiresAt, expiresInSeconds, contentType.",
+			"Create a short-lived authenticated URL for downloading a resume as a PDF.",
+			"The URL expires in 10 minutes. Anyone holding this URL can download the PDF until expiry; keep it private.",
+			"Cover letters are documents of their own: use the cover-letter tools for them.",
+			"Returns JSON containing: resumeId, name, downloadUrl, expiresAt, expiresInSeconds, contentType.",
 			`Use \`${T.listResumes}\` first to find valid IDs.`,
 		].join("\n"),
-		inputSchema: z.object({
-			id: resumeIdSchema,
-			target: z
-				.enum(["resume", "cover-letter"])
-				.optional()
-				.default("resume")
-				.describe("Document to export. Default: resume."),
+		outputSchema: z.object({
+			resumeId: z.string(),
+			name: z.string(),
+			downloadUrl: z.url(),
+			expiresAt: z.iso.datetime({ offset: true }),
+			expiresInSeconds: z.number().int().positive(),
+			contentType: z.literal("application/pdf"),
 		}),
+		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
 		annotations: READ_NON_IDEMPOTENT,
 	},
 	[T.createResume]: {
 		title: "Create Resume",
 		description: [
-			"Create a new, empty resume with a name and URL-friendly slug.",
+			"Create a new, empty resume with a name. Its URL-friendly slug is generated when omitted.",
 			"",
 			"Returns the ID of the newly created resume.",
 			"Set `withSampleData` to true to pre-fill with example content (useful for testing).",
 			`After creating, use \`${T.getResume}\` to view or \`${T.patchResume}\` to populate it.`,
 		].join("\n"),
-		inputSchema: z.object({
-			name: z.string().min(1).max(64).describe("Display name for the resume (e.g. 'Software Engineer 2026')"),
-			slug: z
-				.string()
-				.min(1)
-				.max(64)
-				.describe("URL-friendly slug, must be unique across your resumes (e.g. 'software-engineer-2026')"),
-			tags: z
-				.array(z.string())
-				.optional()
-				.default([])
-				.describe("Tags to categorize the resume (e.g. ['tech', 'senior'])"),
-			withSampleData: z.boolean().optional().default(false).describe("Pre-fill with sample data. Default: false."),
-		}),
+		outputSchema: idOutput,
+		inputSchema: wireInput(
+			z.strictObject({
+				name: z.string().min(1).max(64).describe("Display name for the resume (e.g. 'Software Engineer 2026')"),
+				slug: z
+					.string()
+					.min(1)
+					.max(64)
+					.optional()
+					.describe("Optional URL-friendly slug; generated from the name when omitted."),
+				tags: z
+					.array(z.string())
+					.optional()
+					.default([])
+					.describe("Tags to categorize the resume (e.g. ['tech', 'senior'])"),
+				withSampleData: z.boolean().optional().default(false).describe("Pre-fill with sample data. Default: false."),
+			}),
+		),
 		annotations: WRITE_NON_IDEMPOTENT,
 	},
 	[T.importResume]: {
@@ -144,11 +168,14 @@ export const TOOL_META = {
 			`For small edits to an existing resume, prefer \`${T.patchResume}\` instead of re-importing.`,
 			"Large payloads may exceed MCP client message limits; in that case, use the web UI or the HTTP API.",
 		].join("\n"),
-		inputSchema: z.object({
-			data: z
-				.unknown()
-				.describe("Complete ResumeData JSON (same shape as `read_resume` body or `resume://_meta/schema`)."),
-		}),
+		outputSchema: idOutput,
+		inputSchema: wireInput(
+			z.strictObject({
+				data: z
+					.unknown()
+					.describe("Complete ResumeData JSON (same shape as `read_resume` body or `resume://_meta/schema`)."),
+			}),
+		),
 		annotations: WRITE_NON_IDEMPOTENT,
 	},
 	[T.duplicateResume]: {
@@ -157,15 +184,18 @@ export const TOOL_META = {
 			"Create a copy of an existing resume with all its data.",
 			"",
 			"Returns the ID of the newly duplicated resume.",
-			"You must provide a new name and slug for the copy.",
+			"Name and tags default to the original; a unique slug is generated when omitted.",
 			"Useful for creating job-specific variants of a base resume.",
 		].join("\n"),
-		inputSchema: z.object({
-			id: resumeIdSchema.describe("ID of the resume to duplicate"),
-			name: z.string().min(1).max(64).describe("Name for the duplicate"),
-			slug: z.string().min(1).max(64).describe("URL-friendly slug for the duplicate (must be unique)"),
-			tags: z.array(z.string()).optional().default([]).describe("Tags for the duplicate"),
-		}),
+		outputSchema: idOutput,
+		inputSchema: wireInput(
+			z.strictObject({
+				id: resumeIdSchema.describe("ID of the resume to duplicate"),
+				name: z.string().min(1).max(64).optional().describe("Name for the duplicate; defaults to the original"),
+				slug: z.string().min(1).max(64).optional().describe("Optional unique slug; generated when omitted"),
+				tags: z.array(z.string()).optional().describe("Tags for the duplicate; defaults to the original"),
+			}),
+		),
 		annotations: WRITE_NON_IDEMPOTENT,
 	},
 	[T.patchResume]: {
@@ -189,50 +219,72 @@ export const TOOL_META = {
 			"  /metadata/template                     — Change the template (e.g. 'azurill', 'bronzor', 'onyx')",
 			"  /metadata/design/colors/primary        — Change the primary color (rgba string)",
 			"  /sections/interests/hidden              — Hide/show a section",
+			"  /sections/experience/items/0/dates      — Set dates: { start, end, present } with years or",
+			"                                            year-months ('2022' or '2022-03')",
 			"",
+			"Dates: write `dates`; the text in `period` (or `date` for awards, certifications and",
+			"publications) is rewritten from it in the resume's locale, so an edit to the text alone is lost.",
 			"Important: HTML content fields (description, summary.content) must use valid HTML.",
 			"New items must include a valid UUID as `id` and `hidden: false`.",
-			`Locked resumes cannot be patched; use \`${T.unlockResume}\` first.`,
+			`Locked resumes cannot be patched. Ask the user before unlocking with \`${T.unlockResume}\`.`,
 		].join("\n"),
-		inputSchema: z.object({
-			id: resumeIdSchema,
-			operations: resumePatchOperationsSchema,
-		}),
+		outputSchema: toWireObjectSchema(resumeDto.patch.output),
+		inputSchema: wireInput(
+			z.strictObject({
+				id: resumeIdSchema,
+				operations: resumePatchOperationsSchema,
+			}),
+		),
 		annotations: { ...WRITE_NON_IDEMPOTENT, destructiveHint: true, openWorldHint: true },
 	},
 	[T.updateResume]: {
 		title: "Update Resume (metadata)",
 		description: [
-			"Update resume metadata only: display name, URL slug, tags, and/or public visibility.",
-			"Does not change section content; use JSON Patch via the patch tool for body edits.",
-			`Locked resumes cannot be updated; use \`${T.unlockResume}\` first.`,
-			"Password protection cannot be set or removed via MCP; use the web app for that.",
+			"Update resume display name, URL slug, tags, visibility, download settings, or full document data.",
+			"Prefer JSON Patch with expectedUpdatedAt for content edits to avoid overwriting concurrent changes.",
+			`Locked resumes cannot be updated. Ask the user before unlocking with \`${T.unlockResume}\`.`,
+			"Use the account security workflow to manage password protection.",
 			"",
 			"Always returns your canonical share URL (`{app}/{username}/{slug}`). Anonymous viewers can use it only when `isPublic` is true; password protection from the web app still applies.",
 		].join("\n"),
-		inputSchema: z.object({
-			id: resumeIdSchema,
-			name: z.string().min(1).max(64).optional().describe("Display name for the resume."),
-			slug: z.string().min(1).max(64).optional().describe("URL-friendly slug; must stay unique among your resumes."),
-			tags: z.array(z.string()).optional().describe("Replace the resume's tags (omit to leave unchanged)."),
-			isPublic: z
-				.boolean()
-				.optional()
-				.describe(
-					"When true, anyone with the link can view the public resume (subject to password if set in the app).",
-				),
-		}),
+		outputSchema: toWireObjectSchema(
+			resumeDto.update.output
+				.pick({ id: true, name: true, slug: true, tags: true, isPublic: true, hasPassword: true })
+				.extend({ shareUrl: z.string() }),
+		),
+		inputSchema: wireInput(
+			z.strictObject({
+				id: resumeIdSchema,
+				name: z.string().min(1).max(64).optional().describe("Display name for the resume."),
+				slug: z
+					.string()
+					.min(1)
+					.max(64)
+					.optional()
+					.describe(
+						"New URL slug: lowercase letters and numbers joined by single dashes (e.g. 'product-designer'), unique among your resumes. The old address keeps redirecting for 30 days.",
+					),
+				tags: z.array(z.string()).optional().describe("Replace the resume's tags (omit to leave unchanged)."),
+				isPublic: z
+					.boolean()
+					.optional()
+					.describe(
+						"When true, anyone with the link can view the public resume (subject to password if set in the app).",
+					),
+			}),
+		),
 		annotations: { ...WRITE_NON_IDEMPOTENT, destructiveHint: true, openWorldHint: true },
 	},
 	[T.deleteResume]: {
 		title: "Delete Resume",
 		description: [
-			"Permanently delete a resume and all its associated files (screenshots, PDFs), removing public access if published.",
+			"Move a resume to Trash, removing public access if published.",
 			"",
-			`This action is IRREVERSIBLE. Locked resumes cannot be deleted; use \`${T.unlockResume}\` first.`,
-			`Consider using \`${T.duplicateResume}\` to create a backup before deleting.`,
+			"It stays in Trash for 30 days, where the user can restore it from the app; then it and its files are deleted.",
+			`Locked resumes cannot be moved; use \`${T.unlockResume}\` first.`,
 		].join("\n"),
-		inputSchema: z.object({ id: resumeIdSchema }),
+		outputSchema: messageOutput,
+		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
 		annotations: { ...WRITE_DESTRUCTIVE, openWorldHint: true },
 	},
 	[T.lockResume]: {
@@ -244,13 +296,15 @@ export const TOOL_META = {
 			"Useful for protecting finalized resumes from accidental changes.",
 			`Use \`${T.unlockResume}\` to re-enable editing.`,
 		].join("\n"),
-		inputSchema: z.object({ id: resumeIdSchema }),
+		outputSchema: messageOutput,
+		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
 		annotations: WRITE_IDEMPOTENT,
 	},
 	[T.unlockResume]: {
 		title: "Unlock Resume",
 		description: "Unlock a previously locked resume, re-enabling edits, patches, and deletion.",
-		inputSchema: z.object({ id: resumeIdSchema }),
+		outputSchema: messageOutput,
+		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
 		annotations: WRITE_IDEMPOTENT,
 	},
 	[T.getResumeStatistics]: {
@@ -261,7 +315,82 @@ export const TOOL_META = {
 			"Returns: isPublic (boolean), views (count), downloads (count),",
 			"lastViewedAt (timestamp or null), lastDownloadedAt (timestamp or null).",
 		].join("\n"),
-		inputSchema: z.object({ id: resumeIdSchema }),
+		outputSchema: toWireObjectSchema(
+			z.object({
+				isPublic: z.boolean(),
+				views: z.number(),
+				downloads: z.number(),
+				lastViewedAt: z.date().nullable(),
+				lastDownloadedAt: z.date().nullable(),
+			}),
+		),
+		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
 		annotations: READ_IDEMPOTENT,
+	},
+} as const;
+
+const pagination = {
+	limit: z.number().int().min(1).max(100).default(20).describe("Maximum rows per page; default 20."),
+	offset: z.number().int().min(0).default(0).describe("Rows to skip; default 0."),
+};
+// Shared DTOs keep fields, validation and limits aligned with API contracts.
+export const TOOL_META = {
+	...BASE_TOOL_META,
+	[T.listResumes]: {
+		...BASE_TOOL_META[T.listResumes],
+		inputSchema: wireInput(BASE_TOOL_META[T.listResumes].inputSchema.extend(pagination)),
+		outputSchema: toWireObjectSchema(
+			z.object({
+				items: resumeDto.list.output,
+				limit: z.number(),
+				offset: z.number(),
+				nextOffset: z.number().nullable(),
+			}),
+		),
+	},
+	[T.getResume]: {
+		...BASE_TOOL_META[T.getResume],
+		description:
+			BASE_TOOL_META[T.getResume].description +
+			" Structured output also includes record metadata and updatedAt for expectedUpdatedAt.",
+		outputSchema: toWireObjectSchema(resumeDto.getById.output),
+	},
+	[T.createResume]: {
+		...BASE_TOOL_META[T.createResume],
+		inputSchema: wireInput(
+			resumeDto.create.input.extend({ tags: resumeDto.create.input.shape.tags.default([]) }).strict(),
+		),
+		outputSchema: idOutput,
+	},
+	[T.duplicateResume]: {
+		...BASE_TOOL_META[T.duplicateResume],
+		inputSchema: wireInput(resumeDto.duplicate.input.strict()),
+		outputSchema: idOutput,
+	},
+	[T.importResume]: { ...BASE_TOOL_META[T.importResume], outputSchema: idOutput },
+	[T.patchResume]: {
+		...BASE_TOOL_META[T.patchResume],
+		inputSchema: wireInput(
+			BASE_TOOL_META[T.patchResume].inputSchema
+				.extend({
+					expectedUpdatedAt: z.iso
+						.datetime({ offset: true })
+						.optional()
+						.describe(
+							"updatedAt from the latest read_resume. Rejects changes when document has changed since that read.",
+						),
+				})
+				.strict(),
+		),
+		outputSchema: toWireObjectSchema(resumeDto.patch.output),
+	},
+	[T.updateResume]: {
+		...BASE_TOOL_META[T.updateResume],
+		inputSchema: wireInput(resumeDto.update.input.strict()),
+		outputSchema: toWireObjectSchema(
+			resumeDto.update.output
+				.pick({ id: true, name: true, slug: true, tags: true, isPublic: true, hasPassword: true })
+				.extend({ shareUrl: z.string() }),
+		),
 	},
 } as const;

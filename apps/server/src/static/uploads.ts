@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
-import { basename, extname, normalize } from "node:path";
+import { basename, normalize } from "node:path";
 import { getStorageService, inferContentType } from "@reactive-resume/api/features/storage";
+
+// Uploads share the app origin and S3/Blob hand back the client-declared type, so only raster
+// images render inline. Anything else (HTML, SVG, PDF, unknown) downloads, whatever was stored.
+const INLINE_CONTENT_TYPES = new Set(["image/gif", "image/jpeg", "image/png", "image/webp"]);
 
 export async function handleUpload(request: Request) {
 	const { userId, filePath } = parseRouteParams(request.url);
@@ -16,13 +20,19 @@ export async function handleUpload(request: Request) {
 	if (!storedFile) return new Response("Not Found", { status: 404 });
 
 	const filename = filePath.split("/").pop() ?? filePath;
-	const ext = extname(filename).toLowerCase();
 	const contentType = storedFile.contentType ?? inferContentType(filename);
+	const isPublicPicture = filePath.startsWith("pictures/") && INLINE_CONTENT_TYPES.has(contentType);
+	if (!isPublicPicture) {
+		const { resolveAuthenticationFromRequestHeaders } = await import("@reactive-resume/api/context");
+		const authentication = await resolveAuthenticationFromRequestHeaders(request.headers).catch(() => null);
+		if (authentication?.user.id !== userId || !authentication.permissions.includes("read"))
+			return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
+	}
 	const etag = createEtag(storedFile);
 
-	if (isNotModified(request.headers, etag)) return makeNotModifiedResponse(etag);
+	if (isPublicPicture && isNotModified(request.headers, etag)) return makeNotModifiedResponse(etag);
 
-	const shouldForceDownload = [".pdf"].includes(ext);
+	const shouldForceDownload = !INLINE_CONTENT_TYPES.has(contentType);
 
 	const headers = new Headers();
 	headers.set("Content-Type", shouldForceDownload ? "application/octet-stream" : contentType);
@@ -32,7 +42,7 @@ export async function handleUpload(request: Request) {
 		headers.set("Content-Disposition", `attachment; filename="${encodeURIComponent(basename(filename))}"`);
 	}
 
-	headers.set("Cache-Control", "public, max-age=31536000, immutable");
+	headers.set("Cache-Control", isPublicPicture ? "public, max-age=31536000, immutable" : "private, no-store");
 	headers.set("ETag", etag);
 	headers.set("X-Content-Type-Options", "nosniff");
 	headers.set("X-Robots-Tag", "noindex, nofollow");

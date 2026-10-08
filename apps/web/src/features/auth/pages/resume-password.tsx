@@ -1,15 +1,14 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ORPCError } from "@orpc/client";
-import { EyeIcon, EyeSlashIcon, LockOpenIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useToggle } from "usehooks-ts";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
-import { Input } from "@reactive-resume/ui/components/input";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { PasswordInput } from "@/components/input/password-input";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 import { useAppForm } from "@/libs/tanstack-form";
@@ -26,9 +25,8 @@ type ResumePasswordPageProps = {
 
 export function ResumePasswordPage({ username, slug, redirectPath }: ResumePasswordPageProps) {
 	const navigate = useNavigate();
-	const [showPassword, toggleShowPassword] = useToggle(false);
 
-	const { mutate: verifyPassword } = useMutation(orpc.resume.verifyPassword.mutationOptions());
+	const { mutate: verifyPassword, isPending } = useMutation(orpc.resume.verifyPassword.mutationOptions());
 
 	const form = useAppForm({
 		defaultValues: { password: "" },
@@ -77,11 +75,11 @@ export function ResumePasswordPage({ username, slug, redirectPath }: ResumePassw
 	return (
 		<>
 			<div className="space-y-4 text-center">
-				<h1 className="font-semibold text-2xl tracking-tight">
+				<h1 className="text-2xl font-semibold tracking-tight">
 					<Trans>This resume is password protected</Trans>
 				</h1>
 
-				<div className="text-muted-foreground leading-relaxed">
+				<div className="leading-relaxed text-ink-3">
 					<Trans>Enter the password the resume owner shared with you.</Trans>
 				</div>
 			</div>
@@ -100,48 +98,26 @@ export function ResumePasswordPage({ username, slug, redirectPath }: ResumePassw
 							<FormLabel>
 								<Trans comment="Label for password input on protected resume access form">Password</Trans>
 							</FormLabel>
-							<div className="flex items-center gap-x-1.5">
-								<FormControl
-									render={
-										<Input
-											min={6}
-											max={64}
-											type={showPassword ? "text" : "password"}
-											autoComplete="new-password"
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(event) => field.handleChange(event.target.value)}
-										/>
-									}
-								/>
-
-								<Button
-									size="icon"
-									variant="ghost"
-									onClick={toggleShowPassword}
-									aria-label={
-										showPassword
-											? t({
-													comment: "Accessible label for button that hides password on protected resume screen",
-													message: "Hide password",
-												})
-											: t({
-													comment: "Accessible label for button that reveals password on protected resume screen",
-													message: "Show password",
-												})
-									}
-								>
-									{showPassword ? <EyeIcon /> : <EyeSlashIcon />}
-								</Button>
-							</div>
+							<FormControl
+								render={
+									<PasswordInput
+										minLength={6}
+										maxLength={64}
+										autoComplete="new-password"
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(event) => field.handleChange(event.target.value)}
+									/>
+								}
+							/>
 							<FormMessage errors={field.state.meta.errors} />
 						</FormItem>
 					)}
 				</form.Field>
 
-				<Button type="submit" className="w-full">
-					<LockOpenIcon />
+				<Button type="submit" className="w-full" disabled={isPending}>
+					<Icon name="lock_open" size={16} />
 					<Trans comment="Primary action button label to unlock a password-protected resume">Unlock</Trans>
 				</Button>
 			</form>

@@ -74,10 +74,12 @@ const filterExperienceRoles = <T extends HiddenItem>(item: T, sectionType?: stri
 	if (!Array.isArray(roles)) return item;
 
 	const visibleRoles = roles.filter(hasVisibleExperienceRole);
+	const position = (item as { position?: unknown }).position;
+	const repeatsRole = hasText(position) && visibleRoles.some((role) => role.position.trim() === position.trim());
 
-	if (visibleRoles.length === roles.length) return item;
+	if (visibleRoles.length === roles.length && !repeatsRole) return item;
 
-	return { ...item, roles: visibleRoles } as T;
+	return { ...item, roles: visibleRoles, ...(repeatsRole ? { position: "" } : {}) } as T;
 };
 
 export const filterItems = <T extends HiddenItem>(items: T[], sectionType?: string): T[] => {

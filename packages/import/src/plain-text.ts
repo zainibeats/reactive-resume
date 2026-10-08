@@ -1,7 +1,7 @@
 import type { ResumeData, SectionType } from "@reactive-resume/schema/resume/data";
-import { parsePeriod, parseSingleDate } from "@reactive-resume/resume/ats";
 import { parseResumeData } from "@reactive-resume/schema/resume/data";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
+import { parsePeriod, parseSingleDate } from "@reactive-resume/schema/resume/period";
 import { generateId } from "@reactive-resume/utils/string";
 import { BULLET_PATTERN, toHtml } from "./html";
 

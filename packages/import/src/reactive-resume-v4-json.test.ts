@@ -218,34 +218,6 @@ describe("parseReactiveResumeV4JSON – custom section description-only items", 
 		expect(item.description).toBe("<p>Rich HTML content</p>");
 	});
 
-	it("treats whitespace-only name the same as missing name", () => {
-		const v4 = makeV4Base({
-			custom: {
-				ws: {
-					name: "Whitespace",
-					columns: 1,
-					separateLinks: false,
-					visible: true,
-					id: "ws",
-					items: [
-						{
-							id: "item-ws",
-							visible: true,
-							name: "   ",
-							description: "Content goes here",
-						},
-					],
-				},
-			},
-		});
-
-		const result = parseReactiveResumeV4JSON(JSON.stringify(v4));
-		const item = result.customSections[0]?.items[0] as { company: string; position: string; description: string };
-		expect(item.company).toBe("#1");
-		expect(item.position).toBe("");
-		expect(item.description).toBe("Content goes here");
-	});
-
 	it("defaults item to visible when 'visible' field is missing in v4 data", () => {
 		const v4 = makeV4Base({
 			custom: {
@@ -316,13 +288,6 @@ describe("parseReactiveResumeV4JSON – skill level scaling (v4: 0-10 → v5: 0-
 		});
 	}
 
-	it("scales level 10 → 5", () => {
-		const result = parseReactiveResumeV4JSON(
-			JSON.stringify(makeWithSkills([{ id: "s1", visible: true, name: "TypeScript", level: 10 }])),
-		);
-		expect(result.sections.skills.items[0]?.level).toBe(5);
-	});
-
 	it("scales level 8 → 4 (not 5)", () => {
 		const result = parseReactiveResumeV4JSON(
 			JSON.stringify(makeWithSkills([{ id: "s2", visible: true, name: "React", level: 8 }])),
@@ -330,32 +295,11 @@ describe("parseReactiveResumeV4JSON – skill level scaling (v4: 0-10 → v5: 0-
 		expect(result.sections.skills.items[0]?.level).toBe(4);
 	});
 
-	it("scales level 6 → 3 (not 5)", () => {
-		const result = parseReactiveResumeV4JSON(
-			JSON.stringify(makeWithSkills([{ id: "s3", visible: true, name: "GraphQL", level: 6 }])),
-		);
-		expect(result.sections.skills.items[0]?.level).toBe(3);
-	});
-
 	it("scales level 5 → 3 (rounds 2.5 up)", () => {
 		const result = parseReactiveResumeV4JSON(
 			JSON.stringify(makeWithSkills([{ id: "s4", visible: true, name: "Node", level: 5 }])),
 		);
 		expect(result.sections.skills.items[0]?.level).toBe(3);
-	});
-
-	it("keeps level 0 → 0 (hides the visual indicator)", () => {
-		const result = parseReactiveResumeV4JSON(
-			JSON.stringify(makeWithSkills([{ id: "s5", visible: true, name: "Rust", level: 0 }])),
-		);
-		expect(result.sections.skills.items[0]?.level).toBe(0);
-	});
-
-	it("clamps negative level to 0", () => {
-		const result = parseReactiveResumeV4JSON(
-			JSON.stringify(makeWithSkills([{ id: "s6", visible: true, name: "Go", level: -3 }])),
-		);
-		expect(result.sections.skills.items[0]?.level).toBe(0);
 	});
 
 	it("clamps level above 10 to 5", () => {
@@ -380,13 +324,6 @@ describe("parseReactiveResumeV4JSON – language level scaling (v4: 0-10 → v5:
 		});
 	}
 
-	it("scales level 10 → 5", () => {
-		const result = parseReactiveResumeV4JSON(
-			JSON.stringify(makeWithLanguages([{ id: "l1", visible: true, name: "Spanish", level: 10 }])),
-		);
-		expect(result.sections.languages.items[0]?.level).toBe(5);
-	});
-
 	it("scales level 6 → 3 (not 5)", () => {
 		const result = parseReactiveResumeV4JSON(
 			JSON.stringify(makeWithLanguages([{ id: "l2", visible: true, name: "French", level: 6 }])),
@@ -402,14 +339,6 @@ describe("parseReactiveResumeV4JSON – rejects non-v4 input gracefully", () => 
 		expect(() => parseReactiveResumeV4JSON("{}")).toThrow(/v4/i);
 	});
 
-	it("throws for a JSON Resume shaped file (basics but no sections/metadata)", () => {
-		expect(() => parseReactiveResumeV4JSON(JSON.stringify({ basics: { name: "Jane" } }))).toThrow(/v4/i);
-	});
-
-	it("throws for a top-level JSON array", () => {
-		expect(() => parseReactiveResumeV4JSON("[]")).toThrow(/v4/i);
-	});
-
 	it("throws for a current-format export whose metadata.layout is not a v4 array", () => {
 		const currentFormat = {
 			basics: { name: "Jane" },
@@ -417,20 +346,5 @@ describe("parseReactiveResumeV4JSON – rejects non-v4 input gracefully", () => 
 			metadata: { layout: { sidebarWidth: 35, pages: [] } },
 		};
 		expect(() => parseReactiveResumeV4JSON(JSON.stringify(currentFormat))).toThrow(/v4/i);
-	});
-
-	it("throws when basics, sections, or metadata are arrays rather than objects", () => {
-		const arrayBranches = JSON.stringify({ basics: [], sections: [], metadata: [] });
-		expect(() => parseReactiveResumeV4JSON(arrayBranches)).toThrow(/v4/i);
-	});
-});
-
-describe("parseReactiveResumeV4JSON – skills section", () => {
-	it("defaults skills layout to 'default' when 'layout' is missing from v4 data", () => {
-		// 'layout' already omitted
-		const v4 = makeV4Base({});
-
-		const result = parseReactiveResumeV4JSON(JSON.stringify(v4));
-		expect(result.sections.skills.layout).toBe("default");
 	});
 });

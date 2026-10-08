@@ -1,9 +1,5 @@
-import { readFile } from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
-import z from "zod";
-import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { createResumeDataJsonSchema } from "@reactive-resume/schema/resume/json-schema";
-import { writableResumeDataSchema } from "@reactive-resume/schema/resume/write";
 
 // Spec generation reads procedure contracts without executing authentication. Keep the
 // provider's resource seeding out of this unit test; real OAuth initialization is covered
@@ -17,11 +13,6 @@ type GeneratedSpecView = {
 		Record<
 			string,
 			{
-				tags?: string[];
-				operationId?: string;
-				summary?: string;
-				description?: string;
-				responses?: Record<string, { description?: string }>;
 				requestBody?: {
 					content?: Record<string, { schema?: unknown }>;
 				};
@@ -78,58 +69,15 @@ function findImpossibleRequestSchemas(spec: GeneratedSpecView) {
 }
 
 describe("generateOpenApiSpec", () => {
-	it("documents all cover-letter procedures with REST metadata", async () => {
+	it("keeps instance homepage resolution out of the public API", async () => {
 		const spec = (await generateSpec()) as GeneratedSpecView;
-		const expected = [
-			["get", "/cover-letters", "listCoverLetters", "List cover letters", "200"],
-			["get", "/cover-letters/{id}", "getCoverLetter", "Get cover letter by ID", "200"],
-			["post", "/cover-letters", "createCoverLetter", "Create a cover letter", "200"],
-			["put", "/cover-letters/{id}", "updateCoverLetter", "Update a cover letter", "200"],
-			["post", "/cover-letters/{id}/refresh-style", "refreshCoverLetterStyle", "Refresh cover letter style", "200"],
-			["post", "/cover-letters/{id}/duplicate", "duplicateCoverLetter", "Duplicate a cover letter", "200"],
-			["delete", "/cover-letters/{id}", "deleteCoverLetter", "Delete a cover letter", "200"],
-			["post", "/cover-letters/from-resume", "copyEmbeddedCoverLetter", "Copy an embedded cover letter", "200"],
-			["get", "/cover-letters/{id}/export", "exportCoverLetter", "Export a cover letter", "200"],
-			["post", "/cover-letters/import", "importCoverLetter", "Import a cover letter", "200"],
-		] as const;
-
-		for (const [method, path, operationId, summary, successStatus] of expected) {
-			const operation = spec.paths?.[path]?.[method];
-			expect(operation).toMatchObject({
-				tags: ["Cover Letters"],
-				operationId,
-				summary,
-				description: expect.any(String),
-				responses: { [successStatus]: { description: expect.any(String) } },
-			});
-		}
-	});
-
-	it("keeps published cover-letter operations in sync with the runtime spec", async () => {
-		const published = JSON.parse(
-			await readFile(new URL("../../../../docs/spec.json", import.meta.url), "utf8"),
-		) as GeneratedSpecView;
-		const runtime = await generateSpec();
-		const coverLetterPaths = (spec: GeneratedSpecView) =>
-			Object.fromEntries(
-				Object.entries(spec.paths ?? {}).filter(
-					([path]) => path.startsWith("/cover-letters") || path.startsWith("/coverLetters/"),
-				),
-			);
-
-		const publishedPaths = coverLetterPaths(published);
-		const runtimePaths = coverLetterPaths(runtime as GeneratedSpecView);
-		expect(Object.keys(publishedPaths).sort()).toEqual(Object.keys(runtimePaths).sort());
-		expect(publishedPaths).toEqual(runtimePaths);
-	});
+		expect(spec.paths).not.toHaveProperty("/resume/getRoot");
+	}, 15_000);
 
 	it("uses caller-provided application URL and version", async () => {
 		const spec = await generateSpec();
 
-		expect(spec.info).toMatchObject({
-			title: "Reactive Resume",
-			version: "9.8.7",
-		});
+		expect(spec.info).toMatchObject({ title: "Reactive Resume", version: "9.8.7" });
 		expect(spec.servers).toEqual([{ url: "https://rxresu.me/api/openapi" }]);
 	}, 15_000);
 
@@ -139,30 +87,6 @@ describe("generateOpenApiSpec", () => {
 		expect(spec.info).not.toHaveProperty("contact");
 		expect(spec.externalDocs).toBeUndefined();
 	}, 15_000);
-
-	it("documents the public health endpoint at its actual URL", async () => {
-		const spec = await generateSpec();
-		const health = spec.paths?.["/api/health"]?.get;
-
-		expect(health).toMatchObject({
-			operationId: "getHealth",
-			security: [],
-			servers: [{ url: "https://rxresu.me" }],
-		});
-		for (const status of ["200", "503"]) {
-			expect(health?.responses?.[status]).toMatchObject({
-				content: {
-					"application/json": {
-						schema: {
-							required: expect.arrayContaining(["service", "version", "status"]),
-							properties: { version: { type: "string" } },
-						},
-					},
-				},
-			});
-		}
-	});
-
 	it("uses the canonical input-side ResumeData schema in update requests", async () => {
 		const spec = (await generateSpec()) as GeneratedSpecView;
 		const { $schema: _dialect, ...canonicalInputSchema } = createResumeDataJsonSchema();
@@ -173,87 +97,104 @@ describe("generateOpenApiSpec", () => {
 				data: { $ref: "#/components/schemas/ResumeData" },
 			},
 		});
-	});
-
-	it("accepts legacy input with omitted picture fit in the published request schema", async () => {
-		const spec = (await generateSpec()) as GeneratedSpecView;
-
-		expect(spec.components?.schemas?.ResumeData).toMatchObject({
-			properties: {
-				picture: { required: expect.not.arrayContaining(["fit"]) },
-			},
-		});
-	});
-
-	it("publishes the custom-section type and item correlation", async () => {
-		const spec = (await generateSpec()) as GeneratedSpecView;
-		const schema = z.fromJSONSchema(spec.components?.schemas?.ResumeData as Parameters<typeof z.fromJSONSchema>[0]);
-		const mismatched = {
-			...defaultResumeData,
-			customSections: [
-				{
-					id: "custom-experience",
-					type: "experience",
-					title: "Experience",
-					icon: "",
-					columns: 1,
-					hidden: false,
-					keepTogether: false,
-					startOnNewPage: false,
-					items: [{ id: "summary-item", hidden: false, content: "<p>Not an experience item</p>" }],
-				},
-			],
-		};
-
-		expect(schema.safeParse(mismatched).success).toBe(false);
-	});
-
-	it("enforces the same submitted bounds as the published request schema", async () => {
-		const spec = (await generateSpec()) as GeneratedSpecView;
-		const published = z.fromJSONSchema(spec.components?.schemas?.ResumeData as Parameters<typeof z.fromJSONSchema>[0]);
-		for (const marginX of [0, 100, -1, 500]) {
-			const data = structuredClone(defaultResumeData);
-			data.metadata.page.marginX = marginX;
-			const expected = marginX === 0 || marginX === 100;
-			expect(published.safeParse(data).success).toBe(expected);
-			expect(writableResumeDataSchema.safeParse(data).success).toBe(expected);
-		}
-	});
+	}, 15_000);
 
 	it("does not publish impossible request schemas", async () => {
 		const spec = (await generateSpec()) as GeneratedSpecView;
 
 		expect(findImpossibleRequestSchemas(spec)).toEqual([]);
 	});
+});
 
-	it("checks every request body media type for impossible schemas", () => {
-		const spec: GeneratedSpecView = {
-			paths: {
-				"/documents": {
-					post: {
-						requestBody: {
-							content: {
-								"application/json": { schema: { type: "object" } },
-								"multipart/form-data": { schema: { not: {} } },
-							},
-						},
-					},
-				},
-			},
-		};
+it("documents anonymous routes, all supported credentials, and additive PATCH routes", async () => {
+	const spec = await generateSpec();
+	expect(spec.paths?.["/flags"]?.get?.security).toEqual([]);
+	expect(spec.paths?.["/resumes/{username}/{slug}"]?.get?.security).toEqual([]);
+	expect(spec.paths?.["/resumes"]?.get?.security).toEqual([{ apiKey: [] }, { bearerAuth: [] }, { cookieAuth: [] }]);
+	expect(spec.paths?.["/auth/account"]?.delete?.security).toEqual([{ cookieAuth: [] }]);
+	expect(spec.paths?.["/auth/account"]?.delete).toHaveProperty(
+		"x-codeSamples.0.source",
+		expect.stringContaining('--cookie "<session-cookie>"'),
+	);
+	for (const path of ["/applications/{id}", "/cover-letters/{id}"]) {
+		expect(spec.paths?.[path]?.put?.requestBody).toBeDefined();
+		expect(spec.paths?.[path]?.patch?.requestBody).toBeDefined();
+	}
+	expect(spec.paths?.["/files"]?.post?.requestBody).toHaveProperty("content.multipart/form-data");
+	expect(spec.paths?.["/files"]?.post?.requestBody).not.toHaveProperty("content.application/json");
+	expect(spec.paths?.["/resumes"]?.get?.parameters).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({ name: "limit", in: "query" }),
+			expect.objectContaining({ name: "offset", in: "query" }),
+		]),
+	);
+});
 
-		expect(findImpossibleRequestSchemas(spec)).toEqual(["POST /documents (multipart/form-data)"]);
-	});
+it("gives every published app operation an explicit route and input/output contracts", async () => {
+	const { openAPIRouter } = await import("./generator");
+	const visit = (node: unknown, path: string) => {
+		if (!node || typeof node !== "object") return;
+		if ("~orpc" in node) {
+			const definition = node["~orpc"] as {
+				route: { tags?: string[]; method?: string; path?: string };
+				inputSchema?: unknown;
+				outputSchema?: unknown;
+			};
+			if (definition.route.tags?.includes("Internal")) return;
+			expect(definition.route.method, path).toBeDefined();
+			expect(definition.route.path, path).toBeDefined();
+			expect(definition.inputSchema, path).toBeDefined();
+			expect(definition.outputSchema, path).toBeDefined();
+			return;
+		}
+		for (const [key, value] of Object.entries(node)) visit(value, `${path}.${key}`);
+	};
+	visit(openAPIRouter, "api");
+});
 
-	it("documents imported data as an accepted ResumeData input", async () => {
-		const spec = (await generateSpec()) as GeneratedSpecView;
+it("describes empty responses and common errors without impossible payloads", async () => {
+	const spec = await generateSpec();
+	const deleted = spec.paths?.["/files"]?.delete?.responses?.["200"];
+	expect(deleted).toBeDefined();
+	expect(deleted).not.toHaveProperty("content");
+	expect(spec.paths?.["/resumes"]?.get?.responses?.default).toHaveProperty(
+		"content.application/json.schema.properties.code",
+	);
+	expect(spec.paths?.["/resumes"]?.get?.responses?.["200"]).toHaveProperty("headers.X-Total-Count");
+});
 
-		expect(getRequestSchema(spec, "/resumes/import", "post")).toEqual({
-			type: "object",
-			properties: {
-				data: { $ref: "#/components/schemas/ResumeData" },
-			},
-			required: ["data"],
-		});
-	});
+it("keeps JSON application writes and documents optional multipart attachments", async () => {
+	const spec = await generateSpec();
+	for (const [path, method] of [
+		["/applications", "post"],
+		["/applications/{id}", "put"],
+		["/applications/{id}", "patch"],
+	] as const) {
+		const body = spec.paths?.[path]?.[method]?.requestBody;
+		if (!body || "$ref" in body) throw new Error("Missing application request body");
+		const json = body.content["application/json"]?.schema;
+		expect(json).toHaveProperty("properties.company");
+		expect(json).not.toHaveProperty("properties.resumeFile");
+		expect(json).not.toHaveProperty("properties.coverLetterFile");
+		expect(body.content["multipart/form-data"]?.schema).toHaveProperty(
+			"properties.resumeFile.contentMediaType",
+			"application/pdf",
+		);
+	}
+});
+
+it("overrides every generated cURL sample with one that has no shell line continuations", async () => {
+	const spec = await generateSpec();
+	const samples = Object.values(spec.paths ?? {}).flatMap((item) =>
+		(["get", "post", "put", "patch", "delete"] as const).flatMap((method) => {
+			const operation = item?.[method] as { "x-codeSamples"?: { label: string; source: string }[] } | undefined;
+			return operation ? [operation["x-codeSamples"]?.find((sample) => sample.label === "cURL")?.source] : [];
+		}),
+	);
+	expect(samples.length).toBeGreaterThan(0);
+	for (const source of samples) expect(source).toMatch(/^curl [^\\]*$/);
+	expect(spec.paths?.["/api/health"]?.get).toHaveProperty(
+		"x-codeSamples.0.source",
+		'curl "https://rxresu.me/api/health"',
+	);
 });

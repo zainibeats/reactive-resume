@@ -4,14 +4,7 @@ import nodemailer from "nodemailer";
 import { render } from "react-email";
 import { env } from "@reactive-resume/env/server";
 
-type SendEmailOptions = {
-	to: string | string[];
-	subject: string;
-	text?: string;
-	html?: string;
-	react?: ReactElement;
-	from?: string;
-};
+type SendEmailOptions = { to: string; subject: string; react: ReactElement };
 
 let cachedTransport: Transporter | undefined;
 
@@ -29,23 +22,15 @@ const getTransport = () => {
 	return cachedTransport;
 };
 
-export const sendEmail = async (options: SendEmailOptions) => {
+export const sendEmail = async ({ to, subject, react }: SendEmailOptions) => {
 	const transport = getTransport();
-	const from = options.from ?? env.SMTP_FROM ?? "Reactive Resume <noreply@localhost>";
 	const payload: SendMailOptions = {
-		to: options.to,
-		from,
-		subject: options.subject,
-		...(options.text === undefined ? {} : { text: options.text }),
-		...(options.html === undefined ? {} : { html: options.html }),
+		to,
+		from: env.SMTP_FROM,
+		subject,
+		html: await render(react),
+		text: await render(react, { plainText: true }),
 	};
-
-	if (options.react) {
-		payload.html = await render(options.react);
-		payload.text = options.text ?? (await render(options.react, { plainText: true }));
-	}
-
-	if (!payload.text && !payload.html) return;
 
 	if (!transport) {
 		console.info("SMTP not configured; skipping email send.", {

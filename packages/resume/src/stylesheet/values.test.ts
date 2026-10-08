@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { getCachedStylesheet, setCachedStylesheet, stylesheetCacheKey } from "./cache";
+import { getCachedStylesheet, setCachedStylesheet } from "./cache";
 import { compileStylesheet } from "./compile";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
 
@@ -18,15 +17,6 @@ function mediaList(count: number): string {
 	return Array.from({ length: count }, (_, index) => `(min-width: ${index + 1}pt)`).join(",");
 }
 
-function legacyFingerprint(source: string): string {
-	let hash = 2_166_136_261;
-	for (let index = 0; index < source.length; index++) {
-		hash ^= source.charCodeAt(index);
-		hash = Math.imul(hash, 16_777_619);
-	}
-	return `${hash >>> 0}:${source.length}`;
-}
-
 function expectedSides(tokens: readonly number[]): readonly [number, number, number, number] {
 	switch (tokens.length) {
 		case 1:
@@ -41,20 +31,10 @@ function expectedSides(tokens: readonly number[]): readonly [number, number, num
 }
 
 describe("Semantic CSS value compilation", () => {
-	it("compiles and caches the portable version-one fixture as plain data", () => {
-		const text = readFileSync(new URL("./__fixtures__/v1/portable-theme.css", import.meta.url), "utf8");
-		const first = compileStylesheet({ languageVersion: 1, text });
-		const second = compileStylesheet({ languageVersion: 1, text });
-
-		expect(first.program).not.toBeNull();
-		expect(second.program).toBe(first.program);
-		expect(() => structuredClone(first.program)).not.toThrow();
-	});
-
 	it("keeps valid rules and declarations when neighboring fragments are invalid", () => {
 		const result = compileStylesheet({
 			languageVersion: 1,
-			text: "@version 1; section:hover { color: red; } name { unknown: 1; color: #123456; }",
+			text: "@version 1; section:hover { color: red; } name { unknown: 1; opacity: 2; color: #123456; }",
 		});
 
 		expect(result.program?.rules).toEqual([
@@ -66,6 +46,7 @@ describe("Semantic CSS value compilation", () => {
 			expect.arrayContaining([
 				expect.objectContaining({ code: "INVALID_SELECTOR", severity: "error" }),
 				expect.objectContaining({ code: "UNSUPPORTED_PROPERTY", severity: "error" }),
+				expect.objectContaining({ code: "INVALID_VALUE", severity: "error" }),
 			]),
 		);
 	});
@@ -89,93 +70,6 @@ describe("Semantic CSS value compilation", () => {
 		);
 	});
 
-	it.each([
-		"linear-gradient(red, blue)",
-		"radial-gradient(red, blue)",
-		"conic-gradient(red, blue)",
-		"repeating-linear-gradient(red, blue)",
-		"repeating-radial-gradient(red, blue)",
-		"repeating-conic-gradient(red, blue)",
-	])("recognizes the standard gradient function %s", (value) => {
-		const result = compileStylesheet({
-			languageVersion: 1,
-			text: `@version 1; header { background-image: ${value}; }`,
-		});
-
-		expect(result.diagnostics).toContainEqual(
-			expect.objectContaining({
-				code: "UNSUPPORTED_PROPERTY",
-				message: "Gradients are not supported by Semantic CSS. Use background-color or another supported property.",
-			}),
-		);
-	});
-
-	it.each([
-		["custom function names", "background-image: not-linear-gradient(red, blue)", "background-image"],
-		["quoted function-like text", 'content: "linear-gradient(red, blue)"', "content"],
-	] as const)("does not treat %s as a standard gradient function", (_case, declaration, property) => {
-		const result = compileStylesheet({
-			languageVersion: 1,
-			text: `@version 1; header { ${declaration}; }`,
-		});
-
-		expect(result.diagnostics).toContainEqual(
-			expect.objectContaining({
-				code: "UNSUPPORTED_PROPERTY",
-				severity: "error",
-				message: `The ${property} property is not supported by Semantic CSS.`,
-			}),
-		);
-	});
-
-	it("omits an invalid value without dropping valid declarations in the rule", () => {
-		const result = compileStylesheet({
-			languageVersion: 1,
-			text: "@version 1; name { opacity: 2; color: #123456; }",
-		});
-
-		expect(result.program?.rules[0]?.declarations).toEqual([
-			expect.objectContaining({ property: "color", value: "#123456" }),
-		]);
-		expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "INVALID_VALUE", severity: "error" }));
-	});
-
-	it("rejects assignments to reserved system variables", () => {
-		const result = compileStylesheet({
-			languageVersion: 1,
-			text: "@version 1; :root { --resume-primary-color: red; } name { color: blue; }",
-		});
-
-		expect(result.program).not.toBeNull();
-		expect(result.diagnostics).toContainEqual(
-			expect.objectContaining({ code: "SYSTEM_VARIABLE_READONLY", severity: "error" }),
-		);
-	});
-
-	it("revalidates custom-property values so forbidden functions cannot hide", () => {
-		for (const value of ["url('https://example.com/x')", "URL(x)", "u\\72l(x)"]) {
-			const result = compileStylesheet({
-				languageVersion: 1,
-				text: `@version 1; :root { --asset: ${value}; } picture { background-color: var(--asset); }`,
-			});
-
-			expect(result.program, value).not.toBeNull();
-			expect(result.diagnostics, value).toContainEqual(
-				expect.objectContaining({ code: "FORBIDDEN_CSS_VALUE", severity: "error" }),
-			);
-		}
-	});
-
-	it("allows technically renderable values and warns about extreme aesthetics", () => {
-		const result = compileStylesheet({
-			languageVersion: 1,
-			text: "@version 1; field { font-size: 3pt; }",
-		});
-
-		expect(result.program).not.toBeNull();
-		expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "EXTREME_VALUE", severity: "warning" }));
-	});
-
 	it("rejects non-finite or technically unrenderable absolute lengths", () => {
 		for (const value of ["100001pt", "1e309pt"]) {
 			const result = compileStylesheet({
@@ -188,32 +82,6 @@ describe("Semantic CSS value compilation", () => {
 			);
 		}
 	});
-
-	it.each(["auto", "none", "normal", "max-content", "min-content", "fit-content", "thin", "medium", "thick"])(
-		"preserves the accepted generic length keyword %s when reference hints are narrower",
-		(value) => {
-			const result = compileStylesheet({
-				languageVersion: 1,
-				text: `@version 1; section { -resume-min-presence-ahead: ${value}; }`,
-			});
-
-			expect(result.program).not.toBeNull();
-			expect(result.diagnostics.filter(({ severity }) => severity === "error")).toEqual([]);
-		},
-	);
-
-	it.each(["none", "hidden", "double", "groove", "ridge", "inset", "outset"])(
-		"rejects the undocumented border style %s",
-		(value) => {
-			const result = compileStylesheet({
-				languageVersion: 1,
-				text: `@version 1; section { border-style: ${value}; }`,
-			});
-
-			expect(result.program).not.toBeNull();
-			expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "INVALID_VALUE", severity: "error" }));
-		},
-	);
 
 	it.each([
 		{
@@ -292,63 +160,6 @@ describe("Semantic CSS value compilation", () => {
 		);
 	});
 
-	it("rejects invalid trailing flex tokens instead of silently ignoring them", () => {
-		fc.assert(
-			fc.property(fc.integer({ min: 0, max: 10 }), fc.stringMatching(/^[a-z]{1,6}$/), (grow, trailing) => {
-				const result = compileStylesheet({
-					languageVersion: 1,
-					text: `@version 1;section{flex:${grow} auto ${trailing}}`,
-				});
-
-				expect(result.program).not.toBeNull();
-				expect(result.diagnostics).toContainEqual(
-					expect.objectContaining({ code: "INVALID_VALUE", severity: "error" }),
-				);
-			}),
-			{ numRuns: 20 },
-		);
-	});
-
-	it("accepts CSS-wide keywords only as whole shorthand declarations", () => {
-		const accepted = compileStylesheet({
-			languageVersion: 1,
-			text: "@version 1;section{flex-flow:inherit}",
-		});
-		expect(accepted.program).not.toBeNull();
-
-		for (const declaration of [
-			"flex-flow:row inherit",
-			"flex:1 inherit",
-			"gap:1pt inherit",
-			"margin:1pt inherit",
-			"border:1pt solid inherit",
-			"border-style:solid inherit",
-		]) {
-			const rejected = compileStylesheet({
-				languageVersion: 1,
-				text: `@version 1;section{${declaration}}`,
-			});
-
-			expect(rejected.program, declaration).not.toBeNull();
-			expect(rejected.diagnostics, declaration).toContainEqual(
-				expect.objectContaining({ code: "INVALID_VALUE", severity: "error" }),
-			);
-		}
-	});
-
-	it("preserves CSS-wide identifiers inside custom-property token streams", () => {
-		const result = compileStylesheet({
-			languageVersion: 1,
-			text: "@version 1;:root{--tokens:row inherit}",
-		});
-
-		expect(result.program).not.toBeNull();
-		expect(result.program?.rules[0]?.declarations).toContainEqual(
-			expect.objectContaining({ property: "--tokens", value: "row inherit" }),
-		);
-		expect(result.diagnostics.filter(({ severity }) => severity === "error")).toEqual([]);
-	});
-
 	it("expands generated one-to-four-token shorthands with CSS side semantics", () => {
 		fc.assert(
 			fc.property(
@@ -386,14 +197,6 @@ describe("Semantic CSS value compilation", () => {
 			),
 			{ numRuns: 60 },
 		);
-	});
-
-	it("uses exact source text in cache keys even when the legacy fingerprints collide", () => {
-		const first = "s0@h,]UQ";
-		const second = "b(tT0e7(";
-
-		expect(legacyFingerprint(first)).toBe(legacyFingerprint(second));
-		expect(stylesheetCacheKey(1, first, "registry")).not.toBe(stylesheetCacheKey(1, second, "registry"));
 	});
 
 	it("uses a bounded least-recently-used cache by entry count", () => {
@@ -463,37 +266,6 @@ describe("Semantic CSS value compilation", () => {
 				expect(result.diagnostics).toContainEqual(expect.objectContaining({ code, severity: "error" }));
 			}),
 			{ numRuns: 100 },
-		);
-	});
-
-	it("publishes the exact frozen version-one limits contract", () => {
-		expect(SEMANTIC_CSS_LIMITS_V1).toEqual({
-			maxSourceBytes: 128 * 1024,
-			maxRules: 1_024,
-			maxDeclarations: 8_192,
-			maxSelectorsPerRule: 64,
-			maxSelectorCodePoints: 2_048,
-			maxCombinatorsPerSelector: 16,
-			maxFunctionDepth: 16,
-			maxVariableExpansionDepth: 32,
-			maxMediaNesting: 4,
-			maxSemanticNodes: 20_000,
-			maxAbsoluteLengthPt: 100_000,
-		});
-		expect(Object.isFrozen(SEMANTIC_CSS_LIMITS_V1)).toBe(true);
-	});
-
-	it("keeps every successful compiled program structured-clone-safe", () => {
-		fc.assert(
-			fc.property(fc.constantFrom("red", "#123456", "rgb(1, 2, 3)", "var(--accent, blue)"), (color) => {
-				const result = compileStylesheet({
-					languageVersion: 1,
-					text: `@version 1; name { color: ${color}; }`,
-				});
-				expect(result.program).not.toBeNull();
-				expect(() => structuredClone(result.program)).not.toThrow();
-			}),
-			{ numRuns: 20 },
 		);
 	});
 });

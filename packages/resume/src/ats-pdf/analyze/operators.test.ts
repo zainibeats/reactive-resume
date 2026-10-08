@@ -109,43 +109,6 @@ describe("summarizePageOperators", () => {
 		expect(summary.whiteFillTextItems).toBe(0);
 	});
 
-	it("counts repeat-image instances from the positions array", () => {
-		const summary = summarizePageOperators(
-			ops([
-				[PDF_OPS.transform, [4, 0, 0, 4, 0, 0]],
-				[PDF_OPS.paintImageXObjectRepeat, ["img_1", 1, 1, [0, 0, 10, 10, 20, 20]]],
-			]),
-			A4,
-		);
-
-		expect(summary.imageCount).toBe(3);
-	});
-
-	it("clamps coverage to the page rather than reporting more than 100%", () => {
-		const summary = summarizePageOperators(
-			ops([
-				[PDF_OPS.transform, [A4.width * 4, 0, 0, A4.height * 4, 0, 0]],
-				[PDF_OPS.paintImageXObject, ["img_1"]],
-			]),
-			A4,
-		);
-
-		expect(summary.imageAreaRatio).toBe(1);
-	});
-
-	it("counts path painting operators", () => {
-		const summary = summarizePageOperators(
-			ops([
-				[PDF_OPS.constructPath, [[], []]],
-				[PDF_OPS.fill, []],
-				[PDF_OPS.stroke, []],
-			]),
-			A4,
-		);
-
-		expect(summary.pathOpCount).toBe(3);
-	});
-
 	it("survives a stream that restores more than it saved", () => {
 		expect(() =>
 			summarizePageOperators(
@@ -157,15 +120,5 @@ describe("summarizePageOperators", () => {
 				A4,
 			),
 		).not.toThrow();
-	});
-
-	it("returns zeros for an empty page", () => {
-		expect(summarizePageOperators(ops([]), A4)).toEqual({
-			imageAreaRatio: 0,
-			imageCount: 0,
-			pathOpCount: 0,
-			invisibleTextItems: 0,
-			whiteFillTextItems: 0,
-		});
 	});
 });

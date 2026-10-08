@@ -1,6 +1,11 @@
-import type { PDFDocumentLoadingTask, PDFDocumentProxy, RenderTask } from "pdfjs-dist/legacy/build/pdf.mjs";
-import type { ReactNode } from "react";
 import type { PreviewPageSize } from "./preview.shared.utils";
+import type {
+	PDFDocumentLoadingTask,
+	PDFDocumentProxy,
+	PDFPageProxy,
+	RenderTask,
+} from "pdfjs-dist/legacy/build/pdf.mjs";
+import type { ReactNode } from "react";
 import {
 	AnnotationMode,
 	GlobalWorkerOptions,
@@ -20,13 +25,15 @@ type PdfCanvasDocumentProps = {
 };
 
 type PdfCanvasPageProps = {
-	className?: string;
+	caption?: ReactNode;
+	className?: string | undefined;
+	overlay?: ReactNode;
 	document: PDFDocumentProxy;
 	onLoadSuccess: (pageNumber: number, pageSize: PreviewPageSize) => void;
 	onRenderSuccess?: () => void;
 	pageNumber: number;
 	pageScale: number;
-	pageSize?: PreviewPageSize;
+	pageSize?: PreviewPageSize | undefined;
 	showPageNumbers: boolean;
 	totalPages: number;
 };
@@ -34,6 +41,10 @@ type PdfCanvasPageProps = {
 const isRenderingCancelledError = (error: unknown) =>
 	error instanceof RenderingCancelledException ||
 	(typeof error === "object" && error !== null && "name" in error && error.name === "RenderingCancelledException");
+
+// A new scale for a page already on the canvas (the assistant's column opening, zoom, a window resize) is drawn
+// once it has held this long; meanwhile the canvas stretches its last bitmap to the page's new size.
+const RESCALE_SETTLE_MS = 150;
 
 export function PdfCanvasDocument({ children, file, onLoadSuccess }: PdfCanvasDocumentProps) {
 	const [document, setDocument] = useState<PDFDocumentProxy | null>(null);
@@ -84,7 +95,9 @@ export function PdfCanvasDocument({ children, file, onLoadSuccess }: PdfCanvasDo
 }
 
 export function PdfCanvasPage({
+	caption,
 	className,
+	overlay,
 	document,
 	onLoadSuccess,
 	onRenderSuccess,
@@ -97,6 +110,8 @@ export function PdfCanvasPage({
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const onLoadSuccessRef = useRef(onLoadSuccess);
 	const onRenderSuccessRef = useRef(onRenderSuccess);
+	// The document and page whose bitmap the canvas holds.
+	const drawnRef = useRef<{ document: PDFDocumentProxy; pageNumber: number } | null>(null);
 	const scaledPageSize = getScaledPreviewPageSize(pageSize, pageScale);
 
 	useEffect(() => {
@@ -108,85 +123,98 @@ export function PdfCanvasPage({
 		let isCancelled = false;
 		let renderTask: RenderTask | undefined;
 
+		const drawPage = async (page: PDFPageProxy, canvas: HTMLCanvasElement) => {
+			if (isCancelled) {
+				page.cleanup();
+				return;
+			}
+
+			const baseViewport = page.getViewport({ scale: 1 });
+			const pageSize = { height: baseViewport.height, width: baseViewport.width };
+
+			onLoadSuccessRef.current(pageNumber, pageSize);
+
+			const width = baseViewport.width * pageScale;
+			const height = baseViewport.height * pageScale;
+			const renderScale = getPreviewCanvasScale(width, height);
+			// Drawn off-screen and copied over in one step, so the page never shows a blank frame between renders.
+			const buffer = globalThis.document.createElement("canvas");
+			const bufferContext = buffer.getContext("2d");
+			const canvasContext = canvas.getContext("2d");
+
+			if (!bufferContext || !canvasContext) return;
+
+			buffer.width = Math.floor(width * renderScale);
+			buffer.height = Math.floor(height * renderScale);
+
+			// PDF.js positions glyphs in physical coordinates, even inside an RTL resume page.
+			bufferContext.direction = "ltr";
+
+			const viewport = page.getViewport({ scale: pageScale });
+			const transform = [renderScale, 0, 0, renderScale, 0, 0];
+
+			renderTask = page.render({
+				canvas: buffer,
+				canvasContext: bufferContext,
+				viewport,
+				transform,
+				annotationMode: AnnotationMode.DISABLE,
+				background: "white",
+			});
+
+			await renderTask.promise;
+			renderTask = undefined;
+
+			if (isCancelled) return;
+
+			canvas.width = buffer.width;
+			canvas.height = buffer.height;
+			canvasContext.drawImage(buffer, 0, 0);
+			drawnRef.current = { document, pageNumber };
+			onRenderSuccessRef.current?.();
+		};
+
 		const renderPage = async () => {
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 
 			const page = await document.getPage(pageNumber);
 
-			try {
-				if (isCancelled) {
-					page.cleanup();
-					return;
-				}
-
-				const baseViewport = page.getViewport({ scale: 1 });
-				const pageSize = { height: baseViewport.height, width: baseViewport.width };
-
-				onLoadSuccessRef.current(pageNumber, pageSize);
-
-				const width = baseViewport.width * pageScale;
-				const height = baseViewport.height * pageScale;
-				const renderScale = getPreviewCanvasScale(width, height);
-				const canvasContext = canvas.getContext("2d");
-
-				if (!canvasContext) return;
-
-				canvas.style.cssText = `width: ${width}px; height: ${height}px;`;
-				canvas.width = Math.floor(width * renderScale);
-				canvas.height = Math.floor(height * renderScale);
-
-				// PDF.js positions glyphs in physical coordinates, even inside an RTL resume page.
-				canvasContext.direction = "ltr";
-				canvasContext.setTransform(1, 0, 0, 1, 0, 0);
-				canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-
-				const viewport = page.getViewport({ scale: pageScale });
-				const transform = [renderScale, 0, 0, renderScale, 0, 0];
-
-				renderTask = page.render({
-					canvas,
-					canvasContext,
-					viewport,
-					transform,
-					annotationMode: AnnotationMode.DISABLE,
-					background: "white",
-				});
-
-				await renderTask.promise;
-				renderTask = undefined;
-
-				if (!isCancelled) onRenderSuccessRef.current?.();
-			} finally {
-				page.cleanup();
-			}
+			await drawPage(page, canvas).finally(() => page.cleanup());
 		};
 
-		void renderPage().catch((error: unknown) => {
-			if (isRenderingCancelledError(error)) return;
+		const drawn = drawnRef.current;
+		const rescaling = drawn?.document === document && drawn.pageNumber === pageNumber;
+		const timeoutId = window.setTimeout(
+			() => {
+				void renderPage().catch((error: unknown) => {
+					if (isRenderingCancelledError(error)) return;
 
-			console.error(`Failed to render PDF page ${pageNumber}`, error);
-		});
+					console.error(`Failed to render PDF page ${pageNumber}`, error);
+				});
+			},
+			rescaling ? RESCALE_SETTLE_MS : 0,
+		);
 
 		return () => {
 			isCancelled = true;
-
-			if (renderTask) {
-				renderTask.cancel();
-			}
+			window.clearTimeout(timeoutId);
+			renderTask?.cancel();
 		};
 	}, [document, pageNumber, pageScale]);
 
 	return (
 		<figure className="shrink-0">
-			{showPageNumbers ? (
-				<figcaption className="mb-1 font-medium text-[0.625rem] text-muted-foreground">
-					Page {pageNumber} of {totalPages}
-				</figcaption>
-			) : null}
+			{caption ??
+				(showPageNumbers ? (
+					<figcaption className="mb-1 text-[0.625rem] font-medium text-ink-3">
+						Page {pageNumber} of {totalPages}
+					</figcaption>
+				) : null)}
 
-			<div style={scaledPageSize} className={cn("aspect-page overflow-hidden rounded-md", className)}>
-				<canvas ref={canvasRef} aria-label={`Resume page ${pageNumber} of ${totalPages}`} />
+			<div style={scaledPageSize} className={cn("relative aspect-page overflow-hidden rounded-md", className)}>
+				<canvas ref={canvasRef} aria-label={`Resume page ${pageNumber} of ${totalPages}`} className="block size-full" />
+				{overlay}
 			</div>
 		</figure>
 	);

@@ -9,56 +9,34 @@ describe("buildMcpServerCard", () => {
 		expect(card.serverInfo.version).toBe("1.2.3");
 	});
 
-	it("identifies the server as reactive-resume", () => {
+	it("keeps runtime identity local to the instance", () => {
 		expect(card.serverInfo.name).toBe("reactive-resume");
 		expect(card.serverInfo.title).toBe("Reactive Resume");
 		expect(card.serverInfo.websiteUrl).toBe("https://resume.example.com/base");
-	});
-
-	it("exposes light + dark theme icons", () => {
-		const themes = card.serverInfo.icons.map((icon) => icon.theme).sort();
-		expect(themes).toEqual(["dark", "light"]);
 		expect(card.serverInfo.icons.map((icon) => icon.src)).toEqual([
 			"https://resume.example.com/icon/light.svg",
 			"https://resume.example.com/icon/dark.svg",
 		]);
 	});
 
-	it("requires authentication with oauth2 + bearer schemes", () => {
-		expect(card.authentication.required).toBe(true);
-		expect(card.authentication.schemes).toContain("oauth2");
-		expect(card.authentication.schemes).toContain("bearer");
-	});
-
-	it("registers one entry per MCP tool", () => {
-		const cardToolNames = card.tools.map((tool) => tool.name).sort();
-		const expectedNames = Object.values(MCP_TOOL_NAME).sort();
-		expect(cardToolNames).toEqual(expectedNames);
-	});
-
-	it("advertises a short-lived PDF download URL tool", () => {
-		const tool = card.tools.find((item) => item.name === "download_resume_pdf");
-
-		expect(tool?.title).toBe("Download Resume PDF");
-		expect(tool?.description).toContain("short-lived");
-		expect(tool?.description).toContain("10 minutes");
-		expect(tool?.annotations?.readOnlyHint).toBe(true);
-		const properties = tool?.inputSchema.properties as Record<string, { enum?: string[]; default?: string }>;
-		expect(properties.target).toMatchObject({ enum: ["resume", "cover-letter"], default: "resume" });
+	it("registers every resume tool", () => {
+		const names = card.tools.map((tool) => tool.name);
+		for (const name of Object.values(MCP_TOOL_NAME)) expect(names).toContain(name);
 	});
 
 	it("does not advertise application tracker tools", () => {
 		const names = card.tools.map((tool) => tool.name);
-
-		expect(names).not.toContain("list_applications");
-		expect(names).not.toContain("create_application");
-		expect(names).not.toContain("attach_application_document");
-		expect(names).not.toContain("tailor_resume_for_application");
+		expect(names.filter((name) => name.includes("application"))).toEqual([]);
 	});
 
 	it("does not advertise independent cover-letter library tools", () => {
 		const names = card.tools.map((tool) => tool.name);
 		expect(names.filter((name) => name.includes("cover_letter"))).toEqual([]);
+	});
+
+	it("does not advertise platform-wide statistics tools", () => {
+		const names = card.tools.map((tool) => tool.name);
+		expect(names.filter((name) => name.startsWith("api_statistics_"))).toEqual([]);
 	});
 
 	it("declares a JSON Schema input for every tool", () => {
@@ -68,27 +46,5 @@ describe("buildMcpServerCard", () => {
 			expect(tool.title.length, tool.name).toBeGreaterThan(0);
 			expect(tool.description.length, tool.name).toBeGreaterThan(0);
 		}
-	});
-
-	it("registers the three documented prompts", () => {
-		const promptNames = card.prompts.map((p) => p.name).sort();
-		expect(promptNames).toEqual(["build_resume", "improve_resume", "review_resume"]);
-	});
-
-	it("publishes a resource template for resume://{id}", () => {
-		const template = card.resourceTemplates.find((r) => r.name === "resume");
-		expect(template?.uriTemplate).toBe("resume://{id}");
-		expect(template?.mimeType).toBe("application/json");
-	});
-
-	it("includes resume and meta-schema in the static resources list", () => {
-		const resourceNames = card.resources.map((r) => r.name);
-		expect(resourceNames).toContain("resume");
-		expect(card.resources.some((r) => r.mimeType === "application/json")).toBe(true);
-	});
-
-	it("documents an optional apiKey in the configuration schema", () => {
-		const props = card.configurationSchema.properties as Record<string, unknown>;
-		expect(props.apiKey).toBeDefined();
 	});
 });

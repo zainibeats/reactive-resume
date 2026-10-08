@@ -1,15 +1,9 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { describe, expect, it, vi } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../document";
-import { semanticNodeKeys } from "./node-keys";
-import { resolveResumePresentation } from "./resolve";
-
-vi.mock("@react-pdf/renderer", async (importOriginal) => ({
-	...(await importOriginal<typeof import("@react-pdf/renderer")>()),
-}));
+import { pdf } from "../forme/testing";
 
 type HostNode = {
 	type: string;
@@ -40,7 +34,7 @@ const flowProps = (node: HostNode | undefined) => ({
 	wrap: node?.wrap ?? node?.props?.wrap,
 });
 
-const buildFixture = (value: string): ResumeData => {
+const buildFixture = (value?: string): ResumeData => {
 	const data = structuredClone(defaultResumeData);
 	data.picture.hidden = true;
 	data.basics.name = "";
@@ -53,6 +47,8 @@ const buildFixture = (value: string): ResumeData => {
 	data.summary.keepTogether = true;
 	data.summary.startOnNewPage = true;
 	data.metadata.layout.pages = [{ fullWidth: true, main: ["summary"], sidebar: [] }];
+	if (value === undefined) return data;
+
 	const source = {
 		languageVersion: 1,
 		text: `@version 1; section[type="summary"] { break-before: ${value}; break-inside: ${value}; }`,
@@ -63,25 +59,10 @@ const buildFixture = (value: string): ResumeData => {
 
 describe("semantic pagination cancellation", () => {
 	it.each([
-		["auto", false, true],
-		["initial", false, true],
-		["unset", false, true],
-		["inherit", false, true],
-		["revert", true, false],
-	] as const)("maps %s over builder pagination to explicit break=%s and wrap=%s", (value, breakBefore, wrap) => {
-		const data = buildFixture(value);
-		const presentation = resolveResumePresentation({ data, template: "onyx", mode: "semantic" });
-		const sectionKey = semanticNodeKeys.section(semanticNodeKeys.region(semanticNodeKeys.page(1), "main"), "summary");
-
-		expect(presentation[sectionKey]).toMatchObject({ break: breakBefore, wrap });
-	});
-
-	it.each([
-		["auto", false, true],
-		["initial", false, true],
-		["unset", false, true],
-		["revert", true, false],
-	] as const)("puts the %s cancellation on the final existing section View", async (value, breakBefore, wrap) => {
+		["the auto cancellation", "auto", false, true],
+		["the initial cancellation", "initial", false, true],
+		["the builder's own pagination", undefined, true, false],
+	] as const)("puts %s on the final existing section View", async (_name, value, breakBefore, wrap) => {
 		const data = buildFixture(value);
 		const element = createElement(ResumeDocument, { data, template: "onyx" }) as unknown as Parameters<typeof pdf>[0];
 		const instance = pdf(element);

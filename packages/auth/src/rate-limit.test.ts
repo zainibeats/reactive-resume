@@ -13,12 +13,6 @@ beforeEach(() => {
 });
 
 describe("authRateLimitStorage", () => {
-	it("leaves Better Auth's default storage intact without Redis", async () => {
-		mocks.redis = null;
-		const { authRateLimitStorage } = await import("./rate-limit");
-		expect(authRateLimitStorage).toBeUndefined();
-	});
-
 	it("atomically consumes namespaced limits in milliseconds", async () => {
 		const { authRateLimitStorage } = await import("./rate-limit");
 		mocks.eval.mockResolvedValueOnce([1, 0]).mockResolvedValueOnce([0, 7]);

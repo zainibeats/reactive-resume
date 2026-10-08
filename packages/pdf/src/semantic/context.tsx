@@ -1,7 +1,6 @@
-import type { SemanticNode } from "@reactive-resume/resume/stylesheet";
-import type { StylesheetMode } from "@reactive-resume/schema/resume/stylesheet";
-import type { ReactNode } from "react";
 import type { ResolvedPdfNodePresentation } from "./adapter";
+import type { SemanticNode } from "@reactive-resume/resume/stylesheet";
+import type { ReactNode } from "react";
 import { createContext, use, useMemo } from "react";
 import { semanticNodeKeys } from "./node-keys";
 
@@ -9,7 +8,6 @@ export type ResolvedResumePresentation = Readonly<Record<string, ResolvedPdfNode
 
 type SemanticRenderProviderProps = {
 	presentation: ResolvedResumePresentation;
-	mode: StylesheetMode;
 	sourceTree: SemanticNode;
 	renderTree: SemanticNode;
 	children: ReactNode;
@@ -18,7 +16,6 @@ type SemanticRenderProviderProps = {
 const EMPTY_NODE = Object.freeze({}) satisfies ResolvedPdfNodePresentation;
 const SemanticRenderContext = createContext<{
 	presentation: ResolvedResumePresentation;
-	mode: StylesheetMode;
 	renderedNodeKeys: ReadonlySet<string>;
 	sourceNodeKeys: ReadonlySet<string>;
 	renderedChildKeys: ReadonlyMap<string, readonly string[]>;
@@ -61,7 +58,6 @@ const indexRenderTree = (root: SemanticNode) => {
 
 export function SemanticRenderProvider({
 	presentation,
-	mode,
 	sourceTree,
 	renderTree,
 	children,
@@ -80,8 +76,8 @@ export function SemanticRenderProvider({
 		[sourceNodes],
 	);
 	const value = useMemo(
-		() => ({ presentation, mode, sourceNodeKeys, sourceChildKeys, sourceNodes, ...treeIndex }),
-		[mode, presentation, sourceChildKeys, sourceNodeKeys, sourceNodes, treeIndex],
+		() => ({ presentation, sourceNodeKeys, sourceChildKeys, sourceNodes, ...treeIndex }),
+		[presentation, sourceChildKeys, sourceNodeKeys, sourceNodes, treeIndex],
 	);
 	return <SemanticRenderContext.Provider value={value}>{children}</SemanticRenderContext.Provider>;
 }
@@ -92,11 +88,9 @@ export function useResolvedNode(nodeKey: string | undefined): ResolvedPdfNodePre
 	return context.presentation[nodeKey] ?? EMPTY_NODE;
 }
 
-export const useSemanticRenderMode = (): StylesheetMode => use(SemanticRenderContext)?.mode ?? "legacy";
-
 export const useSemanticNodeVisible = (nodeKey: string | undefined): boolean => {
 	const context = use(SemanticRenderContext);
-	if (context?.mode !== "semantic" || !nodeKey) return true;
+	if (!context || !nodeKey) return true;
 	return context.renderedNodeKeys.has(nodeKey);
 };
 
@@ -107,7 +101,7 @@ export const useSemanticNodeExists = (nodeKey: string | undefined): boolean => {
 
 export const useRenderedChildKeys = (nodeKey: string | undefined): readonly string[] | undefined => {
 	const context = use(SemanticRenderContext);
-	if (context?.mode !== "semantic" || !nodeKey) return undefined;
+	if (!context || !nodeKey) return undefined;
 	const rendered = context.renderedChildKeys.get(nodeKey) ?? [];
 	const source = context.sourceChildKeys.get(nodeKey) ?? [];
 	return rendered.length === source.length && rendered.every((key, index) => key === source[index])
@@ -142,7 +136,7 @@ export const useSemanticSectionNodeKey = (pageNodeKey: string, sectionId: string
 
 export const useRenderedSectionIds = (pageNodeKey: string, authoredIds: readonly string[]): string[] => {
 	const context = use(SemanticRenderContext);
-	if (context?.mode !== "semantic") return [...authoredIds];
+	if (!context) return [...authoredIds];
 
 	const authored = new Set(authoredIds);
 	return context.sourceNodes
@@ -171,11 +165,11 @@ export const useSemanticNodeBindings = () => {
 			return context.presentation[nodeKey] ?? EMPTY_NODE;
 		},
 		isNodeVisible: (nodeKey: string | undefined): boolean => {
-			if (context?.mode !== "semantic" || !nodeKey) return true;
+			if (!context || !nodeKey) return true;
 			return context.renderedNodeKeys.has(nodeKey);
 		},
 		renderedChildKeysFor: (nodeKey: string | undefined): readonly string[] | undefined => {
-			if (context?.mode !== "semantic" || !nodeKey) return undefined;
+			if (!context || !nodeKey) return undefined;
 			const rendered = context.renderedChildKeys.get(nodeKey) ?? [];
 			const source = context.sourceChildKeys.get(nodeKey) ?? [];
 			return rendered.length === source.length && rendered.every((key, index) => key === source[index])

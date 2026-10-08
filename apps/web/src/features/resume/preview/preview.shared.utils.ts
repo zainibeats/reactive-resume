@@ -15,7 +15,7 @@ export const DEFAULT_PDF_PAGE_SIZE: PreviewPageSize = {
 };
 
 export const getPreviewCanvasScale = (width: number, height: number) => {
-	const devicePixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
+	const devicePixelRatio = window.devicePixelRatio || 1;
 	const desiredScale = Math.max(PDF_PAGE_RENDER_SCALE, devicePixelRatio);
 	const desiredPixels = width * height * desiredScale * desiredScale;
 

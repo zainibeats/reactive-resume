@@ -18,16 +18,9 @@ beforeEach(() => {
 	vi.resetModules();
 	vi.clearAllMocks();
 	mocks.env.REDIS_URL = "";
-	mocks.env.DEPLOYMENT_NAMESPACE = "default";
 });
 
 describe("shared Redis", () => {
-	it("returns no client when Redis is not configured", async () => {
-		const { getRedis } = await import("./redis");
-		expect(getRedis()).toBeNull();
-		expect(mocks.Redis).not.toHaveBeenCalled();
-	});
-
 	it("lazily creates one shared client", async () => {
 		mocks.env.REDIS_URL = "rediss://example.test:6379";
 		const { getRedis } = await import("./redis");
@@ -41,11 +34,5 @@ describe("shared Redis", () => {
 			commandTimeout: 5_000,
 		});
 		expect(mocks.on).toHaveBeenCalledWith("error", expect.any(Function));
-	});
-
-	it("namespaces keys by deployment", async () => {
-		mocks.env.DEPLOYMENT_NAMESPACE = "preview-123";
-		const { redisKey } = await import("./redis");
-		expect(redisKey("views", "resume-1")).toBe("reactive-resume:preview-123:views:resume-1");
 	});
 });

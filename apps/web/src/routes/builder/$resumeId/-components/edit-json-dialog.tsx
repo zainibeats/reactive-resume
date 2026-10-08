@@ -1,5 +1,5 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { resumeDataSchema } from "@reactive-resume/schema/resume/data";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -35,15 +35,9 @@ function parseResumeData(value: string): { data?: ResumeData; error?: string } {
 
 export function EditJsonDialog({ data, open, onOpenChange }: EditJsonDialogProps) {
 	const updateResumeData = useUpdateResumeData();
+	// Mounted per opening (see DocumentMenu), so the text always starts from the current resume.
 	const [value, setValue] = useState(() => JSON.stringify(data, null, 2));
 	const [error, setError] = useState<string>();
-
-	useEffect(() => {
-		if (!open) return;
-
-		setValue(JSON.stringify(data, null, 2));
-		setError(undefined);
-	}, [data, open]);
 
 	const handleSave = () => {
 		const result = parseResumeData(value);
@@ -72,7 +66,7 @@ export function EditJsonDialog({ data, open, onOpenChange }: EditJsonDialogProps
 				<Textarea
 					aria-invalid={Boolean(error)}
 					aria-label="Resume JSON"
-					className="min-h-0 flex-1 resize-none whitespace-pre font-mono text-xs"
+					className="min-h-0 flex-1 resize-none font-mono text-xs whitespace-pre"
 					spellCheck={false}
 					value={value}
 					onChange={(event) => {
@@ -81,10 +75,10 @@ export function EditJsonDialog({ data, open, onOpenChange }: EditJsonDialogProps
 					}}
 				/>
 
-				{error && <p className="text-destructive text-sm">{error}</p>}
+				{error && <p className="text-sm text-danger-text">{error}</p>}
 
 				<DialogFooter>
-					<DialogClose render={<Button variant="outline">Cancel</Button>} />
+					<DialogClose render={<Button variant="secondary">Cancel</Button>} />
 					<Button onClick={handleSave}>Save JSON</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet } from "#react-pdf-renderer";
@@ -96,6 +96,9 @@ const useLaprasTemplate = (): LaprasTemplate => {
 		const borderColor = "#CCCCCC";
 		const pictureBorderRadius = Math.min(picture.borderRadius, 30);
 		const headingNegativeMargin = metadata.typography.heading.fontSize + 6;
+		// The heading sits on the card's top border. It's placed there absolutely, with the card's top padding keeping
+		// its room: Forme loses a page when a box pulled above its parent by a negative margin starts one.
+		const headingHeight = metadata.typography.heading.fontSize * metadata.typography.heading.lineHeight;
 		const colors: TemplateColorRoles = { foreground, background, primary };
 
 		const baseStyles = StyleSheet.create({
@@ -114,11 +117,13 @@ const useLaprasTemplate = (): LaprasTemplate => {
 				borderRadius: pictureBorderRadius,
 				backgroundColor: background,
 				padding: metrics.gapX(1),
+				paddingTop: metrics.gapX(1) - headingNegativeMargin + headingHeight + metrics.gapY(0.25),
 				marginTop: Math.max(0, headingNegativeMargin - metrics.gapX(1)),
 			},
 			sectionHeading: {
-				alignSelf: "flex-start",
-				marginTop: -headingNegativeMargin,
+				position: "absolute",
+				top: metrics.gapX(1) - headingNegativeMargin,
+				...r.anchorToStart(metrics.gapX(1)),
 				backgroundColor: background,
 				paddingHorizontal: metrics.gapX(1),
 			},
@@ -180,18 +185,5 @@ const useLaprasTemplate = (): LaprasTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies LaprasStyles,
 		};
-	}, [
-		picture,
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.gapY,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		base,
-		metrics.page.paddingHorizontal,
-		foreground,
-		background,
-	]);
+	}, [picture, metadata, r, primary, metrics, base, foreground, background]);
 };

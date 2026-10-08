@@ -1,5 +1,6 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { ORPCError } from "@orpc/server";
+import { env } from "@reactive-resume/env/server";
 import { generateFilename } from "@reactive-resume/utils/file";
 import { assertCanView } from "./access-policy";
 import { publicRenderRateLimiter } from "./public-render-rate-limit";
@@ -29,7 +30,7 @@ export type PublicResumePdfDependencies = {
 };
 
 const findResume = async ({ username, slug }: Pick<CreatePublicResumePdfInput, "username" | "slug">) => {
-	const [{ db }, schema, { and, eq }] = await Promise.all([
+	const [{ db }, schema, { and, eq, isNull }] = await Promise.all([
 		import("@reactive-resume/db/client"),
 		import("@reactive-resume/db/schema"),
 		import("drizzle-orm"),
@@ -44,7 +45,7 @@ const findResume = async ({ username, slug }: Pick<CreatePublicResumePdfInput, "
 		})
 		.from(schema.resume)
 		.innerJoin(schema.user, eq(schema.resume.userId, schema.user.id))
-		.where(and(eq(schema.resume.slug, slug), eq(schema.user.username, username)));
+		.where(and(eq(schema.resume.slug, slug), eq(schema.user.username, username), isNull(schema.resume.trashedAt)));
 	return resume ?? null;
 };
 
@@ -53,9 +54,12 @@ const defaultDependencies: PublicResumePdfDependencies = {
 	hasPasswordAccess: async (requestHeaders, resumeId, passwordHash) =>
 		(await import("./access")).hasResumeAccess(requestHeaders, resumeId, passwordHash),
 	resolveCurrentUserId: async (requestHeaders) =>
-		(await import("../../context")).resolveUserFromRequestHeaders(requestHeaders).then((user) => user?.id),
+		(await import("../../context"))
+			.resolveAuthenticationFromRequestHeaders(requestHeaders)
+			.then((authentication) => (authentication?.permissions.includes("read") ? authentication.user.id : undefined)),
 	rateLimiter: publicRenderRateLimiter,
-	renderPdf: async (input) => (await import("@reactive-resume/pdf/server")).createResumePdfFile(input),
+	renderPdf: async (input) =>
+		(await import("@reactive-resume/pdf/server")).createResumePdfFile({ ...input, uploadOrigin: env.APP_URL }),
 };
 
 export async function createPublicResumePdf(

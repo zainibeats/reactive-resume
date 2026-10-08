@@ -1,4 +1,4 @@
-import type { Style } from "@react-pdf/types";
+import type { Style } from "../../forme/style-types";
 import type { StyleInput } from "./styles";
 import { richTextMarkClassName } from "./rich-text-html";
 import { safeTextStyle } from "./safe-text-style";

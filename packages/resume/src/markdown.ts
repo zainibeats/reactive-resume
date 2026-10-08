@@ -115,15 +115,16 @@ function renderExperience(section: Sections["experience"]): string[] {
 
 	const blocks: string[] = [heading(section.title)];
 	for (const item of items) {
-		if (item.roles.length > 0) {
+		const roles = item.roles.filter((role) => role.position.trim());
+		if (roles.length > 0) {
 			blocks.push(entryHeading(item.company, undefined, item.period), italicLine([item.location]));
-			for (const role of item.roles) {
+			for (const role of roles) {
 				blocks.push(italicLine([role.position, role.period]), htmlToMarkdown(role.description));
 			}
 		} else {
 			blocks.push(entryHeading(item.company, item.position, item.period), italicLine([item.location]));
-			blocks.push(htmlToMarkdown(item.description));
 		}
+		blocks.push(htmlToMarkdown(item.description));
 		blocks.push(link(item.website.label, item.website.url));
 	}
 	return blocks.filter(Boolean);
@@ -314,24 +315,39 @@ const ENTITIES: Record<string, string> = {
 
 /**
  * ponytail: regex converter, not a full HTML parser. The rich-text fields only ever hold the
- * constrained tiptap tag set (p, br, strong/b, em/i, u, s, a, ul/ol/li, headings). If the editor
- * gains nested/table markup, swap this for a real parser.
+ * constrained tiptap tag set (p, br, strong/b, em/i, u, s, a, ul/ol/li, headings). Nested lists are converted innermost first.
+ * If the editor gains tables or arbitrary HTML, swap this for a real parser.
  */
 export function htmlToMarkdown(html: string): string {
 	if (!html) return "";
 
-	return html
-		.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gis, (_m, url, inner) => `[${stripTags(inner)}](${url})`)
+	// Convert innermost lists first so nested items retain their own numbering and indentation.
+	const list = /<(ul|ol)\b([^>]*)>((?:(?!<(?:ul|ol)\b).)*?)<\/\1>/gis;
+	let content = html;
+	while (/<(?:ul|ol)\b/i.test(content)) {
+		const next = content.replace(list, (_match, tag: string, attributes: string, inner: string) => {
+			let index = Number(/\bstart=["']?(\d+)/i.exec(attributes)?.[1] ?? 1);
+			const items = inner.replace(/<li\b[^>]*>(.*?)<\/li>/gis, (_item, body: string) => {
+				const prefix = tag.toLowerCase() === "ol" ? `${index++}. ` : "- ";
+				return `${prefix}${htmlToMarkdown(body).replace(/\n/g, `\n${" ".repeat(prefix.length)}`)}\n`;
+			});
+			return `\n${items}\n`;
+		});
+		if (next === content) break;
+		content = next;
+	}
+	return content
+		.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gis, (_m, url, inner) => `[${htmlToMarkdown(inner)}](${url})`)
 		.replace(/<(strong|b)>(.*?)<\/\1>/gis, "**$2**")
 		.replace(/<(em|i)>(.*?)<\/\1>/gis, "_$2_")
-		.replace(/<li[^>]*>(.*?)<\/li>/gis, (_m, inner) => `- ${stripTags(inner).trim()}\n`)
+		.replace(/<(s|strike|del)\b[^>]*>(.*?)<\/\1>/gis, "~~$2~~")
+		.replace(/<u\b[^>]*>(.*?)<\/u>/gis, "<u>$1</u>")
+		.replace(/<li[^>]*>(.*?)<\/li>/gis, (_m, inner) => `- ${htmlToMarkdown(inner).trim()}\n`)
 		.replace(/<br\s*\/?>/gi, "\n")
 		.replace(/<\/(p|div|h[1-6]|ul|ol)>/gi, "\n\n")
-		.replace(/<[^>]+>/g, "")
+		.replace(/<(?!\/?u>)[^>]+>/g, "")
 		.replace(/&#39;|&nbsp;|&quot;|&amp;|&lt;|&gt;/g, (m) => ENTITIES[m] ?? m)
 		.replace(/[ \t]+\n/g, "\n")
 		.replace(/\n{3,}/g, "\n\n")
 		.trim();
 }
-
-const stripTags = (html: string) => html.replace(/<[^>]+>/g, "");

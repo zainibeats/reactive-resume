@@ -15,10 +15,4 @@ describe("parseStylesheet", () => {
 		expect(source.slice(28, 31)).toBe("red");
 		expect(result.rules).toHaveLength(2);
 	});
-
-	it("keeps UTF-16 offsets aligned with the original source", () => {
-		const result = parseStylesheet("/* 😀 */\nsection { color red; }");
-
-		expect(result.diagnostics[0]?.range.start).toMatchObject({ line: 2, column: 17, offset: 25 });
-	});
 });

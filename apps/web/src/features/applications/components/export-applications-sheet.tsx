@@ -15,8 +15,8 @@ import {
 	SheetTitle,
 } from "@reactive-resume/ui/components/sheet";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
-import { Combobox } from "@/components/ui/combobox";
 import { exportApplicationsCsv, selectApplicationsForExport } from "../csv";
+import { Combobox } from "@/components/ui/combobox";
 
 type ExportApplicationsSheetProps = {
 	open: boolean;
@@ -54,7 +54,7 @@ export function ExportApplicationsSheet({ open, onOpenChange, applications, filt
 						onOpenChange(false);
 					}}
 				>
-					<div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
+					<div className="-mt-1 flex flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-4">
 						<div className="space-y-1.5">
 							<Label htmlFor={`${id}-scope`}>
 								<Trans>Applications to export</Trans>
@@ -66,7 +66,7 @@ export function ExportApplicationsSheet({ open, onOpenChange, applications, filt
 								onValueChange={(value) => value && setScope(value)}
 								options={[
 									{ value: "filtered", label: t`Current filters` },
-									{ value: "all", label: t`All applications (including archived)` },
+									{ value: "all", label: t`All applications (including closed)` },
 								]}
 							/>
 						</div>
@@ -97,16 +97,16 @@ export function ExportApplicationsSheet({ open, onOpenChange, applications, filt
 							</div>
 						</div>
 						{!validRange && (
-							<p role="alert" className="text-destructive text-sm">
+							<p role="alert" className="text-sm text-danger-text">
 								<Trans>Start date must be on or before end date.</Trans>
 							</p>
 						)}
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-ink-3">
 							<Plural value={selected.length} one="# application to export" other="# applications to export" />
 						</p>
 					</div>
 					<SheetFooter className="flex-row justify-end gap-2">
-						<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+						<Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
 							<Trans>Cancel</Trans>
 						</Button>
 						<Button type="submit" disabled={!validRange || selected.length === 0}>

@@ -1,28 +1,20 @@
 import { RouterProvider } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
+import { followReducedMotion } from "./libs/motion";
 import { getRouter } from "./router";
 import "./index.css";
 
 const rootElement = document.getElementById("app");
 if (!rootElement) throw new Error("Root element not found");
 
+followReducedMotion();
+
 const router = await getRouter();
 
-// Server metadata describes the initial URL. The SPA router owns these tags after
-// startup, including navigation into root mode from another marketing/public page.
-const serverSeoSelectors = [
-	"[data-root-resume-shell]",
-	'head link[rel="canonical"]',
-	'head script[type="application/ld+json"]',
-	'head meta[property^="og:"]',
-	'head meta[name^="twitter:"]',
-];
-document.querySelectorAll(serverSeoSelectors.join(",")).forEach((element) => {
+// The router owns the title, description and robots tags from here on (see libs/seo.ts), so the copies in the served
+// HTML go; the root-resume canonical link the server may write into <head> stays.
+document.head.querySelectorAll('title, meta[name="description"], meta[name="robots"]').forEach((element) => {
 	element.remove();
 });
 
-if (!rootElement.innerHTML) {
-	const root = ReactDOM.createRoot(rootElement);
-
-	root.render(<RouterProvider router={router} />);
-}
+ReactDOM.createRoot(rootElement).render(<RouterProvider router={router} />);

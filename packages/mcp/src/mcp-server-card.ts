@@ -1,9 +1,26 @@
-import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js";
+import { prepareMcpDiscovery } from "./discovery";
 import { MCP_TOOL_NAME as T } from "./mcp-tool-names";
 import { PROMPT_META } from "./prompts";
-import { TOOL_META } from "./tool-meta";
 
 const RESUME_ID_ARGUMENT = [{ name: "id", description: "Resume ID.", required: true }] as const;
+
+/** Shared server identity for both the live MCP server and the static server card. */
+export function buildMcpServerInfo(version: string, appUrl: string) {
+	const websiteUrl = new URL(appUrl);
+
+	return {
+		name: "reactive-resume",
+		version,
+		title: "Reactive Resume",
+		websiteUrl: websiteUrl.toString(),
+		description:
+			"Reactive Resume is a free and open-source resume builder. Use this MCP server to interact with your resume using an LLM of your choice.",
+		icons: [
+			{ src: new URL("/icon/light.svg", websiteUrl).toString(), mimeType: "image/svg+xml", theme: "light" as const },
+			{ src: new URL("/icon/dark.svg", websiteUrl).toString(), mimeType: "image/svg+xml", theme: "dark" as const },
+		],
+	};
+}
 
 /**
  * Static MCP server card (SEP-1649 / well-known `mcp/server-card.json`).
@@ -12,15 +29,8 @@ const RESUME_ID_ARGUMENT = [{ name: "id", description: "Resume ID.", required: t
  * Some registries only surface the `resources` array in their UI, not `resourceTemplates`.
  * The parameterized resume URI is therefore duplicated here so discovery matches the live template.
  */
-export function buildMcpServerCard(appVersion: string, appUrl = "https://rxresu.me") {
-	// ponytail: derived from TOOL_META; title/description/inputSchema/annotations declared once
-	const tools = Object.entries(TOOL_META).map(([name, { title, description, inputSchema, annotations }]) => ({
-		name,
-		title,
-		description,
-		inputSchema: toJsonSchemaCompat(inputSchema),
-		annotations,
-	}));
+export function buildMcpServerCard(appVersion: string, appUrl: string) {
+	const tools = prepareMcpDiscovery().tools.map(({ execution: _execution, ...tool }) => tool);
 
 	const prompts = Object.entries(PROMPT_META).map(([name, meta]) => ({
 		name,
@@ -73,7 +83,7 @@ export function buildMcpServerCard(appVersion: string, appUrl = "https://rxresu.
 					type: "string",
 					title: "API key",
 					description:
-						"Optional. Create a key under Account → API Keys. Forwarded as the x-api-key header when not using OAuth.",
+						"Optional. Create a key under Settings → AI & developer → API keys. Forwarded as the x-api-key header when not using OAuth.",
 					"x-from": { header: "x-api-key" },
 				},
 			},
@@ -85,25 +95,7 @@ export function buildMcpServerCard(appVersion: string, appUrl = "https://rxresu.
 		resourceTemplates,
 		authentication: {
 			required: true,
-			schemes: ["oauth2", "bearer"],
+			schemes: ["oauth2", "bearer", "apiKey"],
 		},
-	};
-}
-
-/** Shared server identity for both the live MCP server and the static server card. */
-export function buildMcpServerInfo(appVersion: string, appUrl: string) {
-	const websiteUrl = new URL(appUrl);
-
-	return {
-		name: "reactive-resume",
-		version: appVersion,
-		title: "Reactive Resume",
-		websiteUrl: websiteUrl.toString(),
-		description:
-			"Reactive Resume is a free and open-source resume builder. Use this MCP server to interact with your resume using an LLM of your choice.",
-		icons: [
-			{ src: new URL("/icon/light.svg", websiteUrl).toString(), mimeType: "image/svg+xml", theme: "light" as const },
-			{ src: new URL("/icon/dark.svg", websiteUrl).toString(), mimeType: "image/svg+xml", theme: "dark" as const },
-		],
 	};
 }

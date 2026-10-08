@@ -13,7 +13,7 @@ import { HARVEST_DEFAULTS, harvestPdfDocument } from "@reactive-resume/resume/at
  */
 
 /** Refused before PDF.js is even loaded: nothing good happens after this size in a browser tab. */
-export const MAX_UPLOAD_BYTES = 25_000_000;
+const MAX_UPLOAD_BYTES = 25_000_000;
 
 export type ExtractProgress = HarvestProgress | { phase: "loading"; page: 0; pageCount: 0 };
 
@@ -24,21 +24,21 @@ export type ExtractOptions = {
 	operatorBudgetMs?: number;
 };
 
-export class PdfPasswordRequiredError extends Error {
+class PdfPasswordRequiredError extends Error {
 	constructor() {
 		super("This PDF is password protected.");
 		this.name = "PdfPasswordRequiredError";
 	}
 }
 
-export class PdfTooLargeError extends Error {
+class PdfTooLargeError extends Error {
 	constructor(readonly sizeBytes: number) {
 		super("This PDF is too large to check in the browser.");
 		this.name = "PdfTooLargeError";
 	}
 }
 
-export class PdfUnreadableError extends Error {
+class PdfUnreadableError extends Error {
 	constructor(cause?: unknown) {
 		super("This file could not be read as a PDF.");
 		this.name = "PdfUnreadableError";
@@ -49,7 +49,7 @@ export class PdfUnreadableError extends Error {
 const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46] as const; // "%PDF"
 
 /** Sniffs the format from the bytes rather than trusting the extension or the reported MIME type. */
-export async function hasPdfMagicBytes(file: Blob): Promise<boolean> {
+async function hasPdfMagicBytes(file: Blob): Promise<boolean> {
 	const header = new Uint8Array(await file.slice(0, PDF_MAGIC_BYTES.length).arrayBuffer());
 	return PDF_MAGIC_BYTES.every((byte, index) => header[index] === byte);
 }

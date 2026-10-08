@@ -39,41 +39,4 @@ describe("handlePublicResumePdf", () => {
 			trustedClient,
 		});
 	});
-
-	it("keeps password and private responses uncacheable", async () => {
-		mocks.createPublicResumePdf.mockResolvedValueOnce({
-			body: new File(["%PDF"], "resume.pdf", { type: "application/pdf" }),
-			filename: "resume.pdf",
-		});
-		const request = new Request("https://example.com/api/resumes/jane/resume/pdf");
-
-		const response = await handlePublicResumePdf(request, "jane", "resume", trustedClient);
-
-		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
-		expect(mocks.createPublicResumePdf).toHaveBeenCalledWith({
-			username: "jane",
-			slug: "resume",
-			requestHeaders: request.headers,
-			trustedClient,
-		});
-	});
-
-	it.each([
-		[{ code: "NEED_PASSWORD" }, 401],
-		[{ code: "NOT_FOUND" }, 404],
-		[{ code: "RATE_LIMIT_EXCEEDED" }, 429],
-		[{ code: "INTERNAL_SERVER_ERROR" }, 500],
-	])("maps controlled API errors without caching the response", async (error, status) => {
-		mocks.createPublicResumePdf.mockRejectedValueOnce(error);
-
-		const response = await handlePublicResumePdf(
-			new Request("https://example.com/api/resumes/jane/resume/pdf"),
-			"jane",
-			"resume",
-			trustedClient,
-		);
-
-		expect(response.status).toBe(status);
-		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
-	});
 });

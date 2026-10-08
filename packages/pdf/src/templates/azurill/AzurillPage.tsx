@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type {
 	TemplateColorRoles,
 	TemplateFeatureStyleSlots,
@@ -135,7 +135,7 @@ const useAzurillTemplate = (): AzurillTemplate => {
 				color: primary,
 			},
 			contentRow: {
-				flexDirection: r.row,
+				flexDirection: r.columns,
 			},
 			sidebarColumn: {},
 			mainColumn: {
@@ -251,18 +251,5 @@ const useAzurillTemplate = (): AzurillTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies AzurillStyles,
 		};
-	}, [
-		metadata,
-		r.row,
-		primary,
-		metrics.page.paddingVertical,
-		metrics.page.paddingHorizontal,
-		metrics.gapX,
-		metrics.headerGap,
-		metrics.columnGap,
-		base,
-		metrics.gapY,
-		foreground,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, base, foreground, background]);
 };

@@ -69,3 +69,19 @@ export function isDarkColor(colorString: string): boolean {
 	const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
 	return luminance < 128;
 }
+
+// WCAG 2 relative luminance of an sRGB channel (0–255).
+const linear = (channel: number) => {
+	const value = channel / 255;
+	return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+};
+
+/** WCAG contrast of a colour against white, with any transparency laid over white first. 1 when it can't be read. */
+export function contrastOnWhite(colorString: string): number {
+	const color = parseColorString(colorString);
+	if (!color) return 1;
+	const alpha = Math.max(0, Math.min(1, color.a));
+	const [r, g, b] = [color.r, color.g, color.b].map((channel) => linear(channel * alpha + 255 * (1 - alpha)));
+	const luminance = 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
+	return 1.05 / (luminance + 0.05);
+}

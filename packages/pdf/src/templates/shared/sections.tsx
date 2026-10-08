@@ -1,4 +1,8 @@
-import type { Style } from "@react-pdf/types";
+import type { IconName } from "../../forme/icons";
+import type { Style } from "../../forme/style-types";
+import type { CombinedTextName } from "../../semantic/node-keys";
+import type { StyleInput, TemplatePlacement } from "./styles";
+import type { CustomItemSection, ItemSection } from "./types";
 import type {
 	AwardItem,
 	CertificationItem,
@@ -18,11 +22,7 @@ import type {
 	SummaryItem,
 	VolunteerItem,
 } from "@reactive-resume/schema/resume/data";
-import type { IconName } from "phosphor-icons-react-pdf/dynamic";
 import type { ReactNode } from "react";
-import type { CombinedTextName } from "../../semantic/node-keys";
-import type { StyleInput, TemplatePlacement } from "./styles";
-import type { CustomItemSection, ItemSection } from "./types";
 import { Children, createContext, Fragment, isValidElement, use } from "react";
 import { View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
@@ -46,9 +46,7 @@ import { ITEM_HEADER_ROW_PART_KEYS } from "../../semantic/shared-parts";
 import { getSectionItemRows, getSectionItemsLayout, shouldUseSectionTimeline } from "./columns";
 import { getWebsiteDisplayText } from "./contact";
 import {
-	SectionStyleProvider,
 	TemplatePlacementProvider,
-	useSectionStyleRule,
 	useTemplateFeature,
 	useTemplateFeatureStyle,
 	useTemplatePageNodeKey,
@@ -56,6 +54,7 @@ import {
 	useTemplateStyle,
 } from "./context";
 import { filterItems, hasVisibleItems, isSectionVisible, isVisibleSummary } from "./filtering";
+import { parseStyleFontSize } from "./icon-size";
 import { LevelDisplay } from "./level-display";
 import { getTemplateMetrics } from "./metrics";
 import {
@@ -74,7 +73,6 @@ import { RichText } from "./rich-text";
 import { createRtlStyleHelpers } from "./rtl";
 import { getInlineItemWebsiteUrl, shouldRenderSeparateItemWebsite } from "./section-links";
 import { hasSplitRowText } from "./split-row";
-import { getSectionStyleRuleContext } from "./style-rules";
 import { composeStyles, mergeStyles } from "./styles";
 
 type SectionItemsContextValue = {
@@ -195,7 +193,35 @@ const defaultSectionHeadingContainerStyle = {
 	columnGap: 4,
 } satisfies Style;
 
-export const getSectionHeadingTextStyle = (...styles: StyleInput[]): Style[] => {
+const sectionHeadingTextProperties = new Set<string>([
+	"color",
+	"direction",
+	"fontSize",
+	"fontStyle",
+	"fontWeight",
+	"letterSpacing",
+	"lineHeight",
+	"textAlign",
+	"textDecoration",
+	"textDecorationColor",
+	"textDecorationStyle",
+	"textIndent",
+	"textTransform",
+]);
+
+/**
+ * With an icon, the heading node is the icon row and its title is a separate text that carries the template's own
+ * heading font, so the heading's text styles have to be handed to that text or they never reach it.
+ */
+const sectionHeadingTextOf = (style: Style | undefined): Style | undefined =>
+	style &&
+	(Object.fromEntries(
+		Object.entries(style).filter(
+			([property, value]) => value !== undefined && sectionHeadingTextProperties.has(property),
+		),
+	) as Style);
+
+const getSectionHeadingTextStyle = (...styles: StyleInput[]): Style[] => {
 	const textStyles = composeStyles(...styles).map(
 		({
 			borderBottomWidth: _borderBottomWidth,
@@ -214,6 +240,12 @@ export const getSectionHeadingTextStyle = (...styles: StyleInput[]): Style[] => 
 			paddingRight: _paddingRight,
 			paddingTop: _paddingTop,
 			width: _width,
+			// The container is the one placed; its text flows inside it.
+			position: _position,
+			top: _top,
+			right: _right,
+			bottom: _bottom,
+			left: _left,
 			...textStyle
 		}) => textStyle,
 	);
@@ -227,14 +259,7 @@ export const getSectionHeadingTextStyle = (...styles: StyleInput[]): Style[] => 
 
 const useSectionItemsContext = () => use(SectionItemsContext);
 
-export const SemanticTextRuns = ({
-	runs,
-	separator,
-	host,
-	style,
-	nodeKey,
-	fieldOwnerNodeKey,
-}: SemanticTextRunsProps) => {
+const SemanticTextRuns = ({ runs, separator, host, style, nodeKey, fieldOwnerNodeKey }: SemanticTextRunsProps) => {
 	const contextualNodeKey = useSemanticNodeKey();
 	const fieldParentNodeKey = fieldOwnerNodeKey ?? contextualNodeKey;
 	const combinedTextOwnerNodeKey =
@@ -322,10 +347,9 @@ const SectionShell = ({ sectionId, title, showHeading = true, children }: Sectio
 	const resolved = useResolvedNode(sectionNodeKey);
 	const visible = useSemanticNodeVisible(sectionNodeKey);
 	const sectionStyle = useTemplateStyle("section");
-	const sectionRuleStyle = useSectionStyleRule("section");
+	const headingStyle = useTemplateStyle("heading");
 	const sectionHeadingStyle = useTemplateStyle("sectionHeading");
 	const sectionHeadingContainerStyle = useTemplateStyle("sectionHeadingContainer");
-	const sectionHeadingRuleStyle = useSectionStyleRule("heading");
 	const sectionTitle = getResumeSectionTitle(data, sectionId, title);
 	const sectionHeadingEnabled = (() => {
 		if (sectionId === "summary") return data.summary.showHeading !== false;
@@ -337,6 +361,15 @@ const SectionShell = ({ sectionId, title, showHeading = true, children }: Sectio
 	const sectionHeadingVisible = useSemanticNodeVisible(sectionHeadingNodeKey);
 	const sectionIcon = getResumeSectionIcon(data, sectionId);
 	const showIcon = Boolean(sectionIcon) && !data.metadata.page.hideSectionIcons;
+	const sectionHeadingTextStyle = getSectionHeadingTextStyle(
+		sectionHeadingStyle,
+		sectionHeadingTextOf(sectionHeadingResolved.style),
+	);
+	// The title as `Heading` draws it; a line height in other units than a multiplier falls back to the typography's.
+	const { fontSize: titleFontSize, lineHeight: titleLineHeight } = mergeStyles(headingStyle, sectionHeadingTextStyle);
+	const titleLineBox =
+		(parseStyleFontSize(titleFontSize) ?? data.metadata.typography.heading.fontSize) *
+		(typeof titleLineHeight === "number" ? titleLineHeight : data.metadata.typography.heading.lineHeight);
 	const { keepTogether, startOnNewPage } = getSectionBreaks(data, sectionId);
 	// wrap={false} keeps the whole section on one page; break forces it onto a fresh page.
 	// Only set the props when enabled so we never pass undefined (exactOptionalPropertyTypes).
@@ -347,16 +380,16 @@ const SectionShell = ({ sectionId, title, showHeading = true, children }: Sectio
 	if (keepTogether) breakProps.wrap = false;
 	if (startOnNewPage) breakProps.break = true;
 	const flowProps = { ...breakProps, ...resolvedPdfFlowProps(resolved) };
-	const resolvedSectionStyle = composeStyles(sectionStyle, sectionRuleStyle, resolved.style);
+	const resolvedSectionStyle = composeStyles(sectionStyle, resolved.style);
 	if (!visible) return null;
 
 	if (!showIcon) {
 		// No icon: render heading exactly as before (no structural change)
 		return (
 			<SemanticNodeKeyProvider nodeKey={sectionNodeKey}>
-				<View style={resolvedSectionStyle} {...flowProps}>
+				<View style={resolvedSectionStyle} {...flowProps} data-resume-node={sectionNodeKey}>
 					{showHeading && sectionHeadingEnabled && (
-						<Heading style={composeStyles(sectionHeadingStyle, sectionHeadingRuleStyle)}>{sectionTitle}</Heading>
+						<Heading style={composeStyles(sectionHeadingStyle)}>{sectionTitle}</Heading>
 					)}
 					{children}
 				</View>
@@ -367,7 +400,7 @@ const SectionShell = ({ sectionId, title, showHeading = true, children }: Sectio
 	// With icon: wrap in a flex row container that inherits the heading's border/decoration
 	return (
 		<SemanticNodeKeyProvider nodeKey={sectionNodeKey}>
-			<View style={resolvedSectionStyle} {...flowProps}>
+			<View style={resolvedSectionStyle} {...flowProps} data-resume-node={sectionNodeKey}>
 				{showHeading && sectionHeadingEnabled && sectionHeadingVisible && (
 					<View
 						{...resolvedPdfFlowProps(sectionHeadingResolved)}
@@ -375,24 +408,15 @@ const SectionShell = ({ sectionId, title, showHeading = true, children }: Sectio
 							sectionHeadingStyle,
 							defaultSectionHeadingContainerStyle,
 							sectionHeadingContainerStyle,
-							sectionHeadingRuleStyle,
 							sectionHeadingResolved.style,
 						)}
 					>
 						<SectionHeadingIcon
 							nodeKey={semanticNodeKeys.icon(sectionHeadingNodeKey, "section")}
 							name={sectionIcon as IconName}
+							titleLineHeight={titleLineBox}
 						/>
-						<Heading
-							bindSemanticNode={false}
-							style={getSectionHeadingTextStyle(
-								sectionHeadingStyle,
-								sectionHeadingRuleStyle,
-								sectionHeadingResolved.style?.color === undefined
-									? undefined
-									: { color: sectionHeadingResolved.style.color },
-							)}
-						>
+						<Heading bindSemanticNode={false} style={sectionHeadingTextStyle}>
 							{sectionTitle}
 						</Heading>
 					</View>
@@ -507,7 +531,6 @@ const SectionItem = ({ itemId, children, style }: SectionItemProps) => {
 	const visible = useSemanticNodeVisible(itemNodeKey);
 	const { itemStyle: sectionItemStyle, useTimeline } = useSectionItemsContext();
 	const itemStyle = useTemplateStyle("item");
-	const itemRuleStyle = useSectionStyleRule("item");
 	const timelineItemStyle = useTemplateFeatureStyle("sectionTimeline", "item");
 	const timelineMarkerStyle = useTemplateFeatureStyle("sectionTimeline", "marker");
 	const timelineDotStyle = useTemplateFeatureStyle("sectionTimeline", "dot");
@@ -519,7 +542,7 @@ const SectionItem = ({ itemId, children, style }: SectionItemProps) => {
 	if (!useTimeline) {
 		return (
 			<SemanticNodeKeyProvider nodeKey={itemNodeKey}>
-				<Div nodeKey={itemNodeKey} style={composeStyles(itemStyle, itemRuleStyle, sectionItemStyle, style)}>
+				<Div nodeKey={itemNodeKey} style={composeStyles(itemStyle, sectionItemStyle, style)}>
 					{children}
 				</Div>
 			</SemanticNodeKeyProvider>
@@ -534,16 +557,20 @@ const SectionItem = ({ itemId, children, style }: SectionItemProps) => {
 					partKeys={["timeline-marker"]}
 					style={composeStyles(timelineMarkerStyle)}
 				>
-					<SemanticTemplatePartView
-						ownerNodeKey={itemNodeKey}
-						partKeys={["timeline-marker", "timeline-dot"]}
-						style={composeStyles(timelineDotStyle)}
-					/>
+					{/* When the item breaks across pages, Forme 0.25 stretches the marker's last box down to the page's end:
+					    this plain box takes the stretch, so the dot keeps its size. */}
+					<View style={{ alignSelf: "stretch", alignItems: "center" }}>
+						<SemanticTemplatePartView
+							ownerNodeKey={itemNodeKey}
+							partKeys={["timeline-marker", "timeline-dot"]}
+							style={composeStyles(timelineDotStyle)}
+						/>
+					</View>
 				</SemanticTemplatePartView>
 				<Div
 					nodeKey={itemNodeKey}
 					{...resolvedPdfFlowProps(timelineContentResolved)}
-					style={composeStyles(itemStyle, itemRuleStyle, timelineContentStyle, style, timelineContentResolved.style)}
+					style={composeStyles(itemStyle, timelineContentStyle, style, timelineContentResolved.style)}
 				>
 					{children}
 				</Div>
@@ -615,11 +642,13 @@ const stackedSidebarSplitRowStyle = {
 	alignItems: "flex-start",
 } satisfies Style;
 
-const awardTitleDateRowStyle = {
-	flexDirection: "row",
-	alignItems: "flex-start",
-	justifyContent: "space-between",
-} satisfies Style;
+// The date stays beside the title in every template, even where `splitRow` stacks; right to left, it's mirrored.
+const awardTitleDateRowStyle = (rtl: boolean) =>
+	({
+		flexDirection: rtl ? "row-reverse" : "row",
+		alignItems: "flex-start",
+		justifyContent: "space-between",
+	}) satisfies Style;
 
 const useSectionSplitRowStyle = () => {
 	const placement = useTemplatePlacement();
@@ -1214,11 +1243,7 @@ const inlineSkillsItemStyle = {
 	columnGap: 4,
 } satisfies Style;
 
-export const getSkillsItemStyle = (
-	isInline: boolean,
-	item: SkillItem,
-	metrics: ReturnType<typeof getTemplateMetrics>,
-) => {
+const getSkillsItemStyle = (isInline: boolean, item: SkillItem, metrics: ReturnType<typeof getTemplateMetrics>) => {
 	if (isInline) {
 		return composeStyles(
 			inlineSkillsItemStyle,
@@ -1351,7 +1376,7 @@ const AwardsSection = ({ sectionId = "awards", sectionData }: ItemSectionProps<A
 				{items.map((item) => (
 					<SectionItem key={item.id} itemId={item.id}>
 						<SectionItemHeader>
-							<ItemHeaderRow style={composeStyles(splitRowStyle, awardTitleDateRowStyle)}>
+							<ItemHeaderRow style={composeStyles(splitRowStyle, awardTitleDateRowStyle(data.rtl))}>
 								<ItemTitle field="title" website={item.website} bold={false}>
 									{item.title}
 								</ItemTitle>
@@ -1634,9 +1659,7 @@ export const Section = ({ section, placement, showHeading = true }: SectionProps
 
 	return (
 		<TemplatePlacementProvider placement={placement}>
-			<SectionStyleProvider context={getSectionStyleRuleContext(data, section)}>
-				{render ? render() : <CustomSection sectionId={section} showHeading={showHeading} />}
-			</SectionStyleProvider>
+			{render ? render() : <CustomSection sectionId={section} showHeading={showHeading} />}
 		</TemplatePlacementProvider>
 	);
 };

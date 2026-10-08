@@ -1,7 +1,7 @@
-import type { Style } from "@react-pdf/types";
-import type { ReactNode } from "react";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
@@ -313,21 +313,5 @@ const useRhyhornTemplate = (): RhyhornTemplate => {
 				icon: createIconSlot({ metadata, accentFor }),
 			} satisfies RhyhornStyles,
 		};
-	}, [
-		metadata,
-		r.sectionHeadingTextAlign,
-		r.row,
-		r.headerIdentity,
-		r.contactSeparatorClear,
-		r.contactSeparator,
-		primary,
-		metrics.sectionGap,
-		metrics.gapY,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		base,
-		metrics.page.paddingHorizontal,
-		foreground,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, base, foreground, background]);
 };

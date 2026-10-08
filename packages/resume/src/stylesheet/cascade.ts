@@ -44,13 +44,12 @@ type Winner = {
 };
 
 type LengthContext = {
-	page: ResolvedPageDimensions;
 	parentFontSize: number;
 	fontSize: number;
 	rootFontSize: number;
 };
 
-type CssWideKeyword = "inherit" | "initial" | "revert" | "unset";
+type CssWideKeyword = "inherit" | "initial";
 
 type VariableExpansionBudget = {
 	work: number;
@@ -64,7 +63,7 @@ const absoluteUnitToPt = {
 	cm: 72 / 2.54,
 } as const;
 
-const cssWideKeywords = new Set(["inherit", "initial", "revert", "unset"]);
+const cssWideKeywords = new Set(["inherit", "initial"]);
 const maxVariableExpansionOutputCodeUnits = SEMANTIC_CSS_LIMITS_V1.maxSourceBytes;
 const maxVariableExpansionWorkCodeUnits = SEMANTIC_CSS_LIMITS_V1.maxSourceBytes * 4;
 
@@ -161,16 +160,12 @@ function pageFor(
 }
 
 function toPoints(value: string, property: string, context: LengthContext): number | string | null {
-	const match = value
-		.trim()
-		.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(pt|px|in|mm|cm|%|vw|vh|em|rem)?$/i);
+	const match = value.trim().match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(pt|px|in|mm|cm|%|em|rem)?$/i);
 	if (!match) return null;
 	const number = Number(match[1]);
 	if (!Number.isFinite(number)) return null;
 	const unit = match[2]?.toLowerCase() ?? "pt";
 	if (unit === "%") return property === "font-size" ? (number / 100) * context.parentFontSize : `${number}%`;
-	if (unit === "vw") return (number / 100) * context.page.width;
-	if (unit === "vh") return (number / 100) * context.page.height;
 	if (unit === "rem") return number * context.rootFontSize;
 	if (unit === "em") {
 		return number * (property === "font-size" ? context.parentFontSize : context.fontSize);
@@ -180,7 +175,6 @@ function toPoints(value: string, property: string, context: LengthContext): numb
 
 function mediaMatches(query: CompiledMediaQuery, dimensions: ResolvedPageDimensions, rootFontSize: number): boolean {
 	const lengthContext = {
-		page: dimensions,
 		parentFontSize: rootFontSize,
 		fontSize: rootFontSize,
 		rootFontSize,
@@ -415,7 +409,7 @@ function customProperties(
 	for (const [property, { declaration }] of winners) {
 		if (!property.startsWith("--")) continue;
 		const keyword = cssWideKeyword(declaration.value);
-		if (keyword === "inherit" || keyword === "revert" || keyword === "unset") continue;
+		if (keyword === "inherit") continue;
 		if (keyword === "initial") {
 			if (parent?.has(property)) {
 				custom ??= new Map(parent);
@@ -453,24 +447,12 @@ function dimensionsForSize(size: ResolvedPageSize, authored: ResolvedPageDimensi
 	return { width: size.width, height: size.height ?? authored.height };
 }
 
-function builderPageSize(context: ResolveStylesheetContext, nodeKey: string): ResolvedPageSize {
-	return (
-		context.baseStyles[nodeKey]?.structural.pageSize ??
-		(context.baseSettings.page.format === "letter" ? "LETTER" : "A4")
-	);
-}
-
 function cssWideValue(
 	keyword: CssWideKeyword,
 	property: string,
-	base: Readonly<Record<string, string | number>>,
 	parent: Readonly<Record<string, string | number>> | undefined,
 ): string | number | undefined {
-	const definition = PROPERTY_REGISTRY_V1[property];
-	if (keyword === "inherit") return parent?.[property];
-	if (keyword === "initial") return;
-	if (keyword === "unset") return definition?.inheritable ? parent?.[property] : undefined;
-	return base[property] ?? (definition?.inheritable ? parent?.[property] : undefined);
+	return keyword === "inherit" ? parent?.[property] : undefined;
 }
 
 function normalizeValue(property: string, value: string, context: LengthContext): string | number | null {
@@ -499,18 +481,11 @@ function applyStructuralCssWide(
 	keyword: CssWideKeyword,
 	property: string,
 	structural: StructuralPresentation,
-	base: ResolvedNodeStyle,
 	parent: ResolvedNodeStyle | undefined,
-	revertPageSize: ResolvedPageSize,
 ): boolean {
 	const key = structuralKeys[property];
 	if (!key) return false;
-	const value =
-		keyword === "inherit"
-			? parent?.structural[key]
-			: keyword === "revert"
-				? (base.structural[key] ?? (key === "pageSize" ? revertPageSize : undefined))
-				: undefined;
+	const value = keyword === "inherit" ? parent?.structural[key] : undefined;
 	if (value === undefined) delete structural[key];
 	else Object.assign(structural, { [key]: value });
 	return true;
@@ -684,20 +659,13 @@ export function resolveStylesheet(
 		if (!expanded) continue;
 		const keyword = cssWideKeyword(expanded);
 		const parsed =
-			keyword === "revert"
-				? builderPageSize(context, node.node.key)
-				: keyword === "inherit"
-					? node.parent
-						? context.baseStyles[node.parent.node.key]?.structural.pageSize
-						: undefined
-					: keyword
-						? undefined
-						: parsePageSize(expanded, {
-								page: dimensions,
-								parentFontSize: rootFontSize,
-								fontSize: rootFontSize,
-								rootFontSize,
-							});
+			keyword === "inherit"
+				? node.parent
+					? context.baseStyles[node.parent.node.key]?.structural.pageSize
+					: undefined
+				: keyword
+					? undefined
+					: parsePageSize(expanded, { parentFontSize: rootFontSize, fontSize: rootFontSize, rootFontSize });
 		if (keyword && !parsed) {
 			resolvedPageSizeValues.set(node.node.key, expanded);
 			continue;
@@ -732,13 +700,11 @@ export function resolveStylesheet(
 		const parent = node.parent ? resolved[node.parent.node.key] : undefined;
 		const style: Record<string, string | number> = { ...base.style };
 		const specifiedStyleProperties = new Set<string>();
-		const hostBaseStyleProperties = new Set<string>();
 		for (const [property, definition] of Object.entries(PROPERTY_REGISTRY_V1)) {
 			if (!definition?.inheritable) continue;
 			const inheritedFromAuthoredRule = parent?.specifiedStyleProperties?.includes(property) && !winners.has(property);
 			if (inheritedFromAuthoredRule) {
 				specifiedStyleProperties.add(property);
-				if (parent?.hostBaseStyleProperties?.includes(property)) hostBaseStyleProperties.add(property);
 				if (parent?.style[property] === undefined) delete style[property];
 				else style[property] = parent.style[property];
 			} else if (style[property] === undefined && parent?.style[property] !== undefined) {
@@ -757,8 +723,7 @@ export function resolveStylesheet(
 			const keyword = cssWideKeyword(expanded);
 			if (keyword) {
 				specifiedStyleProperties.add("font-size");
-				if (keyword === "revert") hostBaseStyleProperties.add("font-size");
-				const wide = cssWideValue(keyword, "font-size", base.style, parent?.style);
+				const wide = cssWideValue(keyword, "font-size", parent?.style);
 				if (wide === undefined) delete style["font-size"];
 				else style["font-size"] = wide;
 			} else {
@@ -767,7 +732,6 @@ export function resolveStylesheet(
 					diagnostics.push(createDiagnostic("INVALID_VALUE", "error", syntaxError, fontSizeWinner.declaration.range));
 				} else {
 					const normalized = normalizeValue("font-size", expanded, {
-						page: dimensions,
 						parentFontSize,
 						fontSize: parentFontSize,
 						rootFontSize,
@@ -820,14 +784,7 @@ export function resolveStylesheet(
 				if (resolvedValue === undefined) continue;
 				const sizeKeyword = cssWideKeyword(resolvedValue);
 				if (sizeKeyword) {
-					applyStructuralCssWide(
-						sizeKeyword,
-						property,
-						structural,
-						base,
-						parent,
-						builderPageSize(context, node.node.key),
-					);
+					applyStructuralCssWide(sizeKeyword, property, structural, parent);
 				} else {
 					const pageSize = resolvedPageSizes.get(node.node.key);
 					if (pageSize) structuralValue(property, resolvedValue, structural, pageSize);
@@ -841,22 +798,17 @@ export function resolveStylesheet(
 						hidden = parent?.hidden ?? false;
 						if (!hidden && parent?.style.display !== undefined) style.display = parent.style.display;
 						else delete style.display;
-					} else if (keyword === "revert") {
-						hidden = base.hidden;
-						if (base.style.display === undefined) delete style.display;
-						else style.display = base.style.display;
 					} else {
 						hidden = false;
 						delete style.display;
 					}
 				} else if (property === "order") {
-					order = keyword === "inherit" ? (parent?.order ?? 0) : keyword === "revert" ? base.order : 0;
+					order = keyword === "inherit" ? (parent?.order ?? 0) : 0;
 				} else if (definition.category === "structural") {
-					applyStructuralCssWide(keyword, property, structural, base, parent, builderPageSize(context, node.node.key));
+					applyStructuralCssWide(keyword, property, structural, parent);
 				} else {
 					specifiedStyleProperties.add(property);
-					if (keyword === "revert") hostBaseStyleProperties.add(property);
-					const wide = cssWideValue(keyword, property, base.style, parent?.style);
+					const wide = cssWideValue(keyword, property, parent?.style);
 					if (wide === undefined) delete style[property];
 					else style[property] = wide;
 				}
@@ -869,7 +821,6 @@ export function resolveStylesheet(
 			}
 
 			const normalized = normalizeValue(property, expanded, {
-				page: dimensions,
 				parentFontSize,
 				fontSize,
 				rootFontSize,
@@ -920,7 +871,6 @@ export function resolveStylesheet(
 		resolved[node.node.key] = {
 			style,
 			specifiedStyleProperties: [...specifiedStyleProperties],
-			hostBaseStyleProperties: [...hostBaseStyleProperties],
 			structural,
 			hidden,
 			order,

@@ -1,24 +1,8 @@
-import { t } from "@lingui/core/macro";
-import { UserCircleIcon } from "@phosphor-icons/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Separator } from "@reactive-resume/ui/components/separator";
-import { ProfileSettingsPage } from "@/features/settings/pages/profile";
-import { DashboardHeader } from "../-components/header";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Settings became three pages in 6.0; the old address redirects (through 6.0.x).
 export const Route = createFileRoute("/dashboard/settings/profile")({
-	component: RouteComponent,
+	beforeLoad: () => {
+		throw redirect({ to: "/dashboard/settings/account", replace: true });
+	},
 });
-
-function RouteComponent() {
-	const { session } = Route.useRouteContext();
-
-	return (
-		<div className="space-y-4">
-			<DashboardHeader icon={UserCircleIcon} title={t`Profile`} />
-
-			<Separator />
-
-			<ProfileSettingsPage session={session} />
-		</div>
-	);
-}

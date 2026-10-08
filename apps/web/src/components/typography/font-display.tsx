@@ -6,7 +6,7 @@ interface FontDisplayProps {
 	family: string;
 	label: string;
 	type: "standard" | "web";
-	url?: string;
+	url?: string | undefined;
 }
 
 const loadedFonts = new Set<string>();
@@ -34,11 +34,11 @@ export function FontDisplay({ family, label, type, url }: FontDisplayProps) {
 		<div ref={containerRef} className="inline-flex items-baseline gap-2">
 			<span
 				style={{ fontFamily: isLoaded ? `'${previewName}', sans-serif` : "sans-serif" }}
-				className={cn(isLoaded ? "opacity-100" : "opacity-50", "transition-opacity duration-150 ease-out-strong")}
+				className={cn(isLoaded ? "opacity-100" : "opacity-50", "transition-opacity duration-quick ease-enter")}
 			>
 				{label}
 			</span>
-			{label !== family && <span className="text-muted-foreground text-xs">{family}</span>}
+			{label !== family && <span className="text-xs text-ink-3">{family}</span>}
 		</div>
 	);
 }

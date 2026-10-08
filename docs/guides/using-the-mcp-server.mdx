@@ -1,329 +1,307 @@
 ---
 title: "Using the MCP server"
-description: "Connect Reactive Resume to AI tools like Claude Desktop, Cursor, and Codex through the Model Context Protocol to edit and manage resumes via chat."
+description: "Connect Claude, Cursor, Codex or any MCP client to Reactive Resume with OAuth or an API key, and see every tool, prompt and resource it offers."
 ---
 
-The Reactive Resume MCP server lets you manage and modify your resumes through any MCP-compatible AI tool - Claude Desktop, Cursor, Codex, and more. It connects to the Reactive Resume API and exposes resume-focused tools using natural language.
+Reactive Resume runs a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server, so AI clients such as Claude, Cursor and Codex can read and edit your resumes, cover letters and job applications when you ask them to in plain language. This guide shows you how to connect a client and lists everything the server offers.
 
-## What is MCP?
+## Before you start
 
-The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) is a standard that lets LLM-powered tools connect to external services. Instead of being limited to the built-in chat UI, you can use any MCP client to interact with your resumes.
+- You need a Reactive Resume account.
+- Your MCP client must support remote servers over Streamable HTTP, or be able to run the [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) bridge.
+- Decide how the client signs in:
+  - **OAuth (recommended).** You approve the client in your browser. No secret is copied anywhere.
+  - **API key.** For clients that can't do OAuth but can send a custom header. Create a key first, as described in [Using the API](/guides/using-the-api).
 
-## Prerequisites
+## Find your server address
+
+The server address is your instance's address followed by `/mcp`. On the hosted instance it's `https://rxresu.me/mcp`. You can copy it from **Settings** → **AI & developer**, in the **MCP server** section.
+
+<Frame caption="The MCP server section in AI & developer settings">
+  <img
+    src="/images/guides/using-the-mcp-server/mcp-server-settings.webp"
+    alt="MCP server section showing the address https://rxresu.me/mcp with a Copy button and a Setup guide link"
+  />
+</Frame>
+
+## Connect with OAuth
 
 <Steps>
-  <Step title="Choose your authentication method">
-    Reactive Resume MCP supports two authentication methods:
+  <Step title="Add the server to your client">
+    Add a remote MCP server with the address `https://rxresu.me/mcp` and no headers. Client-specific steps are in [Set up popular clients](#set-up-popular-clients).
+  </Step>
+  <Step title="Sign in to Reactive Resume">
+    Your client opens a browser window. If you aren't signed in, Reactive Resume asks you to sign in first.
+  </Step>
+  <Step title="Approve the connection">
+    Check the application name under **Connect an application**, read what it will be able to do, and select **Allow access**. Select **Deny** if you don't recognize the application.
 
-    - **OAuth2 (recommended):** best user experience for clients that support MCP OAuth.
-    - **API key (fallback):** works in all clients that can send custom headers.
-
-    Use OAuth2 whenever your MCP client supports it. Use API key only when OAuth is unavailable in that client.
+    <Frame caption="The consent screen for a new MCP client">
+      <img src="/images/guides/using-the-mcp-server/oauth-consent.webp" alt="Connect an application screen for a client named Claude, listing access to resumes and job applications, profile information, email address and offline access, with Deny and Allow access buttons" />
+    </Frame>
 
   </Step>
-
-  <Step title="If using API key, create one">
-    Head over to [https://rxresu.me](https://rxresu.me) (or your self-hosted instance), sign in, and navigate to **Settings → API Keys**. Click **Create a new API key**, give it a name, and copy the secret. It is shown only once.
-
-    For the full walkthrough, see [Using the API](/guides/using-the-api).
-
+  <Step title="Return to your client">
+    The browser hands control back to your client, which can now use the Reactive Resume tools.
   </Step>
 </Steps>
 
-## Configuration
+## Connect with an API key
 
-There are two transport options, and each can use either OAuth2 or API key depending on your client capabilities.
-
-### Method 1: Streamable HTTP (recommended)
-
-If your client supports the `url` field (e.g. **Cursor**, **Codex**, Claude custom connectors), use this.
-
-#### Option A: OAuth2 (recommended)
-
-Most OAuth-capable clients only need the MCP URL:
-
-```json
-{
-  "mcpServers": {
-    "reactive-resume": {
-      "url": "https://rxresu.me/mcp"
-    }
-  }
-}
-```
-
-Then connect/sign in from the client UI (or with the client's OAuth login command).
-
-#### Option B: API key (fallback)
-
-If OAuth is not supported in your client, send `x-api-key`:
+If your client can't do OAuth, send your API key in the `x-api-key` header:
 
 ```json
 {
   "mcpServers": {
     "reactive-resume": {
       "url": "https://rxresu.me/mcp",
-      "headers": {
-        "x-api-key": "your-api-key"
-      }
+      "headers": { "x-api-key": "YOUR_API_KEY" }
     }
   }
 }
 ```
 
-### Method 2: mcp-remote
-
-If your client only supports `command` / `args` (for example, local-only Claude Desktop config), use [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) as a bridge. This requires [Node.js](https://nodejs.org) **20 or later**.
-
-`mcp-remote` is most commonly used with API keys:
+If your client only runs local commands, use `mcp-remote` as a bridge. It needs a current version of [Node.js](https://nodejs.org):
 
 ```json
 {
   "mcpServers": {
     "reactive-resume": {
       "command": "npx",
-      "args": ["mcp-remote", "https://rxresu.me/mcp", "--header", "x-api-key:your-api-key"]
+      "args": ["mcp-remote", "https://rxresu.me/mcp", "--header", "x-api-key:YOUR_API_KEY"]
     }
   }
 }
 ```
 
-<Info>Replace `your-api-key` with the API key you created in the prerequisites step.</Info>
+<Warning>
+  An API key in a config file grants its configured permissions. Choose read-only access when edits are unnecessary.
+  Keep the file private, and revoke the key in Settings if it leaks.
+</Warning>
 
-### Where to put the config
+## Set up popular clients
 
-| Client            | Config file                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------ |
-| Cursor            | `.cursor/mcp.json` in your project or home directory                                             |
-| Claude Desktop    | `claude_desktop_config.json` ([docs](https://modelcontextprotocol.io/quickstart/user))           |
-| Codex             | `~/.codex/config.toml` or `.codex/config.toml` ([docs](https://developers.openai.com/codex/mcp)) |
-| Other MCP clients | Refer to the client's documentation                                                              |
+<AccordionGroup>
+  <Accordion title="Claude (web, desktop and mobile)">
+    Add a custom connector with the URL `https://rxresu.me/mcp`, then connect it and approve access in the browser. See Anthropic's guide to [custom connectors](https://claude.com/docs/connectors/custom/remote-mcp).
+  </Accordion>
+  <Accordion title="Claude Code">
+    ```bash
+    claude mcp add --transport http reactive-resume https://rxresu.me/mcp
+    ```
 
-## Authentication details (how Reactive Resume MCP works)
+    Then run `/mcp` inside Claude Code and choose **reactive-resume** to sign in.
 
-Reactive Resume MCP accepts authentication in this order:
+  </Accordion>
+  <Accordion title="Cursor">
+    Add the server to `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` for all projects:
 
-1. **Bearer token (OAuth2 access token)** via `Authorization: Bearer <token>`
-2. **API key fallback** via `x-api-key: <key>`
-
-If neither is valid, the MCP endpoint responds with `401` and advertises OAuth metadata using:
-
-- `WWW-Authenticate: Bearer resource_metadata="<instance>/.well-known/oauth-protected-resource"`
-
-OAuth-capable MCP clients use this to discover and complete the OAuth flow automatically.
-
-### OAuth2 flow used by this server
-
-Reactive Resume is configured as an OAuth authorization server for MCP clients:
-
-- The MCP endpoint is `https://rxresu.me/mcp`.
-- OAuth discovery metadata is exposed under `/.well-known/*` endpoints.
-- The login/authorization route is `/api/auth/oauth`.
-- If the user is not signed in, `/api/auth/oauth` redirects to `/auth/login`, then resumes OAuth.
-- If the user is signed in, `/api/auth/oauth` uses the OAuth provider to validate the signed request, registered redirect URI, scopes, resource grants, and PKCE before issuing an authorization code, and redirects back to the client.
-- PKCE parameters (`code_challenge`, `code_challenge_method`) are preserved in the authorization flow.
-
-## Popular client setup
-
-### Cursor
-
-**OAuth2 (recommended):**
-
-```json
-{
-  "mcpServers": {
-    "reactive-resume": {
-      "url": "https://rxresu.me/mcp"
-    }
-  }
-}
-```
-
-**API key fallback:**
-
-```json
-{
-  "mcpServers": {
-    "reactive-resume": {
-      "url": "https://rxresu.me/mcp",
-      "headers": {
-        "x-api-key": "your-api-key"
+    ```json
+    {
+      "mcpServers": {
+        "reactive-resume": { "url": "https://rxresu.me/mcp" }
       }
     }
-  }
-}
-```
+    ```
 
-### Codex (CLI / IDE extension)
+    Cursor offers to sign in when it first connects. To use an API key instead, add the `headers` object shown in [Connect with an API key](#connect-with-an-api-key).
 
-Add server:
+  </Accordion>
+  <Accordion title="Codex">
+    ```bash
+    codex mcp add reactive-resume --url https://rxresu.me/mcp
+    codex mcp login reactive-resume
+    ```
 
-```bash
-codex mcp add reactive-resume --url https://rxresu.me/mcp
-```
+    To use an API key instead, add this to `~/.codex/config.toml`:
 
-Then sign in with OAuth:
+    ```toml
+    [mcp_servers.reactive-resume]
+    url = "https://rxresu.me/mcp"
+    http_headers = { "x-api-key" = "YOUR_API_KEY" }
+    ```
 
-```bash
-codex mcp login reactive-resume
-```
+  </Accordion>
+  <Accordion title="Other clients">
+    Use the server address with your client's remote MCP (Streamable HTTP) option. If it asks for a transport, choose HTTP. If it can't do OAuth, send the `x-api-key` header.
+  </Accordion>
+</AccordionGroup>
 
-API key fallback (`config.toml`):
+<Note>
+  Self-hosting? Replace `https://rxresu.me` with your own address everywhere on this page, for example
+  `https://resume.example.com/mcp`.
+</Note>
 
-```toml
-[mcp_servers."reactive-resume"]
-url = "https://rxresu.me/mcp"
-http_headers = { "x-api-key" = "your-api-key" }
-```
+## Try it
 
-### Claude (web app custom connector)
+Ask your client something like:
 
-Add `https://rxresu.me/mcp` as a custom remote MCP connector, then connect with OAuth in Claude's connector UI.
+- "List my resumes."
+- "Change the headline on my Game Developer Resume to Senior Game Developer."
+- "Add Unreal Engine 5 to my skills with the level Expert."
+- "Make a copy of my Game Developer Resume for a technical designer role."
+- "Review my resume and give me a score." (uses the `review_resume` prompt)
 
-### Claude Desktop (local config file)
+Before it edits, the client reads the resume with `read_resume`, then changes it with `apply_resume_patch`. Every change it makes appears in the resume's history as **AI edit**, so you can restore an earlier version. See [Undoing changes and version history](/guides/undoing-changes-and-version-history).
 
-Use `mcp-remote` bridge with API key (example shown above in **Method 2**).
+For job applications, see [Managing applications with MCP](/guides/managing-applications-with-mcp).
 
-## External references
+## Tools
 
-- [Cursor MCP docs](https://cursor.sh/docs/mcp)
-- [MCP quickstart for users (Claude Desktop example)](https://modelcontextprotocol.io/quickstart/user)
-- [OpenAI Codex MCP docs](https://developers.openai.com/codex/mcp)
-- [Claude custom connectors (remote MCP)](https://claude.com/docs/connectors/custom/remote-mcp)
-- [MCP Authorization spec](https://modelcontextprotocol.io/specification/latest/basic/authorization)
+The server keeps the original 43 tool names and adds API-derived tools for the remaining workflows. Each advertises input/output schemas, structured results and MCP annotations. Clients should use these hints to decide when to request confirmation; the server independently enforces authentication, permissions and ownership. Use `tools/list` or the server card for the current catalog.
 
-## Self-hosting
+### Resumes
 
-If you're running a self-hosted Reactive Resume instance, replace `https://rxresu.me/mcp` with your instance URL:
+| Tool                    | What it does                                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_resumes`          | Lists your resumes (ID, name, slug, tags, public and locked status, dates). Filter by `tags`, sort by `lastUpdatedAt`, `createdAt` or `name`.                 |
+| `list_resume_tags`      | Lists every tag used across your resumes.                                                                                                                     |
+| `read_resume`           | Returns full data, with ID, name and `updatedAt` in `structuredContent`.                                                                                      |
+| `download_resume_pdf`   | Returns a signed PDF download link that expires in 10 minutes.                                                                                                |
+| `create_resume`         | Creates a resume with a `name` and `slug`, empty or with sample content (`withSampleData`).                                                                   |
+| `import_resume`         | Creates a resume from a full resume data object, such as a JSON export.                                                                                       |
+| `duplicate_resume`      | Copies a resume under a new `name` and `slug`.                                                                                                                |
+| `apply_resume_patch`    | Changes content with JSON Patch; supply `expectedUpdatedAt` from `read_resume` to reject stale edits. See [Using the patch API](/guides/using-the-patch-api). |
+| `update_resume`         | Changes the name, slug, tags or public setting, and returns the public address. Use `api_resume_set_password` for passwords.                                  |
+| `delete_resume`         | Moves a resume to Trash, where it stays for 30 days.                                                                                                          |
+| `lock_resume`           | Locks a resume so it can't be edited or deleted.                                                                                                              |
+| `unlock_resume`         | Unlocks a resume.                                                                                                                                             |
+| `get_resume_statistics` | Returns view and download counts, and when the resume was last viewed and downloaded.                                                                         |
+
+### Cover letters
+
+| Tool                         | What it does                                                                                                          |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `list_cover_letters`         | Lists your cover letters. Filter by name (`search`), `resumeId` or `applicationId`.                                   |
+| `read_cover_letter`          | Returns one letter, including its `revision`.                                                                         |
+| `create_cover_letter`        | Creates a letter, optionally linked to a resume (for its sender details and design) or an application.                |
+| `update_cover_letter`        | Changes a letter's text, recipient, template or links. Needs the latest `revision` as `expectedRevision`.             |
+| `refresh_cover_letter_style` | Copies the sender details and design from a resume, keeping the letter's text and template. Needs `expectedRevision`. |
+| `duplicate_cover_letter`     | Copies a letter.                                                                                                      |
+| `delete_cover_letter`        | Moves a letter to Trash for 30 days. Needs `expectedRevision`.                                                        |
+| `export_cover_letter`        | Returns a letter as versioned cover-letter JSON.                                                                      |
+| `import_cover_letter`        | Creates a letter from cover-letter JSON produced by `export_cover_letter`.                                            |
+
+### Applications
+
+| Tool                                | What it does                                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `list_applications`                 | Lists your applications with contacts, documents and timeline. Filter by stage (`status`) or `tags`.                                       |
+| `read_application`                  | Returns one application in full.                                                                                                           |
+| `list_application_tags`             | Lists every tag used across applications.                                                                                                  |
+| `get_application_stats`             | Counts applications by stage and source.                                                                                                   |
+| `create_application`                | Creates an application. `company` and `role` are required.                                                                                 |
+| `update_application`                | Changes fields, moves the stage, edits contacts, follow-up and tags, or links a resume and letter. Lists you send replace the old ones.    |
+| `add_application_note`              | Adds a note to the activity timeline.                                                                                                      |
+| `add_application_interview`         | Schedules an interview (`screening`, `technical`, `behavioral`, `onsite` or `other`).                                                      |
+| `update_application_interview`      | Reschedules or edits an interview.                                                                                                         |
+| `update_application_timeline_entry` | Changes the date of a stage or note entry, or a note's text.                                                                               |
+| `delete_application_timeline_entry` | Deletes a note, an interview or an older stage entry.                                                                                      |
+| `delete_application`                | Permanently deletes an application and the PDFs uploaded to it.                                                                            |
+| `bulk_update_applications`          | Moves several applications to a stage or adds tags to them.                                                                                |
+| `bulk_delete_applications`          | Permanently deletes several applications.                                                                                                  |
+| `import_applications`               | Creates up to 500 applications from parsed rows.                                                                                           |
+| `attach_application_document`       | Attaches a PDF using bounded inline base64 or an owned storage reference (up to 10 MiB).                                                   |
+| `remove_application_document`       | Removes an attached PDF.                                                                                                                   |
+| `autofill_application_from_job`     | Reads a pasted job posting with your AI provider and suggests company, role, location and salary.                                          |
+| `score_application_match`           | Scores the linked resume against the job description with your AI provider.                                                                |
+| `tailor_resume_for_application`     | Makes a private copy of the linked resume with a summary rewritten for the job by your AI provider, and links the copy to the application. |
+| `draft_application_message`         | Drafts a cover letter (saved as a new letter) or a recruiter follow-up with your AI provider.                                              |
+
+The last four tools send data to the AI provider you set up in Reactive Resume and need a tested default provider. See [Connecting an AI provider](/guides/using-ai).
+
+### Additional API workflows
+
+Additional tools use `api_` followed by the API router path in snake case. Inputs come from the same validated contracts as the API. Existing tool names remain available.
+
+| Area                       | Examples                                                                                       | Coverage                                                                                                                  |
+| -------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Resume history and sharing | `api_resume_list_versions`, `api_resume_restore_version`, `api_resume_set_password`            | List/read/create/rename/delete/restore versions; passwords, slug availability, public reads and daily statistics          |
+| Letter history and drafts  | `api_cover_letters_get_version`, `api_cover_letters_draft`                                     | All version actions; draft, shorter and personal variants; existing update tool accepts complete style fields             |
+| Document library           | `api_documents_list`, `api_documents_copy_for_job`, `api_documents_purge_expired`              | Counts, names, tags, locks, application links, Trash, restore, permanent deletion and expired Trash cleanup               |
+| Files and exports          | `api_rest_document_exports_resume`, `api_rest_document_exports_letter`, `api_rest_file_upload` | PDF, DOCX, Markdown and JSON exports; file upload/delete and supported file imports                                       |
+| Checks and AI              | `api_rest_check_resume`, `api_rest_check_pdf`, `api_rest_match_resume`, `api_ai_improve`       | Deterministic checks and matching; PDF/DOCX parsing, qualitative review, line rewrites, job search and posting extraction |
+| Assistant                  | `api_agent_threads_start`, `api_agent_messages_send`, `api_agent_attachments_create`           | Threads, messages, cancellation, resumable replies, proposed edit status and attachments                                  |
+| Account and instance       | `api_auth_export_data`, `api_auth_delete_account`, `api_flags_get`                             | Account export, browser handoff for account deletion, enabled auth providers and platform statistics                      |
+| Integrations               | `api_ai_providers_list`, `api_web_access_status`                                               | Provider list/test/delete and web connection status/test/delete; credential entry uses browser handoffs                   |
+
+Resume and letter exports return authenticated REST URLs. Download with your existing credentials or open in your signed-in browser. Letter localization words are encoded in the URL. No generated file is permanently copied into storage by the export tool.
+
+Lists default to 20 results and accept `limit` (up to 100) and `offset`; continue paging until no more results. Array results use `{ items: [...] }` in `structuredContent`. Scalar results use `{ result: ... }`. Dates use ISO 8601. Resume edits can use optimistic concurrency with `expectedUpdatedAt`; letter edits require `expectedRevision`. After a conflict, reread before retrying.
+
+Document listing never deletes expired Trash. Run `api_documents_purge_expired` explicitly to permanently remove documents trashed more than 30 days ago. Individual permanent deletion requires moving the document to Trash first.
+
+### File limits and references
+
+The Streamable HTTP JSON request limit is 4 MiB. Inline base64 is limited to 3 MiB of encoded text (approximately 2.25 MiB of file bytes), leaving space for JSON metadata. Larger files use an owned `storagePath` returned by the REST file upload or assistant attachment endpoint:
 
 ```json
 {
-  "url": "https://resume.example.com/mcp",
-  "headers": {
-    "x-api-key": "your-api-key"
+  "file": {
+    "name": "resume.pdf",
+    "contentType": "application/pdf",
+    "storagePath": "uploads/YOUR_USER_ID/pictures/FILE_ID.pdf"
   }
 }
 ```
 
-### Reconnecting after the OAuth provider upgrade
+The server reads storage directly and verifies the account prefix and path segments. External URLs and other users' files cannot be used as references. The API still validates each operation's file type and size: ordinary uploads/imports and application PDFs allow 10 MiB, PDF checking allows 25,000,000 bytes, and assistant attachments allow 25 MiB. Upload larger assistant attachments through their REST endpoint before referencing them. Small application attachments use `fileName`, `contentType`, and either `dataBase64` or `storagePath`.
 
-Self-hosted instances automatically apply the additive OAuth schema migration at startup. This preserves existing client and token records and adds the provider's resource and client-resource tables.
+### Browser and streaming workflows
 
-Clients registered before OAuth provider 1.7 do not have per-resource grants. Remove the old connection from your MCP client and add it again so it dynamically registers a new client, then sign in again. Refreshing an existing token does not create these grants. New registrations receive only the resources configured for this instance; existing clients are not automatically granted access.
+`open_account_settings` opens profile, security, API keys, preferences or account settings. Provider creation/update and web credential entry return their authenticated settings page. Account deletion, password changes, passkeys, two-factor authentication and provider credentials require user interaction in that browser. Browser preferences, local undo and document selection remain browser workflows; durable edits and history are available through MCP.
 
-## Available tools
+MCP is stateless and accepts POST requests with JSON responses. GET/DELETE return 405; there is no standalone SSE subscription. Draft/message streams are collected up to 500,000 characters; `truncated` identifies longer responses. Read the assistant thread for persisted replies. `api_resume_updates_subscribe` returns an owned snapshot; poll its `updatedAt` for changes. `api_resume_verify_password` returns a resource cookie capability; pass it as `resourceCookie` to `api_resume_get_by_slug`. It expires server-side after ten minutes and cannot authenticate an account.
 
-Tool names use canonical unprefixed `snake_case` names.
+The installed SDK uses its supported MCP 1.x protocol negotiation, including `2025-11-25`. Protocol revisions beyond that require a separate SDK/compatibility upgrade; this server does not claim support for untested future versions.
 
-| Tool                    | Description                                                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `list_resumes`          | List all resumes with IDs, names, tags, and status. Supports filtering by tags and sorting by last updated, creation date, or name |
-| `list_resume_tags`      | List every distinct tag in use across your resumes (sorted)                                                                        |
-| `read_resume`           | Get the full data of a specific resume by ID                                                                                       |
-| `download_resume_pdf`   | Create a 10-minute authenticated PDF download URL. Defaults to the resume; set `target: "cover-letter"` for its visible cover letter |
-| `create_resume`         | Create a new, empty resume with a name and slug. Optionally pre-fill with sample data                                              |
-| `import_resume`         | Create a resume from a full ResumeData JSON export (random name/slug). Large files may exceed client limits                        |
-| `duplicate_resume`      | Create a copy of an existing resume with a new name and slug                                                                       |
-| `apply_resume_patch`    | Apply JSON Patch (RFC 6902) operations to modify a resume's data                                                                   |
-| `update_resume`         | Update metadata only: name, slug, tags, `isPublic`. Returns canonical share URL; passwords are not managed via MCP                 |
-| `delete_resume`         | Permanently delete a resume and all associated files. **Irreversible**                                                             |
-| `lock_resume`           | Lock a resume to prevent edits, patches, and deletion                                                                              |
-| `unlock_resume`         | Unlock a previously locked resume to re-enable editing                                                                             |
-| `get_resume_statistics` | Get view and download statistics for a resume                                                                                      |
+Browser requests must use the configured application Origin; native clients normally omit Origin. Responses are private and uncached. Request/user rate limits supplement each API operation's own limits; signed PDF downloads share the renderer limit with REST exports.
 
-### Breaking change (tool names)
+## Prompts
 
-Older clients may refer to prefixed or dot-separated names. Those names are no longer registered; update automations and saved prompts to the canonical names above.
+Prompts are ready-made instructions your client can start from. Each takes a resume `id` and includes that resume and the schema.
 
-## Available resources
+| Prompt           | What it does                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `build_resume`   | Walks you through building a resume section by section.                                                  |
+| `improve_resume` | Suggests concrete improvements to wording, impact and structure.                                         |
+| `review_resume`  | Gives a structured critique with a scorecard and prioritized recommendations, without changing anything. |
 
-Resources follow MCP conventions: **static** items appear in `resources/list`; **parameterized** access is declared in `resources/templates/list` and read via `resources/read` once you know the ID.
+## Resources
 
-| Discovery                             | What you get                                                                                  |
-| ------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `resources/list`                      | Static resources only: currently **`resume://_meta/schema`** (ResumeData JSON Schema)        |
-| `resources/templates/list` | **`resume://{id}`**: template for reading full resume JSON by ID (not enumerated per resume) |
-| `list_resumes` (tool)      | **Primary way to discover resume IDs**; resumes are not listed as separate MCP resources     |
+| URI                     | Contents                                                                                                                |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `resume://_meta/schema` | The resume data JSON Schema, listed in `resources/list`. Clients use it to build valid patches.                         |
+| `resume://{id}`         | One resume's full data as JSON. This is a resource template (`resources/templates/list`); find IDs with `list_resumes`. |
 
-| URI                     | Description                                                              |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `resume://_meta/schema` | ResumeData JSON Schema; use for valid JSON Patch paths and value types  |
-| `resume://{id}`         | Full resume data as JSON; use an ID from `list_resumes`                 |
+Your instance also publishes a server card at `/.well-known/mcp/server-card.json` that summarizes the tools, prompts and resources, for clients that discover servers without connecting.
 
-### Breaking change (schema URI)
+## How authentication works
 
-The schema resource was previously `resume://schema`. It is now **`resume://_meta/schema`**. Update any saved prompts, automations, or client configs that referenced the old URI.
+This section is for client developers and self-hosters.
 
-### Static server card (`/.well-known/mcp/server-card.json`)
-
-`GET /.well-known/mcp/server-card.json` returns a JSON document ([SEP-1649](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1649)) with `serverInfo`, optional authentication metadata, and summaries of tools, resources, resource templates, and prompts. It is generated to match the live MCP server, and a client that cannot run a full capability scan against `/mcp/` can use it for discovery.
-
-## Available prompts
-
-Prompts are pre-built workflows that give the AI structured instructions and context. Each prompt embeds the resume data and the schema resource (`resume://_meta/schema`) automatically.
-
-| Prompt           | Description                                                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `build_resume`   | Guide you step-by-step through building a resume from scratch: basics, summary, experience, education, skills, and design                                   |
-| `improve_resume` | Review your resume and suggest concrete improvements to wording, impact, metrics, and structure                                                              |
-| `review_resume`  | Get a structured, professional critique with a scorecard (1–10 across seven dimensions) and prioritized recommendations. **Read-only**; no changes are made |
-
-## Usage examples
-
-Once your MCP client is connected, you can work with your resumes in natural language:
-
-### Browsing
-
-- "List my resumes"
-- "Show me my resume named 'Software Engineer'"
-- "What skills are listed on my resume?"
-- "Show me the stats for my resume"
-
-### Creating & Managing
-
-- "Create a new resume called 'Frontend Engineer 2026'"
-- "Import this exported ResumeData JSON as a new resume"
-- "What tags do I use across my resumes?"
-- "Duplicate my 'Software Engineer' resume for a product manager role"
-- "Make my resume public and give me the share link"
-- "Lock my finalized resume so it can't be accidentally edited"
-- "Delete my old draft resume"
-- "Download a PDF of my Software Engineer resume"
-- "Download the visible cover letter from my Software Engineer resume as a PDF"
-
-### Editing
-
-- "Update my name to Jane Doe"
-- "Change my headline to Senior Software Engineer"
-- "Add TypeScript to my skills with an Advanced proficiency level"
-- "Add a new experience entry for my role as Staff Engineer at Acme Corp from Jan 2024 to Present"
-- "Remove the third item from my skills section"
-
-### Styling
-
-- "Change the template to bronzor"
-- "Set the primary color to blue"
-- "Hide the interests section"
-
-### Using prompts
-
-- "Help me build my resume from scratch" (uses `build_resume`)
-- "Review my resume and give me a score" (uses `review_resume`)
-- "Improve the wording on my resume" (uses `improve_resume`)
-
-<Tip>
-  The AI reads your current resume with `read_resume` before making changes with `apply_resume_patch`, so it targets the
-  correct JSON paths. Use `update_resume` for name, slug, tags, and public visibility, not for section content.
-</Tip>
+- The server checks `x-api-key: <key>` first, then `Authorization: Bearer <token>`. MCP never accepts account session cookies. Invalid explicit credentials cannot borrow a browser session.
+- A request with neither gets `401` and a `WWW-Authenticate: Bearer resource_metadata="<instance>/.well-known/oauth-protected-resource"` header. OAuth clients use it to discover the authorization server.
+- Authorization server metadata is at `/.well-known/oauth-authorization-server`. The authorization server supports dynamic client registration and PKCE with `S256`.
+- New OAuth clients can request `api:read`, `api:write` and `api:delete`. The consent screen describes these permissions alongside identity scopes. Existing identity-only grants and legacy keys without permission statements retain account-wide access for compatibility.
+- The server checks the user, client, login session and consent grant on every authenticated request. Disabled clients, banned accounts, ended sessions and revoked grants cannot continue using signed tokens. Proof-bound DPoP tokens are rejected: this endpoint supports ordinary bearer access tokens.
+- Revoke a connection under Settings → AI & developer → Connected applications. Revoking the application grant invalidates existing access and refresh tokens. The authorization provider does not support revoking one self-contained JWT independently of its grant.
 
 ## Troubleshooting
 
-| Issue                                                         | Solution                                                                                                                       |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| "Unauthorized" with no login prompt                           | Your client may not support MCP OAuth discovery. Use API key mode (`x-api-key`)                                                |
-| OAuth login opens but fails redirect/callback                 | Confirm your client's MCP OAuth callback settings and retry the connection                                                     |
-| "API error (401)"                                             | Your API key is invalid or expired. Create a new one in **Settings → API Keys**                                                |
-| "API error (404)"                                             | The resume ID doesn't exist. Use `list_resumes` to find valid IDs                                                             |
-| "API error (403)"                                             | The resume is locked. Unlock it in the Reactive Resume dashboard                                                               |
-| Connection refused                                            | Check that the URL is correct and the instance is running                                                                      |
-| "ReferenceError: File is not defined" when using `mcp-remote` | You're running Node.js 18. `mcp-remote` requires **Node.js 20 or later** — upgrade with `nvm use 20` or `nvm alias default 20` |
+| Problem                                                       | What to do                                                                                            |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| "Unauthorized" and no sign-in window                          | Your client doesn't support MCP OAuth. Connect with an API key.                                       |
+| The sign-in window says the request is invalid or has expired | Start the connection again from your client.                                                          |
+| `401` with an API key                                         | The key is wrong, revoked or expired. Create a new one in **Settings** → **AI & developer**.          |
+| A tool says the resume is locked                              | Unlock it in the app, or ask the client to run `unlock_resume`.                                       |
+| A tool says an ID wasn't found                                | Ask the client to list resumes, letters or applications first to get valid IDs.                       |
+| An edit to dates doesn't stick                                | The client changed the `period` or `date` text. Ask it to write the `dates` object instead.           |
+| A tool rejects a large file                                   | Upload through the REST file/attachment endpoint and pass an owned storage reference.                 |
+| A self-hosted connection made before an upgrade stops working | Remove the server from your client and add it again, so it registers afresh and you approve it again. |
+
+## Related guides
+
+- [Managing applications with MCP](/guides/managing-applications-with-mcp): prompts for tracking your job search from an AI client.
+- [Using the patch API](/guides/using-the-patch-api): how resume edits are expressed.
+- [Using the API](/guides/using-the-api): API keys and the REST API.

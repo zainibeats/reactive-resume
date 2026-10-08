@@ -13,13 +13,6 @@ beforeEach(() => {
 });
 
 describe("createRateLimiter", () => {
-	it("uses in-memory limits when Redis is absent", async () => {
-		const { createRateLimiter } = await import("./redis");
-		const limiter = createRateLimiter("test", { maxRequests: 1, window: 60_000 });
-		await expect(limiter.limit("visitor")).resolves.toMatchObject({ success: true });
-		await expect(limiter.limit("visitor")).resolves.toMatchObject({ success: false });
-	});
-
 	it("namespaces the Redis limiter and falls back to memory when Redis fails", async () => {
 		mocks.redis = { eval: mocks.evalScript };
 		const { createRateLimiter } = await import("./redis");

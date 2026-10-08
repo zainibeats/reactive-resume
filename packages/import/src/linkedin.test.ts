@@ -1,4 +1,4 @@
-// biome-ignore-all lint/style/noNonNullAssertion: These tests assert imported section lengths before inspecting the first item.
+// oxlint-disable typescript/no-non-null-assertion -- These tests assert imported section lengths before inspecting the first item.
 import { describe, expect, it } from "vitest";
 import { zipSync } from "fflate";
 import { parseLinkedInExport } from "./linkedin";
@@ -11,10 +11,6 @@ function makeZip(files: Record<string, string>): Uint8Array {
 }
 
 describe("parseLinkedInExport", () => {
-	it("throws when the file is not a valid ZIP", () => {
-		expect(() => parseLinkedInExport(new Uint8Array([1, 2, 3]))).toThrow(/ZIP archive/);
-	});
-
 	it("throws when the ZIP has none of the expected LinkedIn CSVs", () => {
 		const zip = makeZip({ "Random.csv": "a,b\n1,2\n" });
 		expect(() => parseLinkedInExport(zip)).toThrow(/doesn't look like a LinkedIn data export/);
@@ -45,6 +41,7 @@ describe("parseLinkedInExport", () => {
 		expect(item.company).toBe("Acme");
 		expect(item.position).toBe("Engineer");
 		expect(item.period).toBe("January 2020 - December 2022");
+		expect(item.dates).toEqual({ start: "2020-01", end: "2022-12", present: false });
 		expect(item.description).toBe("<p>Built stuff</p>");
 	});
 
@@ -56,6 +53,7 @@ describe("parseLinkedInExport", () => {
 		const result = parseLinkedInExport(zip);
 		expect(result.sections.experience.items).toHaveLength(1);
 		expect(result.sections.experience.items[0]!.period).toBe("January 2020 - Present");
+		expect(result.sections.experience.items[0]!.dates).toEqual({ start: "2020-01", end: null, present: true });
 	});
 
 	it("skips positions without a company name", () => {
@@ -123,7 +121,10 @@ describe("parseLinkedInExport", () => {
 			"Positions.csv": "Company Name,Started On,Finished On\nAcme,Jan 2020,2021-06-30\n",
 		});
 
-		expect(parseLinkedInExport(zip).sections.experience.items[0]!.period).toBe("January 2020 - 2021-06-30");
+		const [item] = parseLinkedInExport(zip).sections.experience.items;
+		expect(item!.period).toBe("January 2020 - 2021-06-30");
+		// An end cell it couldn't read leaves the text to be read, and flagged, when saved.
+		expect(item!.dates).toBeUndefined();
 	});
 
 	it("reads headers behind a UTF-8 byte order mark", () => {

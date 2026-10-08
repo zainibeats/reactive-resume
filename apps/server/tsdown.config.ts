@@ -8,8 +8,20 @@ const rootPackageJson = JSON.parse(readFileSync(new URL("../../package.json", im
 	version?: string;
 };
 
-// Lambda disables require(ESM) and uses stricter CJS export detection than standalone Node.
+// Lambda disables require(ESM) and uses stricter CJS export detection than standalone Node. Vercel's service builder
+// also loads external CommonJS packages through pnpm links it leaves out of the Function, so CommonJS dependencies
+// (ioredis, react-reconciler) are bundled together with their own dependencies.
 const bundledInteropPackages = new Set([
+	"ioredis",
+	"@ioredis/commands",
+	"cluster-key-slot",
+	"debug",
+	"ms",
+	"denque",
+	"redis-errors",
+	"standard-as-callback",
+	"react-reconciler",
+	"scheduler",
 	"@uiw/color-convert",
 	"@babel/runtime",
 	"sanitize-html",
@@ -29,15 +41,24 @@ const bundledInteropPackages = new Set([
 	"source-map-js",
 	"launder",
 	"dayjs",
+	"wink-porter2-stemmer",
 ]);
 
-const shouldExternalizeThirdParty = (id: string) => {
-	const packageName = id
+const packageNameOf = (id: string) =>
+	id
 		.split("/")
 		.slice(0, id.startsWith("@") ? 2 : 1)
 		.join("/");
-	if (id.startsWith("@reactive-resume/") || bundledInteropPackages.has(packageName)) return false;
-	if (id.startsWith("@/") || id.startsWith(".") || id.startsWith("/") || id.startsWith("\0")) return false;
+
+// Matches subpath imports too, such as `react-reconciler/constants.js`.
+const shouldBundle = (id: string) =>
+	id.startsWith("@reactive-resume/") || bundledInteropPackages.has(packageNameOf(id));
+
+const shouldExternalizeThirdParty = (id: string) => {
+	if (shouldBundle(id)) return false;
+	// Subpath imports (`#…`) are resolved by the workspace package that declares them, so they're bundled with it.
+	if (id.startsWith("@/") || id.startsWith("#") || id.startsWith(".") || id.startsWith("/") || id.startsWith("\0"))
+		return false;
 
 	return true;
 };
@@ -60,7 +81,12 @@ const promptAssetsPlugin: TsdownPlugin = {
 };
 
 export default defineConfig({
-	entry: { index: "src/index.ts", vercel: "src/vercel.ts", "prepare-deployment": "src/prepare-deployment.ts" },
+	entry: {
+		index: "src/index.ts",
+		vercel: "src/vercel.ts",
+		"prepare-deployment": "src/prepare-deployment.ts",
+		"migrate-legacy-styles": "src/migrate-legacy-styles.ts",
+	},
 	// Keep import.meta.url-based asset lookup adjacent to the entrypoints.
 	outputOptions: { chunkFileNames: "[name]-[hash].mjs" },
 	format: "esm",
@@ -76,7 +102,7 @@ export default defineConfig({
 	suppressWarnings: [/dynamic import will not move module into another chunk/],
 	outExtensions: () => ({ js: ".mjs" }),
 	deps: {
-		alwaysBundle: [/^@reactive-resume\//, ...bundledInteropPackages],
+		alwaysBundle: shouldBundle,
 		neverBundle: shouldExternalizeThirdParty,
 	},
 	plugins: [promptAssetsPlugin],

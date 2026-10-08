@@ -118,6 +118,8 @@ const normalizeParagraphIndentation = (root: ReturnType<typeof parse>, direction
 		const style = (element.getAttribute("style") ?? "").replace(/(?:^|;)\s*margin-inline-start\s*:[^;]*(?:;|$)/gi, ";");
 		const level = Number(element.getAttribute("data-indent"));
 		const insideList = element.closest("li") !== null;
+		// A list item sets its own inset: a paragraph's indent inside one is dropped, pseudo-bullets included.
+		if (insideList) element.removeAttribute("data-indent");
 		const indent =
 			!insideList && Number.isInteger(level) && level > 0 && level <= 8
 				? `margin-${direction === "rtl" ? "right" : "left"}: ${level * 18}pt`

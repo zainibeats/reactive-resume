@@ -1,35 +1,40 @@
 import type * as React from "react";
-import { CheckIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { Command as CommandPrimitive } from "cmdk";
-import { InputGroup, InputGroupAddon } from "@reactive-resume/ui/components/input-group";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { cn } from "@reactive-resume/utils/style";
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
 	return (
 		<CommandPrimitive
 			data-slot="command"
-			className={cn(
-				"flex size-full flex-col overflow-hidden rounded-xl! bg-popover p-1 text-popover-foreground",
-				className,
-			)}
+			className={cn("flex size-full flex-col overflow-hidden bg-raised text-ink", className)}
 			{...props}
 		/>
 	);
 }
 
-function CommandInput({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Input>) {
+type CommandInputProps = React.ComponentProps<typeof CommandPrimitive.Input> & {
+	/** Shown at the end of the search row, e.g. an "esc" key hint. */
+	hint?: React.ReactNode;
+};
+
+/** The 52px search row of the command bar. */
+function CommandInput({ className, hint, ...props }: CommandInputProps) {
 	return (
-		<div data-slot="command-input-wrapper" className="p-1 pb-0">
-			<InputGroup className="h-9! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:ps-2!">
-				<CommandPrimitive.Input
-					data-slot="command-input"
-					className={cn("w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50", className)}
-					{...props}
-				/>
-				<InputGroupAddon>
-					<MagnifyingGlassIcon className="size-4 shrink-0 opacity-50" />
-				</InputGroupAddon>
-			</InputGroup>
+		<div
+			data-slot="command-input-wrapper"
+			className="flex h-[52px] shrink-0 items-center gap-3 border-b border-line px-4"
+		>
+			<Icon name="search" className="text-ink-3" />
+			<CommandPrimitive.Input
+				data-slot="command-input"
+				className={cn(
+					"h-full w-full bg-transparent text-[15px] text-ink outline-hidden placeholder:text-ink-3 focus-visible:outline-none disabled:cursor-not-allowed",
+					className,
+				)}
+				{...props}
+			/>
+			{hint}
 		</div>
 	);
 }
@@ -38,7 +43,10 @@ function CommandList({ className, ...props }: React.ComponentProps<typeof Comman
 	return (
 		<CommandPrimitive.List
 			data-slot="command-list"
-			className={cn("no-scrollbar max-h-72 scroll-py-1 overflow-y-auto overflow-x-hidden outline-none", className)}
+			className={cn(
+				"no-scrollbar max-h-[min(420px,60svh)] scroll-py-1.5 overflow-x-hidden overflow-y-auto p-1.5 outline-none",
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -48,7 +56,7 @@ function CommandEmpty({ className, ...props }: React.ComponentProps<typeof Comma
 	return (
 		<CommandPrimitive.Empty
 			data-slot="command-empty"
-			className={cn("py-6 text-center text-sm", className)}
+			className={cn("py-8 text-center text-sm text-ink-3", className)}
 			{...props}
 		/>
 	);
@@ -59,7 +67,7 @@ function CommandGroup({ className, ...props }: React.ComponentProps<typeof Comma
 		<CommandPrimitive.Group
 			data-slot="command-group"
 			className={cn(
-				"overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-xs",
+				"overflow-hidden text-ink **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:pt-2.5 **:[[cmdk-group-heading]]:pb-1 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-ink-3",
 				className,
 			)}
 			{...props}
@@ -71,38 +79,41 @@ function CommandSeparator({ className, ...props }: React.ComponentProps<typeof C
 	return (
 		<CommandPrimitive.Separator
 			data-slot="command-separator"
-			className={cn("-mx-1 h-px bg-border", className)}
+			className={cn("-mx-1.5 my-1.5 h-px bg-line", className)}
 			{...props}
 		/>
 	);
 }
 
+/** A 40px row; the selected row is sunken and shows a ↵ hint unless the row has its own shortcut. */
 function CommandItem({ className, children, ...props }: React.ComponentProps<typeof CommandPrimitive.Item>) {
 	return (
 		<CommandPrimitive.Item
 			data-slot="command-item"
 			className={cn(
-				"group/command-item relative flex cursor-default select-none items-center gap-2 in-data-[slot=dialog-content]:rounded-lg! rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-selected:bg-muted data-selected:text-foreground data-[disabled=true]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-selected:*:[svg]:text-foreground",
+				"group/command-item relative flex h-10 cursor-default items-center gap-3 rounded-md px-3 text-sm text-ink outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:text-ink-3 data-selected:bg-sunken [&_[data-slot=icon]]:text-ink-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 				className,
 			)}
 			{...props}
 		>
 			{children}
-			<CheckIcon className="ms-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
+			<Icon
+				name="check"
+				className="ms-auto hidden text-accent-text! group-data-[checked=true]/command-item:inline-block"
+			/>
+			<span
+				aria-hidden="true"
+				className="ms-auto hidden font-mono text-xs text-ink-3 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:hidden group-data-selected/command-item:inline"
+			>
+				↵
+			</span>
 		</CommandPrimitive.Item>
 	);
 }
 
 function CommandShortcut({ className, ...props }: React.ComponentProps<"span">) {
 	return (
-		<span
-			data-slot="command-shortcut"
-			className={cn(
-				"ms-auto text-muted-foreground text-xs tracking-widest group-data-selected/command-item:text-foreground",
-				className,
-			)}
-			{...props}
-		/>
+		<span data-slot="command-shortcut" className={cn("ms-auto font-mono text-xs text-ink-3", className)} {...props} />
 	);
 }
 
@@ -111,6 +122,7 @@ export {
 	CommandEmpty,
 	CommandGroup,
 	CommandInput,
+	type CommandInputProps,
 	CommandItem,
 	CommandList,
 	CommandSeparator,

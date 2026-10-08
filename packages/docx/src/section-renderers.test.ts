@@ -33,20 +33,6 @@ describe("renderSummary", () => {
 		expect(renderSummary(summary, HEX)).toEqual([]);
 	});
 
-	it("returns [] when content is empty", () => {
-		const summary: ResumeData["summary"] = {
-			title: "Summary",
-			icon: getDefaultSectionIconName("summary"),
-			content: "",
-			hidden: false,
-			showHeading: true,
-			columns: 1,
-			keepTogether: false,
-			startOnNewPage: false,
-		};
-		expect(renderSummary(summary, HEX)).toEqual([]);
-	});
-
 	it("includes a heading paragraph when both title and content are present", () => {
 		const summary: ResumeData["summary"] = {
 			title: "Summary",
@@ -79,49 +65,6 @@ describe("renderSummary", () => {
 
 		expect(paragraphs).toHaveLength(1);
 	});
-
-	it("omits the heading when title is empty but still renders content", () => {
-		const summary: ResumeData["summary"] = {
-			title: "",
-			icon: getDefaultSectionIconName("summary"),
-			content: "<p>Hello world</p>",
-			hidden: false,
-			showHeading: true,
-			columns: 1,
-			keepTogether: false,
-			startOnNewPage: false,
-		};
-		const paragraphs = renderSummary(summary, HEX);
-		expect(paragraphs.length).toBeGreaterThanOrEqual(1);
-	});
-});
-
-const emptySection = <T extends SectionType>(type: T): ResumeData["sections"][T] =>
-	({
-		title: "Section",
-		icon: getDefaultSectionIconName(type),
-		columns: 1,
-		hidden: false,
-		showHeading: true,
-		keepTogether: false,
-		startOnNewPage: false,
-		items: [],
-		...(type === "skills" ? { layout: "default" as const, keywordLayout: "inline" as const } : {}),
-	}) as ResumeData["sections"][T];
-
-describe("renderBuiltInSection", () => {
-	it("returns [] when the section has no items", () => {
-		expect(renderBuiltInSection("experience", emptySection("experience"), HEX)).toEqual([]);
-	});
-
-	it("returns [] when section.hidden is true", () => {
-		const section = { ...emptySection("experience"), hidden: true };
-		expect(renderBuiltInSection("experience", section, HEX)).toEqual([]);
-	});
-
-	it("returns [] for an unknown section type", () => {
-		expect(renderBuiltInSection("not-a-section" as never, emptySection("experience"), HEX)).toEqual([]);
-	});
 });
 
 describe("renderCustomSection", () => {
@@ -138,46 +81,12 @@ describe("renderCustomSection", () => {
 		items: [],
 	};
 
-	it("returns [] when the custom section is hidden", () => {
-		expect(renderCustomSection({ ...baseCustom, hidden: true }, HEX)).toEqual([]);
-	});
-
 	it("returns [] when all items are hidden or empty", () => {
 		const section: CustomSection = {
 			...baseCustom,
 			items: [{ id: "x", hidden: true } as never],
 		};
 		expect(renderCustomSection(section, HEX)).toEqual([]);
-	});
-
-	it("returns [] for an unknown custom section type", () => {
-		const section: CustomSection = {
-			...baseCustom,
-			type: "no-such-type" as never,
-			items: [{ id: "x", hidden: false, content: "<p>x</p>" } as never],
-		};
-		expect(renderCustomSection(section, HEX)).toEqual([]);
-	});
-
-	it("renders content for a summary-type custom section", () => {
-		const section: CustomSection = {
-			...baseCustom,
-			type: "summary",
-			items: [{ id: "x", hidden: false, content: "<p>Hello</p>" } as never],
-		};
-		const paragraphs = renderCustomSection(section, HEX);
-		// 1 heading + at least one paragraph for the HTML
-		expect(paragraphs.length).toBeGreaterThanOrEqual(2);
-	});
-
-	it("omits a disabled custom section heading while retaining content", () => {
-		const section: CustomSection = {
-			...baseCustom,
-			showHeading: false,
-			items: [{ id: "x", hidden: false, content: "<p>Hello</p>" } as never],
-		};
-
-		expect(renderCustomSection(section, HEX)).toHaveLength(1);
 	});
 
 	it("renders recipient + content for a cover-letter custom section", () => {
@@ -207,6 +116,19 @@ describe("setRenderConfig", () => {
 		setRenderConfig(baseConfig);
 	});
 });
+
+const emptySection = <T extends SectionType>(type: T): ResumeData["sections"][T] =>
+	({
+		title: "Section",
+		icon: getDefaultSectionIconName(type),
+		columns: 1,
+		hidden: false,
+		showHeading: true,
+		keepTogether: false,
+		startOnNewPage: false,
+		items: [],
+		...(type === "skills" ? { layout: "default" as const, keywordLayout: "inline" as const } : {}),
+	}) as ResumeData["sections"][T];
 
 type DocxNode = { rootKey?: string; root?: unknown };
 

@@ -1,12 +1,10 @@
-import type { Completion, CompletionContext, CompletionResult, CompletionSource } from "@codemirror/autocomplete";
-import type { Diagnostic } from "@codemirror/lint";
-import type { EditorState, Extension } from "@codemirror/state";
-import type { DecorationSet, EditorView as EditorViewType, ViewUpdate } from "@codemirror/view";
-import type { SemanticCssDiagnostic, SemanticNode } from "@reactive-resume/resume/stylesheet/registry";
 import type { SemanticCssColorToken } from "./color-tokens";
 import type { SemanticCssEditorMetadata } from "./protocol";
+import type { Completion, CompletionContext, CompletionResult, CompletionSource } from "@codemirror/autocomplete";
+import type { EditorState, Extension } from "@codemirror/state";
+import type { DecorationSet, EditorView as EditorViewType, ViewUpdate } from "@codemirror/view";
+import type { SemanticNode } from "@reactive-resume/resume/stylesheet/registry";
 import { autocompletion } from "@codemirror/autocomplete";
-import { linter, lintGutter } from "@codemirror/lint";
 import { search, searchKeymap } from "@codemirror/search";
 import { Decoration, EditorView, hoverTooltip, keymap, ViewPlugin, WidgetType } from "@codemirror/view";
 import {
@@ -20,7 +18,7 @@ import {
 
 export type SemanticCssColorSelection = (token: SemanticCssColorToken, rect: DOMRect) => void;
 
-const directives = ["@media", "@version 1;"] as const;
+const directives = ["@media"] as const;
 
 function walk(root: SemanticNode): SemanticNode[] {
 	const nodes: SemanticNode[] = [];
@@ -44,7 +42,8 @@ function selectorLabels(metadata: SemanticCssEditorMetadata): string[] {
 		...new Set([
 			...SEMANTIC_NODE_KINDS,
 			"*",
-			...nodes.flatMap((node) => (node.id ? [`#${escapeCssIdentifier(node.id)}`] : [])),
+			// Readable IDs only (section types): entries' UUIDs escape to `#\30 19b…`; they're offered by name instead.
+			...nodes.flatMap((node) => (node.id && escapeCssIdentifier(node.id) === node.id ? [`#${node.id}`] : [])),
 			...attributes.map((attribute) => `[${escapeCssIdentifier(attribute)}]`),
 			...nodes.flatMap((node) =>
 				Object.entries(node.attributes).map(
@@ -118,18 +117,7 @@ function completionLabels(source: string, position: number, metadata: SemanticCs
 	}
 }
 
-export function getSemanticCssCompletionLabels(
-	source: string,
-	position: number,
-	metadata: SemanticCssEditorMetadata,
-): readonly string[] {
-	return completionLabels(source, position, metadata);
-}
-
-export function getSemanticCssHoverDocumentation(
-	label: string,
-	metadata: SemanticCssEditorMetadata,
-): string | undefined {
+function getSemanticCssHoverDocumentation(label: string, metadata: SemanticCssEditorMetadata): string | undefined {
 	const semantic = SEMANTIC_REGISTRY_V1[label as keyof typeof SEMANTIC_REGISTRY_V1];
 	if (semantic) {
 		return `Semantic element ${label}. Attributes: ${semantic.attributes.join(", ") || "none"}. Roles: ${semantic.roles.join(", ") || "none"}.`;
@@ -146,19 +134,6 @@ export function getSemanticCssHoverDocumentation(
 	const part = label.match(/^template-part\[name="(.+)"\]$/)?.[1] ?? label;
 	if (metadata.templateParts.includes(part)) return `Current template part ${part}.`;
 	return;
-}
-
-export function mapCompilerDiagnostics(
-	docLength: number,
-	diagnostics: readonly SemanticCssDiagnostic[],
-): readonly Diagnostic[] {
-	return diagnostics.map(({ message, severity, range, code }) => ({
-		from: Math.max(0, Math.min(docLength, range.start.offset)),
-		to: Math.max(0, Math.min(docLength, Math.max(range.start.offset, range.end.offset))),
-		severity,
-		message,
-		source: code,
-	}));
 }
 
 export function compositionAwareDocumentListener(
@@ -194,6 +169,9 @@ function completionSource(metadata: SemanticCssEditorMetadata): CompletionSource
 			label,
 			type: label.startsWith("@") ? "keyword" : label.startsWith("#") || label.includes("[") ? "text" : "property",
 		}));
+		if (completionKind(source, context.pos) === "selector")
+			for (const target of metadata.targets ?? [])
+				options.push({ label: target.label, apply: target.selector, detail: target.selector, type: "class", boost: 1 });
 		return { from: word?.from ?? context.pos, options, validFor: /[-_@#a-zA-Z0-9]*/ };
 	};
 }
@@ -309,7 +287,6 @@ function colorExtension(tokens: readonly SemanticCssColorToken[], onSelect: Sema
 
 export function createSemanticCssEditorExtensions(input: {
 	metadata: SemanticCssEditorMetadata;
-	diagnostics: readonly SemanticCssDiagnostic[];
 	colorTokens: readonly SemanticCssColorToken[];
 	onColorSelect: SemanticCssColorSelection;
 }): Extension {
@@ -318,10 +295,33 @@ export function createSemanticCssEditorExtensions(input: {
 		hoverExtension(input.metadata),
 		search({ top: true }),
 		keymap.of(searchKeymap),
-		lintGutter(),
-		linter((view) => mapCompilerDiagnostics(view.state.doc.length, input.diagnostics), { delay: 0 }),
 		colorExtension(input.colorTokens, input.onColorSelect),
 	];
+}
+
+/**
+ * Something picked on the page: move the cursor into its rule, adding one (under a comment naming it) when the
+ * stylesheet has none yet, and focus the editor.
+ */
+export function revealStyleRule(view: EditorViewType, target: { selector: string; label: string }): void {
+	const text = view.state.doc.toString();
+	const existing = text.indexOf(`${target.selector} {`);
+	if (existing >= 0) {
+		const open = text.indexOf("{", existing) + 1;
+		const indent = text.slice(open).match(/^\n\t*/)?.[0].length ?? 0;
+		view.dispatch({ selection: { anchor: open + indent }, scrollIntoView: true });
+	} else {
+		const gap = text.trim().length === 0 ? "" : text.endsWith("\n\n") ? "" : text.endsWith("\n") ? "\n" : "\n\n";
+		const block = `${gap}/* ${target.label.replaceAll("*/", "*\\/")} */\n${target.selector} {\n\t\n}\n`;
+		const start = text.trim().length === 0 ? 0 : text.length;
+		view.dispatch({
+			changes: { from: start, to: text.length, insert: block },
+			// Inside the empty rule, after its tab.
+			selection: { anchor: start + block.length - "\n}\n".length },
+			scrollIntoView: true,
+		});
+	}
+	view.focus();
 }
 
 export async function copySourceToClipboard(source: string): Promise<void> {

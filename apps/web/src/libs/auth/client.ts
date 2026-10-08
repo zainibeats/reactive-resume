@@ -15,16 +15,14 @@ export const authClient = createAuthClient({
 		twoFactorClient({
 			onTwoFactorRedirect() {
 				// Redirect to 2FA verification page
-				if (typeof window !== "undefined") {
-					const { callbackURL, reauthenticate } = authSearchSchema.parse({
-						reauthenticate: new URLSearchParams(window.location.search).get("reauthenticate") === "true",
-						callbackURL: new URLSearchParams(window.location.search).get("callbackURL"),
-					});
-					const search = callbackURL
-						? `?${new URLSearchParams({ callbackURL, ...(reauthenticate ? { reauthenticate: "true" } : {}) })}`
-						: "";
-					window.location.href = `/auth/verify-2fa${search}`;
-				}
+				const { callbackURL, reauthenticate } = authSearchSchema.parse({
+					reauthenticate: new URLSearchParams(window.location.search).get("reauthenticate") === "true",
+					callbackURL: new URLSearchParams(window.location.search).get("callbackURL"),
+				});
+				const search = callbackURL
+					? `?${new URLSearchParams({ callbackURL, ...(reauthenticate ? { reauthenticate: "true" } : {}) })}`
+					: "";
+				window.location.href = `/auth/verify-2fa${search}`;
 			},
 		}),
 		oauthProviderClient(),

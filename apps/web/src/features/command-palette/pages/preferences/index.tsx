@@ -1,6 +1,6 @@
 import { Trans } from "@lingui/react/macro";
-import { PaletteIcon, TranslateIcon } from "@phosphor-icons/react";
 import { CommandItem } from "@reactive-resume/ui/components/command";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { useCommandPaletteStore } from "../../store";
 import { BaseCommandGroup } from "../base";
 import { LanguageCommandPage } from "./language";
@@ -13,12 +13,12 @@ export function PreferencesCommandGroup() {
 		<>
 			<BaseCommandGroup heading={<Trans>Preferences</Trans>}>
 				<CommandItem onSelect={() => pushPage("theme")}>
-					<PaletteIcon />
+					<Icon name="palette" size={16} />
 					<Trans>Change theme to…</Trans>
 				</CommandItem>
 
 				<CommandItem onSelect={() => pushPage("language")}>
-					<TranslateIcon />
+					<Icon name="translate" size={16} />
 					<Trans>Change language to…</Trans>
 				</CommandItem>
 			</BaseCommandGroup>

@@ -45,7 +45,7 @@ Open `APP_URL` and create the owner account. The default stack runs:
 
 - the application on port 3000;
 - PostgreSQL for account and resume data;
-- Redis for AI assistant coordination;
+- Redis for shared rate limits and resumable assistant replies (optional on a single server);
 - local upload storage in `./data`.
 
 PostgreSQL and Redis data are kept in Docker volumes. Back up those volumes and `./data` together. SMTP, social login,
@@ -53,8 +53,9 @@ S3-compatible storage, and custom OAuth are optional and documented inline in `.
 
 ## AI assistant
 
-After signing in, open **Settings → Integrations** and add an AI provider. Provider credentials are encrypted using
-`ENCRYPTION_SECRET`. The assistant is available inside the resume builder and works on the active resume.
+After signing in, open **Settings → AI & developer** and add an AI provider (local Ollama and LM Studio work without an API
+key). Provider credentials are encrypted using `ENCRYPTION_SECRET`. Open the assistant from the ✦ button in the resume
+editor; it works on the open document and proposes edits for you to accept or reject.
 
 No AI provider is required for the core resume workflow.
 
@@ -69,8 +70,8 @@ sudo docker compose -f compose.dev.yml up -d postgres
 dotenvx run -f .env.local -- pnpm dev
 ```
 
-The application is available at `http://localhost:3000`. To use the AI assistant during local development, also start Redis
-with `sudo docker compose -f compose.dev.yml up -d redis` and set `REDIS_URL="redis://localhost:6379"` in `.env.local`.
+The application is available at `http://localhost:3000`. The AI assistant needs `ENCRYPTION_SECRET`; Redis is optional
+(`sudo docker compose -f compose.dev.yml up -d redis` with `REDIS_URL="redis://localhost:6379"` in `.env.local`).
 
 Common checks:
 

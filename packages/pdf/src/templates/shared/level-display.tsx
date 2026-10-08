@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
-import type { IconName } from "phosphor-icons-react-pdf/dynamic";
+import type { IconName } from "../../forme/icons";
+import type { Style } from "../../forme/style-types";
 import { resolveLevelDisplaySizes } from "@reactive-resume/schema/resume/level-display-sizes";
 import { View } from "#react-pdf-renderer";
 import { useRender } from "../../context";
@@ -11,7 +11,7 @@ import {
 	useSemanticNodeVisible,
 } from "../../semantic/context";
 import { semanticNodeKeys } from "../../semantic/node-keys";
-import { useSectionStyleRule, useTemplateIconSlot, useTemplateStyle } from "./context";
+import { useTemplateIconSlot, useTemplateStyle } from "./context";
 import { resolveStyleFontSize } from "./icon-size";
 import { getTemplateMetrics } from "./metrics";
 import { Icon } from "./primitives";
@@ -37,12 +37,9 @@ export const LevelDisplay = ({ level }: LevelDisplayProps) => {
 	const levelItemStyle = useTemplateStyle("levelItem");
 	const levelItemActiveStyle = useTemplateStyle("levelItemActive");
 	const levelItemInactiveStyle = useTemplateStyle("levelItemInactive");
-	const iconRuleStyle = useSectionStyleRule("icon");
-	const levelRuleStyle = useSectionStyleRule("level");
 	const { decorationSize, levelIconExplicitSize } = resolveLevelDisplaySizes({
 		bodyFontSize: data.metadata.typography.body.fontSize,
-		iconFontSize: resolveStyleFontSize(iconRuleStyle),
-		levelFontSize: resolveStyleFontSize(levelRuleStyle, resolved.style),
+		levelFontSize: resolveStyleFontSize(resolved.style),
 	});
 	const color = typeof iconProps.color === "string" ? iconProps.color : "#000000";
 
@@ -66,7 +63,6 @@ export const LevelDisplay = ({ level }: LevelDisplayProps) => {
 			style={composeStyles(
 				{ flexDirection: "row", alignItems: "center", marginTop: 2, columnGap: gap },
 				levelContainerStyle,
-				levelRuleStyle,
 				resolved.style,
 			)}
 		>

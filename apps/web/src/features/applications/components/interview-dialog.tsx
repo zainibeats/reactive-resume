@@ -1,10 +1,9 @@
-import type { InterviewKind, InterviewTimelineEntry } from "@reactive-resume/schema/applications/data";
 import type { Application } from "../types";
+import type { InterviewKind, InterviewTimelineEntry } from "@reactive-resume/schema/applications/data";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { TrashIcon } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { INTERVIEW_KINDS } from "@reactive-resume/schema/applications/data";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -15,16 +14,17 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@reactive-resume/ui/components/dialog";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { Label } from "@reactive-resume/ui/components/label";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
+import { formatDuration, fromDateTimeLocal, toDateTimeLocal } from "../interviews";
+import { applicationsListQueryKey } from "../queries";
 import { Combobox } from "@/components/ui/combobox";
 import { useConfirm } from "@/hooks/use-confirm";
 import { orpc } from "@/libs/orpc/client";
-import { formatDuration, fromDateTimeLocal, toDateTimeLocal } from "../interviews";
-import { applicationsListQueryKey } from "../queries";
 
 const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240];
 
@@ -92,11 +92,15 @@ export function InterviewDialog({
 	const [draft, setDraft] = useState<Draft>(() => emptyDraft(application?.id ?? ""));
 	const isEditing = !!interview;
 
-	useEffect(() => {
-		if (!open) return;
-		const applicationId = application?.id ?? "";
-		setDraft(interview ? draftFrom(applicationId, interview) : emptyDraft(applicationId, day));
-	}, [open, interview, application?.id, day]);
+	// A fresh draft each time the dialog opens, adjusted during render so the first frame is never stale.
+	const [wasOpen, setWasOpen] = useState(open);
+	if (open !== wasOpen) {
+		setWasOpen(open);
+		if (open) {
+			const applicationId = application?.id ?? "";
+			setDraft(interview ? draftFrom(applicationId, interview) : emptyDraft(applicationId, day));
+		}
+	}
 
 	const onSuccess = (_data: unknown, variables: { id: string }) => {
 		void queryClient.invalidateQueries({ queryKey: applicationsListQueryKey() });
@@ -152,7 +156,7 @@ export function InterviewDialog({
 		? DURATION_OPTIONS
 		: [...DURATION_OPTIONS, draft.durationMinutes].sort((a, b) => a - b);
 
-	const pickable = applications.filter((item) => !item.archived);
+	const pickable = applications.filter((item) => item.status !== "closed");
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -200,9 +204,7 @@ export function InterviewDialog({
 										aria-pressed={selected}
 										className={cn(
 											"flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
-											selected
-												? "border-foreground bg-foreground text-background"
-												: "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+											selected ? "border-ink bg-ink text-bg" : "border-line text-ink-3 hover:bg-sunken hover:text-ink",
 										)}
 										onClick={() => set("kind", kind.value)}
 									>
@@ -259,7 +261,7 @@ export function InterviewDialog({
 						<Button
 							type="button"
 							variant="ghost"
-							className="text-destructive"
+							className="text-danger-text"
 							disabled={pending}
 							onClick={async () => {
 								const confirmed = await confirm(t`Delete this interview?`, {
@@ -269,14 +271,14 @@ export function InterviewDialog({
 								if (confirmed) remove.mutate({ id: draft.applicationId, entryId: interview.id });
 							}}
 						>
-							<TrashIcon />
+							<Icon name="delete" size={16} />
 							<Trans>Delete</Trans>
 						</Button>
 					) : (
 						<span />
 					)}
 					<div className="flex gap-2">
-						<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+						<Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
 							<Trans>Cancel</Trans>
 						</Button>
 						<Button type="button" disabled={!canSave} onClick={save}>
@@ -294,9 +296,9 @@ type FieldProps = { label: string; htmlFor?: string; required?: boolean; childre
 function Field({ label, htmlFor, required, children }: FieldProps) {
 	return (
 		<div className="grid gap-1.5">
-			<Label htmlFor={htmlFor} className="text-muted-foreground text-xs">
+			<Label htmlFor={htmlFor} className="text-xs text-ink-3">
 				{label}
-				{required && <span className="text-destructive"> *</span>}
+				{required && <span className="text-danger-text"> *</span>}
 			</Label>
 			{children}
 		</div>

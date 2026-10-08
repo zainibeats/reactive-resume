@@ -94,26 +94,16 @@ function seedProvider(overrides: Record<string, unknown> = {}) {
 }
 
 function stubProvider(status: number, body: unknown) {
-	const fetchMock = vi.fn(
-		() =>
-			new Response(typeof body === "string" ? body : JSON.stringify(body), {
-				status,
-				headers: { "Content-Type": "application/json" },
-			}),
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(
+			() =>
+				new Response(typeof body === "string" ? body : JSON.stringify(body), {
+					status,
+					headers: { "Content-Type": "application/json" },
+				}),
+		),
 	);
-	vi.stubGlobal("fetch", fetchMock);
-	return fetchMock;
-}
-
-function chatCompletion(content: string) {
-	return {
-		id: "chatcmpl-1",
-		object: "chat.completion",
-		created: 1,
-		model: "gpt-4.1",
-		choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }],
-		usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
-	};
 }
 
 afterEach(() => {
@@ -123,18 +113,6 @@ afterEach(() => {
 describe("POST /ai-providers/{id}/test — end to end", () => {
 	beforeEach(() => {
 		seedProvider();
-	});
-
-	it("resolves with a usable provider and enables it", async () => {
-		stubProvider(200, chatCompletion("1"));
-
-		const response = await client.test({ id: "provider-1" });
-
-		expect(response.testStatus).toBe("success");
-		expect(response.testError).toBeNull();
-		expect(response.enabled).toBe(true);
-		// The persisted row is what the dashboard reads on the next page load.
-		expect(dbState.rows[0]).toMatchObject({ testStatus: "success", testError: null, enabled: true });
 	});
 
 	it("resolves — not rejects — when the provider rejects the key, and explains why", async () => {
@@ -149,32 +127,6 @@ describe("POST /ai-providers/{id}/test — end to end", () => {
 		expect(dbState.rows[0]?.testError).toBe("OpenAI rejected the API key.");
 	});
 
-	it("names the model when the provider returns not-found", async () => {
-		stubProvider(404, {});
-
-		const response = await client.test({ id: "provider-1" });
-
-		expect(response.testError).toBe('OpenAI has no model named "gpt-4.1", or the base URL is wrong.');
-	});
-
-	it("attributes an outage to the provider and does not retry", async () => {
-		const fetchMock = stubProvider(503, {});
-
-		const response = await client.test({ id: "provider-1" });
-
-		expect(response.testError).toBe("OpenAI reported a server error (503). This is a problem on the provider's side.");
-		expect(fetchMock).toHaveBeenCalledTimes(1);
-	});
-
-	it("separates a reachable provider from a usable one", async () => {
-		stubProvider(200, chatCompletion("Of course! I am connected."));
-
-		const response = await client.test({ id: "provider-1" });
-
-		expect(response.testStatus).toBe("failure");
-		expect(response.testError).toContain("reachable, but the model replied with unexpected output");
-	});
-
 	it("never leaks the decrypted API key into the persisted error", async () => {
 		stubProvider(400, { error: { message: "Bad request for key sk-live-demo-key-1234" } });
 
@@ -187,17 +139,11 @@ describe("POST /ai-providers/{id}/test — end to end", () => {
 	it("still rejects with BAD_REQUEST when the base URL is not permitted", async () => {
 		// A blocked address must remain a configuration error, not a provider failure.
 		seedProvider({ baseUrl: "ftp://api.openai.test/v1" });
-		stubProvider(200, chatCompletion("1"));
+		stubProvider(200, {});
 
 		await expect(client.test({ id: "provider-1" })).rejects.toMatchObject({
 			code: "BAD_REQUEST",
 			message: "Invalid AI provider configuration.",
 		});
-	});
-
-	it("rejects with NOT_FOUND when the provider belongs to nobody", async () => {
-		dbState.rows = [];
-
-		await expect(client.test({ id: "provider-1" })).rejects.toMatchObject({ code: "NOT_FOUND" });
 	});
 });

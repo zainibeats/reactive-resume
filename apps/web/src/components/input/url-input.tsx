@@ -1,8 +1,7 @@
 import type { Website } from "@reactive-resume/schema/resume/data";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { TagIcon } from "@phosphor-icons/react";
-import { useCallback } from "react";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import {
 	InputGroup,
@@ -35,22 +34,16 @@ type Props<TValue extends Website = Website> = Omit<React.ComponentProps<"input"
 
 export function URLInput<TValue extends Website>({ value, onChange, hideLabelButton, ...props }: Props<TValue>) {
 	const prefix = value.url.match(HTTP_PREFIX)?.[0] ?? DEFAULT_PREFIX;
-	const handleUrlChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			onChange({
-				...value,
-				url: ensurePrefix(e.target.value, prefix),
-			});
-		},
-		[onChange, value, prefix],
-	);
+	const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		onChange({
+			...value,
+			url: ensurePrefix(e.target.value, prefix),
+		});
+	};
 
-	const handleLabelChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			onChange({ ...value, label: e.target.value });
-		},
-		[onChange, value],
-	);
+	const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		onChange({ ...value, label: e.target.value });
+	};
 
 	const urlValue = stripPrefix(value.url);
 
@@ -79,13 +72,13 @@ export function URLInput<TValue extends Website>({ value, onChange, hideLabelBut
 										message: "Add a label to the URL",
 									})}
 								>
-									<TagIcon />
+									<Icon name="sell" size={16} />
 								</InputGroupButton>
 							}
 						/>
 
 						<PopoverContent className="pt-3">
-							{/** biome-ignore lint/a11y/noStaticElementInteractions: for stopPropagation */}
+							{/** oxlint-disable-next-line jsx-a11y/no-static-element-interactions -- for stopPropagation */}
 							<div role="presentation" className="grid gap-2" onMouseDown={(e) => e.stopPropagation()}>
 								<Label htmlFor="url-label">
 									<Trans comment="Short field label for custom display text associated with a URL">Label</Trans>

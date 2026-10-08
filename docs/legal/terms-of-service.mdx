@@ -24,7 +24,7 @@ If you do not agree, do not use the Service.
 
 ## The Service
 
-Reactive Resume is a resume builder that allows you to create, store, and share resumes, upload related assets, and export/print resumes (including generating PDFs and screenshots).
+Reactive Resume is a resume builder that allows you to create, store, and share resumes and cover letters, track job applications, upload related assets, and export resumes (including generating PDFs).
 
 ---
 
@@ -82,7 +82,7 @@ The Service Operator may remove Content or restrict access if needed to enforce 
 
 ## Uploads, storage, and delivery
 
-Uploaded files may be stored on the Service Operator's infrastructure and may be served back to you (and, if your resume is public, to others). Depending on configuration, storage may be local filesystem storage or S3-compatible object storage.
+Uploaded files may be stored on the Service Operator's infrastructure and may be served back to you (and, if your resume is public, to others). Depending on configuration, storage may be local filesystem storage, S3-compatible object storage, or Vercel Blob.
 
 You represent that you have the rights necessary to upload and use any files and that doing so does not violate any law or third-party rights.
 
@@ -90,7 +90,7 @@ You represent that you have the rights necessary to upload and use any files and
 
 ## Exports (PDF)
 
-When you request a PDF export, the Service renders the document in your own browser using `@react-pdf/renderer`. Your resume content is processed locally by the JavaScript running on your device; it is not transmitted to a separate rendering service for the purpose of generating the PDF.
+When you download a PDF from the editor, the Service renders the document in your own browser using the Forme PDF engine; your resume content is processed locally on your device. PDFs of public resumes and PDFs requested through the API are rendered by the Service's own server with the same engine. In neither case is your content transmitted to a separate third-party rendering service.
 
 ---
 
@@ -98,9 +98,9 @@ When you request a PDF export, the Service renders the document in your own brow
 
 The Service may integrate with third parties depending on configuration and your choices, including:
 
-- OAuth providers (e.g., Google/GitHub/custom OAuth) for sign-in
-- Storage providers (S3-compatible)
-- AI providers (OpenAI, Google, Anthropic) if you enable AI features and provide your own API key
+- OAuth providers (e.g., Google/GitHub/LinkedIn/custom OAuth) for sign-in
+- Storage providers (S3-compatible or Vercel Blob)
+- AI providers (for example, OpenAI, Anthropic, or Google Gemini) if you enable AI features and provide your own API key
 
 Your use of third-party services may be subject to their own terms and policies. The Service Operator is not responsible for third-party services outside its control.
 

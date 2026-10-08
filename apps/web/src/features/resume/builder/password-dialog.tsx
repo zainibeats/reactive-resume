@@ -48,10 +48,9 @@ export function ResumePasswordDialog({ onSubmit, onClose }: ResumePasswordDialog
 			onClose();
 		} catch (error) {
 			setError(error instanceof ORPCError ? error.message : t`Something went wrong. Please try again.`);
-		} finally {
-			submitting.current = false;
-			setIsPending(false);
 		}
+		submitting.current = false;
+		setIsPending(false);
 	};
 
 	return (
@@ -96,7 +95,7 @@ export function ResumePasswordDialog({ onSubmit, onClose }: ResumePasswordDialog
 							aria-invalid={!!error}
 							aria-describedby={`${id}-hint${error ? ` ${id}-error` : ""}`}
 						/>
-						<p id={`${id}-hint`} className="text-muted-foreground text-sm">
+						<p id={`${id}-hint`} className="text-sm text-ink-3">
 							<Trans>Use between 6 and 64 characters.</Trans>
 						</p>
 					</div>
@@ -119,12 +118,12 @@ export function ResumePasswordDialog({ onSubmit, onClose }: ResumePasswordDialog
 						/>
 					</div>
 					{error && (
-						<p id={`${id}-error`} role="alert" className="text-destructive text-sm">
+						<p id={`${id}-error`} role="alert" className="text-sm text-danger-text">
 							{error}
 						</p>
 					)}
 					<DialogFooter>
-						<Button type="button" variant="outline" disabled={isPending} onClick={onClose}>
+						<Button type="button" variant="secondary" disabled={isPending} onClick={onClose}>
 							<Trans>Cancel</Trans>
 						</Button>
 						<Button type="submit" disabled={isPending}>

@@ -1,9 +1,9 @@
 import type { PdfAtsReport, PdfCategory, PdfCategoryScore } from "@reactive-resume/resume/ats-pdf";
 import { Trans } from "@lingui/react/macro";
-import { CheckCircleIcon } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@reactive-resume/ui/components/accordion";
 import { Badge } from "@reactive-resume/ui/components/badge";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { cn } from "@reactive-resume/utils/style";
 import { getPdfCategoryDescription, getPdfCategoryLabel } from "../messages";
 import { FindingRow } from "./finding-row";
@@ -16,9 +16,9 @@ type ReportViewProps = {
 };
 
 function categoryTone(score: number) {
-	if (score >= 80) return "text-emerald-600";
-	if (score >= 60) return "text-amber-600";
-	return "text-rose-600";
+	if (score >= 80) return "text-accent-text";
+	if (score >= 60) return "text-warn-text";
+	return "text-danger-text";
 }
 
 /**
@@ -43,7 +43,7 @@ export function AtsPdfReportView({ report, className }: ReportViewProps) {
 			<ScoreHeader report={report} />
 
 			{report.document.truncated && (
-				<p className="text-muted-foreground text-xs leading-normal">
+				<p className="text-xs leading-normal text-ink-3">
 					<Trans>
 						Only the first {report.document.pageCount} pages were checked, so this report does not cover the whole file.
 					</Trans>
@@ -64,7 +64,7 @@ export function AtsPdfReportView({ report, className }: ReportViewProps) {
 
 			{report.jd && <JdCoverage jd={report.jd} />}
 
-			<p className="text-muted-foreground text-xs leading-normal">
+			<p className="text-xs leading-normal text-ink-3">
 				<Trans>
 					This measures how faithfully software can extract this file's text. It does not predict whether an application
 					will be rejected, and no tool can. Your file was read in this browser and never uploaded.
@@ -85,11 +85,11 @@ function CategorySection({ category, findings }: CategorySectionProps) {
 			<AccordionTrigger>
 				<span className="flex min-w-0 flex-1 items-center gap-2 pe-2">
 					<span className="min-w-0 truncate">{getPdfCategoryLabel(category.category)}</span>
-					<Badge variant="secondary" className="shrink-0 tabular-nums">
+					<Badge variant="neutral" className="shrink-0 tabular-nums">
 						<span className={categoryTone(category.score)}>{category.score}</span>
 					</Badge>
 					{findings.length > 0 && (
-						<span className="shrink-0 font-normal text-muted-foreground text-xs">
+						<span className="shrink-0 text-xs font-normal text-ink-3">
 							<Trans>{findings.length} to fix</Trans>
 						</span>
 					)}
@@ -97,7 +97,7 @@ function CategorySection({ category, findings }: CategorySectionProps) {
 			</AccordionTrigger>
 
 			<AccordionContent className="space-y-3">
-				<p className="text-muted-foreground text-xs leading-normal">
+				<p className="text-xs leading-normal text-ink-3">
 					{getPdfCategoryDescription(category.category)}{" "}
 					<Trans>
 						{category.passedChecks} of {category.applicableChecks} applicable checks passed.
@@ -106,8 +106,8 @@ function CategorySection({ category, findings }: CategorySectionProps) {
 
 				{findings.length === 0 ? (
 					<div className="flex items-center gap-2 rounded-md border border-dashed p-2.5">
-						<CheckCircleIcon className="size-4 shrink-0 text-emerald-600" />
-						<span className="text-muted-foreground text-xs leading-normal">
+						<Icon name="check_circle" size={16} className="shrink-0 text-accent-text" />
+						<span className="text-xs leading-normal text-ink-3">
 							<Trans>Nothing to fix here.</Trans>
 						</span>
 					</div>
@@ -141,12 +141,12 @@ function WritingSection({ tips }: WritingSectionProps) {
 			</AccordionTrigger>
 
 			<AccordionContent className="space-y-3">
-				<p className="text-muted-foreground text-xs leading-normal">{getPdfCategoryDescription("content")}</p>
+				<p className="text-xs leading-normal text-ink-3">{getPdfCategoryDescription("content")}</p>
 
 				{tips.length === 0 ? (
 					<div className="flex items-center gap-2 rounded-md border border-dashed p-2.5">
-						<CheckCircleIcon className="size-4 shrink-0 text-emerald-600" />
-						<span className="text-muted-foreground text-xs leading-normal">
+						<Icon name="check_circle" size={16} className="shrink-0 text-accent-text" />
+						<span className="text-xs leading-normal text-ink-3">
 							<Trans>Nothing to suggest.</Trans>
 						</span>
 					</div>

@@ -28,15 +28,28 @@ const NotFoundScreenWithI18n = () => (
 	</I18nProvider>
 );
 
+// A pathname change fades the page (styles in index.css). Search-param and hash changes (filters, views, editor
+// modes), the first load, and browsers without view-transition types swap instantly.
+const supportsTransitionTypes = globalThis.CSS?.supports?.("selector(:active-view-transition-type(a))") === true;
+
 export const getRouter = async () => {
 	const queryClient = getQueryClient();
 
-	const { theme, locale, session, flags } = await loadRootContext();
+	const { theme, locale, session, flags } = await loadRootContext(queryClient);
 
 	const router = createRouter({
 		routeTree,
 		scrollRestoration: true,
 		defaultStructuralSharing: true,
+		defaultViewTransition: supportsTransitionTypes && {
+			types: ({ fromLocation, pathChanged }) => (fromLocation && pathChanged ? ["page"] : false),
+		},
+		// Hovering a link starts its loaders; TanStack Query decides freshness, not the router's preload cache.
+		defaultPreload: "intent",
+		defaultPreloadStaleTime: 0,
+		// Past 300ms a navigation shows the loader, held long enough (300ms) for its 200ms fade-in to land.
+		defaultPendingMs: 300,
+		defaultPendingMinMs: 300,
 		defaultErrorComponent: ErrorScreenWithI18n,
 		defaultPendingComponent: LoadingScreenWithI18n,
 		defaultNotFoundComponent: NotFoundScreenWithI18n,

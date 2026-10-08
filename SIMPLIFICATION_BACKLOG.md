@@ -4,6 +4,31 @@ This note captures simplification opportunities found during the initial project
 
 ## Quick Wins
 
+### Merge upstream v6 without its hosted-service surface - Done
+
+Upstream v6.0.0 rebuilt the editor (Write / Design / Check), replaced the PDF engine with Forme, moved resumes and letters
+into one Documents library with Trash, and added a document-bound Assistant. It also reintroduced a prerendered marketing
+homepage, a public ATS checker page, Cloudflare Workers and Vercel deployment targets, and broad MCP "parity" tools.
+
+Completed change:
+
+- Took upstream's v6 architecture and re-ported the fork features onto it: linked child resumes with selective parent
+  updates (Documents menu, editor document menu, review badge in the editor bar), the raw JSON editor (document menu),
+  the per-entry "Bold" toggle (Write panel), LM Studio and keyless local providers (v6 AI settings), single-owner auth,
+  and the root public resume behind the owner's dashboard redirect.
+- Dropped the fork's inline builder assistant and its Ollama-only patch agent in favor of v6's Assistant.
+- Removed the homepage prerender/landing page, Product Hunt banner, public `/ats-checker` page, Cloudflare/Vercel
+  deployment files, server-side marketing SEO/social cards, `@better-auth/infra`, MCP evaluation fixtures, and MCP
+  parity tools for cover letters, applications and platform statistics.
+- Kept the env-gated Cloudflare/Vercel runtime branches because they are shared with the Docker path and inert there.
+
+References:
+
+- `AGENTS.md` (fork divergence and the pre-merge checklist)
+- `apps/web/src/routes/builder/$resumeId/-components/{document-menu,editor-bar,parent-updates}.tsx`
+- `apps/web/src/features/resume/editor/write/entries.tsx`
+- `packages/mcp/src/parity.ts`
+
 ### Keep runtime identity local to the instance - Done
 
 Authentication emails loaded logos and fonts from public third-party hosts and included project promotion. MCP metadata also

@@ -1,12 +1,12 @@
 import type { EditorView } from "@codemirror/view";
 import { EditorSelection, Transaction } from "@codemirror/state";
 
-export type FormattedSemanticCss = {
+type FormattedSemanticCss = {
 	formatted: string;
 	cursorOffset: number;
 };
 
-export async function formatSemanticCss(source: string, cursorOffset: number): Promise<FormattedSemanticCss> {
+async function formatSemanticCss(source: string, cursorOffset: number): Promise<FormattedSemanticCss> {
 	const [{ formatWithCursor }, { default: postcss }] = await Promise.all([
 		import("prettier/standalone"),
 		import("prettier/plugins/postcss"),

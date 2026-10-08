@@ -1,116 +1,189 @@
-import type { ApplicationTimelineEntry } from "@reactive-resume/schema/applications/data";
 import type { Application } from "../types";
 import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
-import { DownloadSimpleIcon } from "@phosphor-icons/react";
+import { Plural, Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
+import { Icon } from "@reactive-resume/ui/components/icon";
+import { Skeleton } from "@reactive-resume/ui/components/skeleton";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { computeInsights, computeOutcomes, computeTimeline } from "../insights";
+import { getStageColor, getStageLabel } from "../stages";
+import { stagger } from "@/libs/motion";
 import { orpc } from "@/libs/orpc/client";
-import { computeInsights, computeTimeline } from "../insights";
 
-const byNewest = (a: ApplicationTimelineEntry, b: ApplicationTimelineEntry) =>
-	new Date(b.at).getTime() - new Date(a.at).getTime();
-
-const appliedDate = (app: Application) =>
-	[...app.activity].sort(byNewest).find((entry) => entry.type === "stage" && entry.stage === "applied")?.at ??
-	app.appliedAt;
+/** The page's shape while stats load: the funnel, the two figures, then the charts. */
+export function InsightsSkeleton() {
+	return (
+		<div className="flex max-w-4xl flex-col gap-4">
+			<Skeleton className="h-56 rounded-xl" />
+			<div className="grid gap-4 sm:grid-cols-2">
+				<Skeleton className="h-[102px] rounded-xl" />
+				<Skeleton className="h-[102px] rounded-xl" />
+			</div>
+			<Skeleton className="h-80 rounded-xl" />
+		</div>
+	);
+}
 
 export function ApplicationInsights({ applications }: { applications: Application[] }) {
 	const { data } = useQuery(orpc.applications.stats.queryOptions({}));
+	const { data: documents } = useQuery(orpc.documents.list.queryOptions({ input: { trashed: false } }));
 
-	// Weekly application velocity — derived from the already-loaded list, matching the stats
-	// population (archived excluded), so no extra endpoint is needed.
-	const timeline = useMemo(
-		() => computeTimeline(applications.filter((app) => !app.archived).map((app) => new Date(appliedDate(app)))),
-		[applications],
+	// A resume is tailored for an application when it was made for it (Copy for a job).
+	const madeFor = new Map(
+		(documents ?? []).flatMap((document) => (document.application ? [[document.id, document.application.id]] : [])),
 	);
+	const outcomes = computeOutcomes(applications, (application) =>
+		Boolean(application.resumeId && madeFor.get(application.resumeId) === (application as Application).id),
+	);
+
+	// Sending history includes applications that later closed, and excludes jobs never sent.
+	const timeline = computeTimeline(applications);
 	const maxWeek = Math.max(1, ...timeline.map((bucket) => bucket.count));
 
-	if (!data) return <div className="h-40 animate-pulse rounded-xl bg-muted/40" />;
+	if (!data) return <InsightsSkeleton />;
 
 	const insights = computeInsights(data.byStage);
 	const maxSource = Math.max(1, ...data.bySource.map((s) => s.count));
+	const widest = Math.max(1, ...outcomes.funnel.map((row) => row.reached));
 
-	if (insights.total === 0) {
+	if (outcomes.sent === 0) {
 		return (
-			<p className="py-16 text-center text-muted-foreground text-sm">
-				<Trans>No applications yet. Add a few to see your funnel and reply rates.</Trans>
+			<p className="py-16 text-center text-sm text-ink-2">
+				<Trans>Once you've sent a few applications, this shows how far they get and how quickly people reply.</Trans>
 			</p>
 		);
 	}
 
 	return (
 		<div className="flex max-w-4xl flex-col gap-4 overflow-y-auto pb-6">
-			<p className="text-muted-foreground text-xs">
-				<Trans>Pipeline health across all applications</Trans>
-			</p>
+			<section aria-labelledby="insights-funnel" className="grid gap-3 rounded-xl border border-line p-5">
+				<h2 id="insights-funnel" className="text-sm font-semibold">
+					<Trans>How far applications get</Trans>
+				</h2>
+				<ol className="grid gap-2">
+					{outcomes.funnel.map((row, index) => (
+						<li key={row.status} className="grid grid-cols-[92px_minmax(0,1fr)_32px] items-center gap-3 text-sm">
+							<span className="flex items-center gap-1.5 text-ink-2">
+								<span
+									aria-hidden="true"
+									className="size-2 rounded-full"
+									style={{ background: getStageColor(row.status) }}
+								/>
+								{getStageLabel(row.status)}
+							</span>
+							<span className="h-5 overflow-hidden rounded bg-sunken">
+								<span
+									className="block h-full origin-left rounded transition-[scale] delay-(--stagger) duration-emphasized ease-enter motion-reduce:delay-0 rtl:origin-right starting:scale-x-0"
+									style={{
+										...stagger(index),
+										width: `${(row.reached / widest) * 100}%`,
+										background: getStageColor(row.status),
+									}}
+								/>
+							</span>
+							<span className="text-end font-display text-base tabular-nums">{row.reached}</span>
+						</li>
+					))}
+				</ol>
+				<p className="text-xs text-ink-3">
+					<Trans>Counts every application that reached each stage, including ones now closed.</Trans>
+				</p>
+			</section>
 
-			{/* stat tiles */}
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-				{insights.tiles.map((tile) => (
-					<div key={tile.label} className="rounded-xl border border-border p-4">
-						<div className="text-muted-foreground text-xs">{tile.label}</div>
-						<div className="mt-2 font-bold text-2xl tracking-tight">{tile.value}</div>
-						<div className="mt-1 text-muted-foreground text-xs">{tile.sub}</div>
+			<div className="grid gap-4 sm:grid-cols-2">
+				<div className="rounded-xl border border-line p-5">
+					<div className="font-display text-[34px] leading-10 font-medium">
+						{Math.round((outcomes.heardBack / outcomes.sent) * 100)}%
 					</div>
-				))}
+					<div className="text-sm text-ink-2">
+						<Trans>heard back</Trans>
+					</div>
+				</div>
+				<div className="rounded-xl border border-line p-5">
+					<div className="font-display text-[34px] leading-10 font-medium">
+						{outcomes.medianDaysToReply === null ? (
+							"—"
+						) : (
+							<Plural value={outcomes.medianDaysToReply} one="# day" other="# days" />
+						)}
+					</div>
+					<div className="text-sm text-ink-2">
+						<Trans>median to first reply</Trans>
+					</div>
+				</div>
 			</div>
+
+			{outcomes.tailored.sent + outcomes.base.sent > 0 && (
+				<section aria-labelledby="insights-tailored" className="grid gap-1 rounded-xl border border-line p-5">
+					<h2 id="insights-tailored" className="text-sm font-semibold">
+						<Trans>Tailored vs. base resume</Trans>
+					</h2>
+					<p className="text-sm leading-6 text-ink-2">
+						<Trans>
+							{outcomes.tailored.replied} of {outcomes.tailored.sent} tailored applications got a reply;{" "}
+							{outcomes.base.replied} of {outcomes.base.sent} sent with another resume.
+						</Trans>{" "}
+						{outcomes.tailored.sent + outcomes.base.sent < 10 && <Trans>Small numbers, but worth noticing.</Trans>}
+					</p>
+				</section>
+			)}
 
 			<PipelineFlow insights={insights} />
 
 			<div className="grid gap-4 lg:grid-cols-2">
 				{/* application velocity over time */}
-				<div className="rounded-xl border border-border p-5">
-					<h3 className="font-semibold text-sm">
+				<div className="rounded-xl border border-line p-5">
+					<h3 className="text-sm font-semibold">
 						<Trans>Applications over time</Trans>
 					</h3>
-					<p className="mt-0.5 text-muted-foreground text-xs">
+					<p className="mt-0.5 text-xs text-ink-3">
 						<Trans>Applications sent per week (last 8 weeks)</Trans>
 					</p>
 					<div className="mt-4 flex items-end gap-2">
-						{timeline.map((bucket) => (
+						{timeline.map((bucket, index) => (
 							<div key={bucket.label} className="flex flex-1 flex-col items-center gap-1">
 								<div className="flex h-28 w-full flex-col justify-end">
-									<span className="mb-1 text-center text-[10px] text-muted-foreground tabular-nums">
-										{bucket.count || ""}
-									</span>
+									<span className="mb-1 text-center text-[10px] text-ink-3 tabular-nums">{bucket.count || ""}</span>
 									<div
-										className="w-full rounded-t bg-primary/60"
-										style={{ height: `${bucket.count ? Math.max((bucket.count / maxWeek) * 100, 8) : 0}%` }}
+										className="w-full origin-bottom rounded-t bg-accent transition-[scale] delay-(--stagger) duration-emphasized ease-enter motion-reduce:delay-0 starting:scale-y-0"
+										style={{
+											...stagger(index),
+											height: `${bucket.count ? Math.max((bucket.count / maxWeek) * 100, 8) : 0}%`,
+										}}
 									/>
 								</div>
-								<span className="text-[10px] text-muted-foreground tabular-nums">{bucket.label}</span>
+								<span className="text-[10px] text-ink-3 tabular-nums">{bucket.label}</span>
 							</div>
 						))}
 					</div>
 				</div>
 
 				{/* sources */}
-				<div className="rounded-xl border border-border p-5">
-					<h3 className="font-semibold text-sm">
+				<div className="rounded-xl border border-line p-5">
+					<h3 className="text-sm font-semibold">
 						<Trans>Where applications come from</Trans>
 					</h3>
-					<p className="mt-0.5 text-muted-foreground text-xs">
+					<p className="mt-0.5 text-xs text-ink-3">
 						<Trans>Count by source</Trans>
 					</p>
 					<div className="mt-4 flex flex-col gap-3">
 						{data.bySource.length === 0 ? (
-							<p className="text-muted-foreground text-sm">
+							<p className="text-sm text-ink-3">
 								<Trans>No source data yet.</Trans>
 							</p>
 						) : (
-							data.bySource.map((row) => (
+							data.bySource.map((row, index) => (
 								<div key={row.source} className="flex items-center gap-3 text-xs">
 									<span className="w-28 shrink-0 truncate font-medium">{row.source}</span>
-									<div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+									<div className="h-2.5 flex-1 overflow-hidden rounded-full bg-sunken">
 										<div
-											className="h-full rounded-full bg-foreground/70"
-											style={{ width: `${Math.max((row.count / maxSource) * 100, 3)}%` }}
+											className="h-full origin-left rounded-full bg-ink-2 transition-[scale] delay-(--stagger) duration-emphasized ease-enter motion-reduce:delay-0 rtl:origin-right starting:scale-x-0"
+											style={{ ...stagger(index), width: `${Math.max((row.count / maxSource) * 100, 3)}%` }}
 										/>
 									</div>
-									<span className="w-6 text-right text-muted-foreground">{row.count}</span>
+									<span className="w-6 text-right text-ink-3">{row.count}</span>
 								</div>
 							))
 						)}
@@ -126,7 +199,7 @@ export function ApplicationInsights({ applications }: { applications: Applicatio
 const FLOW_COLORS = ["#a5b4fc", "#818cf8", "#22d3ee", "#fbbf24", "#34d399"];
 const FLOW_BG = "#0a0a0f";
 const FLOW_REJECTED = "#fb7185";
-const FLOW_FONT = '"IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, sans-serif';
+const FLOW_FONT = "var(--font-ui)";
 // RxR mark ~18px wide in the 256-unit icon viewBox (the mark's glyphs span y ≈ 36–220).
 const ICON_SCALE = 18 / 256;
 
@@ -138,10 +211,16 @@ function toBase64(buffer: ArrayBuffer): string {
 }
 
 // A rasterized SVG (loaded as an <img>) can't reach the page's webfonts, so the exported PNG falls
-// back to a system font unless the font is inlined. Find the IBM Plex Sans woff2 the app already
+// back to a system font unless the font is inlined. Find the UI woff2 the app already
 // loaded (basic-latin subset covers the chart's English labels), base64 it, and return an
 // @font-face the export SVG can embed. Returns null on any failure so export still proceeds.
-async function ibmPlexFontFace(): Promise<string | null> {
+async function uiFontFace(): Promise<string | null> {
+	const uiFamily = getComputedStyle(document.documentElement)
+		.getPropertyValue("--font-ui")
+		.split(",")[0]
+		?.trim()
+		.replace(/["']/g, "");
+	if (!uiFamily) return null;
 	for (const sheet of Array.from(document.styleSheets)) {
 		let rules: CSSRuleList | undefined;
 		try {
@@ -152,7 +231,7 @@ async function ibmPlexFontFace(): Promise<string | null> {
 		for (const rule of Array.from(rules ?? [])) {
 			if (!(rule instanceof CSSFontFaceRule)) continue;
 			const family = rule.style.getPropertyValue("font-family").replace(/["']/g, "");
-			if (!family.includes("IBM Plex Sans")) continue;
+			if (family !== uiFamily) continue;
 			if ((rule.style.getPropertyValue("font-style") || "normal") !== "normal") continue;
 			// Keep only the basic-latin subset (covers the chart's English labels). CSSOM normalizes
 			// its range to "U+0-FF" — i.e. "U+" then all-zero start — so match that, not "U+0000".
@@ -161,8 +240,10 @@ async function ibmPlexFontFace(): Promise<string | null> {
 			const url = rule.style.getPropertyValue("src").match(/url\(["']?([^"')]+\.woff2)["']?\)/)?.[1];
 			if (!url) continue;
 			try {
-				const buffer = await (await fetch(url)).arrayBuffer();
-				return `@font-face{font-family:"IBM Plex Sans Variable";font-style:normal;font-weight:100 700;src:url(data:font/woff2;base64,${toBase64(buffer)}) format("woff2");}`;
+				const res = await fetch(url);
+				if (!res.ok) return null;
+				const buffer = await res.arrayBuffer();
+				return `@font-face{font-family:"${family}";font-style:normal;font-weight:${rule.style.getPropertyValue("font-weight")};src:url(data:font/woff2;base64,${toBase64(buffer)}) format("woff2");}`;
 			} catch {
 				return null;
 			}
@@ -198,9 +279,10 @@ function PipelineFlow({ insights }: { insights: ReturnType<typeof computeInsight
 		if (!svg) return;
 		// Reveal the export-only watermark on a clone so the on-screen chart stays clean.
 		const clone = svg.cloneNode(true) as SVGSVGElement;
+		clone.style.fontFamily = getComputedStyle(svg).fontFamily;
 		for (const el of clone.querySelectorAll<SVGElement>("[data-export-only]")) el.style.display = "";
-		// Inline the brand font so the rasterized PNG renders in IBM Plex Sans, not a system fallback.
-		const fontFace = await ibmPlexFontFace();
+		// Inline the UI font so the rasterized PNG uses the same type as the app.
+		const fontFace = await uiFontFace();
 		if (fontFace) {
 			const styleEl = document.createElementNS("http://www.w3.org/2000/svg", "style");
 			styleEl.textContent = fontFace;
@@ -229,13 +311,13 @@ function PipelineFlow({ insights }: { insights: ReturnType<typeof computeInsight
 	};
 
 	return (
-		<div className="rounded-xl border border-border p-5">
+		<div className="rounded-xl border border-line p-5">
 			<div className="flex items-start justify-between gap-4">
-				<h3 className="font-semibold text-sm">
+				<h3 className="text-sm font-semibold">
 					<Trans>Where your applications went</Trans>
 				</h3>
-				<Button size="sm" variant="outline" onClick={() => void exportPng()}>
-					<DownloadSimpleIcon />
+				<Button size="sm" variant="secondary" onClick={() => void exportPng()}>
+					<Icon name="download" size={16} />
 					<Trans>Export PNG</Trans>
 				</Button>
 			</div>
@@ -267,13 +349,13 @@ function PipelineFlow({ insights }: { insights: ReturnType<typeof computeInsight
 					{t`Job search pipeline`}
 				</text>
 				<text x={padX} y={60} fontSize={12} fill="#71717a">
-					{t`${insights.total} applications tracked`}
+					{t`${insights.total} active applications`}
 				</text>
-				{insights.rejected > 0 && (
+				{insights.closed > 0 && (
 					<g>
 						<circle cx={W - padX - 96} cy={54} r={4} fill={FLOW_REJECTED} />
 						<text x={W - padX - 86} y={58} fontSize={12} fill="#a1a1aa">
-							{t`${insights.rejected} rejected`}
+							{t`${insights.closed} closed`}
 						</text>
 					</g>
 				)}

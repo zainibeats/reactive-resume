@@ -1,4 +1,4 @@
-import type { ResumeData, SectionType } from "@reactive-resume/schema/resume/data";
+import type { LayoutPage, ResumeData, SectionType } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import {
 	BorderStyle,
@@ -14,6 +14,7 @@ import {
 	TextRun,
 	WidthType,
 } from "docx";
+import { templateLayouts } from "@reactive-resume/schema/templates";
 import { parseColorString } from "@reactive-resume/utils/color";
 import { isRTL } from "@reactive-resume/utils/locale";
 import { shouldShowResumeHeader } from "./cover-letter";
@@ -57,34 +58,28 @@ const NO_BORDERS = {
 	right: { style: BorderStyle.NONE, size: 0 },
 } as const;
 
-// --- Template layout config ---
-
-interface TemplateConfig {
-	/** Which side the sidebar appears on */
-	sidebarSide: "left" | "right" | "none";
-	/** Sidebar background: "solid" = full primary color, "tint" = 20% opacity, "none" = no background */
-	sidebarBackground: "solid" | "tint" | "none";
-	/** Where the header is rendered */
-	headerPosition: "full-width" | "main-only" | "sidebar-only";
-}
-
-const TEMPLATE_CONFIGS: Record<Template, TemplateConfig> = {
-	azurill: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "full-width" },
-	bronzor: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
-	chikorita: { sidebarSide: "right", sidebarBackground: "solid", headerPosition: "main-only" },
-	ditgar: { sidebarSide: "left", sidebarBackground: "tint", headerPosition: "sidebar-only" },
-	ditto: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "full-width" },
-	gengar: { sidebarSide: "left", sidebarBackground: "tint", headerPosition: "sidebar-only" },
-	glalie: { sidebarSide: "left", sidebarBackground: "tint", headerPosition: "sidebar-only" },
-	kakuna: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
-	lapras: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
-	leafish: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
-	meowth: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "full-width" },
-	onyx: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
-	pikachu: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "main-only" },
-	rhyhorn: { sidebarSide: "right", sidebarBackground: "none", headerPosition: "full-width" },
-	scizor: { sidebarSide: "left", sidebarBackground: "none", headerPosition: "full-width" },
+// Sidebar and header placement come from `templateLayouts`, as in the PDF; only the sidebar's background is DOCX's
+// own: "solid" fills it with the primary colour (text inverts), "tint" with 20% of it.
+const SIDEBAR_BACKGROUND: Partial<Record<Template, "solid" | "tint">> = {
+	chikorita: "solid",
+	ditgar: "tint",
+	gengar: "tint",
+	glalie: "tint",
 };
+
+type PagePlan = { kind: "single"; sections: string[] } | { kind: "split" };
+
+/**
+ * How a layout page prints, as in the PDF: a full-width page prints no sidebar, a one-column template prints its
+ * sidebar sections after the main ones, and only a two-column template with sidebar sections splits the page.
+ */
+export function planPageColumns(page: LayoutPage, template: Template): PagePlan {
+	const sidebar = page.fullWidth ? [] : page.sidebar;
+	if (templateLayouts[template].columns === 1 || sidebar.length === 0) {
+		return { kind: "single", sections: [...page.main, ...sidebar] };
+	}
+	return { kind: "split" };
+}
 
 /**
  * Blends a hex color toward white at the given opacity (0-1).
@@ -281,7 +276,7 @@ function buildTwoColumnTable(
 	sidebarParagraphs: Paragraph[],
 	sidebarWidthPct: number,
 	gapXTwips: number,
-	sidebarSide: "left" | "right" | "none",
+	sidebarSide: "left" | "right",
 	sidebarShadingHex?: string,
 ): Table {
 	const mainWidthPct = 100 - sidebarWidthPct;
@@ -296,11 +291,8 @@ function buildTwoColumnTable(
 
 	const margins: { right?: number; left?: number } = {};
 
-	if (sidebarSide === "left") {
-		margins.right = gapXTwips;
-	} else if (sidebarSide === "right") {
-		margins.left = gapXTwips;
-	}
+	if (sidebarSide === "left") margins.right = gapXTwips;
+	else margins.left = gapXTwips;
 
 	const sidebarCell = new TableCell({
 		width: { size: sidebarWidthPct, type: WidthType.PERCENTAGE },
@@ -361,20 +353,13 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 
 	const sidebarWidth = data.metadata.layout.sidebarWidth;
 
-	// Template-aware layout config
-	const templateConfig = TEMPLATE_CONFIGS[data.metadata.template];
-
-	// Compute sidebar background shading hex
-	let sidebarShadingHex: string | undefined;
-	if (templateConfig.sidebarBackground === "solid") {
-		sidebarShadingHex = colorHex;
-	} else if (templateConfig.sidebarBackground === "tint") {
-		sidebarShadingHex = blendWithWhite(colorHex, 0.2);
-	}
-
-	// Determine sidebar text colors — inverted when sidebar has a solid background
-	const sidebarTextColorHex = templateConfig.sidebarBackground === "solid" ? bgColorHex : textColorHex;
-	const sidebarHeadingColorHex = templateConfig.sidebarBackground === "solid" ? bgColorHex : colorHex;
+	const layout = templateLayouts[data.metadata.template];
+	const background = SIDEBAR_BACKGROUND[data.metadata.template];
+	const sidebarShadingHex =
+		background === "solid" ? colorHex : background === "tint" ? blendWithWhite(colorHex, 0.2) : undefined;
+	// Text on a solid sidebar inverts.
+	const sidebarTextColorHex = background === "solid" ? bgColorHex : textColorHex;
+	const sidebarHeadingColorHex = background === "solid" ? bgColorHex : colorHex;
 
 	// Configure heading typography for section renderers
 	const headingFont = data.metadata.typography.heading.fontFamily || "Calibri";
@@ -394,18 +379,18 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 	const showHeader = shouldShowResumeHeader(data);
 
 	// Header placement depends on template
-	if (templateConfig.headerPosition === "full-width" && showHeader) {
+	if (layout.headerPlacement === "full-width" && showHeader) {
 		setRenderConfig(mainConfig);
 		documentChildren.push(...buildHeader(data, colorHex, textColorHex));
 	}
 
 	// Process each page in the layout
 	for (const layoutPage of data.metadata.layout.pages) {
-		const isFullWidth = layoutPage.fullWidth || layoutPage.sidebar.length === 0;
+		const plan = planPageColumns(layoutPage, data.metadata.template);
 
-		if (isFullWidth) {
+		if (plan.kind === "single") {
 			setRenderConfig(mainConfig);
-			for (const sectionId of [...layoutPage.main, ...layoutPage.sidebar]) {
+			for (const sectionId of plan.sections) {
 				documentChildren.push(...renderSection(sectionId, data, colorHex, resolveTitle));
 			}
 		} else {
@@ -413,7 +398,7 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 			setRenderConfig(mainConfig);
 
 			const mainParagraphs: Paragraph[] = [];
-			if (templateConfig.headerPosition === "main-only" && showHeader) {
+			if (layout.headerPlacement === "main-only" && showHeader) {
 				mainParagraphs.push(...buildHeader(data, colorHex, textColorHex));
 			}
 			for (const sectionId of layoutPage.main) {
@@ -424,7 +409,7 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 			setRenderConfig({ ...mainConfig, textColorHex: sidebarTextColorHex, primaryColorHex: sidebarHeadingColorHex });
 
 			const sidebarParagraphs: Paragraph[] = [];
-			if (templateConfig.headerPosition === "sidebar-only" && showHeader) {
+			if (layout.headerPlacement === "sidebar-only" && showHeader) {
 				sidebarParagraphs.push(...buildHeader(data, sidebarHeadingColorHex, sidebarTextColorHex));
 			}
 			for (const sectionId of layoutPage.sidebar) {
@@ -438,7 +423,8 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 						sidebarParagraphs,
 						sidebarWidth,
 						gapXTwips,
-						templateConfig.sidebarSide,
+						// The side chosen in Design, else the template's own.
+						data.metadata.layout.sidebarSide ?? layout.sidebarSide ?? "left",
 						sidebarShadingHex,
 					),
 				);

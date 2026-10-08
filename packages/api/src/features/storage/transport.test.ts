@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
 		STORAGE_BACKEND: "blob",
 		DEPLOYMENT_NAMESPACE: "test",
 	},
-	user: vi.fn(),
+	authentication: vi.fn(),
 	limit: vi.fn(),
 	getRedis: vi.fn(),
 	redis: { get: vi.fn(), getdel: vi.fn(), set: vi.fn() },
@@ -15,7 +15,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@vercel/blob", () => mocks.blob);
 vi.mock("@reactive-resume/env/server", () => ({ env: mocks.env }));
-vi.mock("../../context", () => ({ resolveUserFromRequestHeaders: mocks.user }));
+vi.mock("../../context", () => ({
+	resolveAuthenticationFromRequestHeaders: mocks.authentication,
+	resolveUserFromRequestHeaders: async (headers: Headers) => (await mocks.authentication(headers))?.user ?? null,
+}));
 vi.mock("../../redis", () => ({ createRateLimiter: () => ({ limit: mocks.limit }) }));
 vi.mock("@reactive-resume/db/redis", () => ({
 	getRedis: mocks.getRedis,
@@ -56,7 +59,7 @@ beforeEach(() => {
 	vi.resetAllMocks();
 	vi.stubEnv("VERCEL", "1");
 	// Deliberately fake only provider boundaries; Request, streams, schema and body restoration stay real.
-	mocks.user.mockResolvedValue({ id: "user-1" });
+	mocks.authentication.mockResolvedValue({ user: { id: "user-1" }, permissions: ["read", "write", "delete"] });
 	mocks.limit.mockResolvedValue({ success: true });
 	mocks.getRedis.mockReturnValue(mocks.redis);
 	records.clear();
@@ -83,23 +86,15 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("staged RPC transport", () => {
-	it("deletes expired staging bodies while preparing a new upload", async () => {
-		mocks.blob.list.mockResolvedValueOnce({
-			blobs: [
-				{ pathname: "test/_staging/expired", uploadedAt: new Date(Date.now() - 601_000) },
-				{ pathname: "test/_staging/current", uploadedAt: new Date() },
-			],
-		});
-		expect((await prepareStagedBody(prepareRequest())).status).toBe(200);
-		expect(mocks.blob.del).toHaveBeenCalledExactlyOnceWith(["test/_staging/expired"], {});
+	it("denies read-only credentials before granting an upload or consuming an existing staged body", async () => {
+		mocks.authentication.mockResolvedValue({ user: { id: "user-1" }, permissions: ["read"] });
+		expect((await prepareStagedBody(prepareRequest({}, { "x-api-key": "read-only" }))).status).toBe(403);
+		expect(mocks.blob.issueSignedToken).not.toHaveBeenCalled();
+		const handle = vi.fn();
+		expect((await withStagedBody(stageRequest({ "x-api-key": "read-only" }), handle)).status).toBe(403);
+		expect(mocks.redis.getdel).not.toHaveBeenCalled();
+		expect(handle).not.toHaveBeenCalled();
 	});
-
-	it("disables staging on Docker", async () => {
-		vi.stubEnv("VERCEL", "");
-		expect((await prepareStagedBody(prepareRequest())).status).toBe(404);
-		expect(mocks.user).not.toHaveBeenCalled();
-	});
-
 	it("issues only a private path-scoped PUT URL with the exact declared size", async () => {
 		const result = await prepareStagedBody(prepareRequest());
 		expect(result.status).toBe(200);
@@ -127,8 +122,9 @@ describe("staged RPC transport", () => {
 	it.each(["unauthorized", "foreign-origin", "foreign-owner", "foreign-path"])(
 		"rejects %s without consuming the upload",
 		async (kind) => {
-			if (kind === "unauthorized") mocks.user.mockResolvedValue(null);
-			if (kind === "foreign-owner") mocks.user.mockResolvedValue({ id: "user-2" });
+			if (kind === "unauthorized") mocks.authentication.mockResolvedValue(null);
+			if (kind === "foreign-owner")
+				mocks.authentication.mockResolvedValue({ user: { id: "user-2" }, permissions: ["write"] });
 			if (kind === "foreign-path") {
 				const key = `test:staged-body:${id}`;
 				records.set(key, JSON.stringify({ ...JSON.parse(records.get(key) ?? "{}"), path: "/api/rpc/other" }));
@@ -160,26 +156,6 @@ describe("staged RPC transport", () => {
 		expect((await withStagedBody(stageRequest(), handle)).status).toBe(410);
 		expect(handle).toHaveBeenCalledTimes(1);
 		expect(mocks.blob.del).toHaveBeenCalledExactlyOnceWith(pathname, {});
-	});
-
-	it("rejects a size mismatch before RPC parsing and deletes the staged object", async () => {
-		mocks.blob.get.mockResolvedValue({
-			statusCode: 200,
-			blob: { size: wire.length - 1 },
-			stream: new Blob([new Uint8Array(wire.length - 1)]).stream(),
-		});
-		const handle = vi.fn();
-		expect((await withStagedBody(stageRequest(), handle)).status).toBe(413);
-		expect(handle).not.toHaveBeenCalled();
-		expect(mocks.blob.del).toHaveBeenCalledWith(pathname, {});
-	});
-
-	it("deletes staging even when the RPC handler throws, without restoring replay permission", async () => {
-		const handle = vi.fn(() => Promise.reject(new Error("Handler failed")));
-		await expect(withStagedBody(stageRequest(), handle)).rejects.toThrow("Handler failed");
-		expect(mocks.blob.del).toHaveBeenCalledWith(pathname, {});
-		expect((await withStagedBody(stageRequest(), handle)).status).toBe(410);
-		expect(handle).toHaveBeenCalledTimes(1);
 	});
 
 	it.each([{ path: "/api/rpc/../../auth" }, { size: 160 * 1024 * 1024 + 1 }])(

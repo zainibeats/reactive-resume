@@ -14,17 +14,10 @@ import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } 
 import { CSS } from "@dnd-kit/utilities";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import {
-	ArrowBendUpRightIcon,
-	DotsSixVerticalIcon,
-	DotsThreeVerticalIcon,
-	FileIcon,
-	PlusCircleIcon,
-	PlusIcon,
-	TrashIcon,
-} from "@phosphor-icons/react";
+import { useReducedMotion } from "motion/react";
 import { useCallback, useId, useState } from "react";
 import { match } from "ts-pattern";
+import { templateLayouts } from "@reactive-resume/schema/templates";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
 	DropdownMenu,
@@ -37,13 +30,13 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@reactive-resume/ui/components/dropdown-menu";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Switch } from "@reactive-resume/ui/components/switch";
 import { cn } from "@reactive-resume/utils/style";
-import { templates } from "@/dialogs/resume/template/data";
-import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
-import { EASE_OUT_STRONG } from "@/libs/motion";
 import { resolveLayoutSectionTitle } from "./title";
 import { filterVisibleLayoutSectionIds } from "./visibility";
+import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
+import { DRAG_SETTLE } from "@/libs/motion";
 
 type ColumnId = "main" | "sidebar";
 
@@ -94,10 +87,11 @@ const createDroppableId = (pageIndex: number, columnId: ColumnId): string => {
 
 export function LayoutPages() {
 	const [activeId, setActiveId] = useState<string | null>(null);
+	const reduceMotion = useReducedMotion();
 
 	const resume = useCurrentResume();
 	const template = resume.data.metadata.template;
-	const templateSidebarPosition = templates[template].sidebarPosition;
+	const templateSidebarPosition = templateLayouts[template].sidebarSide ?? "none";
 
 	const layout = resume.data.metadata.layout;
 	const updateResumeData = useUpdateResumeData();
@@ -114,8 +108,7 @@ export function LayoutPages() {
 			if (location) return location;
 
 			// Search through all pages
-			for (let pageIndex = 0; pageIndex < layout.pages.length; pageIndex++) {
-				const page = layout.pages[pageIndex];
+			for (const [pageIndex, page] of layout.pages.entries()) {
 				const mainSections = new Set(page.main);
 				const sidebarSections = new Set(page.sidebar);
 				if (mainSections.has(id)) return { pageIndex, columnId: "main" };
@@ -147,6 +140,7 @@ export function LayoutPages() {
 			// Same location, reorder within column
 			if (activeLocation.pageIndex === overLocation.pageIndex && activeLocation.columnId === overLocation.columnId) {
 				const page = layout.pages[activeLocation.pageIndex];
+				if (!page) return;
 				const items = page[activeLocation.columnId];
 				const oldIdx = items.indexOf(activeIdStr);
 				let newIdx = items.indexOf(overIdStr);
@@ -154,12 +148,9 @@ export function LayoutPages() {
 				if (newIdx === -1) newIdx = items.length - 1;
 
 				updateResumeData((draft) => {
-					const colOrder = draft.metadata.layout.pages[activeLocation.pageIndex][activeLocation.columnId];
-					draft.metadata.layout.pages[activeLocation.pageIndex][activeLocation.columnId] = arrayMove(
-						colOrder,
-						oldIdx,
-						newIdx,
-					);
+					const page = draft.metadata.layout.pages[activeLocation.pageIndex];
+					if (!page) return;
+					page[activeLocation.columnId] = arrayMove(page[activeLocation.columnId], oldIdx, newIdx);
 				});
 				return;
 			}
@@ -167,6 +158,7 @@ export function LayoutPages() {
 			// Different location, move between columns/pages
 			const fromPage = layout.pages[activeLocation.pageIndex];
 			const toPage = layout.pages[overLocation.pageIndex];
+			if (!fromPage || !toPage) return;
 			const fromItems = fromPage[activeLocation.columnId];
 			const toItems = toPage[overLocation.columnId];
 			const fromIdx = fromItems.indexOf(activeIdStr);
@@ -178,6 +170,7 @@ export function LayoutPages() {
 			updateResumeData((draft) => {
 				const fromPageDraft = draft.metadata.layout.pages[activeLocation.pageIndex];
 				const toPageDraft = draft.metadata.layout.pages[overLocation.pageIndex];
+				if (!fromPageDraft || !toPageDraft) return;
 				const from = fromPageDraft[activeLocation.columnId];
 				const to = toPageDraft[overLocation.columnId];
 
@@ -207,6 +200,7 @@ export function LayoutPages() {
 				// Find the first available page that isn't being deleted
 				const targetPageIndex = pageIndex === 0 ? 1 : 0;
 				const targetPage = draft.metadata.layout.pages[targetPageIndex];
+				if (!pageToDelete || !targetPage) return;
 
 				// Move all sections from deleted page to target page
 				targetPage.main.push(...pageToDelete.main);
@@ -222,6 +216,7 @@ export function LayoutPages() {
 		(pageIndex: number, fullWidth: boolean) => {
 			updateResumeData((draft) => {
 				const page = draft.metadata.layout.pages[pageIndex];
+				if (!page) return;
 				page.fullWidth = fullWidth;
 
 				if (fullWidth) {
@@ -265,13 +260,13 @@ export function LayoutPages() {
 					/>
 				))}
 
-				<Button variant="outline" className="self-end" onClick={handleAddPage}>
-					<PlusIcon />
+				<Button variant="secondary" className="self-end" onClick={handleAddPage}>
+					<Icon name="add" size={16} />
 					<Trans>Add Page</Trans>
 				</Button>
 			</div>
 
-			<DragOverlay dropAnimation={{ duration: 150, easing: `cubic-bezier(${EASE_OUT_STRONG})` }}>
+			<DragOverlay dropAnimation={reduceMotion ? null : DRAG_SETTLE}>
 				{activeId ? <LayoutItemContent id={activeId} isOverlay /> : null}
 			</DragOverlay>
 		</DndContext>
@@ -299,11 +294,11 @@ function PageContainer({
 	const fullWidthSwitchId = useId();
 
 	return (
-		<div className="space-y-3 rounded-md border border-dashed bg-background/40">
-			<div className="@container bg-secondary/50 px-4 py-3">
-				<div className="grid @max-[22rem]:grid-cols-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2">
+		<div className="space-y-3 rounded-md border border-dashed bg-bg/40">
+			<div className="@container bg-sunken/50 px-4 py-3">
+				<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 @max-[22rem]:grid-cols-1">
 					<div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-						<span className="font-medium text-xs">
+						<span className="text-xs font-medium">
 							<Trans comment="Layout editor page label with 1-based page number">Page {pageIndex + 1}</Trans>
 						</span>
 
@@ -314,7 +309,7 @@ function PageContainer({
 								onCheckedChange={(checked) => onToggleFullWidth(pageIndex, checked)}
 							/>
 
-							<span className="font-medium text-muted-foreground text-xs">
+							<span className="text-xs font-medium text-ink-3">
 								<Trans comment="Layout editor toggle label that makes a page single-column">Full Width</Trans>
 							</span>
 						</label>
@@ -326,7 +321,7 @@ function PageContainer({
 							onClick={() => onDelete(pageIndex)}
 							className="size-auto gap-x-2.5 justify-self-end p-0!"
 						>
-							<TrashIcon />
+							<Icon name="delete" size={16} />
 							<Trans>Delete Page</Trans>
 						</Button>
 					)}
@@ -335,7 +330,7 @@ function PageContainer({
 
 			<div
 				className={cn(
-					"grid w-full @md:grid-cols-2 gap-x-4 gap-y-2 p-4 pt-0 font-medium",
+					"grid w-full gap-x-4 gap-y-2 p-4 pt-0 font-medium @md:grid-cols-2",
 					sidebarPosition === "none" && "@md:grid-cols-1",
 				)}
 			>
@@ -384,13 +379,13 @@ function LayoutColumn({
 	return (
 		<SortableContext id={droppableId} items={items} strategy={verticalListSortingStrategy}>
 			<div className={cn("space-y-1.5", disabled && "opacity-50", className)}>
-				{!hideLabel && <div className="@md:row-start-1 ps-4 font-medium text-xs">{getColumnLabel(columnId)}</div>}
+				{!hideLabel && <div className="ps-4 text-xs font-medium @md:row-start-1">{getColumnLabel(columnId)}</div>}
 
 				<div
 					ref={setNodeRef}
 					className={cn(
 						"space-y-2.5 rounded-md border border-dashed p-3 pb-8 transition-colors",
-						isOver && !disabled ? "border-primary/60 bg-primary/5" : "bg-background/40",
+						isOver && !disabled ? "border-accent/60 bg-accent/5" : "bg-bg/40",
 					)}
 				>
 					{items.map((id) => (
@@ -398,7 +393,7 @@ function LayoutColumn({
 					))}
 
 					{items.length === 0 && (
-						<div className="rounded-md border border-dashed p-4 font-medium text-muted-foreground text-xs">
+						<div className="rounded-md border border-dashed p-4 text-xs font-medium text-ink-3">
 							<Trans>Drag and drop sections here to move them between columns</Trans>
 						</div>
 					)}
@@ -415,7 +410,10 @@ type SortableLayoutItemProps = {
 };
 
 function SortableLayoutItem({ id, pageIndex, columnId }: SortableLayoutItemProps) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id,
+		transition: DRAG_SETTLE,
+	});
 
 	const style: CSSProperties = { transform: CSS.Transform.toString(transform), transition };
 
@@ -450,21 +448,24 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 
 	const pages = resume.data.metadata.layout.pages;
 	// When the template collapses the sidebar, no page has a usable sidebar column.
-	const sidebarCollapsed = templates[resume.data.metadata.template].sidebarPosition === "none";
+	const sidebarCollapsed = templateLayouts[resume.data.metadata.template].columns === 1;
 
 	const moveTo = (targetPageIndex: number, targetColumnId: ColumnId) => {
 		updateResumeData((draft) => {
-			const from = draft.metadata.layout.pages[pageIndex][columnId];
+			const from = draft.metadata.layout.pages[pageIndex]?.[columnId];
+			const to = draft.metadata.layout.pages[targetPageIndex]?.[targetColumnId];
+			if (!from || !to) return;
 			const index = from.indexOf(id);
 			if (index === -1) return;
 			from.splice(index, 1);
-			draft.metadata.layout.pages[targetPageIndex][targetColumnId].push(id);
+			to.push(id);
 		});
 	};
 
 	const moveToNewPage = () => {
 		updateResumeData((draft) => {
-			const from = draft.metadata.layout.pages[pageIndex][columnId];
+			const from = draft.metadata.layout.pages[pageIndex]?.[columnId];
+			if (!from) return;
 			const index = from.indexOf(id);
 			if (index === -1) return;
 			from.splice(index, 1);
@@ -475,7 +476,7 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 	return (
 		<DropdownMenuSub>
 			<DropdownMenuSubTrigger>
-				<ArrowBendUpRightIcon />
+				<Icon name="redo" size={16} />
 				<Trans>Move to</Trans>
 			</DropdownMenuSubTrigger>
 
@@ -487,7 +488,7 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 					return (
 						<DropdownMenuSub key={`page-${targetPageIndex}`}>
 							<DropdownMenuSubTrigger>
-								<FileIcon />
+								<Icon name="draft" size={16} />
 								<Trans>Page {targetPageIndex + 1}</Trans>
 							</DropdownMenuSubTrigger>
 
@@ -515,7 +516,7 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 				<DropdownMenuSeparator />
 
 				<DropdownMenuItem onClick={moveToNewPage}>
-					<PlusCircleIcon />
+					<Icon name="add_circle" size={16} />
 					<Trans>New Page</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuSubContent>
@@ -573,7 +574,7 @@ function SectionBreakItems({ id }: SectionBreakItemsProps) {
 				<Trans comment="Layout editor toggle that prevents a section from splitting across pages">Keep together</Trans>
 			</DropdownMenuCheckboxItem>
 
-			<p className="px-2 pb-1 text-muted-foreground text-xs">
+			<p className="px-2 pb-1 text-xs text-ink-3">
 				<Trans comment="Helper note explaining the keep-together limitation">
 					Only applies when the section fits on a single page.
 				</Trans>
@@ -620,15 +621,15 @@ function LayoutItemContent({
 			data-overlay={isOverlay ? "true" : undefined}
 			data-dragging={isDragging ? "true" : undefined}
 			className={cn(
-				"group/item flex cursor-grab touch-none select-none items-center gap-x-2 rounded-md border border-border bg-background px-2 py-1.5 font-medium text-sm transition-[background-color,border-color] duration-150",
-				"hover:bg-secondary/40 active:cursor-grabbing active:border-primary/60 active:bg-secondary/40",
-				"data-[overlay=true]:cursor-grabbing data-[overlay=true]:border-primary/60 data-[overlay=true]:bg-background data-[overlay=true]:shadow-md",
+				"group/item flex cursor-grab touch-none items-center gap-x-2 rounded-md border border-line bg-bg px-2 py-1.5 text-sm font-medium transition-[background-color,border-color] duration-quick select-none",
+				"hover:bg-sunken/40 active:cursor-grabbing active:border-accent/60 active:bg-sunken/40",
+				"data-[overlay=true]:cursor-grabbing data-[overlay=true]:border-accent/60 data-[overlay=true]:bg-bg data-[overlay=true]:shadow-md",
 				"data-[dragging=true]:cursor-grabbing data-[dragging=true]:opacity-40",
 				className,
 			)}
 			{...rest}
 		>
-			<DotsSixVerticalIcon className="opacity-40 transition-opacity group-hover/item:opacity-100" />
+			<Icon name="drag_indicator" size={16} className="opacity-40 transition-opacity group-hover/item:opacity-100" />
 			<span className="min-w-0 flex-1 truncate">{title}</span>
 
 			{/* The drag overlay renders without a location; only real rows get the menu. */}
@@ -637,9 +638,9 @@ function LayoutItemContent({
 					<DropdownMenuTrigger
 						aria-label={t`Move section to another column or page`}
 						onPointerDown={(event) => event.stopPropagation()}
-						className="flex cursor-context-menu items-center rounded p-0.5 opacity-40 transition-opacity hover:bg-secondary/40 focus:outline-none focus-visible:ring-1 group-hover/item:opacity-100"
+						className="flex cursor-context-menu items-center rounded p-0.5 opacity-40 transition-opacity group-hover/item:opacity-100 hover:bg-sunken/40 focus:outline-none focus-visible:ring-1"
 					>
-						<DotsThreeVerticalIcon />
+						<Icon name="more_vert" size={16} />
 					</DropdownMenuTrigger>
 
 					<DropdownMenuContent align="end">

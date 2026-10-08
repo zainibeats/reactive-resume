@@ -1,5 +1,5 @@
-import type { PdfAtsReport } from "@reactive-resume/resume/ats-pdf";
 import type { ExtractProgress } from "./extract-client";
+import type { PdfAtsReport } from "@reactive-resume/resume/ats-pdf";
 import { extractPdf } from "./extract-client";
 
 export type AtsCheckResult = {
@@ -21,16 +21,20 @@ export type RunAtsCheckOptions = {
  * who never uploads a file never downloads either.
  */
 export async function runAtsCheck(file: File, options: RunAtsCheckOptions = {}): Promise<AtsCheckResult> {
+	const engine = import("@reactive-resume/resume/ats-pdf");
+	// Awaited below; this only keeps a failed chunk load from surfacing as unhandled when extraction throws first.
+	engine.catch(() => {});
 	const raw = await extractPdf(file, {
 		...(options.onProgress ? { onProgress: options.onProgress } : {}),
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 
-	const { analyzePdfResume, buildExtractedDocument } = await import("@reactive-resume/resume/ats-pdf");
+	const { analyzePdfResume, buildExtractedDocument } = await engine;
 
-	const report = analyzePdfResume(raw, {
-		...(options.jobDescription?.trim() ? { jobDescription: options.jobDescription } : {}),
-	});
+	const report = analyzePdfResume(
+		raw,
+		options.jobDescription?.trim() ? { jobDescription: options.jobDescription } : {},
+	);
 
 	return { report, fullText: buildExtractedDocument(raw).fullText };
 }

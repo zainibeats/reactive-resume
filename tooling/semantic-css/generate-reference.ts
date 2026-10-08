@@ -45,8 +45,8 @@ const table = (headers: readonly string[], rows: readonly string[]) =>
 	[`| ${headers.join(" | ")} |`, `| ${headers.map(() => "---").join(" | ")} |`, ...rows].join("\n");
 
 export function replaceGeneratedBlock(source: string, name: string, body: string, path: string): string {
-	const start = `<!-- ${name}:START -->`;
-	const end = `<!-- ${name}:END -->`;
+	const start = `{/* ${name}:START */}`;
+	const end = `{/* ${name}:END */}`;
 	const startMatches = source.split(start).length - 1;
 	const endMatches = source.split(end).length - 1;
 

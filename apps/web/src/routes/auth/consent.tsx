@@ -2,13 +2,12 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { OAuthConsentPage } from "@/features/auth/pages/consent";
 
 export const Route = createFileRoute("/auth/consent")({
-	ssr: false,
-	beforeLoad: ({ context, location }) => {
+	beforeLoad: ({ context }) => {
 		if (!context.session) {
 			throw redirect({
 				to: "/auth/login",
 				search: {
-					callbackURL: `/api/auth/oauth${typeof window === "undefined" ? location.searchStr : window.location.search}`,
+					callbackURL: `/api/auth/oauth${window.location.search}`,
 				},
 			});
 		}

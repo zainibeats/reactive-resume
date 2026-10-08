@@ -1,7 +1,6 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { ModelMessage } from "ai";
-import { inflateRawSync } from "node:zlib";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createCerebras } from "@ai-sdk/cerebras";
 import { createCohere } from "@ai-sdk/cohere";
@@ -16,6 +15,7 @@ import { createPerplexity } from "@ai-sdk/perplexity";
 import { createTogetherAI } from "@ai-sdk/togetherai";
 import { createXai } from "@ai-sdk/xai";
 import { APICallError, createGateway, generateText, LoadAPIKeyError, NoSuchModelError } from "ai";
+import { strFromU8, unzipSync } from "fflate";
 import { createOllama } from "ollama-ai-provider-v2";
 import { match } from "ts-pattern";
 import { z } from "zod";
@@ -86,14 +86,6 @@ const TEST_CONNECTION_TIMEOUT_MS = z.coerce
 	.catch(30_000)
 	.parse(process.env.AI_TEST_TIMEOUT_MS?.trim() || undefined);
 const DOCX_DOCUMENT_XML_PATH = "word/document.xml";
-const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
-const ZIP_CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50;
-const ZIP_END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054b50;
-const ZIP_STORED_METHOD = 0;
-const ZIP_DEFLATED_METHOD = 8;
-const REMOTE_AI_REQUEST_TIMEOUT_MS = 120_000;
-const LOCAL_AI_REQUEST_TIMEOUT_MS = 300_000;
-const AI_STREAM_CHUNK_TIMEOUT_MS = 60_000;
 
 export function getModel(input: GetModelInput) {
 	const { provider, model, apiKey } = input;
@@ -131,18 +123,9 @@ export function getModel(input: GetModelInput) {
 }
 
 export function getAgentModel(input: GetModelInput) {
-	if (!supportsProviderNativeWebSearch(input)) return getModel(input);
+	if (input.provider !== "openai" || !supportsProviderNativeWebSearch(input)) return getModel(input);
 
 	return createOpenAI({ apiKey: input.apiKey, baseURL: resolveAiBaseUrl(input) }).responses(input.model);
-}
-
-export function getAiRequestTimeout(input: Pick<GetModelInput, "provider" | "baseURL">) {
-	const isLocalProvider = input.provider === "ollama" || input.provider === "lmstudio";
-
-	return {
-		totalMs: isLocalProvider ? LOCAL_AI_REQUEST_TIMEOUT_MS : REMOTE_AI_REQUEST_TIMEOUT_MS,
-		chunkMs: AI_STREAM_CHUNK_TIMEOUT_MS,
-	};
 }
 
 const aiCredentialsSchema = z.object({
@@ -351,68 +334,16 @@ type ParseDocxInput = z.infer<typeof aiCredentialsSchema> & {
 	mediaType: "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 };
 
-function assertZipRange(buffer: Buffer, offset: number, length: number) {
-	if (offset < 0 || length < 0 || offset + length > buffer.length) throw new Error("Invalid DOCX archive.");
-}
-
-function findEndOfCentralDirectory(buffer: Buffer): number {
-	const minOffset = Math.max(0, buffer.length - 0xffff - 22);
-
-	for (let offset = buffer.length - 22; offset >= minOffset; offset--) {
-		if (buffer.readUInt32LE(offset) === ZIP_END_OF_CENTRAL_DIRECTORY_SIGNATURE) return offset;
+function readDocumentXml(data: string): string {
+	let entries: Record<string, Uint8Array>;
+	try {
+		entries = unzipSync(Buffer.from(data, "base64"), { filter: (file) => file.name === DOCX_DOCUMENT_XML_PATH });
+	} catch {
+		throw new Error("Invalid DOCX archive.");
 	}
-
-	throw new Error("Invalid DOCX archive.");
-}
-
-function readZipEntry(buffer: Buffer, entryName: string): Buffer {
-	const eocdOffset = findEndOfCentralDirectory(buffer);
-	assertZipRange(buffer, eocdOffset, 22);
-
-	const centralDirectorySize = buffer.readUInt32LE(eocdOffset + 12);
-	const centralDirectoryOffset = buffer.readUInt32LE(eocdOffset + 16);
-	assertZipRange(buffer, centralDirectoryOffset, centralDirectorySize);
-
-	let offset = centralDirectoryOffset;
-	const endOffset = centralDirectoryOffset + centralDirectorySize;
-
-	while (offset < endOffset) {
-		assertZipRange(buffer, offset, 46);
-		if (buffer.readUInt32LE(offset) !== ZIP_CENTRAL_DIRECTORY_SIGNATURE) throw new Error("Invalid DOCX archive.");
-
-		const compressionMethod = buffer.readUInt16LE(offset + 10);
-		const compressedSize = buffer.readUInt32LE(offset + 20);
-		const fileNameLength = buffer.readUInt16LE(offset + 28);
-		const extraFieldLength = buffer.readUInt16LE(offset + 30);
-		const commentLength = buffer.readUInt16LE(offset + 32);
-		const localHeaderOffset = buffer.readUInt32LE(offset + 42);
-		const fileNameOffset = offset + 46;
-		assertZipRange(buffer, fileNameOffset, fileNameLength);
-
-		const fileName = buffer.toString("utf8", fileNameOffset, fileNameOffset + fileNameLength);
-
-		if (fileName === entryName) {
-			assertZipRange(buffer, localHeaderOffset, 30);
-			if (buffer.readUInt32LE(localHeaderOffset) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
-				throw new Error("Invalid DOCX archive.");
-			}
-
-			const localFileNameLength = buffer.readUInt16LE(localHeaderOffset + 26);
-			const localExtraFieldLength = buffer.readUInt16LE(localHeaderOffset + 28);
-			const dataOffset = localHeaderOffset + 30 + localFileNameLength + localExtraFieldLength;
-			assertZipRange(buffer, dataOffset, compressedSize);
-
-			const compressed = buffer.subarray(dataOffset, dataOffset + compressedSize);
-			if (compressionMethod === ZIP_STORED_METHOD) return compressed;
-			if (compressionMethod === ZIP_DEFLATED_METHOD) return inflateRawSync(compressed);
-
-			throw new Error("Unsupported DOCX archive compression.");
-		}
-
-		offset = fileNameOffset + fileNameLength + extraFieldLength + commentLength;
-	}
-
-	throw new Error("DOCX document content not found.");
+	const xml = entries[DOCX_DOCUMENT_XML_PATH];
+	if (!xml) throw new Error("DOCX document content not found.");
+	return strFromU8(xml);
 }
 
 function decodeXmlEntities(value: string): string {
@@ -429,7 +360,7 @@ function decodeXmlEntities(value: string): string {
 }
 
 function extractDocxText(file: z.infer<typeof fileInputSchema>): string {
-	const documentXml = readZipEntry(Buffer.from(file.data, "base64"), DOCX_DOCUMENT_XML_PATH).toString("utf8");
+	const documentXml = readDocumentXml(file.data);
 	// ponytail: minimal OOXML body-text extraction; add a DOCX parser dependency if tracked changes matter.
 	const text = decodeXmlEntities(
 		documentXml

@@ -2,10 +2,10 @@ import type { SemanticNode } from "@reactive-resume/resume/stylesheet";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import { describe, expect, it } from "vitest";
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../document";
+import { pdf } from "../forme/testing";
 import { resolveResumeRuntime } from "./resolve";
 
 type HostNode = {
@@ -237,7 +237,7 @@ describe("semantic sibling ordering reaches final PDF output", () => {
 			data.metadata.page.locale = locale;
 			data.summary.content = "<ul><li>List content</li></ul>";
 			data.metadata.layout.pages = [{ fullWidth: true, main: ["summary"], sidebar: [] }];
-			const runtime = resolveResumeRuntime({ data, template: "onyx", mode: "semantic" });
+			const runtime = resolveResumeRuntime({ data, template: "onyx" });
 			const renderedItem = findSemanticNode(runtime.renderTree, (node) => node.kind === "list-item");
 
 			expect(runtime.diagnostics.filter(({ severity }) => severity === "error")).toEqual([]);

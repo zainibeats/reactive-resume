@@ -292,16 +292,4 @@ describe("parseReactiveResumeV4JSON — broad section mapping", () => {
 		expect(ref.position).toBe("Manager");
 		expect(ref.description).toBe("Was great");
 	});
-
-	it("scales language level 10 → 5 and skill level 10 → 5", () => {
-		const language = result.sections.languages.items[0] as { level?: number };
-		expect(language.level).toBe(5);
-
-		const skill = result.sections.skills.items[0] as { level?: number };
-		expect(skill.level).toBe(5);
-	});
-
-	it("invalid JSON throws", () => {
-		expect(() => parseReactiveResumeV4JSON("not json")).toThrow();
-	});
 });

@@ -1,13 +1,3 @@
-export function getCookie(request: Request, name: string): string | undefined {
-	const cookieHeader = request.headers.get("cookie");
-	if (!cookieHeader) return;
-
-	for (const part of cookieHeader.split(";")) {
-		const [rawName, ...rawValue] = part.trim().split("=");
-		if (rawName === name && rawValue.length > 0) return rawValue.join("=");
-	}
-}
-
 export function mergeResponseHeaders(response: Response, headers: Headers): Response {
 	if ([...headers].length === 0) return response;
 

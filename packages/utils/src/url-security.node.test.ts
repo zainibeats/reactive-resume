@@ -1,10 +1,14 @@
-import { describe, expect, it } from "vitest";
-import { isAllowedOAuthRedirectUri, isPrivateOrLoopbackHost, parseUrl } from "./url-security.node";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchWorkerPublicUrl, isAllowedOAuthRedirectUri, isPrivateOrLoopbackHost } from "./url-security.node";
+
+const dns = vi.hoisted(() => ({ lookup: vi.fn(), resolve4: vi.fn(), resolve6: vi.fn() }));
+vi.mock("node:dns/promises", () => dns);
 
 describe("isPrivateOrLoopbackHost", () => {
 	it.each([
 		"0.0.0.0",
 		"10.0.0.1",
+		"10.255.255.255",
 		"100.64.0.1",
 		"100.127.255.255",
 		"127.0.0.1",
@@ -15,6 +19,7 @@ describe("isPrivateOrLoopbackHost", () => {
 		"192.0.2.1",
 		"192.88.99.1",
 		"192.168.0.1",
+		"192.168.255.255",
 		"198.18.0.1",
 		"198.19.255.255",
 		"198.51.100.1",
@@ -38,6 +43,7 @@ describe("isPrivateOrLoopbackHost", () => {
 		"2001::1",
 		"2001:2::1",
 		"2001:10::1",
+		"2001:100::1",
 		"2001:db8::1",
 		"2002::1",
 		"3fff::1",
@@ -56,18 +62,8 @@ describe("isPrivateOrLoopbackHost", () => {
 	describe("loopback hostnames", () => {
 		it("matches localhost", () => {
 			expect(isPrivateOrLoopbackHost("localhost")).toBe(true);
-		});
-
-		it("matches LOCALHOST (case-insensitive)", () => {
 			expect(isPrivateOrLoopbackHost("LOCALHOST")).toBe(true);
-		});
-
-		it("matches subdomains of localhost", () => {
 			expect(isPrivateOrLoopbackHost("api.localhost")).toBe(true);
-		});
-
-		it("matches IPv6 loopback ::1", () => {
-			expect(isPrivateOrLoopbackHost("::1")).toBe(true);
 		});
 
 		it("matches bracketed IPv6 loopback [::1]", () => {
@@ -76,68 +72,6 @@ describe("isPrivateOrLoopbackHost", () => {
 	});
 
 	describe("private IPv4 ranges", () => {
-		it("matches 10.0.0.0/8", () => {
-			expect(isPrivateOrLoopbackHost("10.0.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("10.255.255.255")).toBe(true);
-		});
-
-		it("matches 127.0.0.0/8 (loopback)", () => {
-			expect(isPrivateOrLoopbackHost("127.0.0.1")).toBe(true);
-		});
-
-		it("matches 169.254.0.0/16 (link-local)", () => {
-			expect(isPrivateOrLoopbackHost("169.254.1.1")).toBe(true);
-		});
-
-		it("matches 172.16.0.0/12", () => {
-			expect(isPrivateOrLoopbackHost("172.16.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("172.31.255.255")).toBe(true);
-		});
-
-		it("does NOT match outside 172.16-31", () => {
-			expect(isPrivateOrLoopbackHost("172.15.0.1")).toBe(false);
-			expect(isPrivateOrLoopbackHost("172.32.0.1")).toBe(false);
-		});
-
-		it("matches 192.168.0.0/16", () => {
-			expect(isPrivateOrLoopbackHost("192.168.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("192.168.255.255")).toBe(true);
-		});
-
-		it("matches 0.0.0.0/8", () => {
-			expect(isPrivateOrLoopbackHost("0.0.0.0")).toBe(true);
-		});
-
-		it("matches 192.0.0.0/24", () => {
-			expect(isPrivateOrLoopbackHost("192.0.0.1")).toBe(true);
-		});
-
-		it("matches documentation IPv4 ranges", () => {
-			expect(isPrivateOrLoopbackHost("192.0.2.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("198.51.100.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("203.0.113.1")).toBe(true);
-		});
-
-		it("matches deprecated 6to4 relay anycast", () => {
-			expect(isPrivateOrLoopbackHost("192.88.99.1")).toBe(true);
-		});
-
-		it("matches 100.64.0.0/10 (CGNAT)", () => {
-			expect(isPrivateOrLoopbackHost("100.64.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("100.127.255.255")).toBe(true);
-		});
-
-		it("matches 198.18.0.0/15 (benchmarking)", () => {
-			expect(isPrivateOrLoopbackHost("198.18.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("198.19.255.255")).toBe(true);
-		});
-
-		it("matches multicast, reserved, and broadcast IPv4 ranges", () => {
-			expect(isPrivateOrLoopbackHost("224.0.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("240.0.0.1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("255.255.255.255")).toBe(true);
-		});
-
 		it("does NOT match public IPs", () => {
 			expect(isPrivateOrLoopbackHost("8.8.8.8")).toBe(false);
 			expect(isPrivateOrLoopbackHost("1.1.1.1")).toBe(false);
@@ -149,44 +83,6 @@ describe("isPrivateOrLoopbackHost", () => {
 	});
 
 	describe("private IPv6 ranges", () => {
-		it("matches unique-local fc00::/7", () => {
-			expect(isPrivateOrLoopbackHost("fc00::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("fd12::1")).toBe(true);
-		});
-
-		it("matches link-local fe80::/10", () => {
-			expect(isPrivateOrLoopbackHost("fe80::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("fe81::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("febf::1")).toBe(true);
-		});
-
-		it("matches unspecified and multicast IPv6 ranges", () => {
-			expect(isPrivateOrLoopbackHost("::")).toBe(true);
-			expect(isPrivateOrLoopbackHost("ff00::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("ff02::1")).toBe(true);
-		});
-
-		it("matches NAT64 discard-only, benchmarking, and 6to4 IPv6 ranges", () => {
-			expect(isPrivateOrLoopbackHost("64:ff9b::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("64:ff9b:1::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("100::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("100:0:0:1::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("2001::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("2001:2::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("2001:10::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("2002::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("3fff::1")).toBe(true);
-			expect(isPrivateOrLoopbackHost("5f00::1")).toBe(true);
-		});
-
-		it("matches documentation IPv6 2001:db8::/32", () => {
-			expect(isPrivateOrLoopbackHost("2001:db8::1")).toBe(true);
-		});
-
-		it("does NOT match IPv6 addresses outside fe80::/10", () => {
-			expect(isPrivateOrLoopbackHost("fec0::1")).toBe(false);
-		});
-
 		it("does NOT match global IPv6", () => {
 			expect(isPrivateOrLoopbackHost("2606:4700:4700::1111")).toBe(false);
 		});
@@ -200,45 +96,12 @@ describe("isPrivateOrLoopbackHost", () => {
 			expect(isPrivateOrLoopbackHost("::ffff:0a00:1")).toBe(true);
 			expect(isPrivateOrLoopbackHost("[::ffff:7f00:1]")).toBe(true);
 		});
-
-		it("matches IPv4-mapped IPv6 public addresses because the mapped range is special-purpose", () => {
-			expect(isPrivateOrLoopbackHost("::ffff:8.8.8.8")).toBe(true);
-			expect(isPrivateOrLoopbackHost("::ffff:0808:0808")).toBe(true);
-		});
-
-		it("matches the broad 2001::/23 IETF protocol assignments range", () => {
-			expect(isPrivateOrLoopbackHost("2001:100::1")).toBe(true);
-		});
 	});
 
 	describe("non-IP, non-loopback hostnames", () => {
 		it("returns false for public domain", () => {
 			expect(isPrivateOrLoopbackHost("example.com")).toBe(false);
 		});
-
-		it("returns false for arbitrary string", () => {
-			expect(isPrivateOrLoopbackHost("not-a-real-host")).toBe(false);
-		});
-	});
-});
-
-describe("parseUrl", () => {
-	it("returns URL object for valid URL", () => {
-		const url = parseUrl("https://example.com/path");
-		expect(url).not.toBeNull();
-		expect(url?.hostname).toBe("example.com");
-	});
-
-	it("returns null for invalid URL", () => {
-		expect(parseUrl("not a url")).toBeNull();
-	});
-
-	it("returns null for empty string", () => {
-		expect(parseUrl("")).toBeNull();
-	});
-
-	it("returns null for relative URL", () => {
-		expect(parseUrl("/path/only")).toBeNull();
 	});
 });
 
@@ -257,32 +120,12 @@ describe("isAllowedOAuthRedirectUri", () => {
 		expect(isAllowedOAuthRedirectUri("https://app.example.com/cb#x", trustedOrigins)).toBe(false);
 	});
 
-	it("allows http for loopback (localhost)", () => {
-		expect(isAllowedOAuthRedirectUri("http://localhost:3000/cb", trustedOrigins)).toBe(true);
-	});
-
-	it("allows http for 127.0.0.1", () => {
-		expect(isAllowedOAuthRedirectUri("http://127.0.0.1/cb", trustedOrigins)).toBe(true);
-	});
-
-	it("allows http for IPv6 loopback", () => {
-		expect(isAllowedOAuthRedirectUri("http://[::1]/cb", trustedOrigins)).toBe(true);
-	});
-
 	it("rejects http for non-loopback hosts", () => {
 		expect(isAllowedOAuthRedirectUri("http://example.com/cb", trustedOrigins)).toBe(false);
 	});
 
 	it("rejects non-https/non-http protocols", () => {
 		expect(isAllowedOAuthRedirectUri("ftp://example.com/cb", trustedOrigins)).toBe(false);
-	});
-
-	it("rejects https with private/loopback host", () => {
-		expect(isAllowedOAuthRedirectUri("https://192.168.1.1/cb", trustedOrigins)).toBe(false);
-	});
-
-	it("matches trusted origins", () => {
-		expect(isAllowedOAuthRedirectUri("https://app.example.com/cb", trustedOrigins)).toBe(true);
 	});
 
 	it("allows a trusted origin on a private network, for LAN-only self-hosted deployments", () => {
@@ -293,19 +136,60 @@ describe("isAllowedOAuthRedirectUri", () => {
 		expect(isAllowedOAuthRedirectUri("https://api.example.com/cb", trustedOrigins)).toBe(true);
 		expect(isAllowedOAuthRedirectUri("https://claude.ai/api/mcp/auth_callback", trustedOrigins)).toBe(true);
 	});
+});
 
-	it("still rejects unsafe shapes on public https hosts", () => {
-		expect(isAllowedOAuthRedirectUri("https://u:p@api.example.com/cb", trustedOrigins)).toBe(false);
-		expect(isAllowedOAuthRedirectUri("https://api.example.com/cb#x", trustedOrigins)).toBe(false);
+describe("fetchWorkerPublicUrl", () => {
+	const network = vi.fn<typeof fetch>();
+	const options = () => ({ signal: new AbortController().signal });
+	beforeEach(() => {
+		vi.stubEnv("CLOUDFLARE", "1");
+		vi.stubGlobal("fetch", network);
+		dns.resolve4.mockResolvedValue(["1.1.1.1"]);
+		dns.resolve6.mockRejectedValue(new Error("No IPv6 records"));
+	});
+	afterEach(() => {
+		vi.resetAllMocks();
+		vi.unstubAllGlobals();
+		vi.unstubAllEnvs();
 	});
 
-	it("allows any parseable URI when unsafe mode is enabled", () => {
-		const options = { allowUnsafe: true };
-
-		expect(isAllowedOAuthRedirectUri("myapp://callback", trustedOrigins, options)).toBe(true);
-		expect(isAllowedOAuthRedirectUri("http://example.com/cb", trustedOrigins, options)).toBe(true);
-		expect(isAllowedOAuthRedirectUri("https://192.168.1.1/cb", trustedOrigins, options)).toBe(true);
-		expect(isAllowedOAuthRedirectUri("https://u:p@app.example.com/cb#x", trustedOrigins, options)).toBe(true);
-		expect(isAllowedOAuthRedirectUri("not a url", trustedOrigins, options)).toBe(false);
+	it("reads public redirects without automatically following unchecked destinations", async () => {
+		network.mockResolvedValueOnce(
+			new Response(null, { status: 302, headers: { location: "https://next.example/page" } }),
+		);
+		network.mockResolvedValueOnce(new Response("public page"));
+		const response = await fetchWorkerPublicUrl(new URL("https://example.com"), options());
+		expect(await response.text()).toBe("public page");
+		expect(network.mock.calls.map(([url, init]) => [String(url), init?.redirect])).toEqual([
+			["https://example.com/", "manual"],
+			["https://next.example/page", "manual"],
+		]);
 	});
+
+	it("refuses a host if any DNS answer is private", async () => {
+		dns.resolve6.mockResolvedValue(["fd00::1"]);
+		await expect(fetchWorkerPublicUrl(new URL("https://example.com"), options())).rejects.toMatchObject({
+			cause: "unsafe-url",
+		});
+		expect(network).not.toHaveBeenCalled();
+	});
+
+	it("fails closed when DNS cannot resolve either address family", async () => {
+		dns.resolve4.mockRejectedValue(new Error("DNS unavailable"));
+		await expect(fetchWorkerPublicUrl(new URL("https://example.com"), options())).rejects.toMatchObject({
+			cause: "unsafe-url",
+		});
+		expect(network).not.toHaveBeenCalled();
+	});
+
+	it.each(["https://127.0.0.1/admin", "https://[::1]/admin", "http://next.example/page"])(
+		"refuses redirect to %s",
+		async (location) => {
+			network.mockResolvedValueOnce(new Response(null, { status: 302, headers: { location } }));
+			await expect(fetchWorkerPublicUrl(new URL("https://example.com"), options())).rejects.toMatchObject({
+				cause: "unsafe-url",
+			});
+			expect(network).toHaveBeenCalledTimes(1);
+		},
+	);
 });

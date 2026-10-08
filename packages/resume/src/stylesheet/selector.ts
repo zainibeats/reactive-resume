@@ -1,5 +1,5 @@
-import type { CssNode } from "css-tree";
 import type { SemanticNode } from "./types";
+import type { CssNode } from "css-tree";
 import SpecificityCalculator from "@bramus/specificity";
 import * as csstree from "css-tree";
 import { SEMANTIC_CSS_LIMITS_V1 } from "./limits";
@@ -8,7 +8,7 @@ import { SEMANTIC_NODE_KINDS, SEMANTIC_REGISTRY_V1 } from "./registry/semantic";
 export type Specificity = readonly [ids: number, classes: number, types: number];
 
 type Combinator = " " | ">" | "+" | "~";
-type AttributeMatcher = "=" | "~=" | "|=" | "^=" | "$=" | "*=";
+type AttributeMatcher = "=" | "~=" | "^=" | "*=";
 
 type CompiledSimpleSelector =
 	| { type: "universal" }
@@ -26,7 +26,6 @@ type CompiledSimpleSelector =
 			name: "nth-child" | "nth-of-type";
 			a: number;
 			b: number;
-			of?: readonly CompiledComplexSelector[];
 	  };
 
 type CompiledCompoundSelector = {
@@ -142,11 +141,7 @@ function validateCompound(selectors: readonly CompiledSimpleSelector[]): void {
 	}
 }
 
-function compileNth(
-	node: SelectorAst,
-	name: "nth-child" | "nth-of-type",
-	context: CompileContext,
-): CompiledSimpleSelector {
+function compileNth(node: SelectorAst, name: "nth-child" | "nth-of-type"): CompiledSimpleSelector {
 	const nth = childrenOf(node);
 	if (nth.length !== 1 || nth[0]?.type !== "Nth" || !nth[0].nth) {
 		throw new Error(`:${name} requires one An+B expression.`);
@@ -173,9 +168,8 @@ function compileNth(
 		throw new Error(`Unsupported :${name} expression.`);
 	}
 
-	if (name === "nth-of-type" && nth[0].selector) throw new Error(":nth-of-type does not accept an of selector.");
-	const of = nth[0].selector ? compileSelectorList(nth[0].selector, { depth: context.depth + 1 }) : undefined;
-	return { type: "pseudo", name, a, b, ...(of ? { of } : {}) };
+	if (nth[0].selector) throw new Error(`:${name} does not accept an of selector.`);
+	return { type: "pseudo", name, a, b };
 }
 
 function compileSimple(node: SelectorAst, context: CompileContext): CompiledSimpleSelector | null {
@@ -193,7 +187,7 @@ function compileSimple(node: SelectorAst, context: CompileContext): CompiledSimp
 			if (!knownAttributes.has(name)) throw new Error(`Unknown semantic attribute ${name}.`);
 			if (node.flags) throw new Error("Attribute selector flags are not supported.");
 			const matcher = node.matcher as AttributeMatcher | null | undefined;
-			if (matcher !== null && matcher !== undefined && !["=", "~=", "|=", "^=", "$=", "*="].includes(matcher)) {
+			if (matcher !== null && matcher !== undefined && !["=", "~=", "^=", "*="].includes(matcher)) {
 				throw new Error(`Unsupported attribute matcher ${matcher}.`);
 			}
 			const value = attributeValue(node);
@@ -220,12 +214,7 @@ function compileSimple(node: SelectorAst, context: CompileContext): CompiledSimp
 				const selectors = compileSelectorList(nested[0], { depth: context.depth + 1 });
 				return { type: "pseudo", name: name as "is" | "where" | "not", selectors };
 			}
-			if (name === "nth-child" || name === "nth-of-type") {
-				if (context.depth >= SEMANTIC_CSS_LIMITS_V1.maxFunctionDepth) {
-					throw new SelectorResourceLimitError("Selector function nesting is too deep.");
-				}
-				return compileNth(node, name, context);
-			}
+			if (name === "nth-child" || name === "nth-of-type") return compileNth(node, name);
 			throw new Error(`Unsupported pseudo-class :${name}.`);
 		}
 		case "ClassSelector":
@@ -336,12 +325,8 @@ function matchesAttribute(actual: string, matcher: AttributeMatcher, expected: s
 			return actual === expected;
 		case "~=":
 			return expected !== "" && actual.split(/\s+/).includes(expected);
-		case "|=":
-			return expected !== "" && (actual === expected || actual.startsWith(`${expected}-`));
 		case "^=":
 			return expected !== "" && actual.startsWith(expected);
-		case "$=":
-			return expected !== "" && actual.endsWith(expected);
 		case "*=":
 			return expected !== "" && actual.includes(expected);
 	}
@@ -394,8 +379,6 @@ function matchesSimple(selector: CompiledSimpleSelector, target: TreeNode): bool
 					if (selector.name === "nth-of-type") {
 						values = values.filter((sibling) => sibling.node.kind === target.node.kind);
 					}
-					if (selector.of)
-						values = values.filter((sibling) => selector.of?.some((nested) => matchesComplex(nested, sibling)));
 					const index = values.indexOf(target);
 					return index >= 0 && nthMatches(index + 1, selector.a, selector.b);
 				}

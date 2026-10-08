@@ -8,9 +8,9 @@ import { estimateTokenCount as estimateTextTokenCount } from "tokenx";
 
 const AGENT_CONTEXT_TOKEN_BUDGET = 40_000;
 
-const SNAPSHOT_TOOL_NAMES = new Set(["read_resume", "apply_resume_patch"]);
+const SNAPSHOT_TOOL_NAMES = new Set(["read_resume", "read_letter", "apply_resume_patch"]);
 const SUPERSEDED_SNAPSHOT_NOTE =
-	"Superseded resume snapshot removed. Base further edits on the resume state in the latest read_resume or apply_resume_patch result.";
+	"Superseded document snapshot removed. Base further edits on the latest read_resume, read_letter or apply_resume_patch result.";
 const PRUNED_TOOL_RESULT_NOTE = "Older tool result pruned to fit the context budget.";
 
 type LoosePart = Record<string, unknown> & { type: string };
@@ -69,7 +69,7 @@ function isSnapshotResultPart(part: LoosePart): boolean {
 	const value = unwrapToolOutput(part.output);
 	if (!value || typeof value !== "object") return false;
 
-	return part.toolName === "read_resume" ? "data" in value : "resume" in value;
+	return part.toolName === "apply_resume_patch" ? "resume" in value : "data" in value;
 }
 
 function supersedeSnapshotPart(part: LoosePart): LoosePart {
@@ -98,7 +98,7 @@ function supersedeStaleSnapshots(messages: ModelMessage[]): ModelMessage[] {
 	for (const { messageIndex, partIndex } of stale) {
 		const message = next[messageIndex] as ModelMessage & { content: LoosePart[] };
 		const parts = [...contentParts(message)];
-		// biome-ignore lint/style/noNonNullAssertion: location was collected from this array
+		// oxlint-disable-next-line typescript/no-non-null-assertion -- location was collected from this array
 		parts[partIndex] = supersedeSnapshotPart(parts[partIndex]!);
 		next[messageIndex] = { ...message, content: parts } as ModelMessage;
 	}
@@ -120,7 +120,7 @@ function collapseOldestToolPairs(messages: ModelMessage[], budget: number): Mode
 
 	// The surviving snapshot (last one, by Tier 0) must keep its full pair.
 	for (let index = messages.length - 1; index >= 0; index--) {
-		// biome-ignore lint/style/noNonNullAssertion: index is in range
+		// oxlint-disable-next-line typescript/no-non-null-assertion -- index is in range
 		const part = contentParts(messages[index]!).findLast(isSnapshotResultPart);
 		if (part && typeof part.toolCallId === "string") {
 			survivingSnapshotCallIds.add(part.toolCallId);

@@ -1,12 +1,10 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"tags": ["-lintignore"],
+	"ignoreBinaries": ["pdftotext"],
 	"workspaces": {
-		".": {
-			"ignoreFiles": [".design-sync/**"]
-		},
 		"apps/web": {
-			"entry": ["lingui.config.ts", "vite.config.ts", "vitest.config.ts"],
+			"entry": ["lingui.config.ts", "vitest.config.ts"],
 			"vite": {
 				"config": []
 			},
@@ -16,6 +14,8 @@
 		},
 		"apps/server": {
 			"ignoreDependencies": [
+				"@formepdf/core",
+				"@reactive-resume/pdf",
 				"@ai-sdk/anthropic",
 				"@ai-sdk/cerebras",
 				"@ai-sdk/cohere",
@@ -34,29 +34,30 @@
 				"@better-auth/drizzle-adapter",
 				"@better-auth/passkey",
 				"@bramus/specificity",
+				"@formepdf/react",
 				"@orpc/experimental-ratelimit",
-				"@react-pdf/hyphenate",
 				"@sindresorhus/slugify",
 				"@t3-oss/env-core",
 				"@uiw/color-convert",
 				"@vercel/blob",
 				"ai",
-				"bcrypt",
+				"bcryptjs",
 				"cjk-regex",
 				"css-tree",
-				"deepmerge-ts",
+				"docx",
 				"drizzle-zod",
 				"fast-json-patch",
 				"fast-png",
+				"fflate",
 				"ioredis",
 				"jose",
 				"jsonrepair",
 				"node-html-parser",
 				"nodemailer",
 				"ollama-ai-provider-v2",
-				"phosphor-icons-react-pdf",
+				"pdfjs-dist",
 				"react-email",
-				"react-pdf-html",
+				"react-reconciler",
 				"resumable-stream",
 				"sanitize-html",
 				"sharp",
@@ -67,11 +68,10 @@
 			]
 		},
 		"tooling": {
-			"entry": ["issue-labels.mjs"]
+			"entry": ["**/*.mjs"]
 		},
 		"packages/api": {
 			"ignoreDependencies": ["ioredis"]
 		}
-	},
-	"ignoreDependencies": ["@reactive-resume/config"]
+	}
 }

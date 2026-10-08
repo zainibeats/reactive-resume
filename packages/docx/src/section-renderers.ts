@@ -1,5 +1,5 @@
-import type { CustomSection, CustomSectionType, ResumeData, SectionType } from "@reactive-resume/schema/resume/data";
 import type { HtmlStyleConfig } from "./html-to-docx";
+import type { CustomSection, CustomSectionType, ResumeData, SectionType } from "@reactive-resume/schema/resume/data";
 import { BorderStyle, ExternalHyperlink, HeadingLevel, Paragraph, TabStopPosition, TabStopType, TextRun } from "docx";
 import { htmlToParagraphs } from "./html-to-docx";
 import { toSafeDocxLink } from "./link-utils";
@@ -165,13 +165,14 @@ function renderExperience(section: Sections["experience"], colorHex: string): Pa
 	const baseRun = getBaseRun();
 
 	for (const item of items) {
-		if (item.roles && item.roles.length > 0) {
+		const roles = item.roles.filter((role) => role.position.trim());
+		if (roles.length > 0) {
 			paragraphs.push(titleAndSubtitle(item.company, "", item.period, item.mainEntryBold ?? false));
 
 			const loc = locationAndPeriod(item.location, "");
 			if (loc) paragraphs.push(loc);
 
-			for (const role of item.roles) {
+			for (const role of roles) {
 				paragraphs.push(
 					new Paragraph({
 						spacing: { before: 80 },
@@ -190,11 +191,8 @@ function renderExperience(section: Sections["experience"], colorHex: string): Pa
 
 			const loc = locationAndPeriod(item.location, "");
 			if (loc) paragraphs.push(loc);
-
-			if (item.description) {
-				paragraphs.push(...htmlToParagraphs(item.description, getHtmlStyle()));
-			}
 		}
+		if (item.description) paragraphs.push(...htmlToParagraphs(item.description, getHtmlStyle()));
 
 		const ws = websiteParagraph(item.website.url, item.website.label);
 		if (ws) paragraphs.push(ws);

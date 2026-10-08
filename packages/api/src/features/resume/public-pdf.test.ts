@@ -2,6 +2,19 @@ import { describe, expect, it, vi } from "vitest";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { createPublicResumePdf } from "./public-pdf";
 
+// The default lookup runs its real query against a stand-in `pg` client that records the SQL and finds nothing.
+const queries = vi.hoisted(() => [] as string[]);
+vi.mock("@reactive-resume/db/client", async () => {
+	const { drizzle } = await import("drizzle-orm/node-postgres");
+	const client = {
+		query: ({ text }: { text: string }) => {
+			queries.push(text);
+			return Promise.resolve({ rows: [] });
+		},
+	};
+	return { db: drizzle({ client: client as never }) };
+});
+
 const requestHeaders = new Headers({ "x-forwarded-for": "203.0.113.7" });
 const input = {
 	username: "jane",
@@ -40,28 +53,9 @@ describe("createPublicResumePdf", () => {
 		expect(passwordDependencies.renderPdf).not.toHaveBeenCalled();
 	});
 
-	it("rejects renderer-unsafe stored data before budget or rendering", async () => {
-		const resume = buildResume();
-		resume.data.customSections = [
-			{
-				id: "custom-experience",
-				type: "experience",
-				title: "Experience",
-				icon: "",
-				columns: 1,
-				hidden: false,
-				keepTogether: false,
-				startOnNewPage: false,
-				items: [{ id: "summary-shaped-item", hidden: false, content: "<p>Missing company</p>" }],
-			} as never,
-		];
-		const unsafeDependencies = dependencies(resume);
-
-		await expect(createPublicResumePdf(input, unsafeDependencies)).rejects.toMatchObject({
-			code: "INTERNAL_SERVER_ERROR",
-		});
-		expect(unsafeDependencies.rateLimiter.consume).not.toHaveBeenCalled();
-		expect(unsafeDependencies.renderPdf).not.toHaveBeenCalled();
+	it("does not look in Trash, so a trashed resume's link stops serving its PDF", async () => {
+		await expect(createPublicResumePdf(input)).rejects.toMatchObject({ code: "NOT_FOUND" });
+		expect(queries.at(-1)).toContain('"resume"."trashed_at" is null');
 	});
 
 	it("renders on demand with canonical public stylesheet source", async () => {
@@ -81,13 +75,5 @@ describe("createPublicResumePdf", () => {
 			resumeId: resume.id,
 		});
 		expect(pdfDependencies.renderPdf).toHaveBeenCalledWith({ data: resume.data, filename: "ada-lovelace.pdf" });
-	});
-
-	it("preserves ordinary renderer failures", async () => {
-		const rendererError = new Error("renderer failed");
-		const pdfDependencies = dependencies();
-		pdfDependencies.renderPdf.mockRejectedValue(rendererError);
-
-		await expect(createPublicResumePdf(input, pdfDependencies)).rejects.toBe(rendererError);
 	});
 });

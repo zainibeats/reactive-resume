@@ -1,7 +1,6 @@
-import type z from "zod";
 import type { SingleComboboxProps } from "@/components/ui/combobox";
+import type z from "zod";
 import { t } from "@lingui/core/macro";
-import { useMemo } from "react";
 import { match } from "ts-pattern";
 import { levelDesignSchema } from "@reactive-resume/schema/resume/data";
 import { Combobox } from "@/components/ui/combobox";
@@ -23,12 +22,10 @@ const getLevelTypeName = (type: LevelType) => {
 };
 
 export function LevelTypeCombobox({ ...props }: LevelTypeComboboxProps) {
-	const options = useMemo(() => {
-		return levelDesignSchema.shape.type.options.map((option) => ({
-			value: option,
-			label: getLevelTypeName(option),
-		}));
-	}, []);
+	const options = levelDesignSchema.shape.type.options.map((option) => ({
+		value: option,
+		label: getLevelTypeName(option),
+	}));
 
 	return <Combobox options={options} {...props} />;
 }

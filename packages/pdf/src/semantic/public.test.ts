@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { resolveResumeRuntime } from "@reactive-resume/pdf/semantic";
+import { parseResumeData } from "@reactive-resume/schema/resume/data";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
 
 describe("@reactive-resume/pdf/semantic", () => {
 	it("falls back to base presentation and preserves fatal source diagnostics", () => {
 		const data = structuredClone(sampleResumeData);
 		data.metadata.stylesheet = { mode: "semantic", source: { languageVersion: 2, text: "@version 2;" } };
+		// The export entry points parse data first, so a fatal source must still parse to reach the fallback.
+		expect(() => parseResumeData(data)).not.toThrow();
 
-		const inspection = resolveResumeRuntime({ data, template: data.metadata.template, mode: "semantic" });
+		const inspection = resolveResumeRuntime({ data, template: data.metadata.template });
 
 		expect(inspection.diagnostics).toContainEqual(
 			expect.objectContaining({ code: "UNSUPPORTED_VERSION", severity: "error" }),
@@ -22,8 +25,9 @@ describe("@reactive-resume/pdf/semantic", () => {
 			mode: "semantic",
 			source: { languageVersion: 1, text: `@version 1;\n${selectors} { color: red; }` },
 		};
+		expect(() => parseResumeData(data)).not.toThrow();
 
-		const inspection = resolveResumeRuntime({ data, template: data.metadata.template, mode: "semantic" });
+		const inspection = resolveResumeRuntime({ data, template: data.metadata.template });
 
 		expect(inspection.diagnostics).toContainEqual(
 			expect.objectContaining({ code: "RESOURCE_LIMIT", severity: "error" }),
@@ -42,7 +46,7 @@ describe("@reactive-resume/pdf/semantic", () => {
 			},
 		};
 
-		const inspection = resolveResumeRuntime({ data, template: data.metadata.template, mode: "semantic" });
+		const inspection = resolveResumeRuntime({ data, template: data.metadata.template });
 
 		expect(inspection.presentation["page-1/region-header/header/name"]?.style?.color).toBe("#123456");
 		expect(inspection.diagnostics).toContainEqual(

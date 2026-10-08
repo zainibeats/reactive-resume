@@ -1,5 +1,5 @@
 import type { ResumeData, StyleRule } from "@reactive-resume/schema/resume/data";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { compileStylesheet } from "@reactive-resume/resume/stylesheet";
 import { styleRulesSchema } from "@reactive-resume/schema/resume/data";
@@ -9,6 +9,9 @@ import { convertLegacyStyleRules } from "./legacy-converter";
 const fixtureUrl = (name: string) => new URL(`./__fixtures__/legacy/${name}`, import.meta.url);
 const readFixture = (name: string): unknown => JSON.parse(readFileSync(fixtureUrl(`${name}.json`), "utf8"));
 const readExpected = (name: string): string => readFileSync(fixtureUrl(`${name}.expected.css`), "utf8");
+const fixtureNames = readdirSync(fixtureUrl(""))
+	.filter((file) => file.endsWith(".json"))
+	.map((file) => file.slice(0, -".json".length));
 
 const dataWithRules = (name: string): ResumeData => {
 	const data = structuredClone(defaultResumeData);
@@ -53,20 +56,7 @@ describe("convertLegacyStyleRules", () => {
 		expect(links).not.toMatch(/^[^/]*\btext-decoration:/m);
 	});
 
-	it("maps every rich-text slot to its real semantic host", () => {
-		const source = convertLegacyStyleRules(dataWithRules("rich-text-all-slots")).source.text;
-
-		expect(source).toContain("rich-text paragraph");
-		expect(source).toContain("rich-text list {");
-		expect(source).toContain("rich-text list-item {");
-		expect(source).toContain("rich-text list-item-content {");
-		expect(source).toContain("rich-text link {");
-		expect(source).toContain("rich-text strong {");
-		expect(source).toContain("rich-text mark {");
-		expect(compileStylesheet({ languageVersion: 1, text: source }).program).not.toBeNull();
-	});
-
-	it("preserves Bold-after-text #3146 while retaining the award unbold exception", () => {
+	it("preserves Bold-after-text #3146, including nested role positions, while retaining the award unbold exception", () => {
 		const primary = convertLegacyStyleRules(dataWithRules("primary-text-bold-3146")).source.text;
 		const award = convertLegacyStyleRules(dataWithRules("award-unbold")).source.text;
 
@@ -99,16 +89,6 @@ describe("convertLegacyStyleRules", () => {
 		expect(source).not.toContain('field[role~="nested-role"]');
 	});
 
-	it("emits legacy text declarations for the combined outer Text without widening field selectors", () => {
-		const source = convertLegacyStyleRules(dataWithRules("combined-text-host")).source.text;
-
-		expect(source).toContain("combined-text");
-		expect(source).toContain("font-size: 14pt;");
-		expect(source).toContain("opacity: 0.65;");
-		expect(source).toContain("padding-left: 2pt;");
-		expect(source).toContain('field:not([name="content"])');
-	});
-
 	it("translates icon and level font sizes to explicit geometry", () => {
 		const source = convertLegacyStyleRules(dataWithRules("icon-level-size")).source.text;
 
@@ -125,8 +105,8 @@ describe("convertLegacyStyleRules", () => {
 		expect(uuid).toContain('section[id="1d7312cb-9ba2-4d42-9ca8-2a9ca05f9f37"] > section-heading');
 	});
 
-	it("compiles the all-template portable smoke fixture", () => {
-		const result = convertLegacyStyleRules(dataWithRules("all-templates-smoke"));
+	it.each(fixtureNames)("compiles the converted %s fixture without error diagnostics", (name) => {
+		const result = convertLegacyStyleRules(dataWithRules(name));
 		expect(compileStylesheet(result.source).diagnostics.filter(({ severity }) => severity === "error")).toEqual([]);
 	});
 });

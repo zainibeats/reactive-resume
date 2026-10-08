@@ -1,24 +1,27 @@
+import type { QueryClient } from "@tanstack/react-query";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ArrowRightIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "@tanstack/react-form";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { useToggle } from "usehooks-ts";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
-import { authClient } from "@/libs/auth/client";
-import { orpc } from "@/libs/orpc/client";
-import { useAppForm } from "@/libs/tanstack-form";
 import { SocialAuth } from "../components/social-auth";
 import { getAuthRedirectOptions, getOAuthPasskeyOptions, getOAuthSignInOptions, isOAuthRedirect } from "../redirect";
+import { PasswordInput } from "@/components/input/password-input";
+import { authClient } from "@/libs/auth/client";
+import { orpc } from "@/libs/orpc/client";
+import { sessionQueryKey } from "@/libs/root-context";
+import { useAppForm } from "@/libs/tanstack-form";
 
 const formSchema = z.object({
 	identifier: z.string().trim().toLowerCase(),
-	password: z.string().trim().min(6).max(64),
+	password: z.string().min(6).max(64),
 });
 
 type Props = {
@@ -26,13 +29,76 @@ type Props = {
 	disableSignups: boolean;
 };
 
+type SubmitLoginOptions = {
+	value: z.infer<typeof formSchema>;
+	callbackURL: string | undefined;
+	reauthenticate: boolean | undefined;
+	navigate: ReturnType<typeof useNavigate>;
+	queryClient: QueryClient;
+	router: ReturnType<typeof useRouter>;
+};
+
+async function submitLogin({ value, callbackURL, reauthenticate, navigate, queryClient, router }: SubmitLoginOptions) {
+	const toastId = toast.add({ type: "loading", description: t`Signing in...` });
+
+	try {
+		const isEmail = value.identifier.includes("@");
+
+		const result = isEmail
+			? await authClient.signIn.email({
+					email: value.identifier,
+					password: value.password,
+					...getOAuthSignInOptions(callbackURL),
+				})
+			: await authClient.signIn.username({
+					username: value.identifier,
+					password: value.password,
+					...getOAuthSignInOptions(callbackURL),
+				});
+
+		if (result.error) {
+			toast.add({
+				type: "error",
+				description:
+					result.error.message ||
+					t({
+						comment: "Fallback toast when sign-in fails and no server error message is available",
+						message: "Failed to sign in. Please try again.",
+					}),
+				id: toastId,
+			});
+			return;
+		}
+
+		const requiresTwoFactor =
+			result.data &&
+			typeof result.data === "object" &&
+			"twoFactorRedirect" in result.data &&
+			result.data.twoFactorRedirect;
+
+		if (requiresTwoFactor) {
+			toast.close(toastId);
+			void navigate({ to: "/auth/verify-2fa", search: { callbackURL, reauthenticate }, replace: true });
+			return;
+		}
+
+		toast.close(toastId);
+		if (isOAuthRedirect(result.data)) return;
+		await queryClient.invalidateQueries({ queryKey: sessionQueryKey });
+		await router.invalidate();
+		void navigate(getAuthRedirectOptions(callbackURL));
+	} catch {
+		toast.add({ type: "error", description: t`Failed to sign in. Please try again.`, id: toastId });
+	}
+}
+
 export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 	const router = useRouter();
 	const { callbackURL, reauthenticate } = useSearch({ from: "/auth" });
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
 	const hasStartedConditionalPasskeyRef = useRef(false);
-	const [showPassword, toggleShowPassword] = useToggle(false);
 
 	const { data: providers = {} } = useQuery(orpc.auth.providers.list.queryOptions());
 
@@ -40,62 +106,14 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 		defaultValues: { identifier: "", password: "" },
 		validators: { onSubmit: formSchema },
 		onSubmit: async ({ value }) => {
-			const toastId = toast.add({ type: "loading", description: t`Signing in...` });
-
-			try {
-				const isEmail = value.identifier.includes("@");
-
-				const result = isEmail
-					? await authClient.signIn.email({
-							email: value.identifier,
-							password: value.password,
-							...getOAuthSignInOptions(callbackURL),
-						})
-					: await authClient.signIn.username({
-							username: value.identifier,
-							password: value.password,
-							...getOAuthSignInOptions(callbackURL),
-						});
-
-				if (result.error) {
-					toast.add({
-						type: "error",
-						description:
-							result.error.message ||
-							t({
-								comment: "Fallback toast when sign-in fails and no server error message is available",
-								message: "Failed to sign in. Please try again.",
-							}),
-						id: toastId,
-					});
-					return;
-				}
-
-				const requiresTwoFactor =
-					result.data &&
-					typeof result.data === "object" &&
-					"twoFactorRedirect" in result.data &&
-					result.data.twoFactorRedirect;
-
-				if (requiresTwoFactor) {
-					toast.close(toastId);
-					void navigate({ to: "/auth/verify-2fa", search: { callbackURL, reauthenticate }, replace: true });
-					return;
-				}
-
-				toast.close(toastId);
-				if (isOAuthRedirect(result.data)) return;
-				await router.invalidate();
-				void navigate(getAuthRedirectOptions(callbackURL));
-			} catch {
-				toast.add({ type: "error", description: t`Failed to sign in. Please try again.`, id: toastId });
-			}
+			await submitLogin({ value, callbackURL, reauthenticate, navigate, queryClient, router });
 		},
 	});
 
+	const isSubmitting = useSelector(form.store, (state) => state.isSubmitting);
+
 	useEffect(() => {
 		if (!("passkey" in providers)) return;
-		if (typeof window === "undefined") return;
 		if (!("PublicKeyCredential" in window)) return;
 		if (!PublicKeyCredential.isConditionalMediationAvailable) return;
 		if (hasStartedConditionalPasskeyRef.current) return;
@@ -111,20 +129,21 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 			});
 			if (error || isOAuthRedirect(data)) return;
 
+			await queryClient.invalidateQueries({ queryKey: sessionQueryKey });
 			await router.invalidate();
 			void navigate(getAuthRedirectOptions(callbackURL));
 		});
-	}, [providers, router, navigate, callbackURL]);
+	}, [providers, router, navigate, callbackURL, queryClient]);
 
 	return (
 		<>
 			<div className="space-y-1 text-center">
-				<h1 className="font-semibold text-2xl tracking-tight">
+				<h1 className="text-2xl font-semibold tracking-tight">
 					<Trans comment="Title on the login page">Sign in to your account</Trans>
 				</h1>
 
 				{!disableSignups && (
-					<div className="text-muted-foreground">
+					<div className="text-ink-3">
 						<Trans>
 							Don't have an account?{" "}
 							<Button
@@ -136,7 +155,7 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 										<Trans comment="Call-to-action link from login page to account registration page">
 											Create one now
 										</Trans>{" "}
-										<ArrowRightIcon />
+										<Icon name="arrow_forward" size={16} />
 									</Link>
 								}
 							/>
@@ -201,47 +220,25 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 										}
 									/>
 								</div>
-								<div className="flex items-center gap-x-1.5">
-									<FormControl
-										render={
-											<Input
-												min={6}
-												max={64}
-												type={showPassword ? "text" : "password"}
-												autoComplete="section-login current-password"
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(event) => field.handleChange(event.target.value)}
-											/>
-										}
-									/>
-
-									<Button
-										size="icon"
-										variant="ghost"
-										onClick={toggleShowPassword}
-										aria-label={
-											showPassword
-												? t({
-														comment: "Accessible label for button that hides the password in login form",
-														message: "Hide password",
-													})
-												: t({
-														comment: "Accessible label for button that reveals the password in login form",
-														message: "Show password",
-													})
-										}
-									>
-										{showPassword ? <EyeIcon /> : <EyeSlashIcon />}
-									</Button>
-								</div>
+								<FormControl
+									render={
+										<PasswordInput
+											minLength={6}
+											maxLength={64}
+											autoComplete="section-login current-password"
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) => field.handleChange(event.target.value)}
+										/>
+									}
+								/>
 								<FormMessage errors={field.state.meta.errors} />
 							</FormItem>
 						)}
 					</form.Field>
 
-					<Button type="submit" className="w-full">
+					<Button type="submit" className="w-full" disabled={isSubmitting}>
 						<Trans comment="Primary action button label on login form">Sign in</Trans>
 					</Button>
 				</form>

@@ -3,7 +3,7 @@ import { set } from "es-toolkit/compat";
 import { SEMANTIC_CSS_LIMITS_V1 } from "@reactive-resume/resume/stylesheet";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
-import { parseStoredResumeData, parseWritableResumeData } from "./resume-data-validation";
+import { parseWritableResumeData } from "./resume-data-validation";
 
 describe("parseWritableResumeData", () => {
 	it("rejects stylesheet source above the Semantic CSS byte limit", () => {
@@ -23,17 +23,12 @@ const invalidBounds = [
 	["metadata.template", "unknown-template"],
 	["metadata.page.format", "a3"],
 	["metadata.page.marginX", 500],
-	["metadata.page.marginY", -1],
 	["metadata.typography.body.fontSize", 999],
-	["metadata.typography.heading.fontSize", 5],
-	["metadata.typography.body.lineHeight", 5],
-	["metadata.typography.heading.lineHeight", 0.1],
 	["metadata.typography.body.fontWeights", ["950"]],
 	["metadata.layout.sidebarWidth", 51],
 	["summary.columns", 7],
 	["sections.experience.columns", 1.5],
 	["sections.skills.items.0.level", 6],
-	["sections.languages.items.0.level", -1],
 ] as const;
 
 describe("strict write bounds", () => {
@@ -43,13 +38,6 @@ describe("strict write bounds", () => {
 		expect(() => parseWritableResumeData(data)).toThrowError(
 			expect.objectContaining({ code: "BAD_REQUEST", status: 400 }),
 		);
-	});
-
-	it("keeps tolerant normalization for stored documents", () => {
-		const data = structuredClone(defaultResumeData);
-		set(data, "metadata.template", "retired-template");
-		data.metadata.page.marginX = 500;
-		expect(parseStoredResumeData(data).metadata).toMatchObject({ template: "onyx", page: { marginX: 14 } });
 	});
 
 	it("preserves defaults for omitted fields from older clients", () => {

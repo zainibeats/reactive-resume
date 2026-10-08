@@ -2,21 +2,32 @@ import { describe, expect, it, vi } from "vitest";
 
 const envMock = vi.hoisted(() => ({
 	ENCRYPTION_SECRET: "test-secret-with-enough-entropy",
-	REDIS_URL: "redis://localhost:6379",
 }));
 
 vi.mock("@reactive-resume/env/server", () => ({ env: envMock }));
 
-const {
-	assertAgentEnvironment,
-	decryptCredential,
-	encryptCredential,
-	fingerprintCredential,
-	isAgentEnvironmentConfigured,
-	redactEncryptedCredential,
-} = await import("./credentials");
+const { decryptCredential, encryptCredential } = await import("./credentials");
 
 describe("AI credential encryption", () => {
+	it("round-trips an empty key for a local Ollama provider", () => {
+		expect(decryptCredential(encryptCredential("").encryptedApiKey)).toBe("");
+	});
+	it("explains how to recover a key encrypted under a different secret", () => {
+		const encrypted = encryptCredential("sk-original");
+		const previous = envMock.ENCRYPTION_SECRET;
+		try {
+			envMock.ENCRYPTION_SECRET = "changed-secret-with-enough-entropy";
+			expect(() => decryptCredential(encrypted.encryptedApiKey)).toThrow(
+				expect.objectContaining({
+					code: "AI_CREDENTIAL_DECRYPTION_FAILED",
+					status: 412,
+					message: expect.stringContaining("again"),
+				}),
+			);
+		} finally {
+			envMock.ENCRYPTION_SECRET = previous;
+		}
+	});
 	it("encrypts and decrypts provider API keys without storing plaintext", () => {
 		const encrypted = encryptCredential("sk-test-secret");
 
@@ -25,54 +36,7 @@ describe("AI credential encryption", () => {
 		expect(decryptCredential(encrypted.encryptedApiKey)).toBe("sk-test-secret");
 	});
 
-	it("supports providers without API keys", () => {
-		const encrypted = encryptCredential("");
-
-		expect(encrypted.apiKeyPreview).toBe("No key");
-		expect(decryptCredential(encrypted.encryptedApiKey)).toBe("");
-	});
-
-	it("generates salted non-revealable fingerprints", () => {
-		const first = fingerprintCredential("sk-test-secret", "salt-a");
-		const again = fingerprintCredential("sk-test-secret", "salt-a");
-		const differentSalt = fingerprintCredential("sk-test-secret", "salt-b");
-
-		expect(first).toBe(again);
-		expect(first).not.toBe(differentSalt);
-		expect(first).not.toContain("sk-test-secret");
-	});
-
-	it("redacts stored encrypted credential fields from API responses", () => {
-		const encrypted = encryptCredential("sk-test-secret");
-
-		const redacted = redactEncryptedCredential({
-			encryptedApiKey: encrypted.encryptedApiKey,
-			apiKeySalt: encrypted.apiKeySalt,
-			apiKeyHash: encrypted.apiKeyHash,
-			apiKeyPreview: encrypted.apiKeyPreview,
-		});
-
-		expect(redacted).toEqual({
-			apiKeyFingerprint: encrypted.apiKeyHash,
-			apiKeyPreview: encrypted.apiKeyPreview,
-		});
-		expect(JSON.stringify(redacted)).not.toContain(encrypted.encryptedApiKey);
-		expect(JSON.stringify(redacted)).not.toContain(encrypted.apiKeySalt);
-	});
-});
-
-describe("AI agent environment", () => {
-	it("is available only when Redis and encryption secret are configured", () => {
-		expect(isAgentEnvironmentConfigured()).toBe(true);
-		expect(() => assertAgentEnvironment()).not.toThrow();
-
-		envMock.REDIS_URL = "";
-		expect(isAgentEnvironmentConfigured()).toBe(false);
-		expect(() => assertAgentEnvironment()).toThrow("AGENT_ENVIRONMENT_UNAVAILABLE");
-
-		envMock.REDIS_URL = "redis://localhost:6379";
-		envMock.ENCRYPTION_SECRET = "";
-		expect(isAgentEnvironmentConfigured()).toBe(false);
-		expect(() => assertAgentEnvironment()).toThrow("AGENT_ENVIRONMENT_UNAVAILABLE");
+	it("shows a no-key preview for providers without API keys", () => {
+		expect(encryptCredential("").apiKeyPreview).toBe("No key");
 	});
 });

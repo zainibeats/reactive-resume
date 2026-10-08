@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
-import { generateSectionTitleCatalog } from "./section-titles";
+import { generatePresentLabels, generateSectionTitleCatalog } from "./section-titles";
 
 it("keeps PDF headings synchronized with the source Lingui catalogs", async () => {
 	const catalogs = fileURLToPath(new URL("../../apps/web/locales/", import.meta.url));
@@ -11,4 +11,14 @@ it("keeps PDF headings synchronized with the source Lingui catalogs", async () =
 	);
 	expect(committed, "Run pnpm pdf:translations after updating translations.").toEqual(generated);
 	expect(generated["es-ES"]?.Experience).toBe("Experiencia");
+});
+
+it("keeps the printed 'Present' synchronized with the source Lingui catalogs", async () => {
+	const catalogs = fileURLToPath(new URL("../../apps/web/locales/", import.meta.url));
+	const generated = await generatePresentLabels(catalogs);
+	const committed = JSON.parse(
+		await readFile(new URL("../../packages/schema/src/resume/present-labels.json", import.meta.url), "utf8"),
+	);
+	expect(committed, "Run pnpm pdf:translations after updating translations.").toEqual(generated);
+	expect(generated["en-US"]).toBe("Present");
 });

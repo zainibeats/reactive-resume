@@ -1,11 +1,10 @@
-import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import type { Locale } from "@reactive-resume/utils/locale";
-import type { ReactNode } from "react";
 import type { SectionTitleResolver } from "./section-title";
+import type { ResumeData } from "@reactive-resume/schema/resume/data";
+import type { Template } from "@reactive-resume/schema/templates";
+import type { ReactNode } from "react";
 import { createContext, use, useMemo } from "react";
-import { isCJKLocale, isRTL } from "@reactive-resume/utils/locale";
-import { resumeContentContainsCJK } from "./hooks/use-register-fonts";
-import { createHyphenationCallback } from "./hyphenation";
+import { templateLayouts } from "@reactive-resume/schema/templates";
+import { isRTL } from "@reactive-resume/utils/locale";
 
 export type ResumeRenderOptions = {
 	includeCoverLetterHeader?: boolean;
@@ -15,7 +14,11 @@ type RenderContextValue = ResumeData & {
 	resolveSectionTitle?: SectionTitleResolver | undefined;
 	renderOptions: ResumeRenderOptions;
 	rtl: boolean;
-	hyphenationCallback: ReturnType<typeof createHyphenationCallback>;
+	/**
+	 * Whether a two-column template lays its columns out from the right: its sidebar goes to the other side from
+	 * where the template draws it. That's the side chosen in Design, or, without a choice, a right-to-left page.
+	 */
+	columnsReversed: boolean;
 };
 
 const RenderContext = createContext<RenderContextValue | null>(null);
@@ -25,6 +28,7 @@ type RenderProviderProps = {
 	data: ResumeData;
 	resolveSectionTitle?: SectionTitleResolver | undefined;
 	renderOptions?: ResumeRenderOptions | undefined;
+	template?: Template | undefined;
 	children: ReactNode;
 };
 
@@ -32,21 +36,16 @@ export const RenderProvider = ({
 	data,
 	resolveSectionTitle,
 	renderOptions = defaultRenderOptions,
+	template,
 	children,
 }: RenderProviderProps) => {
 	const rtl = isRTL(data.metadata.page.locale);
-	const hyphenationCallback = useMemo(
-		() =>
-			createHyphenationCallback({
-				locale: data.metadata.page.locale,
-				automatic: data.metadata.typography.hyphenation === true,
-				cjk: isCJKLocale(data.metadata.page.locale as Locale) || resumeContentContainsCJK(data),
-			}),
-		[data],
-	);
+	const chosenSide = data.metadata.layout.sidebarSide;
+	const ownSide = template ? templateLayouts[template].sidebarSide : null;
+	const columnsReversed = chosenSide && ownSide ? chosenSide !== ownSide : rtl;
 	const contextValue = useMemo<RenderContextValue>(
-		() => ({ ...data, resolveSectionTitle, renderOptions, rtl, hyphenationCallback }),
-		[data, resolveSectionTitle, renderOptions, rtl, hyphenationCallback],
+		() => ({ ...data, resolveSectionTitle, renderOptions, rtl, columnsReversed }),
+		[data, resolveSectionTitle, renderOptions, rtl, columnsReversed],
 	);
 
 	return <RenderContext.Provider value={contextValue}>{children}</RenderContext.Provider>;

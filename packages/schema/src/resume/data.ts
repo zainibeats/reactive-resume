@@ -1,5 +1,6 @@
 import z from "zod";
 import { templateSchema } from "../templates";
+import { dateFormatSchema, resumeDatesSchema, syncResumeDates, upgradeResumeDates } from "./dates";
 import { semanticStylesheetSchema } from "./stylesheet";
 
 const iconSchema = z
@@ -132,27 +133,39 @@ export const summaryItemSchema = baseItemSchema.extend({
 export type SummaryItem = z.infer<typeof summaryItemSchema>;
 
 export const awardItemSchema = baseItemSchema.extend({
-	title: z.string().min(1).describe("The title of the award."),
+	title: z.string().describe("The title of the award. Empty while the entry is a draft, which isn't printed."),
 	awarder: z.string().describe("The awarder of the award."),
-	date: z.string().describe("The date when the award was received."),
+	date: z
+		.string()
+		.describe(
+			"The date when the award was received, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The website of the award, if any."),
 	description: z.string().describe("The description of the award. This should be a HTML-formatted string."),
 });
 
 export const certificationItemSchema = baseItemSchema.extend({
-	title: z.string().min(1).describe("The title of the certification."),
+	title: z.string().describe("The title of the certification. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
 		.describe("Whether the certification title should be rendered in bold. Defaults to false."),
 	issuer: z.string().describe("The issuer of the certification."),
-	date: z.string().describe("The date when the certification was received."),
+	date: z
+		.string()
+		.describe(
+			"The date when the certification was received, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The website of the certification, if any."),
 	description: z.string().describe("The description of the certification. This should be a HTML-formatted string."),
 });
 
 export const educationItemSchema = baseItemSchema.extend({
-	school: z.string().min(1).describe("The name of the school or institution."),
+	school: z
+		.string()
+		.describe("The name of the school or institution. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
@@ -161,7 +174,12 @@ export const educationItemSchema = baseItemSchema.extend({
 	area: z.string().describe("The area of study or specialization."),
 	grade: z.string().describe("The grade or score achieved."),
 	location: z.string().describe("The location of the school or institution."),
-	period: z.string().describe("The period of time the education was obtained over."),
+	period: z
+		.string()
+		.describe(
+			"The period of time the education was obtained over, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The website of the school or institution, if any."),
 	description: z.string().describe("The description of the education. This should be a HTML-formatted string."),
 });
@@ -169,14 +187,21 @@ export const educationItemSchema = baseItemSchema.extend({
 const roleItemSchema = z.object({
 	id: z.string().describe("The unique identifier for the role. Usually generated as a UUID."),
 	position: z.string().describe("The position or job title for this role."),
-	period: z.string().describe("The period of time this role was held."),
+	period: z
+		.string()
+		.describe(
+			"The period of time this role was held, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	description: z.string().describe("The description of this specific role. This should be a HTML-formatted string."),
 });
 
 export type RoleItem = z.infer<typeof roleItemSchema>;
 
 export const experienceItemSchema = baseItemSchema.extend({
-	company: z.string().min(1).describe("The name of the company or organization."),
+	company: z
+		.string()
+		.describe("The name of the company or organization. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
@@ -190,8 +215,9 @@ export const experienceItemSchema = baseItemSchema.extend({
 	period: z
 		.string()
 		.describe(
-			"The overall period of time at the company. When multiple roles are used, this should reflect the total tenure.",
+			"The overall period of time at the company, as text. When multiple roles are used, this should reflect the total tenure. Written from `dates` on every save; write `dates` instead.",
 		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The website of the company or organization, if any."),
 	description: z.string().describe("The description of the experience. This should be a HTML-formatted string."),
 	roles: z
@@ -203,7 +229,7 @@ export const experienceItemSchema = baseItemSchema.extend({
 export const interestItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
 	iconColor: iconColorSchema,
-	name: z.string().min(1).describe("The name of the interest/hobby."),
+	name: z.string().describe("The name of the interest/hobby. Empty while the entry is a draft, which isn't printed."),
 	keywords: z
 		.array(z.string())
 		.catch([])
@@ -211,7 +237,9 @@ export const interestItemSchema = baseItemSchema.extend({
 });
 
 export const languageItemSchema = baseItemSchema.extend({
-	language: z.string().min(1).describe("The name of the language the author knows."),
+	language: z
+		.string()
+		.describe("The name of the language the author knows. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
@@ -234,7 +262,9 @@ export const languageItemSchema = baseItemSchema.extend({
 export const profileItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
 	iconColor: iconColorSchema,
-	network: z.string().min(1).describe("The name of the network or platform."),
+	network: z
+		.string()
+		.describe("The name of the network or platform. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
@@ -244,26 +274,40 @@ export const profileItemSchema = baseItemSchema.extend({
 });
 
 export const projectItemSchema = baseItemSchema.extend({
-	name: z.string().min(1).describe("The name of the project."),
+	name: z.string().describe("The name of the project. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
 		.describe("Whether the project name should be rendered in bold. Defaults to false."),
-	period: z.string().describe("The period of time the project was worked on."),
+	period: z
+		.string()
+		.describe(
+			"The period of time the project was worked on, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The link to the project, if any."),
 	description: z.string().describe("The description of the project. This should be a HTML-formatted string."),
 });
 
 export const publicationItemSchema = baseItemSchema.extend({
-	title: z.string().min(1).describe("The title of the publication."),
+	title: z.string().describe("The title of the publication. Empty while the entry is a draft, which isn't printed."),
 	publisher: z.string().describe("The publisher of the publication."),
-	date: z.string().describe("The date when the publication was published."),
+	date: z
+		.string()
+		.describe(
+			"The date when the publication was published, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The link to the publication, if any."),
 	description: z.string().describe("The description of the publication. This should be a HTML-formatted string."),
 });
 
 export const referenceItemSchema = baseItemSchema.extend({
-	name: z.string().min(1).describe("The name of the reference, or a note such as 'Available upon request'."),
+	name: z
+		.string()
+		.describe(
+			"The name of the reference, or a note such as 'Available upon request'. Empty while the entry is a draft, which isn't printed.",
+		),
 	position: z.string().describe("The position or job title of the reference."),
 	website: itemWebsiteSchema.describe("The website or LinkedIn profile of the reference, if any."),
 	phone: z.string().describe("The phone number of the reference."),
@@ -277,7 +321,7 @@ export const referenceItemSchema = baseItemSchema.extend({
 export const skillItemSchema = baseItemSchema.extend({
 	icon: iconSchema,
 	iconColor: iconColorSchema,
-	name: z.string().min(1).describe("The name of the skill."),
+	name: z.string().describe("The name of the skill. Empty while the entry is a draft, which isn't printed."),
 	mainEntryBold: z
 		.boolean()
 		.optional()
@@ -302,9 +346,16 @@ export const skillItemSchema = baseItemSchema.extend({
 });
 
 export const volunteerItemSchema = baseItemSchema.extend({
-	organization: z.string().min(1).describe("The name of the organization or company."),
+	organization: z
+		.string()
+		.describe("The name of the organization or company. Empty while the entry is a draft, which isn't printed."),
 	location: z.string().describe("The location of the organization or company."),
-	period: z.string().describe("The period of time the author was volunteered at the organization or company."),
+	period: z
+		.string()
+		.describe(
+			"The period of time the author was volunteered at the organization or company, as text. Written from `dates` on every save; write `dates` instead.",
+		),
+	dates: resumeDatesSchema.optional(),
 	website: itemWebsiteSchema.describe("The link to the organization or company, if any."),
 	description: z
 		.string()
@@ -506,6 +557,13 @@ export const layoutSchema = z.object({
 		.max(50)
 		.catch(35)
 		.describe("The width of the sidebar column, defined as a percentage of the page width."),
+	sidebarSide: z
+		.enum(["left", "right"])
+		.optional()
+		.catch(undefined)
+		.describe(
+			"Which side of the page the sidebar column sits on in two-column templates. When unset, each template uses its own side (and right-to-left resumes mirror it).",
+		),
 	pages: z.array(pageLayoutSchema).describe("The pages to display in the layout."),
 });
 
@@ -522,6 +580,12 @@ export const pageSchema = z.object({
 		.string()
 		.describe("The locale of the page. Used for displaying pre-translated section headings, if not overridden.")
 		.catch("en-US"),
+	dateFormat: dateFormatSchema
+		.optional()
+		.catch(undefined)
+		.describe(
+			"How dates print: 'short' (Mar 2022), 'long' (March 2022), 'numeric' (03/2022) or 'iso' (2022-03). When missing, it's read from how the dates were typed.",
+		),
 	hideLinkUnderline: z.boolean().describe("Whether to hide the underlines of the links.").catch(false),
 	hideIcons: z.boolean().describe("Whether to hide the item-level icons (skills, profiles, interests).").catch(false),
 	hideSectionIcons: z
@@ -562,9 +626,7 @@ export const typographySchema = z.object({
 	hyphenation: z
 		.boolean()
 		.optional()
-		.describe(
-			"Enable automatic PDF hyphenation using the resume language. Currently supports German. Defaults to false.",
-		),
+		.describe("Enable automatic PDF hyphenation using the resume language. Defaults to false."),
 });
 
 const styleSlotSchema = z.enum([
@@ -710,9 +772,23 @@ export const metadataSchema = z.object({
 			"Personal notes for the resume. Can be used to add any additional information or instructions for the resume. These notes are not displayed on the resume, they are only visible to the author of the resume when editing the resume. This should be a HTML-formatted string.",
 		),
 	styleRules: styleRulesSchema.describe(
-		"Structured style rules that target semantic resume sections and slots for React PDF rendering.",
+		"Structured style rules that target semantic resume sections and slots for PDF rendering.",
 	),
 	stylesheet: semanticStylesheetSchema.optional(),
+	check: z
+		.object({
+			ignored: z
+				.array(z.string())
+				.catch([])
+				.describe("Check issues the author chose to ignore, by issue key (the rule code and where it applies)."),
+			hiddenTerms: z
+				.array(z.string())
+				.catch([])
+				.describe("Job-posting terms the author hid from Job match as not true for them."),
+		})
+		.optional()
+		.catch(undefined)
+		.describe("The author's Check choices for this resume. Not printed; missing until a choice is made."),
 });
 
 export const resumeDataSchema = z.looseObject({
@@ -741,6 +817,8 @@ export const parseResumeData = (data: unknown): ResumeData => {
 	parsed.summary.showHeading ??= true;
 	for (const section of Object.values(parsed.sections)) section.showHeading ??= true;
 	for (const section of parsed.customSections) section.showHeading ??= true;
+	upgradeResumeDates(parsed);
+	syncResumeDates(parsed);
 	return parsed;
 };
 

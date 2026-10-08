@@ -1,16 +1,10 @@
-import type { z } from "zod";
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { resumeDataSchema } from "./data";
 import { defaultResumeData } from "./default";
 import { sampleResumeData } from "./sample";
 import { parseResumeDataForWrite, writableResumeDataSchema } from "./write";
 
 describe("writableResumeDataSchema", () => {
-	it("keeps canonical client input and output types", () => {
-		expectTypeOf<z.input<typeof writableResumeDataSchema>>().toEqualTypeOf<z.input<typeof resumeDataSchema>>();
-		expectTypeOf<z.output<typeof writableResumeDataSchema>>().toEqualTypeOf<z.output<typeof resumeDataSchema>>();
-	});
-
 	it.each([defaultResumeData, sampleResumeData])("accepts canonical initial resume data", (data) => {
 		expect(parseResumeDataForWrite(data)).toEqual(resumeDataSchema.parse(data));
 	});

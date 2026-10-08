@@ -14,7 +14,7 @@ const rpcHandler = new RPCHandler(router, {
 	],
 });
 
-export async function handleRpc(request: Request, trustedClient = "unknown") {
+export async function handleRpc(request: Request, trustedClient: string) {
 	const resHeaders = new Headers();
 	const { response } = await rpcHandler.handle(request, {
 		prefix: "/api/rpc",

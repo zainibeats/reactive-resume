@@ -1,9 +1,9 @@
-import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { AtsRuleCode } from "./catalog";
-import type { RuleContext } from "./rules";
-import type { AtsFinding, AtsReport, AtsSeverity } from "./types";
-import { ATS_RULE_CODES } from "./catalog";
-import { ATS_RULES } from "./rules";
+import type { AtsRuleFinding, RuleContext } from "./rules";
+import type { AtsCategory, AtsCategoryScore, AtsFinding, AtsReport, AtsSeverity } from "./types";
+import type { ResumeData } from "@reactive-resume/schema/resume/data";
+import { ATS_CATEGORIES, ATS_RULE_CODES, atsRuleCategory } from "./catalog";
+import { ATS_RULES, checksSectionTitles } from "./rules";
 import { walkSections } from "./walk";
 
 export type AtsLintOptions = {
@@ -20,6 +20,30 @@ function compareFindings(a: AtsFinding, b: AtsFinding): number {
 	return a.code < b.code ? -1 : 1;
 }
 
+const decodePointerToken = (token: string) => token.replace(/~1/g, "/").replace(/~0/g, "~");
+
+/** The finding's key: its code and pointer, with array indexes swapped for entry ids (see {@link AtsFinding.key}). */
+export function atsFindingKey(finding: Pick<AtsFinding, "code" | "pointer">, data: ResumeData): string {
+	let node: unknown = data;
+
+	const tokens = finding.pointer
+		.split("/")
+		.slice(1)
+		.map((token) => {
+			if (Array.isArray(node)) {
+				const entry: unknown = node[Number(token)];
+				node = entry;
+				const id = (entry as { id?: unknown } | undefined)?.id;
+				return typeof id === "string" ? `#${id}` : token;
+			}
+
+			node = (node as Record<string, unknown> | undefined)?.[decodePointerToken(token)];
+			return token;
+		});
+
+	return `${finding.code}:/${tokens.join("/")}`;
+}
+
 export function lintResumeForAts(data: ResumeData, options: AtsLintOptions = {}): AtsReport {
 	const context: RuleContext = {
 		data,
@@ -28,27 +52,47 @@ export function lintResumeForAts(data: ResumeData, options: AtsLintOptions = {})
 		now: options.now ?? new Date(),
 	};
 
-	const findings = ATS_RULES.flatMap((rule) => rule(context)).sort(compareFindings);
+	const ignoredKeys = new Set(data.metadata.check?.ignored ?? []);
+	const all = ATS_RULES.flatMap((rule) => rule(context))
+		.map((item: AtsRuleFinding): AtsFinding => ({ ...item, key: atsFindingKey(item, data) }))
+		.sort(compareFindings);
+	const findings = all.filter((item) => !ignoredKeys.has(item.key));
 
 	const counts: Record<AtsSeverity, number> = { error: 0, warning: 0, info: 0 };
-	const fired = new Set<AtsRuleCode>();
+	const failed = new Set<AtsRuleCode>();
 
 	for (const item of findings) {
 		counts[item.severity] += 1;
-		fired.add(item.code);
+		failed.add(item.code);
 	}
+
+	const applicable = ATS_RULE_CODES.filter(
+		(code) => code !== "NON_STANDARD_SECTION_TITLE" || checksSectionTitles(context.locale),
+	);
+	const passed = applicable.filter((code) => !failed.has(code));
+
+	const categories = Object.fromEntries(
+		ATS_CATEGORIES.map((category): [AtsCategory, AtsCategoryScore] => [
+			category,
+			{
+				total: applicable.filter((code) => atsRuleCategory(code) === category).length,
+				passed: passed.filter((code) => atsRuleCategory(code) === category).length,
+			},
+		]),
+	) as Record<AtsCategory, AtsCategoryScore>;
 
 	return {
 		findings,
+		ignored: all.filter((item) => ignoredKeys.has(item.key)),
 		counts,
-		totalRules: ATS_RULE_CODES.length,
-		passedRules: ATS_RULE_CODES.length - fired.size,
+		totalRules: applicable.length,
+		passedRules: passed.length,
+		score: Math.round((passed.length / applicable.length) * 100),
+		categories,
 	};
 }
 
 export type { AtsRuleCode } from "./catalog";
-export type { ParsedPeriod, PeriodEndpoint } from "./period";
-export type { AtsFinding, AtsFindingParams, AtsReport, AtsSeverity } from "./types";
+export type { AtsCategory, AtsCategoryScore, AtsFinding, AtsFindingParams, AtsReport, AtsSeverity } from "./types";
 export type { SectionPlacement, WalkedItem, WalkedSection } from "./walk";
-export { ATS_RULE_CODES } from "./catalog";
-export { isFutureEndpoint, isReversedPeriod, parsePeriod, parseSingleDate } from "./period";
+export { ATS_CATEGORIES, ATS_RULE_CODES, atsRuleCategory } from "./catalog";

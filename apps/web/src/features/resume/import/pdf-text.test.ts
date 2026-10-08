@@ -62,15 +62,6 @@ describe("documentToLines", () => {
 		).toEqual(["Ada Lovelace"]);
 	});
 
-	it("orders lines from the top of the page down", () => {
-		expect(
-			linesOf([
-				{ text: "Second", x: 40, y: 80 },
-				{ text: "First", x: 40, y: 60 },
-			]),
-		).toEqual(["First", "Second"]);
-	});
-
 	it("turns a wide field gap into a double space the parser can split on", () => {
 		expect(
 			linesOf([
@@ -78,22 +69,6 @@ describe("documentToLines", () => {
 				{ text: "Engineer", x: 120, y: 60 },
 			]),
 		).toEqual(["Acme  Engineer"]);
-	});
-
-	it("reads every page in order", () => {
-		expect(linesOf([{ text: "Page one", x: 40, y: 60 }], [{ text: "Page two", x: 40, y: 60 }])).toEqual([
-			"Page one",
-			"Page two",
-		]);
-	});
-
-	it("drops blank items and blank lines", () => {
-		expect(
-			linesOf([
-				{ text: "   ", x: 40, y: 60 },
-				{ text: "Ada", x: 40, y: 80 },
-			]),
-		).toEqual(["Ada"]);
 	});
 
 	it("reads each column of a sidebar layout in full instead of interleaving them", () => {

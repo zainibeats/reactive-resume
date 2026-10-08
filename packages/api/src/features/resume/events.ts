@@ -1,4 +1,6 @@
+import { on, once } from "node:events";
 import { getPool } from "@reactive-resume/db/client";
+import { getCoordination } from "@reactive-resume/db/coordination";
 import { getRedis, redisKey } from "@reactive-resume/db/redis";
 
 const RESUME_UPDATED_CHANNEL = "resume_updated";
@@ -38,6 +40,8 @@ function isResumeUpdatedEvent(value: unknown): value is ResumeUpdatedEvent {
 }
 
 export async function publishResumeUpdated(event: ResumeUpdatedEvent) {
+	const shared = getCoordination();
+	if (shared) return shared.publish(redisKey(RESUME_UPDATED_CHANNEL, event.resumeId), JSON.stringify(event));
 	const redis = getRedis();
 	if (redis) {
 		await redis.publish(redisKey(RESUME_UPDATED_CHANNEL), JSON.stringify(event));
@@ -46,81 +50,61 @@ export async function publishResumeUpdated(event: ResumeUpdatedEvent) {
 	await getPool().query("SELECT pg_notify($1, $2)", [RESUME_UPDATED_CHANNEL, JSON.stringify(event)]);
 }
 
+/** The event a notification carries, when it's one for this subscription. */
+function readEvent(payload: string | undefined, resumeId: string, userId: string) {
+	if (!payload) return undefined;
+	try {
+		const event = JSON.parse(payload) as unknown;
+		if (isResumeUpdatedEvent(event) && event.resumeId === resumeId && event.userId === userId) return event;
+	} catch {
+		// Ignore malformed notifications; the refetch path is invalidation-only.
+	}
+	return undefined;
+}
+
+const isAbort = (error: unknown) => error instanceof Error && error.name === "AbortError";
+
 export async function* subscribeResumeUpdated({ resumeId, userId, signal }: SubscribeResumeUpdatedInput) {
 	if (signal?.aborted) return;
+	const shared = getCoordination();
+	if (shared) {
+		for await (const payload of shared.subscribe(redisKey(RESUME_UPDATED_CHANNEL, resumeId), signal)) {
+			const event = readEvent(payload, resumeId, userId);
+			if (event) yield event;
+		}
+		return;
+	}
 	const subscriber = getRedis()?.duplicate({ commandTimeout: 5_000 });
 	const client = subscriber ? undefined : await getPool().connect();
 	const channel = subscriber ? redisKey(RESUME_UPDATED_CHANNEL) : RESUME_UPDATED_CHANNEL;
-	const queue: ResumeUpdatedEvent[] = [];
-	let done = signal?.aborted ?? false;
-	let wake: (() => void) | undefined;
-	let failure: Error | undefined;
-	let stop: () => void = () => {};
-	const stopped = new Promise<void>((resolve) => {
-		stop = resolve;
-	});
-
-	const resolveWake = () => {
-		wake?.();
-		wake = undefined;
-	};
-
-	const onAbort = () => {
-		done = true;
-		stop();
-		resolveWake();
-	};
-	const onError = (error: Error) => {
-		failure = error;
-		onAbort();
-	};
-
-	const onNotification = (notification: PgNotification) => {
-		if (notification.channel !== channel || !notification.payload) return;
-
-		try {
-			const event = JSON.parse(notification.payload) as unknown;
-			if (!isResumeUpdatedEvent(event)) return;
-			if (event.resumeId !== resumeId || event.userId !== userId) return;
-
-			queue.push(event);
-			resolveWake();
-		} catch {
-			// Ignore malformed notifications; the refetch path is invalidation-only.
-		}
-	};
-	const onMessage = (messageChannel: string, payload: string) => onNotification({ channel: messageChannel, payload });
-
-	signal?.addEventListener("abort", onAbort, { once: true });
-	client?.on("notification", onNotification);
-	subscriber?.on("message", onMessage);
-	subscriber?.on("error", onError);
+	// `on` queues notifications from now on, so none that arrive while subscribing are lost. It rethrows the
+	// connection's "error" event and ends with an AbortError when the signal aborts.
+	const notifications = subscriber
+		? on(subscriber, "message", { signal })
+		: on(client as NonNullable<typeof client>, "notification", { signal });
 
 	try {
-		if (subscriber) await Promise.race([subscriber.subscribe(channel), stopped]);
-		else await client?.query(`LISTEN ${RESUME_UPDATED_CHANNEL}`);
+		if (subscriber) {
+			// A subscription that never connects still ends when the caller goes away.
+			const aborted = signal ? once(signal, "abort") : new Promise<never>(() => {});
+			await Promise.race([subscriber.subscribe(channel), aborted]);
+			if (signal?.aborted) return;
+		} else await client?.query(`LISTEN ${RESUME_UPDATED_CHANNEL}`);
 
-		while (!done) {
-			const event = queue.shift();
-			if (event) {
-				yield event;
-				continue;
-			}
-
-			await new Promise<void>((resolve) => {
-				wake = resolve;
-			});
+		for await (const args of notifications) {
+			const [notificationChannel, payload] = subscriber
+				? (args as [string, string])
+				: [(args[0] as PgNotification).channel, (args[0] as PgNotification).payload];
+			if (notificationChannel !== channel) continue;
+			const event = readEvent(payload, resumeId, userId);
+			if (event) yield event;
 		}
-		if (failure) throw failure;
+	} catch (error) {
+		if (!isAbort(error) || !signal?.aborted) throw error;
 	} finally {
-		signal?.removeEventListener("abort", onAbort);
-		client?.off("notification", onNotification);
-		subscriber?.off("message", onMessage);
-
 		if (subscriber) {
 			// The duplicate connection exists only for this subscription; closing it unsubscribes.
 			subscriber.disconnect();
-			subscriber.off("error", onError);
 		} else if (client) {
 			try {
 				await client.query(`UNLISTEN ${RESUME_UPDATED_CHANNEL}`);

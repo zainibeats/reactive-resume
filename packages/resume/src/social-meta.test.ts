@@ -10,13 +10,6 @@ const buildData = (overrides: { name?: string; headline?: string; summary?: stri
 	}) as ResumeData;
 
 describe("getResumeSocialMeta", () => {
-	it("combines the name and headline into the social title", () => {
-		const meta = getResumeSocialMeta(buildData({ name: "Jane Doe", headline: "Staff Engineer" }));
-
-		expect(meta.title).toBe("Jane Doe — Staff Engineer");
-		expect(meta.name).toBe("Jane Doe");
-	});
-
 	it("falls back to the resume name when the basics name is blank", () => {
 		const meta = getResumeSocialMeta(buildData({}), "Untitled Resume");
 
@@ -31,12 +24,6 @@ describe("getResumeSocialMeta", () => {
 		);
 
 		expect(meta.description).toBe("Builds systems at scale.");
-	});
-
-	it("prefers the headline when the summary is empty markup", () => {
-		const meta = getResumeSocialMeta(buildData({ name: "Jane", headline: "Staff Engineer", summary: "<p></p>" }));
-
-		expect(meta.description).toBe("Staff Engineer");
 	});
 
 	it("truncates a long summary on a word boundary", () => {

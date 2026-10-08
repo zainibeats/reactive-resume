@@ -1,11 +1,10 @@
 import { ORPCError } from "@orpc/client";
-import { ClientOnly, createFileRoute, lazyRouteComponent, redirect } from "@tanstack/react-router";
+import { createFileRoute, lazyRouteComponent, redirect } from "@tanstack/react-router";
 import { getResumeSocialMeta } from "@reactive-resume/resume/social-meta";
-import { LoadingScreen } from "@/components/layout/loading-screen";
+import { Hero } from "./-sections/hero";
 import { NotFoundScreen } from "@/components/layout/not-found-screen";
 import { orpc } from "@/libs/orpc/client";
-import { createNoindexFollowMeta, createResumeSocialMeta } from "@/libs/seo";
-import { Hero } from "./-sections/hero";
+import { createNoindexFollowMeta } from "@/libs/seo";
 
 const PublicResumePage = lazyRouteComponent(() => import("@/features/resume/public/public-resume"), "PublicResumePage");
 
@@ -13,7 +12,7 @@ export const Route = createFileRoute("/_home/")({
 	component: RouteComponent,
 	beforeLoad: ({ context }) => {
 		if (context.session) {
-			throw redirect({ to: "/dashboard/resumes", search: { sort: "lastUpdatedAt", tags: [] }, replace: true });
+			throw redirect({ to: "/dashboard", replace: true });
 		}
 	},
 	loader: async ({ context }) => ({
@@ -27,31 +26,20 @@ export const Route = createFileRoute("/_home/")({
 	},
 	head: ({ loaderData }) => {
 		const root = loaderData?.root;
-		if (!root || root.status === "disabled") return {};
-
-		const { canonicalUrl } = root;
-		if (root.status === "unavailable") {
+		if (root && root.status !== "disabled") {
+			if (root.status === "unavailable") {
+				return { meta: [{ title: "Reactive Resume" }, createNoindexFollowMeta()] };
+			}
+			const social = getResumeSocialMeta(root.resume.data, root.resume.name || "Resume");
 			return {
-				meta: [{ title: "Reactive Resume" }, createNoindexFollowMeta()],
-				links: [{ rel: "canonical", href: canonicalUrl }],
+				meta: [
+					{ title: `${social.name} - Reactive Resume` },
+					{ name: "description", content: social.description },
+					createNoindexFollowMeta(),
+				],
 			};
 		}
-
-		const social = getResumeSocialMeta(root.resume.data, root.resume.name || "Resume");
-
-		return {
-			meta: [
-				{ title: `${social.name} - Reactive Resume` },
-				createNoindexFollowMeta(),
-				...createResumeSocialMeta({
-					canonicalUrl,
-					title: social.title,
-					description: social.description,
-					imageUrl: `${canonicalUrl}opengraph/banner.jpg`,
-				}),
-			],
-			links: [{ rel: "canonical", href: canonicalUrl }],
-		};
+		return {};
 	},
 });
 
@@ -67,11 +55,7 @@ function RouteComponent() {
 		);
 
 	if (root.status === "public") {
-		return (
-			<ClientOnly fallback={<LoadingScreen />}>
-				<PublicResumePage resume={root.resume} username={root.username} slug={root.slug} flags={flags} isRoot />
-			</ClientOnly>
-		);
+		return <PublicResumePage resume={root.resume} username={root.username} slug={root.slug} flags={flags} isRoot />;
 	}
 
 	return (

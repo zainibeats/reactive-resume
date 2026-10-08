@@ -1,89 +1,65 @@
 ---
 title: "Checking service status"
-description: "Check the current uptime and incident status for Reactive Resume's hosted servers, and see what to do when the service is down or slow."
+description: "Find out whether rxresu.me is up, see its recent uptime, and learn what to do when Reactive Resume is slow or unreachable."
 ---
 
-## Status page
+If rxresu.me won't load, is slow, or something that normally works keeps failing, check the status page first. It tells
+you whether the problem is on our side or yours.
 
-You can check the health of Reactive Resume's servers at any time on the status page:
+## Check the status page
 
-<Card title="Status Page" icon="signal" href="https://status.rxresu.me">
-  View real-time server metrics including uptime, CPU usage, memory usage, and more.
+Open [status.rxresu.me](https://status.rxresu.me). The page shows:
+
+- Whether the service is **Online** right now, and for how long.
+- Uptime for the last 24 hours, the last 7 days and each recent month.
+- When it last checked. The service is checked every minute from several locations around the world.
+
+<Card title="Reactive Resume status" icon="signal" href="https://status.rxresu.me">
+  Live and recent uptime for rxresu.me.
 </Card>
 
-The status page shows:
-
-- **Uptime**: How long the servers have been running without interruption
-- **CPU Usage**: Current processor utilization
-- **Memory Usage**: RAM consumption across services
-- **Response Times**: How quickly the servers are responding to requests
-
----
-
-## What to do if servers are down
-
-If the servers are under high load or unreachable:
+## If the service is down or slow
 
 <Steps>
-  <Step title="Check the status page">
-    Visit [status.rxresu.me](https://status.rxresu.me) to confirm if there's an ongoing issue. The page will show you the current state of all services.
+  <Step title="Confirm it on the status page">
+    If the status page shows a problem, it's on our side. You don't need to do anything else.
   </Step>
-
-  <Step title="Wait and try again later">
-    If the servers are under heavy load, wait a while and try again. Peak usage times can cause temporary slowdowns.
-
-    <Info>
-      Reactive Resume is a **free, open-source service** used by thousands of people worldwide. During peak times, the servers may experience higher than usual load.
-    </Info>
-
+  <Step title="Wait and try again">
+    Most outages and slowdowns are short. Try again in a few minutes. Your documents are safe on the server while it's
+    unavailable.
   </Step>
-
-  <Step title="Check for announcements">
-    For major outages or planned maintenance, announcements may be posted on our [GitHub repository](https://github.com/reactive-resume/reactive-resume).
+  <Step title="Look for announcements">
+    Longer outages and planned maintenance are announced on [GitHub](https://github.com/reactive-resume/reactive-resume)
+    and the [Discord server](https://discord.gg/aSyA5ZSxpb).
   </Step>
 </Steps>
 
----
+## If the status page says everything is fine
 
-## A note on server capacity
+The problem is probably between your device and the service. Try these in order:
 
-<Warning>
-  Reactive Resume is a **free service** that runs on limited server resources. As an open-source project maintained by a
-  single developer, it's not feasible to invest in powerful dedicated servers without community support.
-</Warning>
+1. Reload the page.
+2. Check your internet connection by opening another website.
+3. Open rxresu.me in a private window. If it works there, a browser extension, such as an ad or script blocker, may be
+   getting in the way.
+4. Try a different browser or device.
 
-Thousands of people use the service every day. Because it is free and has no venture funding behind it, server capacity stays constrained.
+If you lose your connection while editing, the editor says so under the document name and keeps your changes on this
+device. They're sent as soon as you're back online. Downloading and sharing are unavailable until then.
 
-If Reactive Resume is useful to you and you want to help keep the servers running (and maybe scale them up), consider supporting the project.
+Still stuck? Ask in [GitHub Discussions](https://github.com/reactive-resume/reactive-resume/discussions/categories/q-a).
+If you can reproduce a bug, [open an issue](https://github.com/reactive-resume/reactive-resume/issues).
 
----
+## If you run your own copy
 
-## Support the project
+The status page only covers rxresu.me. A self-hosted copy reports its own health at `/api/health` on your address, for
+example `https://resume.example.com/api/health`. It returns `healthy` when the database, file storage and (if you use it)
+Redis are working, and an HTTP `503` error when any of them fails. See [Self-hosting with Docker](/self-hosting/docker) for setup and
+health checks.
 
-Donations go directly toward server costs, better infrastructure, and keeping Reactive Resume free for everyone.
+## Help keep the service running
 
-<Card title="Donate on Open Collective" icon="heart" href="https://opencollective.com/reactive-resume/donate">
-  Support Reactive Resume's development and server costs through Open Collective. Every contribution helps keep the
-  service running.
-</Card>
-
-<CardGroup cols={2}>
-  <Card title="One-time Donation" icon="gift">
-    Make a single contribution of any amount to help with immediate server costs.
-  </Card>
-  <Card title="Recurring Support" icon="repeat">
-    Become a backer with a monthly contribution to provide sustainable support.
-  </Card>
-</CardGroup>
-
----
-
-## Self-hosting as an alternative
-
-If you need guaranteed uptime, or want to avoid the limits of a shared server, you can self-host Reactive Resume on your own infrastructure.
-
-<Card title="Self-Hosting Guide" icon="server" href="/self-hosting/docker">
-  Learn how to deploy Reactive Resume on your own servers using Docker.
-</Card>
-
-Self-hosting gives you full control over your data and infrastructure, availability that depends only on your own server capacity, and no resources shared with other users.
+Reactive Resume is free and has no ads or investors. Server costs are paid by donations, so busy periods can still slow
+it down. If Reactive Resume helps you, consider
+[donating on Open Collective](https://opencollective.com/reactive-resume/donate). If you need guaranteed availability,
+you can [host your own copy](/self-hosting/docker).

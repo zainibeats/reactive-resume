@@ -53,16 +53,14 @@ vi.mock("drizzle-orm", () => ({
 	asc: (value: unknown) => ({ type: "asc", value }),
 	desc: (value: unknown) => ({ type: "desc", value }),
 	eq: (left: unknown, right: unknown) => ({ type: "eq", left, right }),
+	ne: (left: unknown, right: unknown) => ({ type: "ne", left, right }),
 	sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ type: "sql", strings: [...strings], values }),
 }));
+vi.mock("@reactive-resume/env/server", () => ({ env: {} }));
 vi.mock("../ai/credentials", () => ({
 	assertCredentialEncryptionConfigured: vi.fn(),
 	decryptCredential: vi.fn(() => "decrypted-key"),
 	encryptCredential: vi.fn(),
-	redactEncryptedCredential: vi.fn(() => ({
-		apiKeyFingerprint: "fingerprint",
-		apiKeyPreview: "sk-...test",
-	})),
 }));
 vi.mock("../ai/service", () => ({ testConnection: vi.fn() }));
 vi.mock("../ai/url-policy", () => ({ resolveAiBaseUrl: vi.fn() }));
@@ -100,7 +98,7 @@ describe("aiProvidersService", () => {
 		queryState.orderByArgs = [];
 	});
 
-	it("gets the first enabled and tested provider by creation order", async () => {
+	it("prefers the most recently used enabled and tested provider, then creation order", async () => {
 		queryState.rows = [providerRow({ id: "first-created" })];
 
 		await expect(aiProvidersService.getDefaultRunnable({ userId: "user-1" })).resolves.toMatchObject({
@@ -114,9 +112,20 @@ describe("aiProvidersService", () => {
 				{ type: "eq", left: "ai_provider.user_id", right: "user-1" },
 				{ type: "eq", left: "ai_provider.enabled", right: true },
 				{ type: "eq", left: "ai_provider.test_status", right: "success" },
+				{ type: "ne", left: "ai_provider.id", right: "server-ai:user-1" },
 			],
 		});
-		expect(queryState.orderByArgs).toEqual([{ type: "asc", value: "ai_provider.created_at" }]);
+		expect(queryState.orderByArgs).toEqual([
+			{
+				type: "desc",
+				value: {
+					type: "sql",
+					strings: ["coalesce(", ", '1970-01-01T00:00:00.000Z'::timestamptz)"],
+					values: ["ai_provider.last_used_at"],
+				},
+			},
+			{ type: "asc", value: "ai_provider.created_at" },
+		]);
 		expect(queryMock.limit).toHaveBeenCalledWith(1);
 	});
 });

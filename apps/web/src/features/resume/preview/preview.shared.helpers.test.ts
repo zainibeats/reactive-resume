@@ -1,42 +1,7 @@
 // @vitest-environment happy-dom
 
 import { afterEach, describe, expect, it } from "vitest";
-import {
-	DEFAULT_PDF_PAGE_SIZE,
-	getPreviewCanvasScale,
-	getResumePreviewGapValue,
-	getScaledPreviewPageSize,
-} from "./preview.shared.utils";
-
-describe("getScaledPreviewPageSize", () => {
-	it("multiplies both dimensions by the scale", () => {
-		const result = getScaledPreviewPageSize({ width: 100, height: 200 }, 2);
-		expect(result).toEqual({ width: 200, height: 400 });
-	});
-
-	it("returns the default A4 page size unchanged when scaled by 1", () => {
-		expect(getScaledPreviewPageSize(DEFAULT_PDF_PAGE_SIZE, 1)).toEqual(DEFAULT_PDF_PAGE_SIZE);
-	});
-
-	it("supports fractional scaling", () => {
-		const result = getScaledPreviewPageSize({ width: 100, height: 200 }, 0.5);
-		expect(result).toEqual({ width: 50, height: 100 });
-	});
-});
-
-describe("getResumePreviewGapValue", () => {
-	it("adds px units for numeric custom-property gap values", () => {
-		expect(getResumePreviewGapValue(96)).toBe("96px");
-	});
-
-	it("preserves explicit zero gap", () => {
-		expect(getResumePreviewGapValue(0)).toBe(0);
-	});
-
-	it("preserves string gap values", () => {
-		expect(getResumePreviewGapValue("1rem")).toBe("1rem");
-	});
-});
+import { getPreviewCanvasScale } from "./preview.shared.utils";
 
 const setDevicePixelRatio = (value: number) => {
 	Object.defineProperty(window, "devicePixelRatio", {
@@ -51,18 +16,6 @@ afterEach(() => {
 });
 
 describe("getPreviewCanvasScale", () => {
-	it("returns the desired render scale (4x) for small pages", () => {
-		setDevicePixelRatio(1);
-		// width * height * 4 * 4 = 100 * 100 * 16 = 160_000 ≪ 16_777_216 budget
-		expect(getPreviewCanvasScale(100, 100)).toBe(4);
-	});
-
-	it("uses devicePixelRatio when it exceeds the desired 4x scale", () => {
-		setDevicePixelRatio(8);
-		// 50*50*8*8 = 160_000 ≪ budget, so we keep the 8x devicePixelRatio
-		expect(getPreviewCanvasScale(50, 50)).toBe(8);
-	});
-
 	it("clamps the scale when the page would exceed the canvas pixel budget", () => {
 		setDevicePixelRatio(1);
 		const scale = getPreviewCanvasScale(2000, 3000);

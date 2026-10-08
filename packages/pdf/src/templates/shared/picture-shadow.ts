@@ -1,4 +1,4 @@
-import type { Style } from "@react-pdf/types";
+import type { Style } from "../../forme/style-types";
 import { encode } from "fast-png";
 import { parseColorString, rgbaStringToHex } from "@reactive-resume/utils/color";
 

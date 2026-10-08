@@ -1,4 +1,4 @@
-import type { Style } from "@react-pdf/types";
+import type { Style } from "../../forme/style-types";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 
 const A4_PAGE_SIZE = {

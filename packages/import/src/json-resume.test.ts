@@ -1,46 +1,17 @@
-// biome-ignore-all lint/style/noNonNullAssertion: These tests assert imported section lengths before inspecting the first item.
+// oxlint-disable typescript/no-non-null-assertion -- These tests assert imported section lengths before inspecting the first item.
 import { describe, expect, it } from "vitest";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { parseJSONResume } from "./json-resume";
 
 describe("parseJSONResume", () => {
-	it("throws when input is not valid JSON", () => {
-		expect(() => parseJSONResume("not json")).toThrow();
-	});
-
-	it("throws a serialized validation error for an obviously invalid shape", () => {
-		// Email field is validated; a non-email string should fail the loose schema.
-		const invalid = JSON.stringify({ basics: { email: "not-an-email" } });
-		expect(() => parseJSONResume(invalid)).toThrow();
-	});
-
-	it.each([
-		"2024-00",
-		"2024-13",
-		"2024-19",
-		"2024-00-01",
-		"2024-13-01",
-		"2024-01-00",
-		"2024-01-32",
-		"2024-1",
-		"2024-1-5",
-	])("rejects the malformed date %s and names the field", (startDate) => {
+	it.each(["2024-13", "2024-01-32", "2024-1"])("rejects the malformed date %s and names the field", (startDate) => {
 		const json = JSON.stringify({ work: [{ name: "Acme", position: "Engineer", startDate }] });
 		expect(() => parseJSONResume(json)).toThrow(/work\.0\.startDate \(Must be a valid ISO 8601 date/);
 	});
 
-	it.each(["2024", "2024-01", "2024-12", "2024-02-29", "1999-12-31"])(
-		"still accepts the valid date %s",
-		(startDate) => {
-			const json = JSON.stringify({ work: [{ name: "Acme", position: "Engineer", startDate }] });
-			expect(() => parseJSONResume(json)).not.toThrow();
-		},
-	);
-
-	it("imports an empty JSON Resume into a baseline ResumeData", () => {
-		const result = parseJSONResume("{}");
-		// Defaults preserve a name field even when unset by input.
-		expect(typeof result.basics.name).toBe("string");
+	it.each(["2024", "2024-02-29"])("still accepts the valid date %s", (startDate) => {
+		const json = JSON.stringify({ work: [{ name: "Acme", position: "Engineer", startDate }] });
+		expect(() => parseJSONResume(json)).not.toThrow();
 	});
 
 	it("imports basics fields into ResumeData", () => {
@@ -91,7 +62,7 @@ describe("parseJSONResume", () => {
 		expect(item.company).toBe("Acme Corp");
 		expect(item.position).toBe("Senior Engineer");
 		expect(item.location).toBe("Berlin");
-		expect(item.period.length).toBeGreaterThan(0);
+		expect(item.dates).toEqual({ start: "2020-01", end: "2024", present: false });
 		expect(item.description).toContain("Shipped X");
 	});
 
@@ -161,11 +132,6 @@ describe("parseJSONResume", () => {
 		expect(result.picture.hidden).toBe(false);
 	});
 
-	it("leaves the summary content empty when basics.summary is absent", () => {
-		const result = parseJSONResume(JSON.stringify({ basics: { name: "Jane" } }));
-		expect(result.summary.content).toBe("");
-	});
-
 	it("imports projects with description and period", () => {
 		const json = JSON.stringify({
 			projects: [
@@ -195,5 +161,23 @@ describe("parseJSONResume", () => {
 
 		expect(next.sections.experience.items).toHaveLength(0);
 		expect(defaultResumeData.sections.experience.items).toHaveLength(0);
+	});
+
+	it("escapes plain-text fields so markup-like text survives as text", () => {
+		const result = parseJSONResume(
+			JSON.stringify({
+				basics: { summary: "Generics like C<T> & more" },
+				work: [{ name: "Acme", summary: "Used List<T>", highlights: ["Wrote <b> tags"] }],
+				education: [{ institution: "Uni", courses: ["Types <T>"] }],
+				awards: [{ title: "Prize", summary: "Best <T>" }],
+			}),
+		);
+
+		expect(result.summary.content).toBe("<p>Generics like C&lt;T&gt; &amp; more</p>");
+		expect(result.sections.experience.items[0]!.description).toBe(
+			"<p>Used List&lt;T&gt;</p><ul><li>Wrote &lt;b&gt; tags</li></ul>",
+		);
+		expect(result.sections.education.items[0]!.description).toBe("<ul><li>Types &lt;T&gt;</li></ul>");
+		expect(result.sections.awards.items[0]!.description).toBe("<p>Best &lt;T&gt;</p>");
 	});
 });

@@ -1,9 +1,9 @@
 import type { MultiComboboxProps, SingleComboboxProps } from "@/components/ui/combobox";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { fontList, getFont, getFontDisplayName, getFontSearchKeywords, sortFontWeights } from "@reactive-resume/fonts";
 import { cn } from "@reactive-resume/utils/style";
-import { Combobox } from "@/components/ui/combobox";
 import { FontDisplay } from "./font-display";
+import { Combobox } from "@/components/ui/combobox";
 
 // Options depend only on the static font list, so compute them once per process
 // instead of per component instance (the body + heading pickers rendered identical output twice).
@@ -26,10 +26,14 @@ export function FontFamilyCombobox({ className, ...props }: FontFamilyComboboxPr
 	return <Combobox {...props} options={FONT_FAMILY_OPTIONS} className={cn("w-full", className)} />;
 }
 
-type FontWeightComboboxProps = Omit<MultiComboboxProps, "options" | "multiple"> & { fontFamily: string };
+type FontWeightComboboxProps = Omit<MultiComboboxProps, "options" | "multiple"> & {
+	fontFamily: string;
+	single?: boolean;
+};
 
 export function FontWeightCombobox({
 	fontFamily,
+	single = false,
 	onValueChange,
 	value,
 	defaultValue,
@@ -54,18 +58,17 @@ export function FontWeightCombobox({
 		}));
 	}, [fontFamily]);
 
-	const sortedValue = useMemo(() => (value ? sortFontWeights(value) : value), [value]);
-	const sortedDefaultValue = useMemo(
-		() => (defaultValue ? sortFontWeights(defaultValue) : defaultValue),
-		[defaultValue],
-	);
+	const sortedValue = value ? sortFontWeights(value).slice(single ? -1 : 0) : value;
+	const sortedDefaultValue = defaultValue ? sortFontWeights(defaultValue).slice(single ? -1 : 0) : defaultValue;
 
-	const handleValueChange = useCallback(
-		(nextValue: string[] | null) => {
-			onValueChange?.(nextValue ? sortFontWeights(nextValue) : nextValue);
-		},
-		[onValueChange],
-	);
+	const handleValueChange = (nextValue: string[] | null) => {
+		if (single && nextValue?.length) {
+			const selected = nextValue.find((weight) => !sortedValue?.includes(weight)) ?? nextValue.at(-1);
+			onValueChange?.(selected ? [selected] : []);
+			return;
+		}
+		onValueChange?.(nextValue ? sortFontWeights(nextValue) : nextValue);
+	};
 
 	return (
 		<Combobox

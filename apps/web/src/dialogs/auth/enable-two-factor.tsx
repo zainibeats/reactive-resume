@@ -1,13 +1,12 @@
 import type { DialogProps } from "../store";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ArrowDownIcon, CopyIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { useStore } from "@tanstack/react-form";
+import { useSelector } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { match } from "ts-pattern";
-import { useToggle } from "usehooks-ts";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -18,15 +17,18 @@ import {
 	DialogTitle,
 } from "@reactive-resume/ui/components/dialog";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { OTPField } from "@reactive-resume/ui/components/otp-field";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
+import { useDialogStore } from "../store";
+import { PasswordInput } from "@/components/input/password-input";
 import { useFormBlocker } from "@/hooks/use-form-blocker";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
+import { sessionQueryKey } from "@/libs/root-context";
 import { useAppForm } from "@/libs/tanstack-form";
-import { useDialogStore } from "../store";
 
 const enableFormSchema = z.object({
 	password: z.string().min(6).max(64),
@@ -48,12 +50,12 @@ type TwoFactorQRCodeProps = {
 
 export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const [totpUri, setTotpUri] = useState<string | null>(null);
 	const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
 	const [step, setStep] = useState<TwoFactorSetupStep>("enable");
 
-	const [showPassword, toggleShowPassword] = useToggle(false);
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 
 	const enableForm = useAppForm({
@@ -85,7 +87,7 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 			if (data.method === "totp") {
 				setTotpUri(data.totpURI);
 				setBackupCodes(data.backupCodes);
-				setStep("verify");
+				setStep("backup");
 				toast.close(toastId);
 			} else {
 				toast.add({ type: "error", description: t`Could not set up two-factor authentication.`, id: toastId });
@@ -117,14 +119,17 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 			}
 
 			toast.close(toastId);
-			setStep("backup");
+			toast.add({ type: "success", description: t`Two-factor authentication is now enabled.` });
+			void queryClient.invalidateQueries({ queryKey: sessionQueryKey }).then(() => router.invalidate());
+			closeDialog();
+			onReset();
 		},
 	});
 
-	const enableIsDirty = useStore(enableForm.store, (s) => s.isDirty);
-	const enableIsSubmitting = useStore(enableForm.store, (s) => s.isSubmitting);
-	const verifyIsDirty = useStore(verifyForm.store, (s) => s.isDirty);
-	const verifyIsSubmitting = useStore(verifyForm.store, (s) => s.isSubmitting);
+	const enableIsDirty = useSelector(enableForm.store, (s) => s.isDirty);
+	const enableIsSubmitting = useSelector(enableForm.store, (s) => s.isSubmitting);
+	const verifyIsDirty = useSelector(verifyForm.store, (s) => s.isDirty);
+	const verifyIsSubmitting = useSelector(verifyForm.store, (s) => s.isSubmitting);
 
 	const { requestClose } = useFormBlocker(enableForm, {
 		shouldBlock: () => {
@@ -135,10 +140,7 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 	});
 
 	const onConfirmBackup = () => {
-		toast.add({ type: "success", description: t`Two-factor authentication is now enabled.` });
-		void router.invalidate();
-		closeDialog();
-		onReset();
+		setStep("verify");
 	};
 
 	const onReset = () => {
@@ -195,46 +197,26 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 									<FormLabel>
 										<Trans>Password</Trans>
 									</FormLabel>
-									<div className="flex items-center gap-x-1.5">
-										<FormControl
-											render={
-												<Input
-													min={6}
-													max={64}
-													type={showPassword ? "text" : "password"}
-													autoComplete="current-password"
-													name={field.name}
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(event) => field.handleChange(event.target.value)}
-												/>
-											}
-										/>
-
-										<Button size="icon" variant="ghost" type="button" onClick={toggleShowPassword}>
-											<span className="sr-only">
-												{showPassword
-													? t({
-															comment:
-																"Accessible label for toggle button that hides the visible password in two-factor setup",
-															message: "Hide password",
-														})
-													: t({
-															comment:
-																"Accessible label for toggle button that reveals the masked password in two-factor setup",
-															message: "Show password",
-														})}
-											</span>
-											{showPassword ? <EyeIcon /> : <EyeSlashIcon />}
-										</Button>
-									</div>
+									<FormControl
+										render={
+											<PasswordInput
+												minLength={6}
+												maxLength={64}
+												autoComplete="current-password"
+												name={field.name}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(event) => field.handleChange(event.target.value)}
+											/>
+										}
+									/>
 									<FormMessage errors={field.state.meta.errors} />
 								</FormItem>
 							)}
 						</enableForm.Field>
 
 						<DialogFooter>
-							<Button type="submit">
+							<Button type="submit" disabled={enableIsSubmitting}>
 								<Trans>Continue</Trans>
 							</Button>
 						</DialogFooter>
@@ -255,7 +237,7 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 													message: "Copy secret",
 												})}
 											</span>
-											<CopyIcon />
+											<Icon name="content_copy" size={16} />
 										</Button>
 									</div>
 
@@ -278,6 +260,9 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 								<verifyForm.Field name="code">
 									{(field) => (
 										<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
+											<FormLabel className="sr-only">
+												<Trans>Verification code</Trans>
+											</FormLabel>
 											<FormControl
 												render={
 													<OTPField
@@ -296,10 +281,10 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 								</verifyForm.Field>
 
 								<DialogFooter className="gap-x-2">
-									<Button type="button" variant="outline" onClick={requestClose}>
+									<Button type="button" variant="secondary" onClick={requestClose}>
 										<Trans comment="Secondary action button to close two-factor setup dialog">Cancel</Trans>
 									</Button>
-									<Button type="submit">
+									<Button type="submit" disabled={verifyIsSubmitting}>
 										<Trans comment="Primary action button to proceed to next step in two-factor setup">Continue</Trans>
 									</Button>
 								</DialogFooter>
@@ -313,19 +298,19 @@ export function EnableTwoFactorDialog(_: DialogProps<"auth.two-factor.enable">) 
 							<div className="space-y-4">
 								<div className="grid grid-cols-2 gap-2">
 									{backupCodes.map((code) => (
-										<div key={code} className="rounded-md border border-border p-2 text-center font-mono text-sm">
+										<div key={code} className="rounded-md border border-line p-2 text-center font-mono text-sm">
 											{code}
 										</div>
 									))}
 								</div>
 
 								<div className="flex items-center gap-x-2">
-									<Button type="button" variant="outline" onClick={handleDownloadBackupCodes} className="flex-1">
-										<ArrowDownIcon className="me-2 size-4" />
+									<Button type="button" variant="secondary" onClick={handleDownloadBackupCodes} className="flex-1">
+										<Icon name="arrow_downward" size={16} className="me-2" />
 										<Trans comment="Action button to download two-factor backup codes as a text file">Download</Trans>
 									</Button>
 									<Button type="button" variant="ghost" onClick={handleCopyBackupCodes} className="flex-1">
-										<CopyIcon className="me-2 size-4" />
+										<Icon name="content_copy" size={16} className="me-2" />
 										<Trans comment="Action button to copy two-factor backup codes to clipboard">Copy</Trans>
 									</Button>
 								</div>

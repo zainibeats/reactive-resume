@@ -1,97 +1,58 @@
 import type { Application } from "../types";
-import { Trans } from "@lingui/react/macro";
-import { FileTextIcon, MapPinIcon } from "@phosphor-icons/react";
-import { getInitials } from "@reactive-resume/utils/string";
+import { useLingui } from "@lingui/react";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { cn } from "@reactive-resume/utils/style";
-import { tileColor } from "../tile-color";
+import { describeNextStep, getNextStep } from "../next-step";
 import { ApplicationActionsMenu } from "./application-actions-menu";
 
-type Props = {
+type ApplicationCardProps = {
 	application: Application;
 	onClick?: () => void;
-	onEdit?: (application: Application) => void;
-	className?: string;
+	/** The ⋯ menu (Move to…, Close…, Delete); cards dragged in the overlay go without. */
+	withMenu?: boolean;
 	dragging?: boolean;
 };
 
-export function ApplicationCard({ application, onClick, onEdit, className, dragging }: Props) {
-	const followUp = application.followUpAt && !application.archived;
+/** A board card: the company's initial, role and company, and the next step (warn when it's overdue). */
+export function ApplicationCard({ application, onClick, withMenu = false, dragging = false }: ApplicationCardProps) {
+	const { i18n } = useLingui();
+	const next = describeNextStep(getNextStep(application), application, i18n.locale);
 
 	return (
-		// biome-ignore lint/a11y/useSemanticElements: the card nests an actions-menu <button>, so it can't itself be a <button>; it stays keyboard-operable via role + tabIndex + onKeyDown.
 		<div
-			role="button"
-			tabIndex={0}
-			onClick={onClick}
-			onKeyDown={(event) => {
-				if (event.key === "Enter" || event.key === " ") {
-					event.preventDefault();
-					onClick?.();
-				}
-			}}
 			className={cn(
-				"group relative w-full cursor-pointer rounded-xl border border-border bg-card p-3 text-left shadow-sm outline-none transition-colors hover:border-foreground/25 focus-visible:ring-2 focus-visible:ring-ring",
-				dragging && "scale-[1.02] shadow-lg",
-				className,
+				"group relative grid gap-2 rounded-[10px] border border-line bg-surface p-3 shadow-e1 transition-[border-color,scale] duration-quick ease-enter hover:border-line-2 active:not-has-[[data-slot=button]:active]:scale-[0.98]",
+				// The overlay card lifts as it's picked up and settles flat again while the drop animation flies it home.
+				dragging &&
+					"scale-[1.02] rotate-1 cursor-grabbing shadow-e3 transition-[rotate,scale,box-shadow] duration-quick ease-enter **:cursor-grabbing in-[.is-dropping]:scale-100 in-[.is-dropping]:rotate-0 in-[.is-dropping]:shadow-e1 starting:scale-100 starting:rotate-0 starting:shadow-e1",
 			)}
 		>
-			{onEdit && (
-				<ApplicationActionsMenu
-					application={application}
-					onEdit={onEdit}
-					showOnHover
-					className="absolute end-1.5 top-1.5"
-				/>
-			)}
 			<div className="flex items-start gap-2.5">
-				<div
-					className={cn(
-						"flex size-9 shrink-0 items-center justify-center rounded-lg font-bold text-white text-xs",
-						tileColor(application.company),
-					)}
+				<span
+					aria-hidden="true"
+					className="grid size-7 shrink-0 place-items-center rounded-[7px] bg-sunken text-xs font-semibold text-ink-2"
 				>
-					{getInitials(application.company)}
-				</div>
-				<div className="min-w-0 flex-1">
-					<div className="truncate font-semibold text-sm tracking-tight">{application.role}</div>
-					<div className="truncate text-muted-foreground text-xs">{application.company}</div>
-				</div>
-				{followUp && (
-					<span
-						title="Needs follow-up"
-						className={cn("mt-1 size-2 shrink-0 rounded-full bg-amber-500 ring-2 ring-amber-500/25", onEdit && "me-6")}
-					/>
-				)}
+					{application.company.slice(0, 1).toUpperCase()}
+				</span>
+				<button
+					type="button"
+					onClick={onClick}
+					className="grid min-w-0 flex-1 text-start after:absolute after:inset-0 after:rounded-[10px]"
+				>
+					<span className="truncate text-sm font-semibold">{application.role}</span>
+					<span className="truncate text-xs text-ink-3">{application.company}</span>
+				</button>
+				{withMenu && <ApplicationActionsMenu application={application} className="relative z-10 -me-1.5 -mt-1.5" />}
 			</div>
-
-			{(application.location || application.salary) && (
-				<div className="mt-2.5 flex items-center gap-2 text-muted-foreground text-xs">
-					{application.location && (
-						<span className="flex min-w-0 items-center gap-1">
-							<MapPinIcon className="size-3 shrink-0" />
-							<span className="truncate">{application.location}</span>
-						</span>
-					)}
-					{application.location && application.salary && <span className="opacity-40">·</span>}
-					{application.salary && <span className="font-medium text-foreground">{application.salary}</span>}
-				</div>
-			)}
-
-			{(application.resumeId || application.source) && (
-				<div className="mt-2.5 flex flex-wrap gap-1.5">
-					{application.resumeId && (
-						<span className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-medium text-[11px] text-muted-foreground">
-							<FileTextIcon className="size-3" />
-							<Trans>Resume linked</Trans>
-						</span>
-					)}
-					{application.source && (
-						<span className="inline-flex items-center rounded-md border border-border px-2 py-0.5 font-medium text-[11px] text-muted-foreground">
-							{application.source}
-						</span>
-					)}
-				</div>
-			)}
+			<span
+				className={cn(
+					"flex items-center gap-1.5 text-xs",
+					next.tone === "warn" ? "text-warn-text" : next.tone === "muted" ? "text-ink-3" : "text-ink-2",
+				)}
+			>
+				<Icon name={next.icon} size={15} className="shrink-0" />
+				<span className="truncate">{next.title}</span>
+			</span>
 		</div>
 	);
 }

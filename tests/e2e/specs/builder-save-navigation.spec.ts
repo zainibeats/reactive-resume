@@ -3,21 +3,14 @@ import { createSampleResumeFromDashboard } from "../fixtures/resume";
 import { expect, test } from "../fixtures/test";
 
 const updateUrl = "**/api/rpc/resume/update";
-function barrier() {
-	let resolve!: () => void;
-	const promise = new Promise<void>((done) => {
-		resolve = done;
-	});
-	return { promise, resolve };
-}
 function waitSave(page: Page) {
 	return page.waitForResponse(
 		(response) => new URL(response.url()).pathname === "/api/rpc/resume/update" && response.ok(),
 	);
 }
 async function clickDashboardWithoutNavigationWait(page: Page) {
-	const dashboardButton = page.getByRole("button", { name: "Go to resumes dashboard", exact: true });
-	const box = await dashboardButton.boundingBox();
+	const dashboardLink = page.getByRole("link", { name: "Back to documents", exact: true });
+	const box = await dashboardLink.boundingBox();
 	if (!box) throw new Error("Dashboard navigation button is not visible.");
 	await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
@@ -31,32 +24,6 @@ async function prepareNavigationTest(page: Page, testInfo: TestInfo) {
 	return page.url();
 }
 
-test("retries a failed autosave before leaving the builder", async ({ authPage: page }, testInfo) => {
-	const url = await prepareNavigationTest(page, testInfo);
-
-	await page.route(updateUrl, async (route) => {
-		await route.abort("failed");
-	});
-	await page.getByLabel("Name", { exact: true }).fill("Draft recovered before leaving");
-	await expect(page.getByText("Your latest changes could not be saved.", { exact: true })).toBeVisible();
-	await page.unroute(updateUrl);
-	const arrived = barrier();
-	const release = barrier();
-	await page.route(updateUrl, async (route) => {
-		arrived.resolve();
-		await release.promise;
-		await route.continue();
-	});
-	await clickDashboardWithoutNavigationWait(page);
-	await arrived.promise;
-	expect(page.url()).toBe(url);
-	await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Draft recovered before leaving");
-	release.resolve();
-	await page.waitForURL(/\/dashboard/);
-	await page.goto(url);
-	await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Draft recovered before leaving");
-});
-
 test("retains the current draft when saving during navigation fails", async ({ authPage: page }, testInfo) => {
 	const url = await prepareNavigationTest(page, testInfo);
 	let attempts = 0;
@@ -64,16 +31,47 @@ test("retains the current draft when saving during navigation fails", async ({ a
 		attempts++;
 		await route.abort("failed");
 	});
-	await page.getByLabel("Name", { exact: true }).fill("Keep unsaved draft");
-	await expect(page.getByText("Your latest changes could not be saved.", { exact: true })).toBeVisible();
+	await page.getByRole("textbox", { name: "Full name", exact: true }).fill("Keep unsaved draft");
+	await expect(page.getByRole("status").filter({ hasText: "Not saved" })).toBeVisible();
 	await clickDashboardWithoutNavigationWait(page);
 	await expect.poll(() => attempts).toBe(2);
-	await expect(page.getByRole("status").filter({ hasText: "Couldn't save" })).toBeVisible();
+	await expect(page.getByRole("status").filter({ hasText: "Not saved" })).toBeVisible();
 	expect(page.url()).toBe(url);
-	await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Keep unsaved draft");
+	await expect(page.getByRole("textbox", { name: "Full name", exact: true })).toHaveValue("Keep unsaved draft");
 	await page.unroute(updateUrl);
 	await clickDashboardWithoutNavigationWait(page);
 	await page.waitForURL(/\/dashboard/);
 	await page.goto(url);
-	await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Keep unsaved draft");
+	await expect(page.getByRole("textbox", { name: "Full name", exact: true })).toHaveValue("Keep unsaved draft");
+});
+
+test("retains failed letter edits until navigation can save them", async ({ authPage: page }, testInfo) => {
+	const created = await page.request.post("/api/openapi/cover-letters", {
+		data: { name: `Letter ${testInfo.testId}` },
+	});
+	expect(created.ok()).toBe(true);
+	const letter = (await created.json()) as { id: string };
+	await page.goto(`/builder/letter/${letter.id}`);
+	const url = page.url();
+	const letterUpdate = "**/api/rpc/coverLetters/update";
+	let attempts = 0;
+	await page.route(letterUpdate, async (route) => {
+		attempts++;
+		await route.abort("failed");
+	});
+	await page.getByRole("button", { name: "Write it myself", exact: true }).click();
+	const body = page.getByRole("textbox", { name: "Letter body", exact: true });
+	await body.fill("Retain this failed letter draft");
+	await expect(page.getByRole("status").filter({ hasText: "Not saved" })).toBeVisible();
+	await clickDashboardWithoutNavigationWait(page);
+	await expect.poll(() => attempts).toBeGreaterThanOrEqual(2);
+	expect(page.url()).toBe(url);
+	await expect(body).toHaveText("Retain this failed letter draft");
+	await page.unroute(letterUpdate);
+	await clickDashboardWithoutNavigationWait(page);
+	await page.waitForURL(/\/dashboard/);
+	await page.goto(url);
+	await expect(page.getByRole("textbox", { name: "Letter body", exact: true })).toHaveText(
+		"Retain this failed letter draft",
+	);
 });

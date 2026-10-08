@@ -1,106 +1,134 @@
 ---
 title: "Undoing changes and version history"
-description: "Undo and redo edits with keyboard shortcuts in the Reactive Resume builder, and restore an earlier snapshot from the version history menu."
+description: "Undo recent edits in the Reactive Resume editor, save named versions, and preview or restore an earlier version of a resume or cover letter."
 ---
 
-Reactive Resume keeps two layers of change history for every resume:
-
-- **Undo and redo**: a live timeline of the changes you've made in the current builder session.
-- **Version history**: server-side snapshots taken at meaningful moments, kept even after you close the builder.
-
-Use undo for a quick correction. Use version history to jump back to an earlier editing snapshot, import, or AI/API edit.
+Reactive Resume gives you two ways back. **Undo** reverses your last few edits while the resume is open. **History**
+keeps saved versions of the document on the server, so you can look at yesterday's resume, or the one you sent to a
+company, and bring it back.
 
 ## Undo and redo
 
-Every change in the builder is undoable: typing, drag-and-drop reordering, template and layout switches, and edits applied by the AI assistant.
+In the resume editor, undo steps back through your changes: typing, adding or deleting entries, moving sections,
+template and design changes, custom styles, and edits you accept from the Assistant.
 
-<Steps>
-  <Step title="Open your resume in the builder">
-    Undo history is scoped to the resume you have open.
-  </Step>
+| Action | Mac                                        | Windows and Linux                                                             |
+| ------ | ------------------------------------------ | ----------------------------------------------------------------------------- |
+| Undo   | <kbd>⌘</kbd> <kbd>Z</kbd>                  | <kbd>Ctrl</kbd> <kbd>Z</kbd>                                                  |
+| Redo   | <kbd>⌘</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> | <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> or <kbd>Ctrl</kbd> <kbd>Y</kbd> |
 
-  <Step title="Undo or redo">
-    Use either the toolbar buttons on the floating dock or a keyboard shortcut:
+These shortcuts undo resume-wide changes when your cursor isn't in a text field. Inside a field, they undo your typing
+in that field. Click outside the field first to undo a change such as a template switch.
 
-    | Shortcut | Action |
-    | --- | --- |
-    | `Cmd/Ctrl+Z` | Undo the last change |
-    | `Cmd/Ctrl+Shift+Z` | Redo the last undone change |
+Many actions also show a message with an **Undo** button right after you make them, for example deleting an entry,
+switching template, **Fit to one page** or **Reset to template defaults**.
 
-    Rapid typing collapses into a single step, so one undo removes a phrase rather than one letter.
-  </Step>
-</Steps>
+How undo behaves:
+
+- **Typing groups into one step.** Edits to the same field less than a second apart undo together, so one undo
+  removes a phrase rather than a letter.
+- **Up to 200 steps** are kept.
+- **Undo lasts while the resume is open.** Reloading the page or opening the resume again starts a fresh undo history.
+  So does restoring a version, or a change arriving from somewhere else, such as another tab or an API client.
+
+The cover letter editor has no document-wide undo. Use <kbd>⌘</kbd> <kbd>Z</kbd> inside the text you're editing, or
+restore a version from History.
 
 <Tip>
-  When your cursor is inside a text field, `Cmd/Ctrl+Z` falls back to your browser's native input undo, so you can undo
-  just the characters you typed. Click outside the field, or use the dock buttons, to undo builder-wide changes such as
-  a template switch.
+  Changes that couldn't be saved, for example because you went offline or closed the tab, are kept on your device. The
+  next time you open the resume, they come back and are saved, and the editor tells you it restored them.
 </Tip>
 
-Undo history lives in your browser for the current session. Reloading the builder clears it, so use version history for anything older.
+## Open History
 
-## Version history
+On a desktop-width window, select the **History** icon (a clock) in the editor bar, next to the Assistant icon.
+History opens in the **Share & export** panel on its **History** tab. On a narrower window, select **Share**, then the
+**History** tab.
 
-Reactive Resume snapshots your resume automatically:
+<Frame caption="History lists Now at the top, then saved versions from newest to oldest">
+  <img
+    src="/images/guides/undoing-changes-and-version-history/history-tab.webp"
+    alt="The History tab of the Share & export panel: a field to name the current version, then a timeline with Now, a named version marked with a bookmark, an Editing session and Created"
+  />
+</Frame>
 
-- when you import a resume;
-- when the AI assistant or API applies edits;
-- on periodic saves during editing, including template switches;
-- when you restore a version.
+Each version shows a title, when it was saved (for example "Today 14:02", "Yesterday 09:15" or a date), and how it was
+saved. History shows the 100 most recent versions.
 
-Snapshots are stored on the server, per resume, and are kept across sessions.
+## What gets saved automatically
 
-Reactive Resume keeps a rolling window of the 30 most recent snapshots for each resume. Periodic editing snapshots, including template changes, are throttled to at most one every two minutes. Imports, AI/API edits, and restores create their own checkpoints.
+You don't need to save anything for History to work. Versions are added when:
 
-### Open version history
+| Title in History           | Saved when                                                                                                                                                                                              | Kept                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| **Created** / **Imported** | You create or import the resume.                                                                                                                                                                        | Until you delete the resume |
+| **Editing session**        | You edit. Each visit to the editor keeps one version with its latest state, refreshed at most every two minutes.                                                                                        | 90 days                     |
+| **AI edit**                | A change arrives through the API, for example from an MCP client or another AI tool connected to your account. Edits you accept from the Assistant in the editor count as part of your editing session. | 90 days                     |
+| **Sent to** _company_      | An application linked to this resume first moves to **Applied**, **Screening**, **Interview** or **Offer**.                                                                                             | Until you delete the resume |
+| **Before restore**         | Just before you restore a version.                                                                                                                                                                      | Until you delete the resume |
+| **Restored a version**     | Right after you restore a version.                                                                                                                                                                      | 90 days                     |
+| _Your name_                | You save a named version.                                                                                                                                                                               | Until you delete it         |
 
-Click the **clock** icon in the builder header, next to the resume name, to open the version history menu.
+Resumes and cover letters both have History. A letter's versions work the same way; only the kinds that apply to
+letters appear.
 
-The menu lists recent snapshots newest first, each with a label describing what triggered it and a relative timestamp such as *2 hours ago*.
+## Save a named version
 
-### Restore a version
+Name a version before a big change, or when you send the resume somewhere, so it's easy to find later.
 
 <Steps>
-  <Step title="Open the version history menu">
-    Click the clock icon in the builder header.
+  <Step title="Open History">Select the **History** icon, or **Share** then **History**.</Step>
+  <Step title="Type a name">
+    In **Name this version**, type a short name such as "Sent to Lumen" or "Before tailoring" (up to 80 characters).
   </Step>
-
-  <Step title="Pick a snapshot">
-    Select the entry you want to restore. Reactive Resume asks you to confirm before replacing the current data.
-  </Step>
-
-  <Step title="Confirm the restore">
-    The resume is updated to the snapshot's contents and reloads in the preview.
+  <Step title="Save">
+    Select **Save**. The version appears in the timeline with a bookmark icon and the detail "named".
   </Step>
 </Steps>
 
-Restoring is **non-destructive**: it writes the older snapshot back through the normal update path, so:
+To rename or delete a named version, point to it, select **⋯**, then choose **Rename…** or **Delete**. Only named
+versions can be renamed or deleted; the others are kept for as long as the table above says.
 
-- your previous versions are still listed in the menu;
-- the restore itself becomes a new snapshot;
-- if you change your mind, you can restore the pre-restore version, or press `Cmd/Ctrl+Z` to undo the restore.
+## Preview and restore a version
 
-<Info>
-  Only the resume owner can list or restore versions. A locked resume cannot be edited or restored until you unlock it
-  from the dashboard.
-</Info>
+<Steps>
+  <Step title="Select a version">
+    Select any version in the timeline. The page shows that version, read-only, and a bar at the top of History says
+    which version you're viewing.
+  </Step>
+  <Step title="Restore it, or go back">
+    Select **Restore this version** to make it your current resume, or **Back to now** to leave it. Closing the panel
+    also takes you back to now.
+  </Step>
+</Steps>
 
-## Keep longer owner-managed history with Git
+<Frame caption="Previewing a named version: the page shows it read-only until you restore it or go back to now">
+  <img
+    src="/images/guides/undoing-changes-and-version-history/history-viewing-a-named-version.webp"
+    alt="The History tab with a dark bar reading Viewing Today 01:44 AM · Original for game studios · read-only, with Restore this version and Back to now buttons, and the named version selected in the timeline"
+  />
+</Frame>
 
-In-app version history and Git backups solve different problems:
+Restoring never throws anything away. Before it replaces your resume, Reactive Resume saves the current state as
+**Before restore**, then adds **Restored a version** after it. To undo a restore, restore **Before restore**.
 
-- **In-app version history** is automatic, stored by Reactive Resume, and limited to the 30 most recent rolling snapshots for one resume.
-- **Git history** contains only the JSON exports you choose to commit. It is stored in your own local repository, uses your commit messages, and follows the retention you choose.
+<Frame caption="After a restore, the state you replaced is saved as Before restore">
+  <img
+    src="/images/guides/undoing-changes-and-version-history/history-after-restoring.webp"
+    alt="The History timeline after a restore: Now, Restored a version, Before restore, the named version, Editing session and Created"
+  />
+</Frame>
 
-Git backup is manual. Reactive Resume does not create commits, synchronize with a repository, or upload files to a remote. To set up a local repository and recover a committed export as a new resume, see [Keep JSON backups in a local Git repository](/guides/exporting-your-resume#keep-json-backups-in-a-local-git-repository).
+<Note>
+  Restoring clears the editor's undo history, so <kbd>⌘</kbd> <kbd>Z</kbd> can't reverse it. Use **Before restore**
+  instead. A locked resume can't be restored over; select **Unlock editing** in the document menu first.
+</Note>
 
-## Which to use when
+A version holds the whole resume: content, design, custom styles and private notes. Its public link settings aren't
+part of it.
 
-| Situation | Use |
-| --- | --- |
-| You typed a wrong word or moved an item you didn't mean to. | Undo (`Cmd/Ctrl+Z`) |
-| You just switched templates and want the old one back. | Undo; version history can help only after a periodic editing snapshot captures the switch. |
-| You imported a resume and want to compare with what you had before. | Version history |
-| The AI assistant applied edits you no longer want. | Undo the batch, or restore the pre-AI snapshot. |
-| You closed the browser and want to roll back yesterday's changes. | Version history |
-| You want selected backups beyond the 30-snapshot rolling window. | Export JSON and commit it to your own Git repository. |
+## Related guides
+
+- [Tracking job applications](/guides/tracking-job-applications): applications keep the exact version you sent.
+- [Using the Assistant](/guides/using-the-assistant): accepted edits can be undone like any other change.
+- [Keyboard shortcuts](/guides/keyboard-shortcuts): every editor shortcut in one place.

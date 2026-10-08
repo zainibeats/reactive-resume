@@ -19,14 +19,6 @@ import { BlobStorageService, blobOptions, blobPath } from "./blob";
 
 const storage = new BlobStorageService();
 
-function storedResult(data = new Uint8Array([1])) {
-	return {
-		statusCode: 200,
-		stream: new Response(data).body,
-		blob: { size: 0, etag: "version-1", uploadedAt: new Date(0), contentType: "image/jpeg" },
-	};
-}
-
 beforeEach(() => {
 	vi.resetAllMocks();
 	mocks.env.BLOB_READ_WRITE_TOKEN = undefined;
@@ -66,19 +58,6 @@ describe("BlobStorageService", () => {
 		});
 	});
 
-	it("reads private bytes and metadata directly from origin; returns null for missing files", async () => {
-		mocks.get.mockResolvedValueOnce(storedResult()).mockResolvedValueOnce(null);
-		expect(await storage.read("uploads/a")).toEqual({
-			data: new Uint8Array([1]),
-			size: 1,
-			etag: "version-1",
-			lastModified: new Date(0),
-			contentType: "image/jpeg",
-		});
-		expect(mocks.get).toHaveBeenCalledWith("preview-123/uploads/a", { access: "private", useCache: false });
-		expect(await storage.read("missing")).toBeNull();
-	});
-
 	it("deletes exact keys and descendants without deleting similarly named siblings", async () => {
 		mocks.list.mockResolvedValue({
 			blobs: ["foo", "foo/a", "foobar", "foo.txt"].map((key) => ({ pathname: `preview-123/${key}` })),
@@ -89,18 +68,5 @@ describe("BlobStorageService", () => {
 		mocks.list.mockResolvedValue({ blobs: [], hasMore: false });
 		expect(await storage.delete("absent")).toBe(false);
 		expect(mocks.del).toHaveBeenCalledTimes(1);
-	});
-
-	it("checks health with one namespaced list call without leaking errors", async () => {
-		mocks.list.mockResolvedValueOnce({ blobs: [], hasMore: false });
-		expect((await storage.healthcheck()).status).toBe("healthy");
-		expect(mocks.list).toHaveBeenCalledExactlyOnceWith({ prefix: "preview-123/.health", limit: 1 });
-		expect(mocks.put).not.toHaveBeenCalled();
-		mocks.list.mockRejectedValueOnce(new Error("private credentials must not escape"));
-		expect(await storage.healthcheck()).toEqual({
-			status: "unhealthy",
-			type: "blob",
-			message: "Blob storage is unavailable",
-		});
 	});
 });

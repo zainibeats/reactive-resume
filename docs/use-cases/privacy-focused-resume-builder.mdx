@@ -1,46 +1,51 @@
 ---
 title: "Privacy-focused resume builder"
-description: "Reactive Resume's privacy-focused design: open-source transparency, self-hosting, public sharing controls, and optional bring-your-own AI providers."
+description: "How Reactive Resume protects your resume data: private by default, password-protected links, in-browser ATS checks, your own AI provider, and self-hosting."
 ---
 
-Reactive Resume is a privacy-focused resume builder: the code is open source, you can self-host it, editing is private by default, and both sharing and AI are choices you make yourself.
+Reactive Resume is a privacy-focused resume builder. Your documents are private until you choose to share them, AI only runs when you connect your own provider, and the code is open source, so you can check these claims yourself or run your own instance.
 
-## Privacy controls in the resume workflow
+## Private by default
 
-You edit resumes inside your account. When you want someone else to read one, turn on a public URL and send them the link. Public resume URLs are not search-indexed by default. You can turn public access off again, and a public resume can require a password.
+- **Documents stay in your account.** Nobody else can see your resumes or cover letters. A resume becomes visible only when you turn on its public link in **Share → Link**. Cover letters have no public link.
+- **Public links are unlisted.** Public pages are not listed anywhere and ask search engines not to index them.
+- **Links can require a password.** Add one in the Link tab, and turn the link off at any time to stop access immediately.
+- **Private notes stay private.** Notes you keep on a resume never appear on the page, in the PDF or on the public link. Hidden sections and entries are removed from the public link too.
 
-For the sharing workflow, see [Sharing your resume publicly](/guides/sharing-your-resume-publicly). For account security, see [Setting up two-factor authentication](/guides/setting-up-two-factor-authentication) and [Setting up passkeys](/guides/setting-up-passkeys).
+## Checks that never leave your browser
 
-## When to use this path
+The public [ATS checker](/guides/using-the-ats-checker) reads your PDF in your browser. The file is not uploaded and you do not need an account. In the editor, Check mode's score, issues and job match also run without sending your resume to an AI service.
 
-Use this path when you want to understand the tradeoffs before choosing hosted use, self-hosting, public sharing, API automation, or AI features. It matters most if your resume holds sensitive job-search information, or if you plan to share links with only a few people.
+## AI only on your terms
 
-## When not to use this path
+Reactive Resume does not include a built-in AI model. AI features run only after you connect a provider of your choice in **Settings → AI**, using your own key, and your text goes only to that provider when you use an AI feature. Without a provider, PDF imports are read in your browser. Remove the key at any time to turn AI off.
 
-Do not treat public sharing as access control. Use password protection, or keep the resume private, if only specific people should open the link. Do not turn on AI features unless you are comfortable sending the prompts and resume content to the provider you configure.
+## Account security and your data
 
-## Open source and self-hosting
+Protect your account with [two-factor authentication](/guides/setting-up-two-factor-authentication) or [passkeys](/guides/setting-up-passkeys). You can [export all your data](/guides/exporting-your-data) as a zip at any time, and deleting your account permanently removes your documents and applications.
 
-The source code is on [GitHub](https://github.com/reactive-resume/reactive-resume), so you can read how the application works. If you need direct control over infrastructure, storage, auth providers, and deployment policy, run your own instance.
+## Full control with self-hosting
 
-Start with:
-
-- [Self-hosting with Docker](/self-hosting/docker)
-- [Self-hosting examples](/self-hosting/examples)
-- [Single sign-on](/self-hosting/sso)
-- [Privacy Policy](/legal/privacy-policy)
-
-## Optional AI features
-
-AI is optional. Reactive Resume does not need it to create, edit, export, or share a resume. If you do want AI help, you configure the provider and the key yourself.
-
-For setup details, see [Using Artificial Intelligence](/guides/using-ai), [Using AI in the builder](/guides/using-ai-in-the-builder), and [Importing resumes](/guides/importing-resumes).
+If you need to decide where data is stored, who can sign in and which services it talks to, run your own instance. The source is on [GitHub](https://github.com/reactive-resume/reactive-resume), and self-hosted instances can use your own database, file storage, email server and single sign-on provider.
 
 <Info>
-  Review the privacy policy for the instance you use. If you self-host, you are responsible for the deployment's data
-  handling, storage, email, and third-party provider configuration.
+  The hosted service at rxresu.me is covered by its [Privacy Policy](/legal/privacy-policy). If you self-host, you are
+  responsible for how your deployment stores and handles data.
 </Info>
 
-## Next action
+## Next steps
 
-Read the [Privacy Policy](/legal/privacy-policy), then go to [Sharing your resume publicly](/guides/sharing-your-resume-publicly) for link controls or [Self-hosting with Docker](/self-hosting/docker) for infrastructure control.
+<CardGroup cols={2}>
+  <Card title="Share your resume publicly" icon="share" href="/guides/sharing-your-resume-publicly">
+    Control the address, password and downloads.
+  </Card>
+  <Card title="Connect an AI provider" icon="plug" href="/guides/using-ai">
+    See what is sent to your provider and when.
+  </Card>
+  <Card title="Self-hosting with Docker" icon="docker" href="/self-hosting/docker">
+    Run Reactive Resume on your own infrastructure.
+  </Card>
+  <Card title="Single sign-on" icon="key" href="/self-hosting/sso">
+    Use your organization's identity provider.
+  </Card>
+</CardGroup>

@@ -1,6 +1,8 @@
+import { gunzipSync } from "node:zlib";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+	trustedProxies: [] as string[],
 	handleAuth: vi.fn(),
 	handleOAuth: vi.fn(),
 	handleRpc: vi.fn(),
@@ -21,6 +23,11 @@ const mocks = vi.hoisted(() => ({
 	serveWebDistStatic: vi.fn(),
 	handleWebApp: vi.fn(),
 }));
+
+vi.mock("@reactive-resume/env/server", async (original) => {
+	const { env } = await original<typeof import("@reactive-resume/env/server")>();
+	return { env: { ...env, TRUSTED_PROXIES: mocks.trustedProxies } };
+});
 
 vi.mock("./auth", () => ({
 	handleAuth: mocks.handleAuth,
@@ -81,6 +88,7 @@ const transportEnv = (remoteAddress: string) =>
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	mocks.trustedProxies.length = 0;
 	mocks.handleAuth.mockResolvedValue(new Response("auth"));
 	mocks.handleOAuth.mockResolvedValue(new Response("oauth"));
 	mocks.handleRpc.mockResolvedValue(new Response("rpc"));
@@ -103,6 +111,29 @@ beforeEach(() => {
 });
 
 describe("createApp", () => {
+	// The first case pays for the cold import of the whole app, which takes seconds under a parallel run.
+	it.each([
+		["127.0.0.1", "127.0.0.1", "198.51.100.1", "198.51.100.1"],
+		["127.0.0.1", "::ffff:127.0.0.1", "198.51.100.1", "198.51.100.1"],
+		["10.0.0.0/8", "10.2.3.4", "198.51.100.1, 10.3.4.5", "198.51.100.1"],
+		["::1/128", "::1", "2001:db8::1", "2001:db8::1"],
+		["127.0.0.1", "127.0.0.1", "192.0.2.99, 198.51.100.1", "198.51.100.1"],
+		["127.0.0.1", "203.0.113.9", "198.51.100.1", "203.0.113.9"],
+		["127.0.0.1", "127.0.0.1", "invalid, 198.51.100.1", "127.0.0.1"],
+	])(
+		"resolves auth client through trusted %s from socket %s",
+		async (proxy, peer, forwarded, expected) => {
+			mocks.trustedProxies.push(proxy);
+			const { createApp } = await import("./app");
+			const request = new Request("http://localhost/api/auth/sign-in/email", {
+				headers: { "x-forwarded-for": forwarded },
+			});
+			await createApp().fetch(request, transportEnv(peer));
+			expect(mocks.handleAuth).toHaveBeenCalledWith(request, expected);
+		},
+		15_000,
+	);
+
 	it("routes /api/auth/oauth to the OAuth bridge before the Better Auth wildcard", async () => {
 		const { createApp } = await import("./app");
 		const app = createApp();
@@ -113,19 +144,6 @@ describe("createApp", () => {
 		await expect(response.text()).resolves.toBe("oauth");
 		expect(mocks.handleOAuth).toHaveBeenCalledWith(request);
 		expect(mocks.handleAuth).not.toHaveBeenCalled();
-	});
-
-	it("routes signed resume PDF downloads before the web fallback", async () => {
-		const { createApp } = await import("./app");
-		const app = createApp();
-		const request = new Request("http://localhost:3001/api/resumes/resume-1/pdf?token=signed");
-
-		const response = await app.fetch(request);
-
-		await expect(response.text()).resolves.toBe("pdf");
-		expect(mocks.handleResumePdfDownload).toHaveBeenCalledWith(request, "resume-1");
-		expect(mocks.serveWebDistStatic).not.toHaveBeenCalled();
-		expect(mocks.handleWebApp).not.toHaveBeenCalled();
 	});
 
 	it("uses the transport address for public PDF fallback despite rotated forwarding headers", async () => {
@@ -173,36 +191,42 @@ describe("createApp", () => {
 		expect(mocks.handleOpenApi).toHaveBeenNthCalledWith(2, unknownOpenApiRequest, "unknown");
 	});
 
-	it.each([
-		["GET", "/robots.txt", "robots", mocks.handleRobots],
-		["HEAD", "/robots.txt", "", mocks.handleRobots],
-		["GET", "/sitemap.xml", "sitemap", mocks.handleSitemap],
-		["HEAD", "/sitemap.xml", "", mocks.handleSitemap],
-		["GET", "/llms.txt", "llms", mocks.handleLlms],
-		["HEAD", "/llms.txt", "", mocks.handleLlms],
-	])("routes %s %s before the static fallback", async (method, pathname, expectedBody, handler) => {
+	it("routes GET / to the web app before static files", async () => {
 		const { createApp } = await import("./app");
 		const app = createApp();
-		const request = new Request(`http://localhost:3001${pathname}`, { method });
-
-		const response = await app.fetch(request);
-
-		await expect(response.text()).resolves.toBe(expectedBody);
-		expect(handler).toHaveBeenCalledWith({ head: method === "HEAD" });
-		expect(mocks.serveWebDistStatic).not.toHaveBeenCalled();
-		expect(mocks.handleWebApp).not.toHaveBeenCalled();
-	});
-
-	it.each(["GET", "HEAD"])("routes %s / to the web app handler so SEO markup is injected", async (method) => {
-		const { createApp } = await import("./app");
-		const app = createApp();
-		const request = new Request("http://localhost:3001/", { method });
+		const request = new Request("http://localhost:3001/");
 
 		const response = await app.fetch(request);
 
 		expect(response.status).toBe(200);
-		expect(mocks.handleWebApp).toHaveBeenCalledWith(request);
+		expect(await response.text()).toBe("web");
 		expect(mocks.serveWebDistStatic).not.toHaveBeenCalled();
+	});
+
+	it("compresses the web app's HTML but never API streams or the Vercel app", async () => {
+		const { createApp } = await import("./app");
+		const html = `<!doctype html>${"<p>Reactive Resume</p>".repeat(200)}`;
+		const htmlResponse = () =>
+			new Response(html, {
+				headers: { "Content-Type": "text/html; charset=UTF-8", "Cache-Control": "private, no-store", Vary: "Cookie" },
+			});
+		const stream = () => new Response("data: x\n\n".repeat(500), { headers: { "Content-Type": "application/json" } });
+		mocks.handleWebApp.mockImplementation(async () => htmlResponse());
+		mocks.handleRpc.mockImplementation(async () => stream());
+		mocks.handleMcp.mockImplementation(async () => stream());
+		const headers = { "Accept-Encoding": "br, gzip" };
+
+		const page = await createApp().request("http://localhost:3000/", { headers });
+		const rpc = await createApp().request("http://localhost:3000/api/rpc/agent/chat", { headers });
+		const mcp = await createApp().request("http://localhost:3000/mcp", { headers });
+		const vercelPage = await createApp({ serveStatic: false }).request("http://localhost:3000/", { headers });
+
+		expect(page.headers.get("content-encoding")).toBe("gzip");
+		expect(page.headers.get("vary")).toBe("Cookie, Accept-Encoding");
+		expect(page.headers.get("cache-control")).toBe("private, no-store");
+		expect(gunzipSync(Buffer.from(await page.arrayBuffer())).toString()).toBe(html);
+		for (const response of [rpc, mcp, vercelPage]) expect(response.headers.get("content-encoding")).toBeNull();
+		expect(vercelPage.headers.get("vary")).toBe("Cookie");
 	});
 });
 
@@ -218,4 +242,17 @@ it.each(["/auth/consent", "/auth/consent/", "/auth/login"])("prevents framing or
 	expect(response.headers.get("x-frame-options")).toBe("DENY");
 	expect(response.headers.get("referrer-policy")).toBe("no-referrer");
 	expect(response.headers.get("cache-control")).toBe("no-store");
+});
+
+it("rejects oversized REST requests before parsing multipart uploads", async () => {
+	const { createApp } = await import("./app");
+	const response = await createApp().request("http://localhost:3000/api/openapi/files", {
+		method: "POST",
+		headers: { "Content-Length": String(40 * 1024 * 1024 + 1) },
+		body: "x",
+	});
+	expect(response.status).toBe(413);
+	expect(await response.json()).toMatchObject({ code: "PAYLOAD_TOO_LARGE", status: 413 });
+	expect(response.headers.get("cache-control")).toBe("no-store");
+	expect(mocks.handleOpenApi).not.toHaveBeenCalled();
 });

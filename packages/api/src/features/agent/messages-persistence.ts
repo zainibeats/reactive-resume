@@ -17,9 +17,77 @@ type StepContentPart = Record<string, unknown> & { type: string };
 
 type AgentStepLike = { content: ReadonlyArray<unknown> };
 
+type EditStatus = "pending" | "accepted" | "rejected";
+type ProposeEditsPart = UiMessagePart & {
+	toolCallId?: string;
+	state?: string;
+	output?: { edits?: Array<{ id: string; status: EditStatus }> };
+};
+
+const proposeEditsParts = (message: UIMessage) =>
+	message.parts.filter(
+		(part): part is ProposeEditsPart =>
+			part.type === "tool-propose_edits" && (part as ProposeEditsPart).state === "output-available",
+	);
+
+/** The edits a message proposed, with what the user did with each. */
+export const proposedEditsOf = (message: UIMessage) =>
+	proposeEditsParts(message).flatMap((part) => part.output?.edits ?? []);
+
+/** The message with edit statuses set, in one propose_edits result (by tool call) or in all of them. */
+export function withEditStatuses(
+	message: UIMessage,
+	toolCallId: string | null,
+	statuses: ReadonlyMap<string, EditStatus>,
+): UIMessage {
+	if (statuses.size === 0) return message;
+	return {
+		...message,
+		parts: message.parts.map((part) => {
+			const edits = (part as ProposeEditsPart).output?.edits;
+			if (part.type !== "tool-propose_edits" || !edits) return part;
+			if (toolCallId && (part as ProposeEditsPart).toolCallId !== toolCallId) return part;
+			const output = (part as ProposeEditsPart).output;
+			return {
+				...part,
+				output: { ...output, edits: edits.map((edit) => ({ ...edit, status: statuses.get(edit.id) ?? edit.status })) },
+			} as UiMessagePart;
+		}),
+	};
+}
+
+// A run rewrites its message as it goes, always with edits pending; what the user already did with them (they can
+// accept while the reply is still streaming) is kept.
+async function withStoredEditStatuses(
+	input: { userId: string; threadId: string; rowId?: string; message: UIMessage },
+	database: AgentMessagesDb,
+) {
+	if (proposeEditsParts(input.message).length === 0) return input.message;
+	const rows = await database
+		.select({ uiMessage: schema.agentMessage.uiMessage })
+		.from(schema.agentMessage)
+		.where(
+			and(
+				eq(schema.agentMessage.threadId, input.threadId),
+				eq(schema.agentMessage.userId, input.userId),
+				input.rowId
+					? eq(schema.agentMessage.id, input.rowId)
+					: sql`${schema.agentMessage.uiMessage}->>'id' = ${input.message.id}`,
+			),
+		);
+	const stored = rows[0]?.uiMessage as unknown as UIMessage | undefined;
+	if (!stored?.parts) return input.message;
+	return withEditStatuses(input.message, null, new Map(proposedEditsOf(stored).map((edit) => [edit.id, edit.status])));
+}
+
 function toolPartFromCall(part: StepContentPart): UiMessagePart {
+	const metadata = {
+		...(part.providerMetadata ? { callProviderMetadata: part.providerMetadata } : {}),
+		...(part.providerExecuted ? { providerExecuted: true } : {}),
+	};
 	if (part.dynamic) {
 		return {
+			...metadata,
 			type: "dynamic-tool",
 			toolName: String(part.toolName),
 			toolCallId: String(part.toolCallId),
@@ -29,6 +97,7 @@ function toolPartFromCall(part: StepContentPart): UiMessagePart {
 	}
 
 	return {
+		...metadata,
 		type: `tool-${String(part.toolName)}`,
 		toolCallId: String(part.toolCallId),
 		state: "input-available",
@@ -37,7 +106,7 @@ function toolPartFromCall(part: StepContentPart): UiMessagePart {
 }
 
 // Pure fold: append one step's content (text, reasoning, tool call/result/error) to a UI message.
-// Sources, files, and approval parts are skipped — the authoritative onFinish message carries them.
+// Files and approval parts are skipped — the authoritative onFinish message carries them.
 export function applyStepToUiMessage(message: UIMessage, step: AgentStepLike): UIMessage {
 	const parts: UiMessagePart[] = [...message.parts, { type: "step-start" } as UiMessagePart];
 	const toolPartIndexByCallId = new Map<string, number>();
@@ -47,6 +116,15 @@ export function applyStepToUiMessage(message: UIMessage, step: AgentStepLike): U
 			continue;
 		}
 		const content = rawContent as StepContentPart;
+		if (content.type === "source" && content.sourceType === "url" && typeof content.url === "string") {
+			parts.push({
+				type: "source-url",
+				sourceId: String(content.id),
+				url: content.url,
+				...(typeof content.title === "string" ? { title: content.title } : {}),
+			});
+			continue;
+		}
 		if (content.type === "text" && typeof content.text === "string" && content.text) {
 			parts.push({ type: "text", text: content.text } as UiMessagePart);
 			continue;
@@ -66,7 +144,11 @@ export function applyStepToUiMessage(message: UIMessage, step: AgentStepLike): U
 		if ((content.type === "tool-result" || content.type === "tool-error") && typeof content.toolCallId === "string") {
 			const resolution =
 				content.type === "tool-result"
-					? { state: "output-available", output: content.output }
+					? {
+							state: "output-available",
+							output: content.output,
+							...(content.providerMetadata ? { resultProviderMetadata: content.providerMetadata } : {}),
+						}
 					: {
 							state: "output-error",
 							errorText: content.error instanceof Error ? content.error.message : String(content.error),
@@ -181,9 +263,10 @@ export async function upsertAssistantUiMessage(
 	},
 	database: AgentMessagesDb = db,
 ) {
+	const message = await withStoredEditStatuses(input, database);
 	const set = {
 		status: input.status,
-		uiMessage: input.message as unknown as Record<string, unknown>,
+		uiMessage: message as unknown as Record<string, unknown>,
 	};
 	const isFinal = input.status !== "streaming";
 
@@ -202,7 +285,7 @@ export async function upsertAssistantUiMessage(
 
 		if (updated.length === 1) {
 			if (isFinal) await touchThread(input, database);
-			// biome-ignore lint/style/noNonNullAssertion: length checked above
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- length checked above
 			return { rowId: updated[0]!.id };
 		}
 	}
@@ -222,7 +305,7 @@ export async function upsertAssistantUiMessage(
 
 	if (updatedById.length >= 1) {
 		if (isFinal) await touchThread(input, database);
-		// biome-ignore lint/style/noNonNullAssertion: length checked above
+		// oxlint-disable-next-line typescript/no-non-null-assertion -- length checked above
 		return { rowId: updatedById[0]!.id };
 	}
 
@@ -232,10 +315,10 @@ export async function upsertAssistantUiMessage(
 		.values({
 			userId: input.userId,
 			threadId: input.threadId,
-			role: input.message.role,
+			role: message.role,
 			status: input.status,
 			sequence,
-			uiMessage: input.message as unknown as Record<string, unknown>,
+			uiMessage: message as unknown as Record<string, unknown>,
 		})
 		.returning({ id: schema.agentMessage.id });
 
@@ -262,4 +345,26 @@ export async function deleteDraftIfEmpty(
 				sql`jsonb_array_length(${schema.agentMessage.uiMessage}->'parts') = 0`,
 			),
 		);
+}
+
+/**
+ * The row of a user message already saved for this thread: a retry sends the same message again, and it's kept
+ * once.
+ */
+export async function findUserMessageRow(
+	input: { userId: string; threadId: string; uiMessageId: string },
+	database: AgentMessagesDb = db,
+) {
+	const [row] = await database
+		.select({ id: schema.agentMessage.id })
+		.from(schema.agentMessage)
+		.where(
+			and(
+				eq(schema.agentMessage.threadId, input.threadId),
+				eq(schema.agentMessage.userId, input.userId),
+				eq(schema.agentMessage.role, "user"),
+				sql`${schema.agentMessage.uiMessage}->>'id' = ${input.uiMessageId}`,
+			),
+		);
+	return row ?? null;
 }

@@ -1,22 +1,8 @@
-import { t } from "@lingui/core/macro";
-import { BrainIcon } from "@phosphor-icons/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Separator } from "@reactive-resume/ui/components/separator";
-import { IntegrationsSettingsPage } from "@/features/settings/integrations";
-import { DashboardHeader } from "../../-components/header";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Settings became three pages in 6.0; the old address redirects (through 6.0.x).
 export const Route = createFileRoute("/dashboard/settings/integrations")({
-	component: RouteComponent,
+	beforeLoad: () => {
+		throw redirect({ to: "/dashboard/settings/ai", replace: true });
+	},
 });
-
-function RouteComponent() {
-	return (
-		<div className="space-y-4">
-			<DashboardHeader icon={BrainIcon} title={t`Integrations`} />
-
-			<Separator />
-
-			<IntegrationsSettingsPage />
-		</div>
-	);
-}

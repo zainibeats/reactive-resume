@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleSlots } from "../shared/types";
 import { useMemo } from "react";
 import { Page, StyleSheet } from "#react-pdf-renderer";
@@ -178,19 +178,5 @@ const useBronzorTemplate = (): BronzorTemplate => {
 		});
 
 		return { colors, styles: baseStyles satisfies BronzorStyles };
-	}, [
-		metadata,
-		r.sectionHeadingTextAlign,
-		r.row,
-		primary,
-		metrics.page.paddingVertical,
-		metrics.page.paddingHorizontal,
-		metrics.headerGap,
-		metrics.columnGap,
-		metrics.gapY,
-		foreground,
-		base,
-		metrics.gapX,
-		background,
-	]);
+	}, [metadata, r, primary, metrics, foreground, base, background]);
 };

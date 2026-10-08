@@ -1,4 +1,4 @@
-import type { Style } from "@react-pdf/types";
+import type { Style } from "../../forme/style-types";
 import type { ReactElement, ReactNode } from "react";
 import { cloneElement, isValidElement } from "react";
 import { View } from "#react-pdf-renderer";
@@ -14,7 +14,7 @@ import {
 import { semanticNodeKeys } from "../../semantic/node-keys";
 import { getRichTextSemanticNodeKey } from "../../semantic/rich-text-keys";
 import { Html, Link as PdfLink, Text as PdfText } from "../../text";
-import { useSectionStyleRule, useTemplateStyle } from "./context";
+import { useTemplateStyle } from "./context";
 import {
 	normalizeRichTextHtml,
 	projectNormalizedRichTextHtml,
@@ -74,7 +74,7 @@ const applyRtlDirectionRecursively = (node: ReactNode): ReactNode => {
 };
 
 export const RichText = ({ children, semanticField }: RichTextProps) => {
-	const { metadata, rtl, hyphenationCallback } = useRender();
+	const { metadata, rtl } = useRender();
 	const parentNodeKey = useSemanticNodeKey();
 	const fieldNodeKey =
 		parentNodeKey && semanticField ? semanticNodeKeys.field(parentNodeKey, semanticField) : undefined;
@@ -93,24 +93,12 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 	const richListItemRowStyle = useTemplateStyle("richListItemRow");
 	const richListItemMarkerStyle = useTemplateStyle("richListItemMarker");
 	const richListItemContentStyle = useTemplateStyle("richListItemContent");
-	const richParagraphRuleStyle = useSectionStyleRule("richParagraph");
-	const richListRuleStyle = useSectionStyleRule("richList");
-	const richListItemRowRuleStyle = useSectionStyleRule("richListItemRow");
-	const richListItemContentRuleStyle = useSectionStyleRule("richListItemContent");
-	const richLinkRuleStyle = useSectionStyleRule("richLink");
-	const richBoldRuleStyle = useSectionStyleRule("richBold");
-	const richMarkRuleStyle = useSectionStyleRule("richMark");
-	const bodyLineHeight = resolveRichTextBodyLineHeight(
-		richParagraphStyle,
-		richParagraphRuleStyle,
-		richListItemContentStyle,
-		richListItemContentRuleStyle,
-	);
+	const bodyLineHeight = resolveRichTextBodyLineHeight(richParagraphStyle, richListItemContentStyle);
 	const proseSpacing = createRichTextProseSpacing(bodyLineHeight);
 
 	const normalizedHtml = normalizeRichTextHtml(children, {
 		direction: rtl ? "rtl" : "ltr",
-		softHyphens: metadata.typography.hyphenation === true && /^de(?:-|$)/i.test(metadata.page.locale),
+		softHyphens: metadata.typography.hyphenation === true,
 	});
 	const html = richTextNodeKey
 		? projectNormalizedRichTextHtml(normalizedHtml, richTextNodeKey, renderedChildKeysFor)
@@ -172,7 +160,6 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 
 	return (
 		<Html
-			resetStyles
 			{...resolvedPdfFlowProps(richTextResolved)}
 			style={composeStyles(fieldResolved.style, richTextResolved.style)}
 			renderers={{
@@ -236,7 +223,6 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 						semanticStyle: resolved.style,
 						textProps: {
 							...resolvedPdfTextProps(resolved),
-							hyphenationCallback,
 							"data-resume-whitespace": props.element.getAttribute("data-resume-whitespace"),
 						},
 						rtl,
@@ -258,7 +244,8 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 					const markerResolved = resolveNode(markerNodeKey);
 					const contentResolved = resolveNode(contentNodeKey);
 					const isOrderedList = isRichTextElementInsideOrderedList(element);
-					const marker = isOrderedList ? `${element.indexOfType + 1}.` : "•";
+					const number = element.indexOfType + 1;
+					const marker = isOrderedList ? `${number}.` : "•";
 					// Reserve the same gutter throughout a list, then let Yoga measure wider
 					// glyphs. An explicit authored width keeps its ordinary CSS geometry.
 					let orderedMarkerStyle: Style | undefined;
@@ -317,7 +304,6 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 							{...resolvedPdfTextProps(contentResolved)}
 							style={composeStyles(
 								richListItemContentStyle,
-								richListItemContentRuleStyle,
 								contentItemStyles,
 								contentResolved.style,
 								safeTextStyle,
@@ -333,7 +319,6 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 							{...resolvedPdfFlowProps(contentResolved)}
 							style={composeStyles(
 								richListItemContentStyle,
-								richListItemContentRuleStyle,
 								contentItemStyles,
 								contentResolved.style,
 								richListItemContentStackStyle,
@@ -365,7 +350,6 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 							{...resolvedPdfFlowProps(itemResolved)}
 							style={composeStyles(
 								richListItemRowStyle,
-								richListItemRowRuleStyle,
 								itemStyles,
 								getRichTextEdgeTrimStyle(element),
 								itemResolved.style,
@@ -385,11 +369,6 @@ export const RichText = ({ children, semanticField }: RichTextProps) => {
 				hideLinkUnderline: metadata.page.hideLinkUnderline,
 				linkStyle,
 				richParagraphStyle,
-				richParagraphRuleStyle,
-				richListRuleStyle,
-				richBoldRuleStyle,
-				richLinkRuleStyle,
-				richMarkRuleStyle,
 				proseSpacing,
 			})}
 		>

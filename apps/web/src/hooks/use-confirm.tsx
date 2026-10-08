@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import * as React from "react";
 import {
 	AlertDialog,
@@ -9,72 +10,52 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@reactive-resume/ui/components/alert-dialog";
+import { Input } from "@reactive-resume/ui/components/input";
 import { cn } from "@reactive-resume/utils/style";
+import { isImeComposing } from "@/libs/keyboard";
 
-interface ConfirmOptions {
-	description?: React.ReactNode;
-	confirmText?: React.ReactNode;
-	cancelText?: React.ReactNode;
-}
+type AskOptions = {
+	description?: string;
+	confirmText?: string;
+	cancelText?: string;
+	/** Prompts only: the text the field starts with. */
+	defaultValue?: string;
+};
 
-interface ConfirmState extends ConfirmOptions {
+type AskState = AskOptions & {
 	open: boolean;
-	title: React.ReactNode;
-	resolve: ((value: boolean) => void) | null;
-}
-
-type ConfirmContextType = {
-	confirm: (title: React.ReactNode, options?: ConfirmOptions) => Promise<boolean>;
+	title: string;
+	/** A prompt asks for text; a confirmation only for yes or no. */
+	withInput: boolean;
+	resolve: ((value: string | null) => void) | null;
 };
 
-type ConfirmDialogProviderProps = {
-	children: React.ReactNode;
-};
+type Ask = (title: string, options: AskOptions | undefined, withInput: boolean) => Promise<string | null>;
 
-const ConfirmContext = React.createContext<ConfirmContextType | null>(null);
+const AskContext = React.createContext<Ask | null>(null);
 
-export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) {
-	const [state, setState] = React.useState<ConfirmState>({
-		open: false,
-		resolve: null,
-		title: "",
-		description: undefined,
-		confirmText: undefined,
-		cancelText: undefined,
-	});
+/** One dialog answers both `useConfirm` and `usePrompt`: a question, and a text field when it's a prompt. */
+export function ConfirmDialogProvider({ children }: { children: React.ReactNode }) {
+	const [state, setState] = React.useState<AskState>({ open: false, title: "", withInput: false, resolve: null });
+	const [value, setValue] = React.useState("");
 
-	const confirm = React.useCallback((title: React.ReactNode, options?: ConfirmOptions): Promise<boolean> => {
-		return new Promise<boolean>((resolve) => {
-			setState({
-				open: true,
-				resolve,
-				title,
-				description: options?.description,
-				confirmText: options?.confirmText,
-				cancelText: options?.cancelText,
-			});
+	const ask: Ask = (title, options, withInput) =>
+		new Promise((resolve) => {
+			setValue(options?.defaultValue ?? "");
+			setState({ ...options, open: true, title, withInput, resolve });
 		});
-	}, []);
 
-	const handleConfirm = React.useCallback(() => {
-		if (state.resolve) state.resolve(true);
-
-		setState((prev) => ({ ...prev, open: false, resolve: null }));
-	}, [state.resolve]);
-
-	const handleCancel = React.useCallback(() => {
-		if (state.resolve) state.resolve(false);
-
-		setState((prev) => ({ ...prev, open: false, resolve: null }));
-	}, [state.resolve]);
-
-	const contextValue = React.useMemo<ConfirmContextType>(() => ({ confirm }), [confirm]);
+	// Cancelling answers null; confirming answers the text (empty for a confirmation). The state stays while closing.
+	const answer = (result: string | null) => {
+		state.resolve?.(result);
+		setState((previous) => ({ ...previous, open: false, resolve: null }));
+	};
 
 	return (
-		<ConfirmContext.Provider value={contextValue}>
+		<AskContext.Provider value={ask}>
 			{children}
 
-			<AlertDialog open={state.open} onOpenChange={(open) => !open && handleCancel()}>
+			<AlertDialog open={state.open} onOpenChange={(open) => !open && answer(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>{state.title}</AlertDialogTitle>
@@ -83,22 +64,45 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
+					{state.withInput && (
+						<Input
+							value={value}
+							aria-label={state.title}
+							onChange={(event) => setValue(event.target.value)}
+							onKeyDown={(event) => {
+								if (isImeComposing(event)) return;
+								if (event.key === "Enter") answer(value);
+							}}
+						/>
+					)}
+
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={handleCancel}>{state.cancelText ?? "Cancel"}</AlertDialogCancel>
-						<AlertDialogAction onClick={handleConfirm}>{state.confirmText ?? "Confirm"}</AlertDialogAction>
+						<AlertDialogCancel onClick={() => answer(null)}>{state.cancelText ?? t`Cancel`}</AlertDialogCancel>
+						<AlertDialogAction onClick={() => answer(state.withInput ? value : "")}>
+							{state.confirmText ?? t`Confirm`}
+						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-		</ConfirmContext.Provider>
+		</AskContext.Provider>
 	);
 }
 
+function useAsk() {
+	const ask = React.use(AskContext);
+	if (!ask) throw new Error("useConfirm and usePrompt must be used within a <ConfirmDialogProvider />.");
+	return ask;
+}
+
+/** Resolves true when the user confirms. */
 export function useConfirm() {
-	const context = React.use(ConfirmContext);
+	const ask = useAsk();
+	return async (title: string, options?: Omit<AskOptions, "defaultValue">) =>
+		(await ask(title, options, false)) !== null;
+}
 
-	if (!context) {
-		throw new Error("useConfirm must be used within a <ConfirmDialogProvider />.");
-	}
-
-	return context.confirm;
+/** Resolves with the text entered, or null when the user cancels. */
+export function usePrompt() {
+	const ask = useAsk();
+	return (title: string, options?: AskOptions) => ask(title, options, true);
 }

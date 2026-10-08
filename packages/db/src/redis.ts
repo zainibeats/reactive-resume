@@ -4,7 +4,7 @@ import { env } from "@reactive-resume/env/server";
 let redis: Redis | undefined;
 
 export function getRedis(): Redis | null {
-	const url = env.REDIS_URL?.trim();
+	const url = env.REDIS_URL;
 	if (!url) return null;
 	if (!redis) {
 		redis = new Redis(url, {

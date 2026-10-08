@@ -1,5 +1,5 @@
-import type { Style } from "@react-pdf/types";
 import type { TemplatePageProps } from "../../document";
+import type { Style } from "../../forme/style-types";
 import type { TemplateColorRoles, TemplateStyleContext, TemplateStyleSlots } from "../shared/types";
 import { Fragment, useMemo } from "react";
 import { Page, StyleSheet, View } from "#react-pdf-renderer";
@@ -65,6 +65,7 @@ export const DittoPage = ({ page, pageSize, pageMinHeightStyle, showHeader, page
 	const { metadata, picture } = data;
 	const { colors, styles } = useDittoTemplate();
 	const metrics = getTemplateMetrics(metadata.page);
+	const { r } = useTemplateBase();
 	const hasPicture = hasTemplatePicture(picture);
 	const sidebarSections = useRenderedSectionIds(pageNodeKey, filterSections(page.sidebar, data));
 	const mainSections = useRenderedSectionIds(pageNodeKey, filterSections(page.main, data));
@@ -89,7 +90,7 @@ export const DittoPage = ({ page, pageSize, pageMinHeightStyle, showHeader, page
 						style={composeStyles(styles.sidebarColumn, {
 							display: page.fullWidth ? "none" : "flex",
 							width: `${metadata.layout.sidebarWidth}%`,
-							paddingLeft: metrics.page.paddingHorizontal,
+							...r.columnInset(metrics.page.paddingHorizontal, 0),
 							paddingTop: showHeader && hasPicture ? metrics.page.paddingVertical : 0,
 							rowGap: metrics.sectionGap,
 						})}
@@ -104,8 +105,7 @@ export const DittoPage = ({ page, pageSize, pageMinHeightStyle, showHeader, page
 					<SemanticRegionView
 						region="main"
 						style={composeStyles(styles.mainColumn, {
-							paddingLeft: metrics.columnGap,
-							paddingRight: metrics.page.paddingHorizontal,
+							...r.columnInset(metrics.columnGap, metrics.page.paddingHorizontal),
 							rowGap: metrics.sectionGap,
 						})}
 					>
@@ -201,7 +201,7 @@ const useDittoTemplate = (): DittoTemplate => {
 			headerBand: {
 				backgroundColor: primary,
 				color: background,
-				flexDirection: r.row,
+				flexDirection: r.columns,
 				...(hasPicture ? { minHeight: picture.size * 0.6 } : {}),
 			},
 			pictureAnchor: {
@@ -232,7 +232,7 @@ const useDittoTemplate = (): DittoTemplate => {
 				color: background,
 			},
 			contactRow: {
-				flexDirection: r.row,
+				flexDirection: r.columns,
 				alignItems: "flex-start",
 			},
 			contactOffset: {
@@ -256,7 +256,7 @@ const useDittoTemplate = (): DittoTemplate => {
 				columnGap: metrics.gapX(1 / 6),
 			},
 			contentRow: {
-				flexDirection: r.row,
+				flexDirection: r.columns,
 			},
 			sidebarColumn: {
 				flexShrink: 0,
@@ -295,18 +295,5 @@ const useDittoTemplate = (): DittoTemplate => {
 				},
 			} satisfies DittoStyles,
 		};
-	}, [
-		picture,
-		metadata,
-		r.row,
-		r.headerIdentity,
-		primary,
-		metrics.page.paddingVertical,
-		metrics.gapX,
-		metrics.page.paddingHorizontal,
-		foreground,
-		base,
-		metrics.gapY,
-		background,
-	]);
+	}, [picture, metadata, r, primary, metrics, foreground, base, background]);
 };

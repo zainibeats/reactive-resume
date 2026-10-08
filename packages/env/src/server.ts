@@ -1,10 +1,12 @@
+import { isIP } from "node:net";
 import { isAbsolute, join } from "node:path";
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
+import { aiProviderSchema } from "@reactive-resume/ai/types";
 import { findWorkspaceRoot } from "@reactive-resume/utils/monorepo.node";
 import { deploymentEnvironment } from "./deployment";
 
-const workspaceRoot = findWorkspaceRoot();
+const workspaceRoot = process.env.CLOUDFLARE === "1" ? null : findWorkspaceRoot();
 
 if (workspaceRoot) {
 	try {
@@ -16,9 +18,43 @@ if (workspaceRoot) {
 	}
 }
 
+// ioredis authenticates as `AUTH <username> <password>`; a bare "redis://value@host" (userinfo with no colon) puts
+// that value in the username slot and Redis rejects the resulting auth. Password-only servers (redis-server
+// --requirepass) need an empty username — "redis://:<pass>@<host>" — or the built-in ACL user,
+// "redis://default:<pass>@<host>". A named user with an explicitly empty password ("redis://user:@host") stays
+// valid: Redis accepts `AUTH <user> ""` for passwordless (`nopass`) ACL users.
+const REDIS_URL_USERINFO_MESSAGE =
+	"REDIS_URL userinfo has no password field. For password-only auth (redis --requirepass) use " +
+	"redis://:<password>@<host>; for ACL users use redis://<user>:<password>@<host> (default is the built-in user; " +
+	"nopass users may keep the password empty, e.g. redis://<user>:@<host>).";
+
+function hasCompleteUserinfo(raw: string): boolean {
+	// Checks run even when the earlier URL-format check has already failed, so this must never throw:
+	// a malformed URL reaching `new URL()` surfaces as an unhandled parse crash instead of a validation
+	// error. Format errors are the URL check's job — only classify complete, parseable URLs here.
+	if (!URL.canParse(raw)) return true;
+
+	// The URL parser normalizes an empty password away ("redis://user:@host" parses like
+	// "redis://user@host"), so the colon that separates the password field must be read from the raw
+	// authority. Userinfo ends at the last "@" before the authority terminator; a userinfo without a
+	// colon is exactly the password-in-username-slot shape ioredis mis-authenticates.
+	const schemeEnd = raw.indexOf("://");
+	if (schemeEnd === -1) return true; // no authority, so no userinfo
+	const authorityStart = schemeEnd + 3;
+	const terminator = raw.slice(authorityStart).search(/[/?#]/);
+	const authority =
+		terminator === -1 ? raw.slice(authorityStart) : raw.slice(authorityStart, authorityStart + terminator);
+	const userinfoEnd = authority.lastIndexOf("@");
+	// `userinfoEnd === 0` is an empty userinfo ("redis://@host") — ioredis reads it exactly like no
+	// userinfo and sends no AUTH, so it passes the same way a missing "@" does.
+	if (userinfoEnd <= 0) return true;
+	return authority.slice(0, userinfoEnd).includes(":");
+}
+
 export const env = createEnv({
 	server: {
 		// Application
+		CLOUDFLARE: z.stringbool().default(false),
 		APP_URL: z.url({ protocol: /https?/ }),
 		ROOT_RESUME_ID: z
 			.string()
@@ -26,6 +62,28 @@ export const env = createEnv({
 			.transform((value) => value || undefined)
 			.optional(),
 		SERVER_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
+		TRUSTED_PROXIES: z
+			.string()
+			.transform((value) =>
+				value
+					.split(",")
+					.map((range) => range.trim())
+					.filter(Boolean),
+			)
+			.pipe(
+				z.array(
+					z.string().refine((range) => {
+						const [address, prefix, ...rest] = range.split("/");
+						const family = isIP(address ?? "");
+						return (
+							family > 0 &&
+							rest.length === 0 &&
+							(prefix === undefined || (/^\d+$/.test(prefix) && Number(prefix) <= (family === 4 ? 32 : 128)))
+						);
+					}, "TRUSTED_PROXIES must contain comma-separated IP addresses or CIDRs"),
+				),
+			)
+			.default([]),
 
 		// Database
 		DATABASE_URL: z.url({ protocol: /postgres(ql)?/ }),
@@ -71,7 +129,7 @@ export const env = createEnv({
 		SMTP_SECURE: z.stringbool().default(false),
 
 		// Storage (Optional)
-		STORAGE_BACKEND: z.enum(["local", "s3", "blob"]),
+		STORAGE_BACKEND: z.enum(["local", "s3", "blob", "r2"]),
 		BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
 		BLOB_STORE_ID: z.string().min(1).optional(),
 		DEPLOYMENT_NAMESPACE: z.string().regex(/^[a-zA-Z0-9._-]+$/),
@@ -83,9 +141,21 @@ export const env = createEnv({
 		S3_BUCKET: z.string().min(1).optional(),
 		S3_FORCE_PATH_STYLE: z.stringbool().default(false),
 
-		// Builder AI assistant (optional until the assistant is used)
-		REDIS_URL: z.url({ protocol: /redis(s)?/ }).optional(),
+		// AI assistant (optional until the assistant is used)
+		REDIS_URL: z
+			.url({ protocol: /redis(s)?/ })
+			.refine(hasCompleteUserinfo, REDIS_URL_USERINFO_MESSAGE)
+			.optional(),
 		ENCRYPTION_SECRET: z.string().min(32, "ENCRYPTION_SECRET must be at least 32 characters").optional(),
+
+		// Optional search and enhanced reading; custom URLs are operator-controlled Firecrawl services.
+		WEB_ACCESS_PROVIDER: z.enum(["firecrawl", "tavily", "exa"]).optional(),
+		WEB_ACCESS_API_KEY: z.string().trim().min(1).optional(),
+		WEB_ACCESS_API_URL: z.url({ protocol: /^https?$/ }).optional(),
+		AI_PROVIDER: aiProviderSchema.optional(),
+		AI_MODEL: z.string().trim().min(1).optional(),
+		AI_API_KEY: z.string().trim().min(1).optional(),
+		AI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
 
 		// Feature Flags
 		FLAG_DISABLE_SIGNUPS: z.stringbool().default(false),
@@ -98,3 +168,25 @@ export const env = createEnv({
 	runtimeEnv: deploymentEnvironment(process.env),
 	emptyStringAsUndefined: true,
 });
+
+if (
+	(env.WEB_ACCESS_PROVIDER || env.WEB_ACCESS_API_KEY || env.WEB_ACCESS_API_URL) &&
+	(!env.WEB_ACCESS_PROVIDER ||
+		(!env.WEB_ACCESS_API_KEY && !(env.WEB_ACCESS_PROVIDER === "firecrawl" && env.WEB_ACCESS_API_URL)) ||
+		(env.WEB_ACCESS_PROVIDER !== "firecrawl" && env.WEB_ACCESS_API_URL))
+) {
+	throw new Error(
+		"Web access requires WEB_ACCESS_PROVIDER and WEB_ACCESS_API_KEY; only Firecrawl accepts WEB_ACCESS_API_URL, which may be keyless.",
+	);
+}
+
+if (
+	(env.AI_PROVIDER || env.AI_MODEL || env.AI_API_KEY || env.AI_BASE_URL) &&
+	(!env.AI_PROVIDER || !env.AI_MODEL || (!env.AI_API_KEY && env.AI_PROVIDER !== "ollama"))
+) {
+	throw new Error("Server AI requires AI_PROVIDER, AI_MODEL and AI_API_KEY (the key is optional for Ollama).");
+}
+
+if (env.AI_PROVIDER === "openai-compatible" && !env.AI_BASE_URL) {
+	throw new Error("The openai-compatible server AI provider requires AI_BASE_URL.");
+}

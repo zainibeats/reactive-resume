@@ -1,9 +1,9 @@
 import { Trans } from "@lingui/react/macro";
-import { HouseIcon, MagnifyingGlassIcon, WarningIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { Alert, AlertDescription, AlertTitle } from "@reactive-resume/ui/components/alert";
 import { BrandIcon } from "@reactive-resume/ui/components/brand-icon";
 import { buttonVariants } from "@reactive-resume/ui/components/button";
+import { Icon } from "@reactive-resume/ui/components/icon";
 
 export function NotFoundScreen() {
 	return (
@@ -11,7 +11,7 @@ export function NotFoundScreen() {
 			<BrandIcon variant="logo" className="size-12" />
 
 			<Alert>
-				<WarningIcon />
+				<Icon name="warning" size={16} />
 				<AlertTitle>
 					<Trans>We couldn't find that page</Trans>
 				</AlertTitle>
@@ -22,12 +22,12 @@ export function NotFoundScreen() {
 
 			<div className="flex items-center gap-x-2">
 				<Link to="/dashboard" className={buttonVariants()}>
-					<MagnifyingGlassIcon />
+					<Icon name="search" size={16} />
 					<Trans>Go to dashboard</Trans>
 				</Link>
 
 				<Link to="/" className={buttonVariants({ variant: "secondary" })}>
-					<HouseIcon />
+					<Icon name="home" size={16} />
 					<Trans>Go home</Trans>
 				</Link>
 			</div>

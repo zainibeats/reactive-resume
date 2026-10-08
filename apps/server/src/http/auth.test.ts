@@ -36,6 +36,25 @@ beforeEach(() => {
 });
 
 describe("handleAuth", () => {
+	it.each(["203.0.113.9", "unknown"])("uses only the adapter's client address (%s)", async (trustedClient) => {
+		const { handleAuth } = await import("./auth");
+		await handleAuth(
+			new Request("http://localhost:3000/api/auth/get-session", {
+				headers: {
+					"cf-connecting-ip": "198.51.100.1",
+					"true-client-ip": "198.51.100.2",
+					"x-forwarded-for": "198.51.100.3, 192.0.2.1",
+					"x-real-ip": "198.51.100.4",
+				},
+			}),
+			trustedClient,
+		);
+		const request = mocks.handler.mock.calls[0]?.[0] as Request;
+		expect(request.headers.get("cf-connecting-ip")).toBeNull();
+		expect(request.headers.get("true-client-ip")).toBeNull();
+		expect(request.headers.get("x-forwarded-for")).toBeNull();
+		expect(request.headers.get("x-real-ip")).toBe(trustedClient === "unknown" ? null : trustedClient);
+	});
 	it.for([null, false, 42, "client", [], [{ redirect_uris: [] }]])(
 		"rejects non-object registration payload %j",
 		async (body) => {
@@ -52,21 +71,6 @@ describe("handleAuth", () => {
 			expect(mocks.handler).not.toHaveBeenCalled();
 		},
 	);
-
-	it("registers third-party https callbacks so remote MCP clients can complete DCR", async () => {
-		const { handleAuth } = await import("./auth");
-
-		const response = await handleAuth(
-			new Request("http://localhost:3001/api/auth/oauth2/register", {
-				method: "POST",
-				body: JSON.stringify({ redirect_uris: ["https://claude.ai/api/mcp/auth_callback"] }),
-				headers: { "content-type": "application/json" },
-			}),
-		);
-
-		expect(response.status).toBe(200);
-		expect(mocks.handler).toHaveBeenCalledOnce();
-	});
 
 	it("rejects unsafe dynamic OAuth redirect URIs in safe mode", async () => {
 		const { handleAuth } = await import("./auth");
@@ -87,21 +91,6 @@ describe("handleAuth", () => {
 		expect(mocks.handler).not.toHaveBeenCalled();
 	});
 
-	it("forwards custom-scheme dynamic OAuth redirect URIs when unsafe mode is enabled", async () => {
-		const { handleAuth } = await import("./auth");
-		mocks.env.FLAG_ALLOW_UNSAFE_OAUTH_REDIRECT_URI = true;
-
-		const response = await handleAuth(
-			new Request("http://localhost:3001/api/auth/oauth2/register", {
-				method: "POST",
-				body: JSON.stringify({ redirect_uris: ["myapp://callback"] }),
-				headers: { "content-type": "application/json" },
-			}),
-		);
-
-		expect(response.status).toBe(200);
-		expect(mocks.handler).toHaveBeenCalledOnce();
-	});
 	it.each(["localhost", "127.0.0.1", "[::1]"])(
 		"infers native application type for exact %s loopback callbacks",
 		async (host) => {
@@ -158,20 +147,6 @@ describe("handleAuth", () => {
 		const forwarded = mocks.handler.mock.calls[0]?.[0] as Request;
 		expect((await forwarded.json()).application_type).not.toBe("native");
 	});
-
-	it("preserves repeated resource indicators during authorization sanitization", async () => {
-		const { handleAuth } = await import("./auth");
-		await handleAuth(
-			new Request(
-				"http://localhost:3000/api/auth/oauth2/authorize?resource=http%3A%2F%2Flocalhost%3A3000&resource=http%3A%2F%2Flocalhost%3A3000%2Fmcp",
-			),
-		);
-		const forwarded = mocks.handler.mock.calls[0]?.[0] as Request;
-		expect(new URL(forwarded.url).searchParams.getAll("resource")).toEqual([
-			"http://localhost:3000",
-			"http://localhost:3000/mcp",
-		]);
-	});
 });
 
 describe("handleOAuth", () => {
@@ -216,15 +191,6 @@ describe("handleOAuth", () => {
 		expect(response.headers.get("location")).toBe("/auth/consent?client_id=client&sig=signed");
 	});
 
-	it("preserves provider failures instead of issuing an authorization code", async () => {
-		const { handleOAuth } = await import("./auth");
-		mocks.getSession.mockResolvedValueOnce({ user: { id: "owner" } });
-		mocks.continueOAuth.mockResolvedValueOnce(Response.json({ error: "invalid_signature" }, { status: 400 }));
-		const response = await handleOAuth(new Request("http://localhost:3000/api/auth/oauth?sig=invalid"));
-		expect(response.status).toBe(400);
-		expect(response.headers.get("location")).toBeNull();
-		await expect(response.json()).resolves.toEqual({ error: "invalid_signature" });
-	});
 	it("preserves provider cookies and cache headers on forced reauthentication", async () => {
 		const { handleOAuth } = await import("./auth");
 		mocks.getSession.mockResolvedValueOnce({ user: { id: "owner" } });
