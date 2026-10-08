@@ -6,6 +6,23 @@ vi.mock("@reactive-resume/email/transport", () => ({ sendEmail: vi.fn() }));
 // Run only against an explicitly supplied disposable database, after applying migrations.
 const databaseURL = process.env.OAUTH_TEST_DATABASE_URL;
 
+// The fork's single-owner auth refuses every account after the first, so the suite shares one owner:
+// it signs the owner in, creating the account only on a fresh database.
+const owner = {
+	name: "OAuth Owner",
+	email: "oauth-owner@example.com",
+	username: "oauth-owner",
+	password: "password123",
+};
+
+async function ownerSession(post: (path: string, body: object) => Promise<Response>) {
+	const signIn = await post("sign-in/email", { email: owner.email, password: owner.password });
+	if (signIn.status === 200) return signIn;
+	const signup = await post("sign-up/email", owner);
+	expect(signup.status, await signup.clone().text()).toBe(200);
+	return signup;
+}
+
 describe.skipIf(!databaseURL)("MCP OAuth flow with PostgreSQL", () => {
 	it("registers public clients, resumes login, and exchanges a resource-bound PKCE code", async () => {
 		if (!databaseURL) return;
@@ -62,16 +79,7 @@ describe.skipIf(!databaseURL)("MCP OAuth flow with PostgreSQL", () => {
 		expect(callbackURL).toContain("sig=");
 		expect(callbackURL).toContain("resource=");
 
-		const unique = randomBytes(6).toString("hex");
-		const signup = await handleAuth(
-			request("sign-up/email", {
-				name: "OAuth Test",
-				email: `oauth-${unique}@example.com`,
-				username: `oauth-${unique}`,
-				password: "password123",
-			}),
-		);
-		expect(signup.status, await signup.clone().text()).toBe(200);
+		const signup = await ownerSession((path, body) => handleAuth(request(path, body)));
 		const cookie = signup.headers
 			.getSetCookie()
 			.map((value) => value.split(";", 1)[0])
@@ -90,7 +98,9 @@ describe.skipIf(!databaseURL)("MCP OAuth flow with PostgreSQL", () => {
 		const consents = async () => {
 			const response = await handleAuth(new Request(`${origin}/api/auth/oauth2/get-consents`, { headers: { cookie } }));
 			expect(response.status).toBe(200);
-			return response.json();
+			// The shared owner keeps consents from earlier runs; only this client's count.
+			const all: { clientId: string }[] = await response.json();
+			return all.filter((consent) => consent.clientId === client.client_id);
 		};
 		expect(await consents()).toEqual([]);
 		const silent = await handleAuth(
@@ -178,16 +188,7 @@ describe.skipIf(!databaseURL)("MCP OAuth flow with PostgreSQL", () => {
 						body: JSON.stringify(body),
 					}),
 				);
-			const unique = randomBytes(6).toString("hex");
-			const credentials = {
-				name: "Reauth Test",
-				email: `reauth-${unique}@example.com`,
-				username: `reauth-${unique}`,
-				password: "password123",
-			};
-			const existingSignup = await post("sign-up/email", credentials);
-			expect(existingSignup.status).toBe(200);
-			const oldCookie = cookieOf(existingSignup);
+			const oldCookie = cookieOf(await ownerSession(post));
 			const registration = await post("oauth2/register", {
 				client_name: "Reauth integration",
 				redirect_uris: ["http://127.0.0.1:33921/callback"],
@@ -217,25 +218,27 @@ describe.skipIf(!databaseURL)("MCP OAuth flow with PostgreSQL", () => {
 			expect(loginURL.searchParams.get("reauthenticate")).toBe("true");
 			const callbackURL = new URL(loginURL.searchParams.get("callbackURL") ?? "", origin);
 			const oauth_query = callbackURL.search.slice(1);
-			const authenticated =
-				mode === "create"
-					? await post(
-							"sign-up/email",
-							{ ...credentials, email: `new-${unique}@example.com`, username: `new-${unique}` },
-							oldCookie,
-						)
-					: await post(
-							"sign-in/email",
-							{ email: credentials.email, password: credentials.password, oauth_query },
-							oldCookie,
-						);
+			if (mode === "create") {
+				// A second account cannot exist on a single-owner instance, so prompt=create ends at the refused sign-up.
+				const unique = randomBytes(6).toString("hex");
+				const refused = await post(
+					"sign-up/email",
+					{ ...owner, email: `new-${unique}@example.com`, username: `new-${unique}` },
+					oldCookie,
+				);
+				expect(refused.status).toBe(403);
+				await expect(refused.json()).resolves.toMatchObject({ message: "This instance already has an owner." });
+				return;
+			}
+			const authenticated = await post(
+				"sign-in/email",
+				{ email: owner.email, password: owner.password, oauth_query },
+				oldCookie,
+			);
 			expect(authenticated.status, await authenticated.clone().text()).toBe(200);
 			const newCookie = cookieOf(authenticated);
 			expect(newCookie).not.toBe(oldCookie);
-			const continuation =
-				mode === "create" ? await post("oauth2/continue", { created: true, oauth_query }, newCookie) : authenticated;
-			expect(continuation.status, await continuation.clone().text()).toBe(200);
-			const result = await continuation.json();
+			const result = await authenticated.json();
 			let target = new URL(result.url, origin);
 			if (target.pathname === "/api/auth/oauth") {
 				const response = await handleOAuth(new Request(target, { headers: { cookie: newCookie } }));
