@@ -1,24 +1,21 @@
 import type { RouterOutput } from "@/libs/orpc/client";
 
 export type DocumentSummary = RouterOutput["documents"]["list"][number];
-export type DocumentTypeFilter = "all" | "resume" | "letter";
 export type DocumentSort = "edited" | "name" | "created";
 
-type DocumentFilters = { type: DocumentTypeFilter; q: string; tags: readonly string[]; sort: DocumentSort };
+type DocumentFilters = { q: string; tags: readonly string[]; sort: DocumentSort };
 
 const byName = new Intl.Collator(undefined, { sensitivity: "base", numeric: true });
 
-/** Search covers titles, tags and linked applications; every chosen tag must be on the document. */
+/** Search covers titles and tags; every chosen tag must be on the document. */
 export function filterDocuments(documents: readonly DocumentSummary[], filters: DocumentFilters) {
 	const query = filters.q.trim().toLocaleLowerCase();
 
 	return documents
-		.filter((document) => filters.type === "all" || document.type === filters.type)
 		.filter((document) => filters.tags.every((tag) => document.tags.includes(tag)))
 		.filter((document) => {
 			if (!query) return true;
-			const haystack = [document.name, ...document.tags, document.application?.company, document.application?.role];
-			return haystack.some((text) => text?.toLocaleLowerCase().includes(query));
+			return [document.name, ...document.tags].some((text) => text.toLocaleLowerCase().includes(query));
 		})
 		.sort((a, b) => {
 			if (filters.sort === "name") return byName.compare(a.name, b.name);

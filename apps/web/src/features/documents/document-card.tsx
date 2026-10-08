@@ -20,7 +20,6 @@ import { ENTER_CLASS, stagger } from "@/libs/motion";
 export type DocumentItemProps = {
 	document: DocumentSummary;
 	onTags: (document: DocumentSummary) => void;
-	onLink: (document: DocumentSummary) => void;
 	/** Position in the library's first appearance, which staggers in; undefined afterwards and in Trash. */
 	introIndex?: number | undefined;
 };
@@ -28,32 +27,30 @@ export type DocumentItemProps = {
 /** "Resume · Edited 2h ago", or the days left for a document in Trash. */
 function useDocumentMeta(document: DocumentSummary) {
 	const { i18n } = useLingui();
-	const type = document.type === "resume" ? t`Resume` : t`Letter`;
+	const type = t`Resume`;
 	if (document.trashedAt) return t`${type} · ${daysLeftInTrash(document.trashedAt)} days left`;
 	return t`${type} · Edited ${formatRelativeTime(document.updatedAt, i18n.locale)}`;
 }
 
-/** Opens the document in its editor: resumes and letters share the editor shell. */
-function OpenLink({
-	document,
-	className,
-	children,
-	label,
-}: Pick<DocumentItemProps, "document"> & {
+type OpenLinkProps = Pick<DocumentItemProps, "document"> & {
 	className?: string;
 	children: React.ReactNode;
 	label?: string;
-}) {
+};
+
+/** Opens the resume in its editor. */
+function OpenLink({ document, className, children, label }: OpenLinkProps) {
 	const markOpened = useNewDocumentsStore((state) => state.markOpened);
 	if (document.trashedAt) return <span className={className}>{children}</span>;
-	const common = { "aria-label": label, className, onClick: () => markOpened(document.id) };
 
-	return document.type === "resume" ? (
-		<Link to="/builder/$resumeId" params={{ resumeId: document.id }} {...common}>
-			{children}
-		</Link>
-	) : (
-		<Link to="/builder/letter/$coverLetterId" params={{ coverLetterId: document.id }} {...common}>
+	return (
+		<Link
+			to="/builder/$resumeId"
+			params={{ resumeId: document.id }}
+			aria-label={label}
+			className={className}
+			onClick={() => markOpened(document.id)}
+		>
 			{children}
 		</Link>
 	);
@@ -91,24 +88,8 @@ function RenameInput({ document, onDone }: { document: DocumentSummary; onDone: 
 	);
 }
 
-/** A letter's page, drawn from lines: letters have no thumbnail render. */
-function LetterThumbnail({ name }: { name: string }) {
-	return (
-		<div aria-hidden="true" className="flex size-full flex-col gap-1.5 bg-white p-[14%] text-[0]">
-			<span className="h-1.5 w-2/5 rounded-full bg-[#c9c9c9]" />
-			<span className="mb-3 h-1 w-3/5 rounded-full bg-[#e2e2e2]" />
-			<span className="h-1 w-1/3 rounded-full bg-[#d4d4d4]" />
-			{Array.from({ length: 7 }, (_, index) => (
-				<span key={index} className={cn("h-1 rounded-full bg-[#e6e6e6]", index % 3 === 2 ? "w-4/5" : "w-full")} />
-			))}
-			<span className="mt-2 h-1 w-1/4 rounded-full bg-[#d4d4d4]" />
-			<span className="sr-only">{name}</span>
-		</div>
-	);
-}
-
-/** A 204px card: the real first page, title with ⋯, "Resume · Edited 2h ago" and the linked application. */
-export function DocumentCard({ document, onTags, onLink, introIndex }: DocumentItemProps) {
+/** A 204px card: the real first page, title with ⋯ and "Resume · Edited 2h ago". */
+export function DocumentCard({ document, onTags, introIndex }: DocumentItemProps) {
 	const openDocument = useOpenDocument();
 	const [renaming, setRenaming] = useState(false);
 	const isNew = useNewDocumentsStore((state) => state.ids.includes(document.id)) && !document.trashedAt;
@@ -118,7 +99,6 @@ export function DocumentCard({ document, onTags, onLink, introIndex }: DocumentI
 		onOpen: () => openDocument(document),
 		onRename: () => setRenaming(true),
 		onTags: () => onTags(document),
-		onLink: () => onLink(document),
 	};
 
 	return (
@@ -146,11 +126,7 @@ export function DocumentCard({ document, onTags, onLink, introIndex }: DocumentI
 						document.trashedAt && "pointer-events-none",
 					)}
 				>
-					{document.type === "resume" ? (
-						<ResumeThumbnail resume={document} />
-					) : (
-						<LetterThumbnail name={document.name} />
-					)}
+					<ResumeThumbnail resume={document} />
 					<span className="absolute start-2 top-2 flex gap-1">
 						{isNew && (
 							<span className="rounded bg-accent px-1.5 text-[11px] leading-[18px] font-semibold text-on-accent">
@@ -176,12 +152,6 @@ export function DocumentCard({ document, onTags, onLink, introIndex }: DocumentI
 							<h3 className="truncate text-sm leading-5 font-semibold">{document.name}</h3>
 						)}
 						<span className="truncate text-xs text-ink-3">{meta}</span>
-						{document.application && (
-							<span className="flex min-w-0 items-center gap-1 text-xs text-ink-2">
-								<Icon name="work" size={14} />
-								<span className="truncate">{document.application.company}</span>
-							</span>
-						)}
 					</div>
 					<DropdownMenu>
 						<DropdownMenuTrigger
@@ -203,8 +173,8 @@ export function DocumentCard({ document, onTags, onLink, introIndex }: DocumentI
 	);
 }
 
-/** The list view's row: Name, Type, Application, Edited, ⋯. */
-export function DocumentRow({ document, onTags, onLink, introIndex }: DocumentItemProps) {
+/** The list view's row: Name, Edited, ⋯. */
+export function DocumentRow({ document, onTags, introIndex }: DocumentItemProps) {
 	const { i18n } = useLingui();
 	const openDocument = useOpenDocument();
 	const [renaming, setRenaming] = useState(false);
@@ -214,7 +184,6 @@ export function DocumentRow({ document, onTags, onLink, introIndex }: DocumentIt
 		onOpen: () => openDocument(document),
 		onRename: () => setRenaming(true),
 		onTags: () => onTags(document),
-		onLink: () => onLink(document),
 	};
 
 	return (
@@ -233,7 +202,7 @@ export function DocumentRow({ document, onTags, onLink, introIndex }: DocumentIt
 			>
 				<td className="py-3 ps-3 pe-2">
 					<span className="flex min-w-0 items-center gap-2.5">
-						<Icon name={document.type === "resume" ? "description" : "mail"} className="shrink-0 text-ink-2" />
+						<Icon name="description" className="shrink-0 text-ink-2" />
 						{renaming ? (
 							<RenameInput document={document} onDone={() => setRenaming(false)} />
 						) : (
@@ -252,10 +221,6 @@ export function DocumentRow({ document, onTags, onLink, introIndex }: DocumentIt
 						{document.isLocked && <Icon name="lock" size={16} className="shrink-0 text-ink-3" />}
 					</span>
 				</td>
-				<td className="px-2 text-sm text-ink-2 max-sm:hidden">
-					{document.type === "resume" ? <Trans>Resume</Trans> : <Trans>Letter</Trans>}
-				</td>
-				<td className="truncate px-2 text-sm text-ink-2 max-sm:hidden">{document.application?.company ?? "—"}</td>
 				<td className="px-2 text-sm whitespace-nowrap text-ink-3">
 					{document.trashedAt ? (
 						<Trans>{daysLeftInTrash(document.trashedAt)} days left</Trans>
@@ -284,15 +249,11 @@ export function DocumentRow({ document, onTags, onLink, introIndex }: DocumentIt
 	);
 }
 
-/** Open from a menu: resumes in the editor, letters in the letter editor. */
+/** Open from a menu: the resume in the editor. */
 function useOpenDocument() {
 	const navigate = useNavigate();
 	return (document: DocumentSummary) => {
 		useNewDocumentsStore.getState().markOpened(document.id);
-		if (document.type === "letter") {
-			void navigate({ to: "/builder/letter/$coverLetterId", params: { coverLetterId: document.id } });
-			return;
-		}
 		void navigate({ to: "/builder/$resumeId", params: { resumeId: document.id } });
 	};
 }

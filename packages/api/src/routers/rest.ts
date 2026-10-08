@@ -14,16 +14,6 @@ export const restAliases = {
 	checkPdf,
 	matchResume,
 	importResumeFile,
-	updateCoverLetter: router.coverLetters.update.route({ method: "PATCH", operationId: "patchCoverLetter" }),
-	updateApplication: router.applications.update.route({ method: "PATCH", operationId: "patchApplication" }),
-	updateInterview: router.applications.updateInterview.route({
-		method: "PATCH",
-		operationId: "patchApplicationInterview",
-	}),
-	updateTimelineEntry: router.applications.updateTimelineEntry.route({
-		method: "PATCH",
-		operationId: "patchApplicationTimelineEntry",
-	}),
 	updateResume: router.resume.update.route({
 		method: "PATCH",
 		path: "/resumes/{id}/metadata",
@@ -52,26 +42,6 @@ export const restAliases = {
 		path: "/resumes/{username}/{slug}/statistics/downloads",
 		operationId: "createResumeDownload",
 	}),
-	letterCopy: router.coverLetters.duplicate.route({
-		path: "/cover-letters/{id}/copies",
-		operationId: "createCoverLetterCopy",
-	}),
-	letterImport: router.coverLetters.import.route({
-		path: "/cover-letters/imports",
-		operationId: "createCoverLetterImport",
-	}),
-	letterStyle: router.coverLetters.refreshStyle.route({
-		path: "/cover-letters/{id}/style-refreshes",
-		operationId: "createCoverLetterStyleRefresh",
-	}),
-	letterDraft: router.coverLetters.draft.route({
-		path: "/cover-letters/{id}/drafts",
-		operationId: "createCoverLetterDraft",
-	}),
-	letterRestoration: router.coverLetters.restoreVersion.route({
-		path: "/cover-letters/{id}/versions/{versionId}/restorations",
-		operationId: "createCoverLetterRestoration",
-	}),
 	documentName: router.documents.rename.route({
 		method: "PATCH",
 		path: "/documents/{type}/{id}/name",
@@ -87,11 +57,6 @@ export const restAliases = {
 		path: "/documents/{type}/{id}/lock",
 		operationId: "putDocumentLock",
 	}),
-	documentApplication: router.documents.linkApplication.route({
-		method: "PUT",
-		path: "/documents/{type}/{id}/application",
-		operationId: "putDocumentApplication",
-	}),
 	documentTrash: router.documents.trash.route({
 		method: "PUT",
 		path: "/documents/{type}/{id}/trash",
@@ -106,45 +71,6 @@ export const restAliases = {
 		method: "DELETE",
 		path: "/documents/{type}/{id}",
 		operationId: "deleteDocumentPermanently",
-	}),
-	documentCopy: router.documents.copyForJob.route({ path: "/documents/copies", operationId: "createDocumentCopy" }),
-	postingSearch: router.applications.ai.searchPostings.route({
-		path: "/applications/ai/posting-searches",
-		operationId: "createPostingSearch",
-	}),
-	postingParse: router.applications.ai.parsePosting.route({
-		path: "/applications/ai/posting-parses",
-		operationId: "createPostingParse",
-	}),
-	applicationAutofill: router.applications.ai.autofill.route({
-		path: "/applications/ai/autofills",
-		operationId: "createApplicationAutofill",
-	}),
-	applicationMatch: router.applications.ai.matchScore.route({
-		path: "/applications/{id}/ai/match-scores",
-		operationId: "createApplicationMatchScore",
-	}),
-	applicationMessage: router.applications.ai.draftMessage.route({
-		path: "/applications/{id}/ai/message-drafts",
-		operationId: "createApplicationMessageDraft",
-	}),
-	applicationResume: router.applications.ai.tailorResume.route({
-		path: "/applications/{id}/ai/tailored-resumes",
-		operationId: "createTailoredResume",
-	}),
-	applicationImport: router.applications.import.route({
-		path: "/applications/imports",
-		operationId: "createApplicationImport",
-	}),
-	applicationBulkUpdate: router.applications.bulkUpdate.route({
-		method: "PATCH",
-		path: "/applications",
-		operationId: "patchApplications",
-	}),
-	applicationBulkDelete: router.applications.bulkDelete.route({
-		method: "DELETE",
-		path: "/applications",
-		operationId: "deleteApplications",
 	}),
 	providerTest: router.aiProviders.test.route({
 		path: "/ai-providers/{id}/tests",

@@ -20,7 +20,7 @@ const route = (
 	description: `${description} Requires authentication.`,
 });
 
-/** Resumes and saved cover letters as one library: list, rename, tag, lock, link, Trash and Copy for a job. */
+/** The resume library: list, count, rename, tag, lock, and Trash. */
 export const documentsRouter = {
 	purgeExpired: protectedProcedure
 		.route(
@@ -29,7 +29,7 @@ export const documentsRouter = {
 				"/documents/trash/expired",
 				"purgeExpiredDocuments",
 				"Delete expired Trash",
-				"Permanently deletes documents in this account that have been in Trash more than 30 days.",
+				"Permanently deletes resumes in this account that have been in Trash more than 30 days.",
 			),
 		)
 		.input(z.object({}).optional())
@@ -44,7 +44,7 @@ export const documentsRouter = {
 				"/documents",
 				"listDocuments",
 				"List documents",
-				"Returns the user's resumes and saved cover letters (or those in Trash), newest edit first, with the job application each was made for.",
+				"Returns the user's resumes (or those in Trash), newest edit first.",
 			),
 		)
 		.input(documentsDto.list.input)
@@ -64,7 +64,7 @@ export const documentsRouter = {
 				"/documents/counts",
 				"countDocuments",
 				"Count documents",
-				"Counts live resumes and letters, and everything in Trash.",
+				"Counts live resumes, and the resumes in Trash.",
 			),
 		)
 		.input(z.object({}).optional())
@@ -72,22 +72,14 @@ export const documentsRouter = {
 		.handler(({ context }) => documentsService.counts({ userId: context.user.id })),
 
 	rename: protectedProcedure
-		.route(route("POST", "/documents/rename", "renameDocument", "Rename a document", "Renames a resume or letter."))
+		.route(route("POST", "/documents/rename", "renameDocument", "Rename a document", "Renames a resume."))
 		.input(documentsDto.rename.input)
 		.use(resumeMutationRateLimit)
 		.output(documentsDto.rename.output)
 		.handler(({ context, input }) => documentsService.rename({ ...input, userId: context.user.id })),
 
 	setTags: protectedProcedure
-		.route(
-			route(
-				"POST",
-				"/documents/tags",
-				"setDocumentTags",
-				"Set a document's tags",
-				"Replaces a resume's or letter's tags.",
-			),
-		)
+		.route(route("POST", "/documents/tags", "setDocumentTags", "Set a document's tags", "Replaces a resume's tags."))
 		.input(documentsDto.setTags.input)
 		.use(resumeMutationRateLimit)
 		.output(documentsDto.setTags.output)
@@ -100,28 +92,13 @@ export const documentsRouter = {
 				"/documents/lock",
 				"lockDocument",
 				"Lock or unlock a document",
-				"Locks a resume or letter against edits and Trash, or unlocks it.",
+				"Locks a resume against edits and Trash, or unlocks it.",
 			),
 		)
 		.input(documentsDto.setLocked.input)
 		.use(resumeMutationRateLimit)
 		.output(documentsDto.setLocked.output)
 		.handler(({ context, input }) => documentsService.setLocked({ ...input, userId: context.user.id })),
-
-	linkApplication: protectedProcedure
-		.route(
-			route(
-				"POST",
-				"/documents/application",
-				"linkDocumentApplication",
-				"Link a document to an application",
-				"Records the job application a resume or letter was made for, or clears it.",
-			),
-		)
-		.input(documentsDto.linkApplication.input)
-		.use(resumeMutationRateLimit)
-		.output(documentsDto.linkApplication.output)
-		.handler(({ context, input }) => documentsService.linkApplication({ ...input, userId: context.user.id })),
 
 	trash: protectedProcedure
 		.route(
@@ -130,7 +107,7 @@ export const documentsRouter = {
 				"/documents/trash",
 				"trashDocument",
 				"Move a document to Trash",
-				"Moves a resume or letter to Trash, where it stays for 30 days. A resume in Trash isn't shared. Locked documents can't be moved.",
+				"Moves a resume to Trash, where it stays for 30 days. A resume in Trash isn't shared. Locked resumes can't be moved.",
 			),
 		)
 		.input(documentsDto.trash.input)
@@ -140,13 +117,7 @@ export const documentsRouter = {
 
 	restore: protectedProcedure
 		.route(
-			route(
-				"POST",
-				"/documents/restore",
-				"restoreDocument",
-				"Restore a document",
-				"Brings a document back from Trash.",
-			),
+			route("POST", "/documents/restore", "restoreDocument", "Restore a document", "Brings a resume back from Trash."),
 		)
 		.input(documentsDto.restore.input)
 		.use(resumeMutationRateLimit)
@@ -160,26 +131,11 @@ export const documentsRouter = {
 				"/documents/purge",
 				"purgeDocument",
 				"Delete a document now",
-				"Permanently deletes a document that is already in Trash.",
+				"Permanently deletes a resume that is already in Trash.",
 			),
 		)
 		.input(documentsDto.purge.input)
 		.use(resumeMutationRateLimit)
 		.output(documentsDto.purge.output)
 		.handler(({ context, input }) => documentsService.purge({ ...input, userId: context.user.id })),
-
-	copyForJob: protectedProcedure
-		.route(
-			route(
-				"POST",
-				"/documents/copy-for-job",
-				"copyResumeForJob",
-				"Copy a resume for a job",
-				"Duplicates a resume and links the copy to a job application. Saved jobs select the copy; submitted document history is preserved.",
-			),
-		)
-		.input(documentsDto.copyForJob.input)
-		.use(resumeMutationRateLimit)
-		.output(documentsDto.copyForJob.output)
-		.handler(({ context, input }) => documentsService.copyForJob({ ...input, userId: context.user.id })),
 };

@@ -16,14 +16,13 @@ import { getInitials } from "@reactive-resume/utils/string";
 import { cn } from "@reactive-resume/utils/style";
 import { MobileTabIndicator } from "@/components/layout/mobile-tab-indicator";
 import { useDialogStore } from "@/dialogs/store";
-import { applicationsListQueryOptions } from "@/features/applications/queries";
 import { useCommandPaletteStore } from "@/features/command-palette/store";
 import { isEditableElementFocused } from "@/features/resume/builder/draft";
 import { UserDropdownMenu } from "@/features/user/dropdown-menu";
 import { orpc } from "@/libs/orpc/client";
 
 type NavItem = {
-	to: "/dashboard" | "/dashboard/applications" | "/dashboard/trash" | "/dashboard/settings";
+	to: "/dashboard" | "/dashboard/trash" | "/dashboard/settings";
 	icon: IconName;
 	label: string;
 	count?: number;
@@ -31,21 +30,9 @@ type NavItem = {
 
 function useNavItems() {
 	const { data: counts } = useQuery(orpc.documents.counts.queryOptions());
-	const { data: applications } = useQuery(applicationsListQueryOptions());
 
 	const items: NavItem[] = [
-		{
-			to: "/dashboard",
-			icon: "description",
-			label: t`Documents`,
-			...(counts ? { count: counts.resume + counts.letter } : {}),
-		},
-		{
-			to: "/dashboard/applications",
-			icon: "work",
-			label: t`Applications`,
-			...(applications ? { count: applications.filter((application) => application.status !== "closed").length } : {}),
-		},
+		{ to: "/dashboard", icon: "description", label: t`Documents`, ...(counts ? { count: counts.resume } : {}) },
 	];
 	const settings: NavItem = { to: "/dashboard/settings", icon: "settings", label: t`Settings` };
 	const trash: NavItem | null = counts?.trash
@@ -62,7 +49,7 @@ function useIsCurrent() {
 }
 
 /**
- * The app shell for Documents, Trash, Applications and Settings: a 240px sidebar at ≥1024, an icon rail at
+ * The app shell for Documents, Trash and Settings: a 240px sidebar at ≥1024, an icon rail at
  * 640–1023 and a bottom tab bar below 640. N opens New anywhere outside a field.
  */
 type AppShellProps = { children: ReactNode };
@@ -278,7 +265,7 @@ function RailTip({
 	);
 }
 
-/** Phones: Documents · Applications · New · Settings, with New as an accent pill in the middle. */
+/** Phones: Documents · New · Settings, with New as an accent pill in the middle. */
 function MobileTabs() {
 	const isCurrent = useIsCurrent();
 	const openDialog = useDialogStore((state) => state.openDialog);
@@ -294,7 +281,7 @@ function MobileTabs() {
 	return (
 		<nav
 			aria-label={t`App`}
-			className="sticky bottom-0 z-30 grid grid-cols-4 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] [view-transition-name:app-nav]"
+			className="sticky bottom-0 z-30 grid grid-cols-3 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] [view-transition-name:app-nav]"
 		>
 			<Link
 				to="/dashboard"
@@ -303,14 +290,6 @@ function MobileTabs() {
 				className="relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 transition-[scale] duration-quick ease-enter active:scale-[0.97]"
 			>
 				{tab("description", t`Documents`, isCurrent("/dashboard"))}
-			</Link>
-			<Link
-				to="/dashboard/applications"
-				aria-current={isCurrent("/dashboard/applications") ? "page" : undefined}
-				viewTransition={false}
-				className="relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 transition-[scale] duration-quick ease-enter active:scale-[0.97]"
-			>
-				{tab("work", t`Applications`, isCurrent("/dashboard/applications"))}
 			</Link>
 			<button
 				type="button"

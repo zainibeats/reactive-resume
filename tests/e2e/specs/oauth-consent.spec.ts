@@ -33,9 +33,7 @@ test("requires explicit OAuth consent before denying or allowing access", async 
 		await expect(page.getByRole("heading", { name: "Connect an application" })).toBeVisible();
 		await expect(page.getByText("Consent test client", { exact: true })).toBeVisible();
 		await expect(
-			page
-				.getByRole("listitem")
-				.filter({ hasText: /reading, changing and deleting your documents and job applications/ }),
+			page.getByRole("listitem").filter({ hasText: /reading, changing and deleting your documents\./ }),
 		).toBeVisible();
 		await expect(page.getByRole("button", { name: "Allow access", exact: true })).toBeEnabled();
 		const before = await page.request.get("/api/auth/oauth2/get-consents");

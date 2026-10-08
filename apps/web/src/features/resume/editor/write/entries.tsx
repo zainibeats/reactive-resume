@@ -470,7 +470,7 @@ export function EntryFields({
 			);
 		case "summary":
 			return <Description {...props} field="content" label={t`Text`} />;
-		// Letters are documents of their own; a resume that still carries one hands it over when it saves.
+		// An imported resume may carry a cover letter; it stays in the data but is neither edited nor exported here.
 		case "cover-letter":
 			return null;
 	}

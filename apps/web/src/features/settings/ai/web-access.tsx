@@ -61,7 +61,7 @@ export function WebAccessSection() {
 					<Trans>Web access</Trans>
 				</h2>
 				<p className="max-w-[60ch] text-[13px] leading-5 text-ink-3">
-					<Trans>Read the job links you save. Saving and preparing jobs works without a connection.</Trans>
+					<Trans>Lets the assistant read the job postings and pages you link.</Trans>
 				</p>
 			</header>
 
@@ -113,10 +113,7 @@ export function WebAccessSection() {
 							)}
 						</div>
 						<p className="max-w-[58ch] text-[13px] leading-5 text-ink-3">
-							<Trans>
-								Search from Applications and the assistant, and read pages the built-in reader can't. One service covers
-								both.
-							</Trans>
+							<Trans>Lets the assistant search the web and read pages the built-in reader can't.</Trans>
 						</p>
 					</div>
 				</div>
@@ -357,11 +354,9 @@ export function WebAccessSection() {
 						<Trans>Assistant.</Trans>
 					</span>{" "}
 					{aiLoading ? (
-						<Trans>AI is optional. Saving and preparing jobs doesn't need it.</Trans>
+						<Trans>AI is optional. Everything else works without it.</Trans>
 					) : !hasUsableProvider ? (
-						<Trans>
-							Connect an AI provider above to use the assistant. Saving and preparing jobs doesn't need one.
-						</Trans>
+						<Trans>Connect an AI provider above to use the assistant.</Trans>
 					) : connectedProvider ? (
 						<Trans>Searches and reads pages with {connectedProvider}, whichever AI provider you use.</Trans>
 					) : (

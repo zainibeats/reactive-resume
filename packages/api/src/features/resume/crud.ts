@@ -375,5 +375,5 @@ export const crudRouter = {
 		.use(resumeMutationRateLimit)
 		.output(resumeDto.delete.output)
 		.errors({ RESUME_LOCKED: { status: 403, message: "Unlock the resume first." } })
-		.handler(({ context, input }) => documentsService.trash({ type: "resume", id: input.id, userId: context.user.id })),
+		.handler(({ context, input }) => documentsService.trash({ id: input.id, userId: context.user.id })),
 };

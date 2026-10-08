@@ -2,7 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createSampleResumeFromDashboard, openDownloadDialog, openSidebarSection } from "../fixtures/resume";
 import { expect, test } from "../fixtures/test";
 
-test("round-trips a JSON backup and splits a legacy embedded letter on import", async ({
+test("round-trips a JSON backup and keeps a legacy embedded letter in the resume on import", async ({
 	authPage: page,
 }, testInfo) => {
 	await createSampleResumeFromDashboard(page, testInfo);
@@ -57,9 +57,13 @@ test("round-trips a JSON backup and splits a legacy embedded letter on import", 
 	await page.getByRole("dialog", { name: "New document" }).getByLabel("Choose a file to import").setInputFiles(path);
 	await page.getByRole("button", { name: "Open in editor" }).click();
 	await page.waitForURL(/\/builder\/.+/);
-	await expect(page.getByText("Dear Globex team,")).toHaveCount(0);
 
-	await page.goto("/dashboard");
-	await page.getByRole("tab", { name: /^Letters/ }).click();
-	await expect(page.getByRole("heading", { name: /— Letter to Globex$/ })).toHaveCount(1);
+	// The letter is resume content now: it stays in the imported resume rather than becoming a document of its own.
+	const resumeId = new URL(page.url()).pathname.split("/").at(-1);
+	const imported = (await (await page.request.get(`/api/openapi/resumes/${resumeId}`)).json()) as {
+		data: { customSections: { id: string; type: string }[] };
+	};
+	expect(imported.data.customSections).toContainEqual(
+		expect.objectContaining({ id: "old-letter", type: "cover-letter" }),
+	);
 });

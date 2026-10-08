@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useDirection } from "@base-ui/react/direction-provider";
 import { AnimatePresence, m } from "motion/react";
 import { AssistantPanel } from "./assistant-panel";
-import { useLetterAssistantDocument, useResumeAssistantDocument } from "./document";
+import { useResumeAssistantDocument } from "./document";
 import { useEditorStore } from "@/features/resume/editor/store";
 import { D2, D3, EASE, EXIT } from "@/libs/motion";
 
@@ -177,11 +177,5 @@ function closeAssistant() {
 
 export function ResumeAssistant() {
 	const document = useResumeAssistantDocument();
-	return <AssistantPanel document={document} onClose={closeAssistant} />;
-}
-
-export function LetterAssistant() {
-	const document = useLetterAssistantDocument();
-	if (!document) return null;
 	return <AssistantPanel document={document} onClose={closeAssistant} />;
 }

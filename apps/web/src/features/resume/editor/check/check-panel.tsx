@@ -35,7 +35,7 @@ import { createResumePdfBlob } from "@/features/resume/export/pdf-document";
 
 /**
  * Check: the score over the live checks, then Issues (numbered cards pinned to their lines), Job match (terms from
- * the linked application's posting, not scored) and Writing (an opt-in AI review, not scored).
+ * a pasted job posting, not scored) and Writing (an opt-in AI review, not scored).
  */
 export function CheckPanel() {
 	const check = useCheck();

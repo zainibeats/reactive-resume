@@ -6,7 +6,7 @@ import { escapeHtml } from "@reactive-resume/utils/string";
  * (a whole `<p>` or `<li>` block) of a rich-text field and is never applied until accepted.
  */
 
-/** A field that holds rich text: the summary's content, an entry's description, or a letter's body. */
+/** A field that holds rich text: the summary's content or an entry's description. */
 export type ProposalTarget = { sectionId: string; itemId?: string; roleId?: string; field: string };
 
 type ProposalSource = "check" | "assistant" | "improve";
@@ -28,9 +28,6 @@ export type Proposal = {
 
 /** Out of date is not stored: it's whenever the passage is no longer in the field. */
 export type ProposalState = Proposal["status"] | "stale";
-
-/** The section id a letter's body goes by, so letters share the proposal shape. */
-export const LETTER_SECTION_ID = "letter";
 
 type Entry = { id: string } & Record<string, unknown>;
 
@@ -190,7 +187,7 @@ export type Passage = {
 };
 
 export type PassageLabels = {
-	/** Also list an empty (visible) summary or letter body, so something can be written into it. */
+	/** Also list an empty (visible) summary, so something can be written into it. */
 	includeEmpty?: boolean;
 	summary: string;
 	sectionTitle: (sectionId: string) => string;
@@ -308,9 +305,3 @@ export function collectPassages(data: ResumeData, labels: PassageLabels): Passag
 
 	return passages;
 }
-
-/** A letter's body, passage by passage. */
-export const collectLetterPassages = (
-	content: string,
-	labels: Pick<PassageLabels, "bullet" | "paragraph" | "includeEmpty"> & { body: string },
-) => passagesOf(content, { sectionId: LETTER_SECTION_ID, field: "content" }, [labels.body], labels, new Map());

@@ -10,21 +10,13 @@ const json = (value: unknown) => strToU8(`${JSON.stringify(value, null, 2)}\n`);
 const fileName = (name: string, id: string) => `${slugify(name)}-${id}.json`;
 
 /**
- * "Export everything": one zip with the account, each resume and letter as its own JSON file, and the applications.
- * Extract the archive to import individual resumes and letters; account and application files are records.
+ * "Export everything": one zip with the account and each resume as its own JSON file.
+ * Extract the archive to import individual resumes; the account file is a record.
  */
 export function buildAccountZip(data: AccountExport): Uint8Array {
 	const files: Record<string, Uint8Array> = {
 		"account.json": json({ exportedAt: data.exportedAt, user: data.user }),
-		"applications.json": json(data.applications),
 	};
 	for (const resume of data.resumes) files[`resumes/${fileName(resume.name, resume.id)}`] = json(resume);
-	for (const letter of data.coverLetters) {
-		files[`letters/${fileName(letter.name, letter.id)}`] = json({
-			...letter,
-			format: "reactive-resume-cover-letter",
-			version: 1,
-		});
-	}
 	return zipSync(files);
 }

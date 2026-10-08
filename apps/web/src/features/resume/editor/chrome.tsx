@@ -13,8 +13,7 @@ import { useBreakpoint } from "@reactive-resume/ui/hooks/use-breakpoint";
 import { cn } from "@reactive-resume/utils/style";
 import { useEditorStore, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from "./store";
 
-// The editor chrome resumes and letters share: the back link and drawer controls in the bar, the canvas width
-// and the zoom bar.
+// The editor chrome: the back link and drawer controls in the bar, the canvas width and the zoom bar.
 
 const LANDSCAPE_QUERY = "(orientation: landscape)";
 

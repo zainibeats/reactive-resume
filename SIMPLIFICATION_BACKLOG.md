@@ -29,6 +29,27 @@ References:
 - `apps/web/src/features/resume/editor/write/entries.tsx`
 - `packages/mcp/src/parity.ts`
 
+### Keep the fork a resume builder - Done
+
+Upstream v6 grew a job-application tracker, a cover-letter library, and (after v6.0.0) a Career area with an AI coach,
+offer comparison, interview practice and background jobs. The owner wants the fork to stay a resume builder.
+
+Completed change:
+
+- Removed the Applications tracker and standalone cover-letter documents from the web app, API, MCP, account export and
+  docs. The Documents library lists resumes only; Check mode keeps job match against a pasted posting.
+- Kept their database tables (unused) so no existing data is deleted, and kept the embedded cover-letter section of
+  resume data.
+- Stopped merging `upstream/main` after `11571ae`: its Career commit (`ba4bec2b`) is not adopted, so upstream fixes are
+  cherry-picked instead (`b128f97d`, `190825cc` so far).
+
+References:
+
+- `AGENTS.md` (fork divergence, cherry-pick policy)
+- `apps/web/src/features/documents/*`
+- `apps/web/src/features/resume/editor/check/job-match.tsx`
+- `packages/api/src/features/documents/*`
+
 ### Keep runtime identity local to the instance - Done
 
 Authentication emails loaded logos and fonts from public third-party hosts and included project promotion. MCP metadata also

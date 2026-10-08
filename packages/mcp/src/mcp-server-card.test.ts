@@ -26,12 +26,12 @@ describe("buildMcpServerCard", () => {
 
 	it("does not advertise application tracker tools", () => {
 		const names = card.tools.map((tool) => tool.name);
-		expect(names.filter((name) => name.includes("application"))).toEqual([]);
+		expect(names.filter((name) => /application|job/.test(name))).toEqual([]);
 	});
 
 	it("does not advertise independent cover-letter library tools", () => {
 		const names = card.tools.map((tool) => tool.name);
-		expect(names.filter((name) => name.includes("cover_letter"))).toEqual([]);
+		expect(names.filter((name) => name.includes("letter"))).toEqual([]);
 	});
 
 	it("does not advertise platform-wide statistics tools", () => {

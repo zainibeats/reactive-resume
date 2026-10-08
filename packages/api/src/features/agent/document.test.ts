@@ -1,15 +1,10 @@
-import type { SQL } from "drizzle-orm";
 import { describe, expect, it, vi } from "vitest";
-import { PgDialect } from "drizzle-orm/pg-core";
 import { collectPassages, readTarget } from "@reactive-resume/resume/proposals";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 
-const dbMock = vi.hoisted(() => ({ select: vi.fn() }));
-vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
 vi.mock("../resume/service", () => ({ resumeService: {} }));
-vi.mock("../cover-letters/service", () => ({ coverLetterService: {} }));
 
-const { findPosting, resolveEdits } = await import("./document");
+const { documentOf, resolveEdits } = await import("./document");
 
 function makeDocument() {
 	const data = structuredClone(defaultResumeData);
@@ -39,11 +34,9 @@ function makeDocument() {
 		data,
 		passages,
 		document: {
-			kind: "resume" as const,
 			name: "Resume",
 			updatedAt: new Date(),
 			locked: false,
-			applicationId: null,
 			passages,
 			read: (target: Parameters<typeof readTarget>[1]) => readTarget(data, target),
 			view: {},
@@ -52,16 +45,10 @@ function makeDocument() {
 }
 
 describe("agent documents", () => {
-	it("reads the explicitly chosen application through an owner-scoped query", async () => {
-		const where = vi.fn((_predicate: SQL) => ({ orderBy: () => ({ limit: () => Promise.resolve([]) }) }));
-		dbMock.select.mockReturnValue({ from: () => ({ where }) });
-		await findPosting("alice", "base", { kind: "resume", applicationId: "other-job" }, "clicked-job");
-		const predicate = where.mock.calls[0]?.[0];
-		if (!predicate) throw new Error("Expected application query");
-		const query = new PgDialect().sqlToQuery(predicate);
-		expect(query.sql).toContain('"application"."user_id"');
-		expect(query.sql).toContain('"application"."id"');
-		expect(query.params).toEqual(["alice", "clicked-job"]);
+	it("finds a conversation's resume, and none for conversations without one", () => {
+		expect(documentOf({ workingResumeId: "resume-1" })).toEqual({ kind: "resume", id: "resume-1" });
+		// Letter conversations from before the assistant was resume-only have no working resume.
+		expect(documentOf({ workingResumeId: null })).toBeNull();
 	});
 
 	it("places rewrites, additions and an empty summary, and skips edits on text that changed", () => {

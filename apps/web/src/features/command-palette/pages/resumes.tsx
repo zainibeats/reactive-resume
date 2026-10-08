@@ -10,16 +10,13 @@ import { Kbd } from "@reactive-resume/ui/components/kbd";
 import { useCommandPaletteStore } from "../store";
 import { BaseCommandGroup } from "./base";
 import { useDialogStore } from "@/dialogs/store";
-import { applicationsListQueryOptions } from "@/features/applications/queries";
 import { orpc } from "@/libs/orpc/client";
 
-type Application = RouterOutput["applications"]["list"][number];
 type Thread = RouterOutput["agent"]["threads"]["list"][number];
-type SearchPage = "resumes" | "applications" | "threads";
+type SearchPage = "resumes" | "threads";
 type SearchPageProps = { page: SearchPage };
 
-const isSearchPage = (page: string | undefined): page is SearchPage =>
-	page === "resumes" || page === "applications" || page === "threads";
+const isSearchPage = (page: string | undefined): page is SearchPage => page === "resumes" || page === "threads";
 
 const matchesSearch = (search: string, values: Array<string | null | undefined>) => {
 	const query = search.trim().toLowerCase();
@@ -44,11 +41,6 @@ export function ResumesCommandGroup() {
 					<Trans>Resumes</Trans>
 				</CommandItem>
 
-				<CommandItem keywords={[t`Applications`]} value="search.applications" onSelect={() => pushPage("applications")}>
-					<Icon name="work" size={16} />
-					<Trans>Applications</Trans>
-				</CommandItem>
-
 				<CommandItem
 					keywords={[t`Conversations`, t`Assistant`, t`Threads`]}
 					value="search.threads"
@@ -60,7 +52,6 @@ export function ResumesCommandGroup() {
 			</BaseCommandGroup>
 
 			{searchPage === "resumes" ? <ResumesPage page={searchPage} /> : null}
-			{searchPage === "applications" ? <ApplicationsPage page={searchPage} /> : null}
 			{searchPage === "threads" ? <ThreadsPage page={searchPage} /> : null}
 		</>
 	);
@@ -120,75 +111,16 @@ function ResumesPage({ page }: SearchPageProps) {
 	);
 }
 
-function ApplicationsPage({ page }: SearchPageProps) {
-	const navigate = useNavigate();
-	const reset = useCommandPaletteStore((state) => state.reset);
-	const search = useCommandPaletteStore((state) => state.search);
-	const { data: applications, isLoading } = useQuery(applicationsListQueryOptions());
-	const filteredApplications = (applications ?? []).filter((application) =>
-		matchesSearch(search, [application.company, application.role]),
-	);
-
-	const onCreateApplication = async () => {
-		await navigate({ to: "/dashboard/applications", search: { create: true } });
-		reset();
-	};
-
-	const onOpenApplication = async (application: Application) => {
-		await navigate({
-			to: "/dashboard/applications",
-			search: { applicationId: application.id },
-		});
-		reset();
-	};
-
-	return (
-		<BaseCommandGroup page={page} heading={<Trans>Applications</Trans>}>
-			<CommandItem value="applications.create" onSelect={onCreateApplication}>
-				<Icon name="add" size={16} />
-				<Trans>New Application</Trans>
-			</CommandItem>
-
-			{isLoading ? (
-				<CommandLoading>
-					<Trans>Loading applications…</Trans>
-				</CommandLoading>
-			) : (
-				filteredApplications.map((application) => (
-					<CommandItem
-						key={application.id}
-						value={`application.${application.id}`}
-						keywords={[application.company, application.role]}
-						onSelect={() => onOpenApplication(application)}
-					>
-						<Icon name="work" size={16} />
-						<span className="min-w-0 truncate">{application.company}</span>
-						<span className="truncate text-xs text-ink-3">{application.role}</span>
-					</CommandItem>
-				))
-			)}
-		</BaseCommandGroup>
-	);
-}
-
 function ThreadsPage({ page }: SearchPageProps) {
 	const navigate = useNavigate();
 	const reset = useCommandPaletteStore((state) => state.reset);
 	const search = useCommandPaletteStore((state) => state.search);
 	const { data: threads, isLoading } = useQuery(orpc.agent.threads.list.queryOptions());
-	const filteredThreads = (threads ?? []).filter((thread) =>
-		matchesSearch(search, [thread.title, thread.resumeName, thread.coverLetterName]),
-	);
+	const filteredThreads = (threads ?? []).filter((thread) => matchesSearch(search, [thread.title, thread.resumeName]));
 
-	// A conversation opens its document with the assistant showing it.
+	// A conversation opens its resume with the assistant showing it.
 	const onOpenThread = async (thread: Thread) => {
-		if (thread.coverLetterId)
-			await navigate({
-				to: "/builder/letter/$coverLetterId",
-				params: { coverLetterId: thread.coverLetterId },
-				search: { assistant: thread.id },
-			});
-		else if (thread.workingResumeId)
+		if (thread.workingResumeId)
 			await navigate({
 				to: "/builder/$resumeId",
 				params: { resumeId: thread.workingResumeId },
@@ -205,7 +137,7 @@ function ThreadsPage({ page }: SearchPageProps) {
 				</CommandLoading>
 			) : (
 				filteredThreads.map((thread) => {
-					const documentName = thread.coverLetterName ?? thread.resumeName ?? "";
+					const documentName = thread.resumeName ?? "";
 
 					return (
 						<CommandItem

@@ -116,7 +116,6 @@ const BASE_TOOL_META = {
 		description: [
 			"Create a short-lived authenticated URL for downloading a resume as a PDF.",
 			"The URL expires in 10 minutes. Anyone holding this URL can download the PDF until expiry; keep it private.",
-			"Cover letters are documents of their own: use the cover-letter tools for them.",
 			"Returns JSON containing: resumeId, name, downloadUrl, expiresAt, expiresInSeconds, contentType.",
 			`Use \`${T.listResumes}\` first to find valid IDs.`,
 		].join("\n"),

@@ -110,7 +110,6 @@ vi.mock("@reactive-resume/db/schema", () => ({
 		userId: "resume.user_id",
 		slug: "resume.slug",
 	},
-	coverLetter: { name: "cover_letter.name", id: "cover_letter.id" },
 	aiProvider: { label: "ai_provider.label", id: "ai_provider.id" },
 }));
 
@@ -162,12 +161,8 @@ vi.mock("../web-access/service", () => ({
 	readPage: vi.fn(),
 }));
 vi.mock("../resume/service", () => ({ resumeService: resumeServiceMock }));
-vi.mock("../cover-letters/service", () => ({
-	coverLetterService: { getById: vi.fn() },
-}));
 const documentMock = {
 	loadDocument: vi.fn(),
-	findPosting: vi.fn(),
 	documentView: vi.fn(),
 	resolveEdits: vi.fn(),
 };
@@ -227,13 +222,7 @@ beforeEach(() => {
 	for (const mock of Object.values(resumeServiceMock)) mock.mockReset();
 	for (const mock of Object.values(aiProvidersServiceMock)) mock.mockReset();
 	for (const mock of Object.values(documentMock)) mock.mockReset();
-	documentMock.loadDocument.mockResolvedValue({
-		kind: "resume",
-		name: "Resume",
-		locked: false,
-		applicationId: null,
-	});
-	documentMock.findPosting.mockResolvedValue(null);
+	documentMock.loadDocument.mockResolvedValue({ name: "Resume", locked: false });
 });
 
 afterEach(() => vi.useRealTimers());
@@ -314,7 +303,7 @@ describe("agentService.messages.send", () => {
 		vi.clearAllMocks();
 	});
 
-	it("leaves the document and the posting out when their context chips are removed", async () => {
+	it("leaves the resume out when its context chip is removed", async () => {
 		const persistedMessage = {
 			id: "message-1",
 			userId: "user-1",
@@ -360,7 +349,7 @@ describe("agentService.messages.send", () => {
 		vi.mocked(streamToEventIterator).mockReturnValue("iterator" as never);
 
 		const { agentService } = await import("./service");
-		const send = async (context?: { document: boolean; posting: boolean }) => {
+		const send = async (context?: { document: boolean }) => {
 			const privateHistory = {
 				...persistedMessage,
 				id: "old-message",
@@ -403,24 +392,13 @@ describe("agentService.messages.send", () => {
 		expect(JSON.stringify(vi.mocked(convertToModelMessages).mock.calls.at(-1)?.[0])).toContain(
 			"private-marker@example.test",
 		);
-		expect(vi.mocked(buildAgentTools).mock.calls[0]?.[0]).toMatchObject({
-			document: "resume",
-		});
-		expect(vi.mocked(buildAgentInstructions).mock.calls[0]?.[0]).toMatchObject({
-			document: { kind: "resume" },
-		});
-		expect(documentMock.findPosting).toHaveBeenCalledTimes(1);
+		expect(vi.mocked(buildAgentTools).mock.calls[0]?.[0]).toMatchObject({ document: true });
+		expect(vi.mocked(buildAgentInstructions).mock.calls[0]?.[0]).toMatchObject({ document: { name: "Resume" } });
 
-		await send({ document: false, posting: false });
+		await send({ document: false });
 		expect(vi.mocked(convertToModelMessages).mock.calls.at(-1)?.[0]).toEqual([persistedMessage.uiMessage]);
-		expect(vi.mocked(buildAgentTools).mock.calls[1]?.[0]).toMatchObject({
-			document: null,
-		});
-		expect(vi.mocked(buildAgentInstructions).mock.calls[1]?.[0]).toMatchObject({
-			document: null,
-			posting: null,
-		});
-		expect(documentMock.findPosting).toHaveBeenCalledTimes(1);
+		expect(vi.mocked(buildAgentTools).mock.calls[1]?.[0]).toMatchObject({ document: false });
+		expect(vi.mocked(buildAgentInstructions).mock.calls[1]?.[0]).toMatchObject({ document: null });
 	});
 
 	it("persists canonical attachment UI parts, links selected attachments, and appends server-read model parts", async () => {

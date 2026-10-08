@@ -23,7 +23,7 @@ const struck = (html: string) => `<s style="color: ${OLD_TEXT_COLOR}">${html}</s
 const highlighted = (html: string) => `<mark data-color="${NEW_TEXT_BACKGROUND}">${html}</mark>`;
 
 /** The old text struck through, then the new text highlighted, inside the passage's own block. */
-export function markChange(before: string, after: string) {
+function markChange(before: string, after: string) {
 	// An addition keeps the passage and adds a block after it: only the new block is marked.
 	if (after.startsWith(before) && after.length > before.length) {
 		const added = after.slice(before.length);

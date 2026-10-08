@@ -1,4 +1,4 @@
-import type { DocumentSort, DocumentSummary, DocumentTypeFilter } from "./filter";
+import type { DocumentSort, DocumentSummary } from "./filter";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useHotkey } from "@tanstack/react-hotkeys";
@@ -11,9 +11,8 @@ import { Kbd } from "@reactive-resume/ui/components/kbd";
 import { NativeSelect } from "@reactive-resume/ui/components/native-select";
 import { SegmentedControl, SegmentedControlItem } from "@reactive-resume/ui/components/segmented-control";
 import { Skeleton } from "@reactive-resume/ui/components/skeleton";
-import { Tabs, TabsCount, TabsList, TabsTrigger } from "@reactive-resume/ui/components/tabs";
 import { cn } from "@reactive-resume/utils/style";
-import { LinkApplicationDialog, TagsDialog } from "./document-actions";
+import { TagsDialog } from "./document-actions";
 import { DocumentCard, DocumentRow } from "./document-card";
 import { collectTags, filterDocuments } from "./filter";
 import { LibraryError } from "./library-error";
@@ -23,7 +22,6 @@ import { isEditableElementFocused } from "@/features/resume/builder/draft";
 import { orpc } from "@/libs/orpc/client";
 
 export type DocumentsSearch = {
-	type: DocumentTypeFilter;
 	q: string;
 	tags: string[];
 	sort: DocumentSort;
@@ -36,14 +34,12 @@ type DocumentsPageProps = {
 };
 
 /**
- * Documents: every resume and letter in one library, with type tabs, search (/), sort, grid or list, and tag
- * chips once tags exist. A file dropped anywhere on the page imports straight away.
+ * Documents: every resume in one library, with search (/), sort, grid or list, and tag chips once tags exist. A file dropped anywhere on the page imports straight away.
  */
 export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 	const openDialog = useDialogStore((state) => state.openDialog);
 	const searchRef = useRef<HTMLInputElement>(null);
 	const [tagsFor, setTagsFor] = useState<DocumentSummary | null>(null);
-	const [linkFor, setLinkFor] = useState<DocumentSummary | null>(null);
 	// Grid and list animate in only after a switch, never on the page's first render.
 	const [viewSwitched, setViewSwitched] = useState(false);
 	const {
@@ -79,16 +75,7 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 	const all = documents ?? [];
 	const shown = filterDocuments(all, search);
 	const tags = collectTags(all);
-	const counts = {
-		all: all.length,
-		resume: all.filter((document) => document.type === "resume").length,
-		letter: all.filter((document) => document.type === "letter").length,
-	};
-	const filtered = search.type !== "all" || search.q.trim() !== "" || search.tags.length > 0;
-	const itemProps = {
-		onTags: setTagsFor,
-		onLink: setLinkFor,
-	};
+	const filtered = search.q.trim() !== "" || search.tags.length > 0;
 
 	return (
 		<div className="mx-auto grid w-full max-w-[1180px] content-start gap-5 px-8 py-8 max-sm:px-4 max-sm:py-5">
@@ -103,23 +90,6 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 			) : (
 				<>
 					<div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-						<Tabs value={search.type} onValueChange={(type) => onSearchChange({ type: type as DocumentTypeFilter })}>
-							<TabsList variant="line" aria-label={t`Document type`}>
-								<TabsTrigger value="all">
-									<Trans>All</Trans>
-									<TabsCount>{counts.all}</TabsCount>
-								</TabsTrigger>
-								<TabsTrigger value="resume">
-									<Trans>Resumes</Trans>
-									<TabsCount>{counts.resume}</TabsCount>
-								</TabsTrigger>
-								<TabsTrigger value="letter">
-									<Trans>Letters</Trans>
-									<TabsCount>{counts.letter}</TabsCount>
-								</TabsTrigger>
-							</TabsList>
-						</Tabs>
-
 						<div className="ms-auto flex flex-wrap items-center gap-2 max-sm:ms-0 max-sm:w-full">
 							<InputGroup className="w-60 max-sm:w-full">
 								<InputGroupAddon>
@@ -179,15 +149,8 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 									<Trans>Nothing matches these filters</Trans>
 								)}
 							</p>
-							<p className="text-sm text-ink-2">
-								<Trans>Search covers titles, tags and linked applications.</Trans>
-							</p>
 							{filtered && (
-								<Button
-									variant="secondary"
-									className="mt-2"
-									onClick={() => onSearchChange({ q: "", tags: [], type: "all" })}
-								>
+								<Button variant="secondary" className="mt-2" onClick={() => onSearchChange({ q: "", tags: [] })}>
 									<Trans>Clear search and filters</Trans>
 								</Button>
 							)}
@@ -202,12 +165,6 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 									<th className="h-10 ps-3 text-start font-medium">
 										<Trans>Name</Trans>
 									</th>
-									<th className="w-24 px-2 text-start font-medium max-sm:hidden">
-										<Trans>Type</Trans>
-									</th>
-									<th className="w-1/4 px-2 text-start font-medium max-sm:hidden">
-										<Trans>Application</Trans>
-									</th>
 									<th className="w-28 px-2 text-start font-medium max-sm:w-24">
 										<Trans>Edited</Trans>
 									</th>
@@ -221,10 +178,10 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 							<tbody>
 								{shown.map((document, index) => (
 									<DocumentRow
-										key={`${document.type}:${document.id}`}
+										key={document.id}
 										document={document}
 										introIndex={intro ? index : undefined}
-										{...itemProps}
+										onTags={setTagsFor}
 									/>
 								))}
 							</tbody>
@@ -238,10 +195,10 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 						>
 							{shown.map((document, index) => (
 								<DocumentCard
-									key={`${document.type}:${document.id}`}
+									key={document.id}
 									document={document}
 									introIndex={intro ? index : undefined}
-									{...itemProps}
+									onTags={setTagsFor}
 								/>
 							))}
 						</div>
@@ -251,7 +208,6 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 
 			<DropToImport />
 			<TagsDialog document={tagsFor} onClose={() => setTagsFor(null)} />
-			<LinkApplicationDialog document={linkFor} onClose={() => setLinkFor(null)} />
 		</div>
 	);
 }

@@ -54,12 +54,10 @@ type EditorStore = {
 	assistantInstant: boolean;
 	/** The assistant's conversation: a thread id, "new" for a fresh one, or null for the document's latest. */
 	assistantThread: string | null;
-	/** A message to send once the assistant is ready, from ⌘K Ask or Prepare for next step. */
+	/** A message to send once the assistant is ready, from ⌘K Ask or Check's job match. */
 	assistantPrompt: string | null;
 	/** The assistant's pending edits, marked on the page and counted in the outline. */
 	assistantProposals: readonly Proposal[];
-	/** Prepare for next step (Applications) opens the assistant with suggestions for the application. */
-	assistantSuggestions: "prepare" | null;
 	/** Write: sections open in the outline. */
 	openSections: readonly string[];
 	/** Write: sections added this visit that are still empty (a summary before any text), so they stay listed. */
@@ -86,7 +84,7 @@ type EditorStore = {
 	pageView: "page" | "parser";
 	/** Check → Job match: a term whose entries are tinted on the page. */
 	highlightTerm: string | null;
-	/** Check → Job match: a posting pasted for this visit, for a resume with no application linked. */
+	/** Check → Job match: a posting pasted for this visit. */
 	pastedPosting: string;
 	/** Edits suggested for the page (Check → Writing), shown on it until accepted or rejected. */
 	proposals: readonly Proposal[];
@@ -108,7 +106,6 @@ type EditorStore = {
 	setAssistantThread: (thread: string | null) => void;
 	setAssistantPrompt: (prompt: string | null) => void;
 	setAssistantProposals: (proposals: readonly Proposal[]) => void;
-	setAssistantSuggestions: (suggestions: "prepare" | null) => void;
 	setSectionOpen: (sectionId: string, open: boolean) => void;
 	markSectionAdded: (sectionId: string) => void;
 	setFocusEntry: (entryId: string | null) => void;
@@ -154,7 +151,6 @@ const initialState = {
 	assistantThread: null,
 	assistantPrompt: null,
 	assistantProposals: [],
-	assistantSuggestions: null,
 	openSections: [],
 	addedSections: [],
 	focusEntryId: null,
@@ -186,7 +182,6 @@ export const useEditorStore = create<EditorStore>()((set) => ({
 	setAssistantThread: (assistantThread) => set({ assistantThread }),
 	setAssistantPrompt: (assistantPrompt) => set({ assistantPrompt }),
 	setAssistantProposals: (assistantProposals) => set({ assistantProposals }),
-	setAssistantSuggestions: (assistantSuggestions) => set({ assistantSuggestions }),
 	setSectionOpen: (sectionId, open) =>
 		set((state) => {
 			const isOpen = state.openSections.includes(sectionId);

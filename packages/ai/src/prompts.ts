@@ -47,7 +47,6 @@ const atsReviewUserPromptTemplate = readPrompt("ats-review-user.md");
 const docxParserUserPrompt = readPrompt("docx-parser-user.md");
 const improveSystemPrompt = readPrompt("improve-system.md");
 const improveUserPromptTemplate = readPrompt("improve-user.md");
-const letterDraftSystemPrompt = readPrompt("letter-draft-system.md");
 const pdfParserUserPrompt = readPrompt("pdf-parser-user.md");
 
 export {
@@ -58,7 +57,6 @@ export {
 	docxParserUserPrompt,
 	improveSystemPrompt,
 	improveUserPromptTemplate,
-	letterDraftSystemPrompt,
 	pdfParserSystemPrompt,
 	pdfParserUserPrompt,
 };

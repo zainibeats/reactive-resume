@@ -28,7 +28,7 @@ export function NavigationCommandGroup() {
 
 				<CommandItem
 					disabled={!session}
-					keywords={[t`Documents`, t`Resumes`, t`Cover letters`]}
+					keywords={[t`Documents`, t`Resumes`]}
 					value="navigation.documents"
 					onSelect={() => onNavigate("/dashboard")}
 				>
@@ -57,29 +57,6 @@ export function NavigationCommandGroup() {
 				>
 					<Icon name="delete" size={16} />
 					<Trans>Trash</Trans>
-				</CommandItem>
-
-				<CommandItem
-					disabled={!session}
-					keywords={[t`Applications`, t`Jobs`]}
-					value="navigation.applications"
-					onSelect={() => onNavigate("/dashboard/applications")}
-				>
-					<Icon name="work" size={16} />
-					<Trans>Applications</Trans>
-				</CommandItem>
-
-				<CommandItem
-					disabled={!session}
-					keywords={[t`New Application`, t`Add application`, t`Job`]}
-					value="navigation.applications.new"
-					onSelect={async () => {
-						await navigate({ to: "/dashboard/applications", search: { create: true } });
-						reset();
-					}}
-				>
-					<Icon name="add" size={16} />
-					<Trans>New Application</Trans>
 				</CommandItem>
 
 				<CommandItem

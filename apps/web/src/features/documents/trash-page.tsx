@@ -59,12 +59,6 @@ export function TrashPage() {
 							<th className="h-10 ps-3 text-start font-medium">
 								<Trans>Name</Trans>
 							</th>
-							<th className="w-24 px-2 text-start font-medium max-sm:hidden">
-								<Trans>Type</Trans>
-							</th>
-							<th className="w-1/4 px-2 text-start font-medium max-sm:hidden">
-								<Trans>Application</Trans>
-							</th>
 							<th className="w-28 px-2 text-start font-medium max-sm:w-24">
 								<Trans>Deleted in</Trans>
 							</th>
@@ -77,7 +71,7 @@ export function TrashPage() {
 					</thead>
 					<tbody>
 						{documents?.map((document) => (
-							<DocumentRow key={`${document.type}:${document.id}`} document={document} onTags={noop} onLink={noop} />
+							<DocumentRow key={document.id} document={document} onTags={noop} />
 						))}
 					</tbody>
 				</table>

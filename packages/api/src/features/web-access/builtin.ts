@@ -166,7 +166,7 @@ const decodeEntities = (text: string) =>
 		return numericEntityCharacter(name) ?? entity;
 	});
 
-/** Generic page text; JobPosting extraction stays in Applications. */
+/** Generic page text. */
 export function htmlToText(html: string): string {
 	// Keep invalid numeric entities as evidence instead of the sanitizer replacing them with U+FFFD.
 	const safeEntities = html.replace(/&(#x[\da-f]+|#\d+);/gi, (entity, name: string) =>

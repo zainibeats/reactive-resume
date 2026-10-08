@@ -8,30 +8,29 @@ web
 
 ## Users
 
-Job seekers preparing and tailoring resumes and cover letters, sharing application documents, and tracking their job search.
+One person, the owner of the instance, preparing, tailoring, exporting and sharing their own resumes.
 
 ## Product Purpose
 
-Help people turn their experience into professional application documents and manage their applications. Success means creating and tailoring a resume or cover letter, exporting or sharing it, and keeping track of applications.
+Help people turn their experience into professional resumes. Success means creating or importing a resume, tailoring it for a role, and exporting or sharing it.
 
 ## Positioning
 
-Reactive Resume is a free, open-source resume builder with privacy and data ownership as durable commitments. Users can run the application on their own infrastructure. Document editing, reviewable AI assistance, and application tracking belong to the same workflow.
+Reactive Resume is a free, open-source resume builder with privacy and data ownership as durable commitments. Users can run the application on their own infrastructure. Resume editing and reviewable AI assistance belong to the same workflow. Job-application tracking and standalone cover-letter documents are out of scope.
 
 ## Operating Context
 
 - Browser-based use on desktop and mobile; mobile web remains the same product.
 - Create or import a resume, edit with a live document preview, choose a template, and export or share it.
-- Tailor resumes and cover letters for individual applications and track progress through the job search.
+- Duplicate or derive a resume for a specific role and check it against a pasted job posting.
 - Use optional AI assistance to propose changes; users review proposals before applying them.
 
 ## Capabilities and Constraints
 
 - Resume creation, importing, template customization, PDF/JSON/DOCX export, and public sharing.
-- Cover-letter editing and application tracking.
 - Preserve free and open-source access, privacy, and user control of their data.
 - Preserve multilingual and right-to-left support throughout workflows and accessible labels.
-- The web app is a client-rendered React SPA. Public marketing pages are prerendered at build time.
+- The web app is a client-rendered React SPA. There are no prerendered marketing pages.
 - Feature UI belongs in `src/features` and routes in `src/routes`; shared UI primitives belong in `../../packages/ui`.
 
 ## Brand Commitments
@@ -41,7 +40,6 @@ Keep the Reactive Resume name and existing brand assets. The incumbent visual sy
 ## Evidence on Hand
 
 - `../../README.md`: product description, capabilities, licensing, and self-hosting information.
-- `src/features/homepage`: existing product demonstrations and public copy.
 - `src/features/ats-checker`: browser-based PDF checks.
 - `public/templates`: real template previews and PDF samples.
 - `public/icon` and `public/logo`: existing brand assets.

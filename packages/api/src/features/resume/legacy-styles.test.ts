@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { needsLegacyStyleConversion } from "@reactive-resume/pdf/semantic-legacy";
-import { copyCoverLetterStyle } from "@reactive-resume/resume/cover-letter";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
-import { migrateLetterStylesheet, migrateResumeStylesheet } from "./legacy-styles";
+import { migrateResumeStylesheet } from "./legacy-styles";
 
 const legacy = () => {
 	const data = structuredClone(sampleResumeData);
@@ -50,14 +49,5 @@ describe("migrateResumeStylesheet", () => {
 		const data = legacy();
 		data.metadata.stylesheet = migrateResumeStylesheet(data) ?? undefined;
 		expect(migrateResumeStylesheet(data)).toBeNull();
-	});
-});
-
-describe("migrateLetterStylesheet", () => {
-	it("converts a letter's copy of a legacy-styled resume's style", () => {
-		const style = copyCoverLetterStyle(legacy());
-
-		expect(migrateLetterStylesheet(style)?.source.text).toContain("color: #0f766e;");
-		expect(migrateLetterStylesheet(copyCoverLetterStyle(defaultResumeData))).toBeNull();
 	});
 });

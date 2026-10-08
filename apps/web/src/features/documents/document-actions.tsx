@@ -2,7 +2,7 @@ import type { DocumentSummary } from "./filter";
 import type { IconName } from "@reactive-resume/ui/components/icon";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@reactive-resume/ui/components/context-menu";
@@ -24,7 +24,6 @@ import { toast } from "@reactive-resume/ui/components/toast";
 import { useNewDocumentsStore } from "./new-documents";
 import { ChipInput } from "@/components/input/chip-input";
 import { useDialogStore } from "@/dialogs/store";
-import { applicationsListQueryOptions } from "@/features/applications/queries";
 import { useClosingValue } from "@/hooks/use-closing-value";
 import { useConfirm } from "@/hooks/use-confirm";
 import { getOrpcErrorMessage } from "@/libs/error-message";
@@ -56,8 +55,7 @@ export function useDocumentActions() {
 	const trash = useMutation(orpc.documents.trash.mutationOptions({ onSettled: refresh }));
 	const restore = useMutation(orpc.documents.restore.mutationOptions({ onSettled: refresh }));
 	const purge = useMutation(orpc.documents.purge.mutationOptions({ onSettled: refresh }));
-	const duplicateResume = useMutation(orpc.resume.duplicate.mutationOptions({ onSettled: refresh }));
-	const duplicateLetter = useMutation(orpc.coverLetters.duplicate.mutationOptions({ onSettled: refresh }));
+	const duplicate = useMutation(orpc.resume.duplicate.mutationOptions({ onSettled: refresh }));
 
 	return {
 		rename: (document: DocumentSummary, name: string) => {
@@ -67,20 +65,15 @@ export function useDocumentActions() {
 		},
 
 		duplicate: async (document: DocumentSummary) => {
-			const copied =
-				document.type === "resume"
-					? duplicateResume.mutateAsync({ id: document.id, name: t`${document.name} (copy)`, tags: document.tags })
-					: duplicateLetter.mutateAsync({ id: document.id }).then((letter) => letter.id);
 			try {
-				markNew(await copied);
+				markNew(
+					await duplicate.mutateAsync({ id: document.id, name: t`${document.name} (copy)`, tags: document.tags }),
+				);
 				toast.add({ description: t`Duplicated` });
 			} catch (error) {
 				failed(error);
 			}
 		},
-
-		copyForJob: (document: DocumentSummary) =>
-			openDialog("document.new", { step: "copy", sourceResumeId: document.id }),
 
 		/** A linked child keeps reviewing its parent's later changes, unlike a duplicate. */
 		createChild: (document: DocumentSummary) =>
@@ -138,20 +131,12 @@ type DocumentMenuProps = {
 	onOpen: () => void;
 	onRename: () => void;
 	onTags: () => void;
-	onLink: () => void;
 	/** The same items as a context menu (right-click and long-press) instead of the ⋯ menu. */
 	variant?: "dropdown" | "context";
 };
 
-/** Open, Rename, Duplicate, Create child and Copy for a job (or Link to application), Tags, Lock, then Move to Trash. */
-export function DocumentMenuContent({
-	document,
-	onOpen,
-	onRename,
-	onTags,
-	onLink,
-	variant = "dropdown",
-}: DocumentMenuProps) {
+/** Open, Rename, Duplicate, Create child, Tags, Lock, then Move to Trash. */
+export function DocumentMenuContent({ document, onOpen, onRename, onTags, variant = "dropdown" }: DocumentMenuProps) {
 	const actions = useDocumentActions();
 
 	const trashEntries: MenuEntry[] = [
@@ -162,12 +147,7 @@ export function DocumentMenuContent({
 		{ icon: "open_in_new", label: t`Open`, onSelect: onOpen },
 		{ icon: "edit", label: t`Rename`, onSelect: onRename, disabled: document.isLocked },
 		{ icon: "content_copy", label: t`Duplicate`, onSelect: () => void actions.duplicate(document) },
-		...(document.type === "resume"
-			? [
-					{ icon: "hub", label: t`Create child resume…`, onSelect: () => actions.createChild(document) } as MenuEntry,
-					{ icon: "work", label: t`Copy for a job…`, onSelect: () => actions.copyForJob(document) } as MenuEntry,
-				]
-			: [{ icon: "work", label: t`Link to application…`, onSelect: onLink, disabled: document.isLocked } as MenuEntry]),
+		{ icon: "hub", label: t`Create child resume…`, onSelect: () => actions.createChild(document) },
 		{ icon: "sell", label: t`Tags…`, onSelect: onTags, disabled: document.isLocked },
 		document.isLocked
 			? { icon: "lock_open", label: t`Unlock`, onSelect: () => actions.setLocked(document, false) }
@@ -253,78 +233,6 @@ export function TagsDialog({ document: requested, onClose }: TagsDialogProps) {
 						<Trans>Save</Trans>
 					</Button>
 				</DialogFooter>
-			</DialogContent>
-		</Dialog>
-	);
-}
-
-type LinkApplicationDialogProps = { document: DocumentSummary | null; onClose: () => void };
-
-/** Link to application… for letters: the job the letter is for. */
-export function LinkApplicationDialog({ document: requested, onClose }: LinkApplicationDialogProps) {
-	const queryClient = useQueryClient();
-	// Closing keeps the list, its highlight and Unlink on screen until the dialog has faded out.
-	const [document, onOpenChangeComplete] = useClosingValue(requested);
-	const { data: applications } = useQuery({ ...applicationsListQueryOptions(), enabled: requested !== null });
-	const link = useMutation(orpc.documents.linkApplication.mutationOptions());
-
-	const choose = async (applicationId: string | null) => {
-		if (!document) return;
-		try {
-			await link.mutateAsync({ type: document.type, id: document.id, applicationId });
-			await queryClient.invalidateQueries({ queryKey: orpc.documents.key() });
-			onClose();
-		} catch (error) {
-			failed(error);
-		}
-	};
-
-	const jobs = (applications ?? []).filter((application) => application.status !== "closed");
-
-	return (
-		<Dialog
-			open={requested !== null}
-			onOpenChange={(open) => !open && onClose()}
-			onOpenChangeComplete={onOpenChangeComplete}
-		>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>
-						<Trans>Link to application</Trans>
-					</DialogTitle>
-					<DialogDescription>
-						<Trans>The application this letter is for.</Trans>
-					</DialogDescription>
-				</DialogHeader>
-				<div className="grid max-h-72 gap-1 overflow-y-auto">
-					{jobs.map((application) => (
-						<Button
-							key={application.id}
-							variant={document?.application?.id === application.id ? "secondary" : "ghost"}
-							className="h-auto justify-start py-2 text-start"
-							disabled={link.isPending}
-							onClick={() => void choose(application.id)}
-						>
-							<Icon name="work" className="text-ink-2" />
-							<span className="grid min-w-0">
-								<span className="truncate font-medium">{application.role}</span>
-								<span className="truncate text-xs text-ink-3">{application.company}</span>
-							</span>
-						</Button>
-					))}
-					{jobs.length === 0 && (
-						<p className="text-sm text-ink-2">
-							<Trans>No applications yet. Add one in Applications first.</Trans>
-						</p>
-					)}
-				</div>
-				{document?.application && (
-					<DialogFooter>
-						<Button variant="ghost" disabled={link.isPending} onClick={() => void choose(null)}>
-							<Trans>Unlink</Trans>
-						</Button>
-					</DialogFooter>
-				)}
 			</DialogContent>
 		</Dialog>
 	);

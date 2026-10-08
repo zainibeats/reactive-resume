@@ -14,7 +14,6 @@ GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.min.
 
 type PdfViewerProps = {
 	className?: string;
-	includeCoverLetterHeader?: boolean;
 	publicResume?: {
 		username: string;
 		slug: string;
@@ -73,13 +72,7 @@ function pdfViewerReducer(state: PdfViewerState, action: PdfViewerAction): PdfVi
 }
 
 /** Renders a resume's PDF from its data, or an existing PDF file (the ATS checker's upload). */
-export function PdfViewer({
-	className,
-	data,
-	file: givenFile,
-	publicResume,
-	includeCoverLetterHeader,
-}: PdfViewerProps) {
+export function PdfViewer({ className, data, file: givenFile, publicResume }: PdfViewerProps) {
 	const rootRef = useRef<HTMLDivElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const viewerRef = useRef<HTMLDivElement>(null);
@@ -99,9 +92,7 @@ export function PdfViewer({
 			if (givenFile) return Promise.resolve(givenFile);
 			if (!data) return Promise.reject(new Error("PdfViewer needs data or a file."));
 			if (publicResume) return resolvePublicResumePdfBlob({ data, publicResume });
-			return includeCoverLetterHeader
-				? createResumePdfBlob(data, undefined, { includeCoverLetterHeader: true })
-				: createResumePdfBlob(data);
+			return createResumePdfBlob(data);
 		};
 
 		void createPdf()
@@ -121,7 +112,7 @@ export function PdfViewer({
 		return () => {
 			isCancelled = true;
 		};
-	}, [data, givenFile, publicResume, includeCoverLetterHeader]);
+	}, [data, givenFile, publicResume]);
 
 	useEffect(() => {
 		void fileVersion;

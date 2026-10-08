@@ -1,14 +1,14 @@
 import type { SemanticStylesheet } from "@reactive-resume/schema/resume/stylesheet";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
-import { migrateLetterStylesheet, migrateResumeStylesheet } from "./legacy-styles";
+import { migrateResumeStylesheet } from "./legacy-styles";
 
 const BATCH = 200;
 
 type Target = {
 	table: string;
 	column: string;
-	/** Where the `metadata` object sits inside the column (a letter version keeps it under `style`). */
+	/** Where the `metadata` object sits inside the column. */
 	owner: readonly string[];
 	convert: (owner: unknown) => SemanticStylesheet | null;
 };
@@ -16,8 +16,6 @@ type Target = {
 const TARGETS: readonly Target[] = [
 	{ table: "resume", column: "data", owner: [], convert: migrateResumeStylesheet },
 	{ table: "resume_version", column: "data", owner: [], convert: migrateResumeStylesheet },
-	{ table: "cover_letter", column: "style", owner: [], convert: migrateLetterStylesheet },
-	{ table: "cover_letter_version", column: "data", owner: ["style"], convert: migrateLetterStylesheet },
 ];
 
 /** One row's stylesheet before and after conversion: enough to put it back. `before` is the stored JSON text, or null when there was none. */

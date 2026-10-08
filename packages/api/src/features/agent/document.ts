@@ -1,33 +1,23 @@
 import type { ProposeEditsInput, ProposeEditsOutput } from "@reactive-resume/ai/tools/agent-tool-contracts";
 import type { Passage, ProposalTarget } from "@reactive-resume/resume/proposals";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import { and, desc, eq } from "drizzle-orm";
-import { db } from "@reactive-resume/db/client";
-import * as schema from "@reactive-resume/db/schema";
 import { buildMarkdown } from "@reactive-resume/resume/markdown";
 import {
 	additionAfter,
-	blockText,
 	canApplyTo,
-	collectLetterPassages,
 	collectPassages,
 	readTarget,
 	replaceBlockText,
 } from "@reactive-resume/resume/proposals";
 import { generateId } from "@reactive-resume/utils/string";
-import { coverLetterService } from "../cover-letters/service";
 import { resumeService } from "../resume/service";
 
-/** The one document a conversation is about. */
-export type AssistantDocument = { kind: "resume" | "letter"; id: string };
+/** The one resume a conversation is about. */
+export type AssistantDocument = { kind: "resume"; id: string };
 
-export const documentOf = (thread: {
-	workingResumeId: string | null;
-	coverLetterId: string | null;
-}): AssistantDocument | null => {
-	if (thread.coverLetterId) return { kind: "letter", id: thread.coverLetterId };
-	return thread.workingResumeId ? { kind: "resume", id: thread.workingResumeId } : null;
-};
+/** Conversations from before the assistant was resume-only have no resume, and stay read-only. */
+export const documentOf = (thread: { workingResumeId: string | null }): AssistantDocument | null =>
+	thread.workingResumeId ? { kind: "resume", id: thread.workingResumeId } : null;
 
 // The model reads passage locations in English; the editor shows its own, translated.
 const LABELS = {
@@ -55,63 +45,31 @@ function sectionTitle(data: ResumeData, sectionId: string) {
 }
 
 type LoadedDocument = {
-	kind: AssistantDocument["kind"];
 	name: string;
 	updatedAt: Date;
 	locked: boolean;
-	applicationId: string | null;
 	passages: Passage[];
 	/** The field a proposal targets, as it reads now. */
 	read: (target: ProposalTarget) => string | undefined;
-	/** What read_resume / read_letter returns to the model. */
+	/** What read_resume returns to the model. */
 	view: Record<string, unknown>;
 };
 
 export async function loadDocument(userId: string, document: AssistantDocument): Promise<LoadedDocument> {
-	if (document.kind === "resume") {
-		const resume = await resumeService.getById({ id: document.id, userId });
-		const passages = collectPassages(resume.data, {
-			...LABELS,
-			sectionTitle: (sectionId) => sectionTitle(resume.data, sectionId),
-			entryTitle,
-		});
-
-		return {
-			kind: "resume",
-			name: resume.name,
-			updatedAt: resume.updatedAt,
-			locked: resume.isLocked,
-			applicationId: resume.applicationId,
-			passages,
-			read: (target) => readTarget(resume.data, target),
-			view: { resume: buildMarkdown(resume.data) },
-		};
-	}
-
-	const letter = await coverLetterService.getById({ id: document.id, userId });
-	const passages = collectLetterPassages(letter.content, { ...LABELS, body: "Letter" });
-	// The letter's facts come from its resume.
-	const resume = letter.sourceResumeId
-		? await resumeService.getById({ id: letter.sourceResumeId, userId }).catch(() => null)
-		: null;
+	const resume = await resumeService.getById({ id: document.id, userId });
+	const passages = collectPassages(resume.data, {
+		...LABELS,
+		sectionTitle: (sectionId) => sectionTitle(resume.data, sectionId),
+		entryTitle,
+	});
 
 	return {
-		kind: "letter",
-		name: letter.name,
-		updatedAt: letter.updatedAt,
-		locked: letter.isLocked,
-		applicationId: letter.sourceApplicationId,
+		name: resume.name,
+		updatedAt: resume.updatedAt,
+		locked: resume.isLocked,
 		passages,
-		read: (target) => (target.field === "content" ? letter.content : undefined),
-		view: {
-			sender: letter.style.basics.name,
-			recipient:
-				letter.layout === "structured"
-					? { name: letter.recipientName, company: letter.recipientCompany, date: letter.letterDate }
-					: blockText(letter.recipient),
-			note: "The greeting and sign-off are added around the body automatically; propose edits to the body only.",
-			...(resume ? { resume: buildMarkdown(resume.data) } : {}),
-		},
+		read: (target) => readTarget(resume.data, target),
+		view: { resume: buildMarkdown(resume.data) },
 	};
 }
 
@@ -130,37 +88,6 @@ export function documentView(document: LoadedDocument) {
 			})),
 		},
 	};
-}
-
-/** The posting of the application the document is for: its role, company and description or requirements. */
-export async function findPosting(
-	userId: string,
-	documentId: string,
-	loaded: Pick<LoadedDocument, "kind" | "applicationId">,
-	applicationId?: string,
-) {
-	// A resume made for an application says so; otherwise, the latest application it's linked to.
-	const selectedId = applicationId ?? loaded.applicationId;
-	if (!selectedId && loaded.kind === "letter") return null;
-	const table = schema.application;
-	const [application] = await db
-		.select({
-			role: table.role,
-			company: table.company,
-			jobDescription: table.jobDescription,
-			requirements: table.requirements,
-			notes: table.notes,
-		})
-		.from(table)
-		.where(and(eq(table.userId, userId), selectedId ? eq(table.id, selectedId) : eq(table.resumeId, documentId)))
-		.orderBy(desc(table.updatedAt))
-		.limit(1);
-	if (!application) return null;
-
-	const text =
-		application.jobDescription?.trim() ||
-		(application.requirements.length > 0 ? application.requirements.map((item) => `- ${item}`).join("\n") : "");
-	return { role: application.role, company: application.company, text, notes: application.notes?.trim() ?? "" };
 }
 
 /**

@@ -137,7 +137,7 @@ describe("native search SDK protocol", () => {
 		);
 		const tools = buildAgentTools({
 			provider,
-			document: "resume",
+			document: true,
 			externalSearch: false,
 			signal: new AbortController().signal,
 			handlers: {
@@ -205,7 +205,7 @@ describe("native search SDK protocol", () => {
 		};
 		const tools = buildAgentTools({
 			provider,
-			document: "resume",
+			document: true,
 			externalSearch: false,
 			signal: new AbortController().signal,
 			handlers: {
@@ -243,7 +243,7 @@ describe("native search SDK protocol", () => {
 			};
 			const tools = buildAgentTools({
 				provider,
-				document: "resume",
+				document: true,
 				externalSearch: false,
 				signal: new AbortController().signal,
 				handlers: {
@@ -303,7 +303,7 @@ describe("native search SDK protocol", () => {
 		(provider) => {
 			const tools = buildAgentTools({
 				provider: { ...provider, apiKey: "test" },
-				document: "resume",
+				document: true,
 				externalSearch: false,
 				signal: new AbortController().signal,
 				handlers: {

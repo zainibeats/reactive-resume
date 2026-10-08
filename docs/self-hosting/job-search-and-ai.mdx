@@ -1,22 +1,22 @@
 ---
-title: "Job search and AI"
-description: "Configure one optional Firecrawl, Tavily or Exa connection and an AI provider without blocking manual job saving."
+title: "Web access and AI"
+description: "Configure an AI provider and one optional Firecrawl, Tavily or Exa connection for the Assistant's web search and page reading."
 ---
 
-Users can save pasted job descriptions, read supported public links and prepare resumes manually without adding
-API accounts. This guide adds optional keyword search, enhanced page reading and AI assistance to a working
-[Docker](/self-hosting/docker), [Kubernetes](/self-hosting/kubernetes) or [Vercel](/self-hosting/vercel) deployment.
+Everything except AI features works without API accounts. This guide adds AI assistance and optional web search and
+enhanced page reading for the Assistant to a working [Docker](/self-hosting/docker) or
+[Kubernetes](/self-hosting/kubernetes) deployment.
 
-| Service                  | What it does                                                                      | Required for                                  |
-| ------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------- |
-| Built-in reader          | Reads supported public pages.                                                     | Active without credentials.                   |
-| Firecrawl, Tavily or Exa | One selected connection supplies search and enhanced reading.                     | Optional keyword search and enhanced reading. |
-| SearXNG                  | Supplies web search results to your self-hosted Firecrawl service.                | Optional alternative search backend.          |
-| AI provider              | Extracts role, company, salary, requirements and other details from posting text. | AI extraction and other AI features.          |
+| Service                  | What it does                                                                      | Required for                                       |
+| ------------------------ | --------------------------------------------------------------------------------- | -------------------------------------------------- |
+| AI provider              | Runs the Assistant, **Improve**, Check's **Writing** review and AI file imports.  | All AI features.                                   |
+| Built-in reader          | Reads supported public pages for the Assistant.                                   | Active without credentials.                        |
+| Firecrawl, Tavily or Exa | One selected connection supplies the Assistant's web search and enhanced reading. | Optional web search and enhanced reading.          |
+| SearXNG                  | Supplies web search results to your self-hosted Firecrawl service.                | Optional alternative search backend for Firecrawl. |
 
 Reactive Resume calls the selected web service and AI provider separately. Only self-hosted Firecrawl uses SearXNG.
-With no external web connection, supported AI configurations can provide native assistant search through the
-existing AI account. Native search is independent of importing a supplied job link.
+With no external web connection, supported AI configurations can provide native Assistant search through the
+existing AI account. See [Assistant tools](/guides/ai-agent-tools#web-search-support).
 
 ## 1. Choose shared services or personal keys
 
@@ -58,8 +58,8 @@ WEB_ACCESS_API_URL="http://firecrawl-api:3002"
 
 Use the API base URL without `/v2`. A URL alone enables a keyless self-hosted service globally. Keep such a service
 private and follow Firecrawl's [production guidance](https://docs.firecrawl.dev/contributing/self-host#before-production).
-Keep its protections against private destination URLs, unsafe redirects and DNS rebinding enabled; job-posting URLs
-in Reactive Resume must point to public HTTPS destinations.
+Keep its protections against private destination URLs, unsafe redirects and DNS rebinding enabled; page URLs read
+by Reactive Resume must point to public HTTPS destinations.
 
 For Firecrawl Cloud, use its [quickstart](https://docs.firecrawl.dev/introduction) to get a key, set only
 `WEB_ACCESS_PROVIDER="firecrawl"` and `WEB_ACCESS_API_KEY`, and leave `WEB_ACCESS_API_URL` unset. Requests then go to
@@ -109,7 +109,7 @@ JSON output, run this from a host or container that can reach SearXNG, replacing
 
 ```bash
 curl --get 'http://searxng:8080/search' \
-  --data-urlencode 'q=software engineer jobs' \
+  --data-urlencode 'q=software engineer' \
   --data-urlencode 'format=json'
 ```
 
@@ -141,34 +141,35 @@ identifier and model. An OpenAI-compatible gateway also needs `AI_BASE_URL`. For
 [AI environment reference](/self-hosting/environment-variables#ai-and-redis). Local or private AI endpoints need
 `FLAG_ALLOW_UNSAFE_AI_BASE_URL=true`; enable it only where you trust every user. Ollama can omit `AI_API_KEY`.
 
-The AI key belongs to Reactive Resume for this workflow. Web services receive search queries and selected public URLs;
-they do not need the AI-provider key or candidate resume data.
+The AI key belongs to Reactive Resume. Web services receive search queries and selected public URLs; they do not need
+the AI-provider key or resume data.
 
-## 5. Apply settings and verify the workflow
+## 5. Apply settings and verify
 
 For the [Docker guide's setup](/self-hosting/docker), put Reactive Resume variables in `.env` and run
 `docker compose up -d reactive-resume`. The source repository's Compose service is named `reactive_resume` instead.
 For local development, edit `.env.local` and restart `pnpm dev`. On other platforms, update the server's environment
 and restart or redeploy it. Keep keys in server configuration or secret storage, never browser build variables.
 
-1. Open **Settings → AI & developer → Web access**. The built-in reader should show **Active**. The selected web service
-   should show its provider and ownership.
-2. Click **Test connection**. Search and reading are tested separately; a built-in fallback cannot make this pass.
-3. Open **Applications**, enter search keywords, choose a result and review the role, company and retained description.
-4. Save the job as **Saved**, prepare a selected resume or a copy, and confirm **Mark as applied** after submission.
-5. Try a public posting URL and pasted text. Failed reading should preserve the draft and offer pasted-text recovery.
+1. Open **Settings → AI & developer**. The shared AI provider should show as provided by the server, or a personal
+   provider should pass its connection test.
+2. Under **Web access**, the built-in reader should show **Active**. The selected web service should show its provider
+   and ownership.
+3. Click **Test connection**. Search and reading are tested separately; a built-in fallback cannot make this pass.
+4. Open a resume, open the Assistant, and ask it to search the web or read a public page URL. The conversation should
+   show the search or read step and its **Sources**.
 
 `/api/health` checks database, storage and configured Redis; it does not verify these integrations. If a step fails:
 
 | Symptom                       | Check                                                                                                                                                                                                                 |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No keyword search             | Configure one shared connection or save a personal key in Web access.                                                                                                                                                 |
+| No web search                 | Configure one shared connection or save a personal key in Web access, or use a model with native search.                                                                                                              |
 | Enhanced access fails         | Test search and reading separately. Check provider credentials, quota and service support. For Firecrawl, also check its network address and [self-hosting guide](https://docs.firecrawl.dev/contributing/self-host). |
 | SearXNG returns HTML or `403` | Enable JSON and check proxy/access rules against its [search API](https://docs.searxng.org/dev/search_api.html).                                                                                                      |
-| AI extraction fails           | Check provider billing, key and model access; verify all required [AI variables](/self-hosting/environment-variables#ai-and-redis).                                                                                   |
+| AI features fail              | Check provider billing, key and model access; verify all required [AI variables](/self-hosting/environment-variables#ai-and-redis).                                                                                   |
 
-Reading failures can fall back to the built-in reader, so a successful URL import alone does not prove the external
-service was used. Review the displayed posting source and use the independent connection test.
+Reading failures can fall back to the built-in reader, so a successful page read alone does not prove the external
+service was used. Use the independent connection test.
 
 ## Credential backups
 

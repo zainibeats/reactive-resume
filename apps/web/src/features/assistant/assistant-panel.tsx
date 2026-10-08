@@ -40,14 +40,11 @@ type AssistantPanelProps = {
 	onClose: () => void;
 };
 
-const belongsTo = (thread: ThreadSummary, document: AssistantDocument) =>
-	document.kind === "letter"
-		? thread.coverLetterId === document.id
-		: thread.workingResumeId === document.id && !thread.coverLetterId;
+const belongsTo = (thread: ThreadSummary, document: AssistantDocument) => thread.workingResumeId === document.id;
 
 /**
- * The assistant beside the page: it knows the open document and the posting it's for, proposes edits that appear on
- * the page and as cards, and asks before writing anything the document doesn't say.
+ * The assistant beside the page: it knows the open resume, proposes edits that appear on the page and as cards, and
+ * asks before writing anything the resume doesn't say.
  */
 export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 	const queryClient = useQueryClient();
@@ -61,7 +58,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 	const [providerId, setProviderId] = useState<string | null>(null);
 	const [modelMenuOpen, setModelMenuOpen] = useState(false);
 	const [starting, setStarting] = useState(false);
-	const [context, setContext] = useState<MessageContext>({ document: true, posting: true });
+	const [context, setContext] = useState<MessageContext>({ document: true });
 	const [promptAttachments, setPromptAttachments] = useState<ChatAttachment[]>([]);
 	const [draftKey, setDraftKey] = useState(0);
 	const draftThread = useRef<string | null>(null);
@@ -83,10 +80,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 		if (creatingThread.current) return creatingThread.current;
 		// A list refetch must not auto-open this empty draft while its composer still holds unsent files.
 		setSelected("new");
-		const input = {
-			...(document.kind === "letter" ? { coverLetterId: document.id } : { resumeId: document.id }),
-			...(provider ? { aiProviderId: provider.id } : {}),
-		};
+		const input = { resumeId: document.id, ...(provider ? { aiProviderId: provider.id } : {}) };
 		const creating = client.agent.threads.start(input).then((created) => {
 			if (creatingThread.current === creating) draftThread.current = created.id;
 			return created.id;
@@ -108,7 +102,6 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 			setPromptAttachments(attachments);
 			setSelected(id);
 			draftThread.current = null;
-			useEditorStore.getState().setAssistantSuggestions(null);
 			setView("thread");
 			void queryClient.invalidateQueries({ queryKey: orpc.agent.threads.list.key() });
 		} catch (error) {
@@ -120,7 +113,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 		setStarting(false);
 	};
 
-	// A question from ⌘K (or Prepare for next step) starts a conversation as soon as the assistant can.
+	// A question from ⌘K (or Check's job match) starts a conversation as soon as the assistant can.
 	const autoStarted = useRef<string | null>(null);
 	useEffect(() => {
 		if (!prompt || selected !== "new" || !providers.hasUsableProvider || autoStarted.current === prompt) return;
@@ -170,7 +163,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 						draftThread.current = null;
 						creatingThread.current = null;
 						setDraftKey((key) => key + 1);
-						setContext({ document: true, posting: true });
+						setContext({ document: true });
 						setPromptAttachments([]);
 						setSelected("new");
 						setView("thread");
@@ -225,7 +218,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 					providerLabel={providerLabel}
 					prompt={selected === threadId ? prompt : null}
 					promptAttachments={promptAttachments}
-					initialContext={{ ...context, ...(document.posting ? { applicationId: document.posting.id } : {}) }}
+					initialContext={context}
 					onPromptSent={() => {
 						setPrompt(null);
 						setPromptAttachments([]);
@@ -350,51 +343,16 @@ function Notice({ children }: { children: ReactNode }) {
 
 type Suggestion = { icon: IconName; label: string; hint: string };
 
-function suggestionsFor(document: AssistantDocument, prepare: boolean): Suggestion[] {
-	const tailor: Suggestion[] = document.posting
-		? [
-				{
-					icon: "work",
-					label: t`Tailor to the ${document.posting.company} posting`,
-					hint: t`Uses the linked application`,
-				},
-			]
-		: [];
-
-	// Prepare for next step: the application's fit, a follow-up and the interview (what the copilot did).
-	if (prepare && document.posting)
-		return [
-			{ icon: "work", label: t`How well do I fit this role?`, hint: t`Compares your resume with the posting` },
-			{ icon: "mail", label: t`Draft a follow-up email`, hint: t`Short and polite, for the recruiter` },
-			{
-				icon: "chat",
-				label: t`Prepare me for the interview`,
-				hint: t`Likely questions, from the posting and your resume`,
-			},
-			...tailor,
-		];
-
-	if (document.kind === "letter")
-		return [
-			...tailor,
-			{ icon: "bolt", label: t`Make the opening stronger`, hint: t`Leads with why you fit` },
-			{ icon: "compress", label: t`Make it shorter`, hint: t`Keeps the most specific parts` },
-			{ icon: "short_text", label: t`Make it more specific`, hint: t`Uses facts from your resume` },
-		];
-
-	return [
-		...tailor,
-		{ icon: "content_cut", label: t`Find weak bullets`, hint: t`Checks every bullet for action and result` },
-		{ icon: "vertical_align_center", label: t`Tighten to one page`, hint: t`Suggests cuts, never deletes on its own` },
-		{ icon: "short_text", label: t`Draft a summary`, hint: t`From your experience entries` },
-	];
-}
+const suggestions = (): Suggestion[] => [
+	{ icon: "content_cut", label: t`Find weak bullets`, hint: t`Checks every bullet for action and result` },
+	{ icon: "vertical_align_center", label: t`Tighten to one page`, hint: t`Suggests cuts, never deletes on its own` },
+	{ icon: "short_text", label: t`Draft a summary`, hint: t`From your experience entries` },
+];
 
 type EmptyStateProps = { document: AssistantDocument; disabled: boolean; onPick: (text: string) => void };
 
 function EmptyState({ document, disabled, onPick }: EmptyStateProps) {
-	const kind = document.kind === "letter" ? t`letter` : t`resume`;
-	const prepare = useEditorStore((state) => state.assistantSuggestions === "prepare");
+	const kind = t`resume`;
 
 	return (
 		<div className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-4">
@@ -403,14 +361,7 @@ function EmptyState({ document, disabled, onPick }: EmptyStateProps) {
 					<Trans>What should we work on?</Trans>
 				</h3>
 				<p className="text-sm text-ink-2">
-					{document.posting ? (
-						<Trans>
-							I can see this {kind} and the {document.posting.company} posting. Suggestions come back as edits you can
-							accept one by one.
-						</Trans>
-					) : (
-						<Trans>I can see this {kind}. Suggestions come back as edits you can accept one by one.</Trans>
-					)}
+					<Trans>I can see this {kind}. Suggestions come back as edits you can accept one by one.</Trans>
 				</p>
 				{document.locked && (
 					<p className="text-xs text-warn-text">
@@ -419,7 +370,7 @@ function EmptyState({ document, disabled, onPick }: EmptyStateProps) {
 				)}
 			</div>
 			<ul className="grid gap-1">
-				{suggestionsFor(document, prepare).map((suggestion, index) => (
+				{suggestions().map((suggestion, index) => (
 					<li key={suggestion.label} style={stagger(index)} className={ENTER_CLASS}>
 						<button
 							type="button"
@@ -454,23 +405,15 @@ function PastConversations({ threads, document, currentId, onOpen }: PastConvers
 	const queryClient = useQueryClient();
 	const confirm = useConfirm();
 	const mine = threads.filter((thread) => belongsTo(thread, document));
-	const others = threads.filter(
-		(thread) => !belongsTo(thread, document) && (thread.workingResumeId || thread.coverLetterId),
-	);
+	const others = threads.filter((thread) => !belongsTo(thread, document) && thread.workingResumeId);
 
 	const outcome = (thread: ThreadSummary) =>
 		thread.editsProposed === 0 ? t`no edits` : t`${thread.editsAccepted} of ${thread.editsProposed} edits accepted`;
 
 	const open = (thread: ThreadSummary) => {
 		if (belongsTo(thread, document)) return onOpen(thread.id);
-		// Another document's conversation opens that document, with the assistant on it.
-		if (thread.coverLetterId)
-			void navigate({
-				to: "/builder/letter/$coverLetterId",
-				params: { coverLetterId: thread.coverLetterId },
-				search: { assistant: thread.id },
-			});
-		else if (thread.workingResumeId)
+		// Another resume's conversation opens that resume, with the assistant on it.
+		if (thread.workingResumeId)
 			void navigate({
 				to: "/builder/$resumeId",
 				params: { resumeId: thread.workingResumeId },
@@ -531,7 +474,7 @@ function PastConversations({ threads, document, currentId, onOpen }: PastConvers
 								index={mine.length + index}
 								thread={thread}
 								current={false}
-								detail={`${formatVersionTime(new Date(thread.lastMessageAt), i18n.locale)} · ${outcome(thread)} · ${thread.coverLetterName ?? thread.resumeName ?? ""}`}
+								detail={`${formatVersionTime(new Date(thread.lastMessageAt), i18n.locale)} · ${outcome(thread)} · ${thread.resumeName ?? ""}`}
 								onOpen={() => open(thread)}
 								onDelete={() => void remove(thread)}
 							/>

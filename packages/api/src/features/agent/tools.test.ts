@@ -23,7 +23,7 @@ function build(externalSearch = false, signal = new AbortController().signal) {
 		handlers,
 		tools: buildAgentTools({
 			provider: { provider: "openai", model: "gpt-5-mini", apiKey: "test" },
-			document: "resume",
+			document: true,
 			externalSearch,
 			signal,
 			handlers,
@@ -67,22 +67,12 @@ describe("assistant web tools", () => {
 	});
 
 	it("describes reader-only capabilities truthfully and names the selected search tool", () => {
-		const reader = buildAgentInstructions({
-			document: null,
-			posting: null,
-			searchTool: null,
-			canReadPage: true,
-		});
+		const reader = buildAgentInstructions({ document: null, searchTool: null, canReadPage: true });
 		expect(reader).toContain("Web search is unavailable");
 		expect(reader).toContain("Use `read_page`");
 		expect(reader).not.toContain("can't browse");
-		expect(
-			buildAgentInstructions({
-				document: null,
-				posting: null,
-				searchTool: "google_search",
-				canReadPage: true,
-			}),
-		).toContain("Use `google_search`");
+		expect(buildAgentInstructions({ document: null, searchTool: "google_search", canReadPage: true })).toContain(
+			"Use `google_search`",
+		);
 	});
 });

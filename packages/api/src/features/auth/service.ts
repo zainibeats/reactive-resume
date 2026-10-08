@@ -5,7 +5,6 @@ import { isCustomOAuthProviderEnabled } from "@reactive-resume/auth/config";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
-import { coverLetterService } from "../cover-letters/service";
 import { getStorageService } from "../storage/service";
 
 type ProviderList = Partial<Record<AuthProvider, string>>;
@@ -62,17 +61,7 @@ export const authService = {
 			.from(schema.resume)
 			.where(eq(schema.resume.userId, input.userId));
 
-		const coverLetters = await db.select().from(schema.coverLetter).where(eq(schema.coverLetter.userId, input.userId));
-		const applications = await db.select().from(schema.application).where(eq(schema.application.userId, input.userId));
-		return {
-			exportedAt: new Date().toISOString(),
-			user: userRecord,
-			resumes,
-			coverLetters: await Promise.all(
-				coverLetters.map(({ id }) => coverLetterService.getById({ id, userId: input.userId })),
-			),
-			applications: applications.map(({ userId: _userId, ...application }) => application),
-		};
+		return { exportedAt: new Date().toISOString(), user: userRecord, resumes };
 	},
 
 	deleteAccount: async (input: { userId: string }): Promise<void> => {

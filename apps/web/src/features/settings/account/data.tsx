@@ -19,7 +19,6 @@ import { toast } from "@reactive-resume/ui/components/toast";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
 import { SettingsRow, SettingsSection } from "../section";
 import { buildAccountZip } from "./export";
-import { applicationsListQueryOptions } from "@/features/applications/queries";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { client, orpc } from "@/libs/orpc/client";
@@ -43,7 +42,7 @@ export function DataSection() {
 		<SettingsSection title={<Trans>Your data</Trans>}>
 			<SettingsRow
 				title={<Trans>Export everything</Trans>}
-				description={<Trans>All documents and applications as JSON, in one zip</Trans>}
+				description={<Trans>All documents as JSON, in one zip</Trans>}
 			>
 				<Button size="sm" variant="secondary" loading={exportAll.isPending} onClick={() => exportAll.mutate()}>
 					<Trans>Export</Trans>
@@ -76,7 +75,6 @@ function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogProps) {
 	const queryClient = useQueryClient();
 	const [typed, setTyped] = useState("");
 	const { data: counts } = useQuery({ ...orpc.documents.counts.queryOptions(), enabled: open });
-	const { data: applications } = useQuery({ ...applicationsListQueryOptions(), enabled: open });
 	const { data: keys } = useQuery({
 		queryKey: ["auth", "api-keys"],
 		queryFn: () => authClient.apiKey.list(),
@@ -96,8 +94,7 @@ function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogProps) {
 			toast.add({ type: "error", description: getReadableErrorMessage(error, t`Couldn't delete the account.`) }),
 	});
 
-	const documents = (counts?.resume ?? 0) + (counts?.letter ?? 0) + (counts?.trash ?? 0);
-	const applicationCount = applications?.length ?? 0;
+	const documents = (counts?.resume ?? 0) + (counts?.trash ?? 0);
 	const keyCount = keys?.length ?? 0;
 
 	return (
@@ -114,7 +111,6 @@ function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogProps) {
 					</AlertDialogTitle>
 					<AlertDialogDescription>
 						<Plural value={documents} one="# document" other="# documents" />,{" "}
-						<Plural value={applicationCount} one="# application" other="# applications" />,{" "}
 						<Plural value={keyCount} one="# API key" other="# API keys" />{" "}
 						<Trans>and every public link are removed permanently. This can't be undone.</Trans>
 					</AlertDialogDescription>

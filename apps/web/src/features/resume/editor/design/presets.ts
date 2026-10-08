@@ -3,7 +3,7 @@ import type { WritableDraft } from "immer";
 import { contrastOnWhite } from "@reactive-resume/utils/color";
 
 type Data = ResumeData | WritableDraft<ResumeData>;
-/** The design a resume and a letter share. */
+/** The resume's design settings. */
 type Metadata = Pick<Data["metadata"], "typography" | "design" | "page">;
 
 /**

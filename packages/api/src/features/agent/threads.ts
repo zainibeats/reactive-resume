@@ -27,21 +27,11 @@ export const threadsRouter = {
 			path: "/agent/threads",
 			tags: ["Agent"],
 			operationId: "startAgentThread",
-			summary: "Start a conversation about a document",
+			summary: "Start a conversation about a resume",
 			description:
-				"Starts an assistant conversation about one resume or cover letter, using the given tested provider or the default one. The assistant reads the document and proposes edits; it never changes the document itself.",
+				"Starts an assistant conversation about one resume, using the given tested provider or the default one. The assistant reads the resume and proposes edits; it never changes the resume itself.",
 		})
-		.input(
-			z
-				.object({
-					resumeId: z.string().min(1).optional(),
-					coverLetterId: z.string().min(1).optional(),
-					aiProviderId: z.string().optional(),
-				})
-				.refine((input) => Boolean(input.resumeId) !== Boolean(input.coverLetterId), {
-					message: "Give a resume or a cover letter.",
-				}),
-		)
+		.input(z.object({ resumeId: z.string().min(1), aiProviderId: z.string().optional() }))
 		.use(mapAgentEnvironmentError)
 		.output(agentThreadSchema)
 		.handler(({ context, input }) => agentService.threads.start({ userId: context.user.id, ...input })),

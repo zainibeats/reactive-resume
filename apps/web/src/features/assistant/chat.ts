@@ -7,8 +7,8 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import { agentMessageMetadataSchema, agentWebSources } from "@reactive-resume/ai/tools/agent-tool-contracts";
 import { streamClient } from "@/libs/orpc/client";
 
-/** What a message shares with the model; each context chip turns one off. */
-export type MessageContext = { document: boolean; posting: boolean; applicationId?: string };
+/** What a message shares with the model; the document chip turns it off. */
+export type MessageContext = { document: boolean };
 
 export type ChatAttachment = { id: string; filename: string; mediaType: string };
 

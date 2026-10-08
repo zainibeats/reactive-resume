@@ -11,7 +11,7 @@ This page is for installations already on v5. Coming from v4? Follow [Migrating 
 
 - **Migrations run on startup**, as in v5. One v6 migration adds columns and tables, moves data, and drops two legacy columns. You don't run anything by hand.
 - **v5 can't run against the upgraded database.** The v6 migration removes columns that v5 reads, so stop every v5 instance before the first v6 instance starts. There's no mixed v5 and v6 rolling update.
-- **Cover letters leave resumes.** Every letter stored inside a resume becomes a saved letter of its own.
+- **Cover letters leave resumes.** The migration moves every letter stored inside a resume into the `cover_letter` table. This version of Reactive Resume has no separate cover letters or job-application tracker, so those records stay in the database but don't appear in the app. See [Cover letters leaving resumes](#cover-letters-leaving-resumes).
 - **Old style-editor styles need a one-time manual conversion**, with a script you run yourself. Nothing converts them automatically.
 - **New optional environment variables** configure server AI and web access. Existing v5.3 settings keep working. Reverse proxies need `TRUSTED_PROXIES` to preserve per-visitor authentication limits; `REDIS_URL` is now optional for the assistant outside Vercel.
 - **Vercel projects must switch to the Services framework preset** before they deploy v6.
@@ -69,15 +69,14 @@ This page is for installations already on v5. Coming from v4? Follow [Migrating 
 ## Check the upgrade
 
 1. Open `/api/health`. `status` should be `healthy` and `version` should start with `6`.
-2. Sign in. You land on **Documents**, which lists resumes and cover letters together.
-3. If a resume used to contain a cover letter, that letter now appears in **Documents** as a document of its own, named after the resume.
-4. If the server log shows `Database schema verification failed`, read [Schema check](#schema-check).
+2. Sign in. You land on **Documents**, which lists your resumes.
+3. If the server log shows `Database schema verification failed`, read [Schema check](#schema-check).
 
 ## Convert styles from the old style editor
 
-Before Custom Styles became CSS, v5 had a visual style editor that stored its own style rules. v6 no longer renders those rules. Until you convert them, resumes and letters that still use them print with their template's default look.
+Before Custom Styles became CSS, v5 had a visual style editor that stored its own style rules. v6 no longer renders those rules. Until you convert them, resumes that still use them print with their template's default look.
 
-The conversion rewrites each affected document's stylesheet as Custom Styles (CSS) that reproduces the old look. It runs only when you start it, it works in four tables (`resume`, `resume_version`, `cover_letter`, `cover_letter_version`), and it changes only the stylesheet: the old rules stay in the data. Files imported later from old JSON exports are converted in the browser as they're imported, so they don't need the script.
+The conversion rewrites each affected document's stylesheet as Custom Styles (CSS) that reproduces the old look. It runs only when you start it, it works in two tables (`resume` and `resume_version`), and it changes only the stylesheet: the old rules stay in the data. Files imported later from old JSON exports are converted in the browser as they're imported, so they don't need the script.
 
 The script is `apps/server/dist/migrate-legacy-styles.mjs`, included in the Docker image. It connects with the server's `DATABASE_URL`.
 
@@ -143,16 +142,16 @@ Existing v5 migrations stay unchanged. The v6 changes are consolidated in `20261
 | Assistant       | Adds conversations about letters and counts of proposed and accepted edits.                                                                                                                                                                   |
 | Web access      | Creates `web_access_credentials` directly for encrypted per-user connections.                                                                                                                                                                 |
 
+This version of Reactive Resume keeps the application and letter tables and columns that the migration creates or
+fills, but doesn't read or show them. Their rows are deleted with the account that owns them.
+
 ### Cover letters leaving resumes
 
-In v5, a resume could hold cover letters as a section. The v6 migration moves each of them, hidden ones included, into a saved letter:
+In v5, a resume could hold cover letters as a section. The v6 migration moves each of them, hidden ones included, into the `cover_letter` table, named after the resume and the section (for example "Product Designer — Cover letter"), and removes the section from the resume.
 
-- The letter is named after the resume and the section, for example "Product Designer — Cover letter".
-- It's linked to the resume, and takes its sender details and design from it, so it looks as it did inside the resume.
-- If a resume held exactly one letter and exactly one application used that resume without a letter, the letter becomes that application's letter.
-- Resume version history keeps its older versions as they were. Restoring one saves its letters again as letters (once) instead of putting them back in the resume.
+This version of Reactive Resume doesn't show those saved letters. To get a letter back inside its resume, restore a resume version from before the upgrade (version history keeps older versions as they were, letter sections included), or import an older JSON export of the resume.
 
-From then on, any resume that reaches the server with a cover-letter section, through an old browser tab, an imported file, a restored version, or an API client, has the section turned into a saved letter in the same save. A letter with the same text from the same section isn't saved twice.
+After the upgrade, a resume that reaches the server with a cover-letter section (an imported file, a restored version or an API client) keeps the section: it's ordinary resume content.
 
 ### Structured dates
 
@@ -160,7 +159,7 @@ Dates on entries (experience and its roles, education, projects, volunteering, a
 
 ### Trash
 
-Deleting a resume or letter now moves it to Trash. Trashed documents stop being shared publicly, and their public address stays reserved. They're deleted for good, with their files, 30 days later. There's no scheduled job for this: it happens the next time the owner opens their documents, so storage is freed then. See [Using the Trash](/guides/using-the-trash).
+Deleting a resume now moves it to Trash. Trashed documents stop being shared publicly, and their public address stays reserved. They're deleted for good, with their files, 30 days later. There's no scheduled job for this: it happens the next time the owner opens their documents, so storage is freed then. See [Using the Trash](/guides/using-the-trash).
 
 ## Removed and redirected routes
 
@@ -169,14 +168,13 @@ These v5 addresses redirect to their v6 place, so bookmarks and old links keep w
 | v5 address                                                                                           | Now goes to                                                                                               |
 | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `/dashboard/resumes`                                                                                 | `/dashboard?type=resume` (tags, sort, and list view carry over)                                           |
-| `/dashboard/cover-letters`                                                                           | `/dashboard?type=letter`                                                                                  |
 | `/dashboard/settings/profile`, `/dashboard/settings/authentication`                                  | `/dashboard/settings/account`                                                                             |
 | `/dashboard/settings/integrations`, `/dashboard/settings/api-keys`, `/dashboard/settings/job-search` | `/dashboard/settings/ai`                                                                                  |
 | `/agent`                                                                                             | `/dashboard`                                                                                              |
 | `/agent/new?resumeId=<id>`                                                                           | `/builder/<id>?assistant=new` (or `/dashboard` without a resume)                                          |
 | `/agent/<threadId>`                                                                                  | The conversation's document in the editor, with the assistant open. `/dashboard` if the document is gone. |
 
-Cover letters now open in their own editor at `/builder/letter/<id>`. API, MCP, auth, and public resume addresses (`/<username>/<slug>`) are unchanged.
+The v5 cover-letter and application pages (`/dashboard/cover-letters`, `/dashboard/applications`) no longer exist. API, MCP, auth, and public resume addresses (`/<username>/<slug>`) are unchanged.
 
 ## API changes
 
@@ -186,41 +184,31 @@ Base paths, authentication, and API keys are unchanged. These changes can affect
 
 - Dated items carry `dates` (`start`, `end`, `present`, and `raw` for text that couldn't be read). Write `dates`. The text in `period` or `date` is rewritten from `dates` on every save, so a change to the text alone is overwritten. Items sent without `dates` get them from their text.
 - `metadata.page.dateFormat` (`short`, `long`, `numeric`, or `iso`) sets how dates print.
-- Resumes no longer hold `cover-letter` custom sections. Any you send are saved as letters and removed from the resume.
+- Resumes can still hold `cover-letter` custom sections; they're saved as part of the resume.
 
 **Resumes and documents**
 
-- `DELETE /resumes/{id}` and `DELETE /cover-letters/{id}` now move the document to Trash. New `documents` endpoints list, rename, tag, lock, trash, restore, and permanently delete (`/documents/purge`) resumes and letters together.
+- `DELETE /resumes/{id}` now moves the resume to Trash. New `documents` endpoints list, rename, tag, lock, trash, restore, and permanently delete (`/documents/purge`) resumes.
 - Creating or duplicating a resume no longer needs a `slug`; one is generated from the name. `GET /resumes/{resumeId}/slug-check` validates a slug (lowercase letters and numbers joined by single dashes) and suggests one.
-- Version entries have `kind` and `name` instead of `label`. New endpoints get, create (named), rename, and delete resume versions, and letters have the same set under `/cover-letters/{id}/versions`.
-- Resume PDF downloads accept only the resume. The `cover-letter` target is gone, and old signed links that ask for it return `404`. Download letters through `/cover-letters`.
+- Version entries have `kind` and `name` instead of `label`. New endpoints get, create (named), rename, and delete resume versions.
+- Resume PDF downloads accept only the resume. The `cover-letter` target is gone, and old signed links that ask for it return `404`.
 
-**Cover letters**
+**Cover letters and applications**
 
-- `POST /cover-letters/from-resume` (`copyEmbedded`) is removed, since resumes no longer contain letters.
-- Letters gain `layout`, `recipientName`, `recipientCompany`, `letterDate`, `senderLinked`, and `designLinked`, and a `draft` endpoint that drafts the letter body with the user's AI provider.
-
-**Applications**
-
-- The `rejected` stage and the `archived` flag are gone. Use `status: "closed"` with `closedReason` (`not-selected`, `withdrew`, `accepted-other`, or `no-response`). CSV import still reads `rejected` and `archived` from older exports as closed.
-- Listing applications returns closed ones too; `includeArchived` is removed. Filter by `status` instead.
-- New interview endpoints (`/applications/{id}/interviews`), and new fields for the linked letter, what was sent (`sentResumeVersionId`, `sentCoverLetterVersionId`, `sentCheckScore`), and `requirements`.
-- The account data export now includes applications.
+- The `/cover-letters` and `/applications` endpoints are removed in this version, along with `documents` endpoints that linked resumes to applications or copied a resume for a job. The account data export contains your account and resumes only.
 
 **Assistant**
 
-- `POST /agent/threads/for-resume`, `POST /agent/threads/{id}/archive`, and `POST /agent/actions/{id}/revert` are removed. Start a conversation with `POST /agent/threads`, passing either `resumeId` or `coverLetterId`.
+- `POST /agent/threads/for-resume`, `POST /agent/threads/{id}/archive`, and `POST /agent/actions/{id}/revert` are removed. Start a conversation with `POST /agent/threads`, passing `resumeId`.
 
 ## MCP changes
 
-- Removed: `copy_embedded_cover_letter`.
+- The MCP server is resume-only: cover-letter and application tools aren't offered.
 - `download_resume_pdf` no longer takes a `target`; it always returns the resume.
-- `delete_resume` and `delete_cover_letter` now move the document to Trash.
-- Added: `add_application_interview` and `update_application_interview`.
-- `list_applications` no longer takes `includeArchived`. `update_application` no longer takes `archived`, and accepts `closedReason` with the `closed` stage.
+- `delete_resume` now moves the resume to Trash.
 - Resume patch paths document the new `dates` field. The resume schema resource, like `/schema.json`, is now generated from the live schema.
 
-See [Using the MCP server](/guides/using-the-mcp-server) and [Managing applications with MCP](/guides/managing-applications-with-mcp).
+See [Using the MCP server](/guides/using-the-mcp-server).
 
 ## Environment variables
 
@@ -257,7 +245,7 @@ If you must keep data written since the upgrade, you can undo the migrations tha
 
 3. Start v5.
 
-Columns and tables added by v6 stay; v5 ignores them. The letters saved from resumes stay too, so in v5 each one shows both inside its resume and in the cover letter library. Documents in Trash show up again in v5, because v5 doesn't know about Trash. If you converted old styles, the converted stylesheets stay, and `--restore` with your backup file puts the originals back.
+Columns and tables added by v6 stay; v5 ignores them. The letters saved from resumes stay too, so in a v5 that has a cover letter library each one shows both inside its resume and in the library. Documents in Trash show up again in v5, because v5 doesn't know about Trash. If you converted old styles, the converted stylesheets stay, and `--restore` with your backup file puts the originals back.
 
 <Warning>
   The rollback script doesn't change the migration ledger, so the v6 migration stays recorded as applied. Upgrading the

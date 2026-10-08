@@ -116,10 +116,8 @@ it("documents anonymous routes, all supported credentials, and additive PATCH ro
 		"x-codeSamples.0.source",
 		expect.stringContaining('--cookie "<session-cookie>"'),
 	);
-	for (const path of ["/applications/{id}", "/cover-letters/{id}"]) {
-		expect(spec.paths?.[path]?.put?.requestBody).toBeDefined();
-		expect(spec.paths?.[path]?.patch?.requestBody).toBeDefined();
-	}
+	expect(spec.paths?.["/resumes/{id}"]?.put?.requestBody).toBeDefined();
+	expect(spec.paths?.["/resumes/{id}/metadata"]?.patch?.requestBody).toBeDefined();
 	expect(spec.paths?.["/files"]?.post?.requestBody).toHaveProperty("content.multipart/form-data");
 	expect(spec.paths?.["/files"]?.post?.requestBody).not.toHaveProperty("content.application/json");
 	expect(spec.paths?.["/resumes"]?.get?.parameters).toEqual(
@@ -163,24 +161,12 @@ it("describes empty responses and common errors without impossible payloads", as
 	expect(spec.paths?.["/resumes"]?.get?.responses?.["200"]).toHaveProperty("headers.X-Total-Count");
 });
 
-it("keeps JSON application writes and documents optional multipart attachments", async () => {
+it("publishes no job-application or cover-letter routes", async () => {
 	const spec = await generateSpec();
-	for (const [path, method] of [
-		["/applications", "post"],
-		["/applications/{id}", "put"],
-		["/applications/{id}", "patch"],
-	] as const) {
-		const body = spec.paths?.[path]?.[method]?.requestBody;
-		if (!body || "$ref" in body) throw new Error("Missing application request body");
-		const json = body.content["application/json"]?.schema;
-		expect(json).toHaveProperty("properties.company");
-		expect(json).not.toHaveProperty("properties.resumeFile");
-		expect(json).not.toHaveProperty("properties.coverLetterFile");
-		expect(body.content["multipart/form-data"]?.schema).toHaveProperty(
-			"properties.resumeFile.contentMediaType",
-			"application/pdf",
-		);
-	}
+	const paths = Object.keys(spec.paths ?? {});
+	expect(
+		paths.filter((path) => /applications|cover-letters|copy-for-job|documents\/copies|\/application$/.test(path)),
+	).toEqual([]);
 });
 
 it("overrides every generated cURL sample with one that has no shell line continuations", async () => {

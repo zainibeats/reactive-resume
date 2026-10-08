@@ -1,5 +1,4 @@
 import type { PublicResumePdfOptions } from "@/features/resume/public/public-pdf";
-import type { ResumeExportTarget } from "@reactive-resume/resume/export-sections";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { t } from "@lingui/core/macro";
 import { useCallback, useState } from "react";
@@ -38,10 +37,6 @@ type UseResumeExportOptions = {
 	publicResumePdf?: PublicResumePdfOptions;
 };
 
-type DownloadPdfOptions = {
-	includeCoverLetterHeader?: boolean;
-};
-
 export type ExportFormat = "pdf" | "docx" | "md" | "json";
 
 // Characters Windows and macOS won't take in a file name.
@@ -51,32 +46,24 @@ const UNSAFE_FILE_NAME_CHARACTERS = /[\\/:*?"<>|]/g;
 export const sanitizeFileName = (value: string) => value.replace(UNSAFE_FILE_NAME_CHARACTERS, "").trim();
 
 /**
- * "First-Last-Resume" (or "First-Last-Cover-Letter"): recruiters see this name. Without a name on the
- * resume it falls back to the document's name.
+ * "First-Last-Resume": recruiters see this name. Without a name on the resume it falls back to the document's name.
  */
-export function getDefaultFileName(resume: ExportableResume, target: ResumeExportTarget = "resume") {
+export function getDefaultFileName(resume: ExportableResume) {
 	const words = (text: string) => sanitizeFileName(text).split(/\s+/).filter(Boolean);
 	const person = words(resume.data.basics.name);
-	const suffix = target === "cover-letter" ? ["Cover", "Letter"] : ["Resume"];
-	if (person.length > 0) return [...person, ...suffix].join("-");
-	return [...words(resume.name || resume.slug), ...(target === "cover-letter" ? suffix : [])].join("-") || "Resume";
+	if (person.length > 0) return [...person, "Resume"].join("-");
+	return words(resume.name || resume.slug).join("-") || "Resume";
 }
 
 /** Builds one export file. It throws when the file can't be made, so each caller decides how to say so. */
-export async function createExportFile(
-	resume: ExportableResume,
-	format: ExportFormat,
-	target: ResumeExportTarget = "resume",
-	options?: DownloadPdfOptions,
-): Promise<Blob> {
+export async function createExportFile(resume: ExportableResume, format: ExportFormat): Promise<Blob> {
 	if (format === "json") {
 		return new Blob([JSON.stringify(resume.data, null, 2)], { type: "application/json" });
 	}
 
-	const data = getResumeExportData(resume.data, target);
-	if (format === "pdf") {
-		return createResumePdfBlob(data, undefined, target === "cover-letter" ? options : undefined);
-	}
+	// Resume files leave out any embedded cover-letter section.
+	const data = getResumeExportData(resume.data, "resume");
+	if (format === "pdf") return createResumePdfBlob(data);
 
 	const resolveTitle = await createSectionTitleResolver(data);
 	if (format === "md") return new Blob([buildMarkdown(data, resolveTitle)], { type: "text/markdown" });

@@ -1,4 +1,3 @@
-import type { Resume } from "@/features/resume/builder/draft";
 import type { ExportFormat } from "@/features/resume/export/use-resume-export";
 import type { IconName } from "@reactive-resume/ui/components/icon";
 import type { ReactNode } from "react";
@@ -6,24 +5,18 @@ import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { t } from "@lingui/core/macro";
 import { Plural, Trans } from "@lingui/react/macro";
-import { useQuery } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
-import { Checkbox } from "@reactive-resume/ui/components/checkbox";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { Spinner } from "@reactive-resume/ui/components/spinner";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
 import { cn } from "@reactive-resume/utils/style";
-import { applicationsListQueryOptions } from "@/features/applications/queries";
-import { useLetterWords } from "@/features/letters/compose";
-import { createLetterFile, letterFileName } from "@/features/letters/export";
 import { useCurrentResume } from "@/features/resume/builder/draft";
 import { useOpenIssueCount } from "@/features/resume/editor/check/use-check";
 import { createExportFile, getDefaultFileName, sanitizeFileName } from "@/features/resume/export/use-resume-export";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { ENTER_CLASS } from "@/libs/motion";
-import { client } from "@/libs/orpc/client";
 
 export type DownloadFormat<Id extends string = ExportFormat> = {
 	id: Id;
@@ -35,7 +28,7 @@ export type DownloadFormat<Id extends string = ExportFormat> = {
 	disabled?: boolean;
 };
 
-export const getExportFormats = (): DownloadFormat[] => [
+const getExportFormats = (): DownloadFormat[] => [
 	{
 		id: "pdf",
 		label: "PDF",
@@ -73,7 +66,7 @@ type FormatRadioGroupProps<Id extends string> = {
 };
 
 /** Format radio cards: icon, name, extension and when to use it. PDF is marked "Best for applying". */
-export function FormatRadioGroup<Id extends string>({ formats, value, onChange }: FormatRadioGroupProps<Id>) {
+function FormatRadioGroup<Id extends string>({ formats, value, onChange }: FormatRadioGroupProps<Id>) {
 	return (
 		<RadioGroup
 			aria-label={t`Format`}
@@ -117,7 +110,7 @@ export function FormatRadioGroup<Id extends string>({ formats, value, onChange }
 type FileNameFieldProps = { value: string; extension: string; hint: ReactNode; onChange: (value: string) => void };
 
 /** The file name recruiters see, with the extension shown after it. Characters file systems reject are dropped. */
-export function FileNameField({ value, extension, hint, onChange }: FileNameFieldProps) {
+function FileNameField({ value, extension, hint, onChange }: FileNameFieldProps) {
 	const id = useId();
 
 	return (
@@ -158,7 +151,7 @@ type DownloadActionsProps = {
  * The failure alert (with PDF as the fallback) and the 44px button that shows its progress. After a download, a
  * one-line thank-you asks for a donation: the moment someone has what they came for is the one time it's fair to ask.
  */
-export function DownloadActions({ state, label, onDownload, onDownloadPdf }: DownloadActionsProps) {
+function DownloadActions({ state, label, onDownload, onDownloadPdf }: DownloadActionsProps) {
 	return (
 		<>
 			{state === "error" && (
@@ -222,15 +215,6 @@ export function DownloadActions({ state, label, onDownload, onDownloadPdf }: Dow
 	);
 }
 
-/** The letter written for this resume's application, which can be downloaded along with it. */
-function useLinkedLetter(resume: Resume) {
-	const { data: applications } = useQuery(applicationsListQueryOptions());
-	const application = applications?.find(
-		(item) => item.coverLetterId && (item.id === resume.applicationId || item.resumeId === resume.id),
-	);
-	return application?.coverLetterId ? { id: application.coverLetterId, company: application.company } : null;
-}
-
 type DownloadTabProps = {
 	/** Opens Check; the note about open issues links there. */
 	onReview: () => void;
@@ -238,17 +222,12 @@ type DownloadTabProps = {
 
 /**
  * Download: every format explained by when to use it, the file name recruiters see, and a button that shows
- * its progress. Open Check issues are mentioned but never block. A failed file offers PDF instead. With a letter
- * written for the resume's application, that letter can come along as a second file.
+ * its progress. Open Check issues are mentioned but never block. A failed file offers PDF instead.
  */
 export function DownloadTab({ onReview }: DownloadTabProps) {
 	const resume = useCurrentResume();
 	const issues = useOpenIssueCount();
-	const words = useLetterWords();
-	const linkedLetter = useLinkedLetter(resume);
-	const headerId = useId();
 	const [format, setFormat] = useState<ExportFormat>("pdf");
-	const [withLetter, setWithLetter] = useState(false);
 	const [fileName, setFileName] = useState<string | null>(null);
 	const [state, setState] = useState<DownloadState>("idle");
 
@@ -259,18 +238,11 @@ export function DownloadTab({ onReview }: DownloadTabProps) {
 	const download = async (as: ExportFormat) => {
 		const extension = formats.find((option) => option.id === as)?.extension ?? ".pdf";
 		const file = `${sanitizeFileName(name) || getDefaultFileName(resume)}${extension}`;
-		const letterId = withLetter ? linkedLetter?.id : undefined;
 		setState("busy");
 		try {
 			const blob = await createExportFile(resume, as);
 			downloadWithAnchor(blob, file);
-			if (letterId) {
-				const letter = await client.coverLetters.getById({ id: letterId });
-				downloadWithAnchor(await createLetterFile(letter, words, as), `${letterFileName(letter, words)}${extension}`);
-				toast.add({ description: t`Downloaded ${file} and the cover letter` });
-			} else {
-				toast.add({ description: t`Downloaded ${file}` });
-			}
+			toast.add({ description: t`Downloaded ${file}` });
 			setState("done");
 		} catch (error) {
 			setState("error");
@@ -295,19 +267,6 @@ export function DownloadTab({ onReview }: DownloadTabProps) {
 				hint={<Trans>Recruiters see this name. Your name plus “Resume” works well.</Trans>}
 				onChange={setFileName}
 			/>
-
-			{linkedLetter && (
-				<div className="flex items-center gap-2.5 text-sm">
-					<Checkbox
-						id={`${headerId}-letter`}
-						checked={withLetter}
-						onCheckedChange={(checked) => setWithLetter(checked === true)}
-					/>
-					<label htmlFor={`${headerId}-letter`} className="cursor-pointer">
-						<Trans>Also download the {linkedLetter.company} cover letter</Trans>
-					</label>
-				</div>
-			)}
 
 			{issues > 0 && (
 				<div className="flex gap-2.5 rounded-[10px] bg-warn-soft px-3 py-2.5 text-[13px] leading-[19px] text-warn-text">

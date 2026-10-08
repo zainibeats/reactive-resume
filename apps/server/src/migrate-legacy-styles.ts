@@ -6,7 +6,7 @@ import { Pool } from "pg";
 import { migrateLegacyStyles, restoreLegacyStyles } from "@reactive-resume/api/features/resume/legacy-styles-migration";
 import { env } from "@reactive-resume/env/server";
 
-const usage = `Converts resumes and letters still styled by the old style editor (legacy style rules) to Semantic CSS.
+const usage = `Converts resumes still styled by the old style editor (legacy style rules) to Semantic CSS.
 Uses DATABASE_URL. Run it once after deploying the version without the legacy renderer.
 
   node apps/server/dist/migrate-legacy-styles.mjs

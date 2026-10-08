@@ -22,14 +22,13 @@ import { generateId } from "@reactive-resume/utils/string";
 import { aiProvidersService } from "../ai-providers/service";
 import { assertAgentEnvironment } from "../ai/credentials";
 import { getAgentModel } from "../ai/service";
-import { coverLetterService } from "../cover-letters/service";
 import { resumeService } from "../resume/service";
 import { getStorageService, inferContentType } from "../storage/service";
 import { webAccessService } from "../web-access/credentials";
 import { readPage, searchWeb } from "../web-access/service";
 import { isRunAlive, monitorRunCancellation, requestRunCancellation } from "./cancellation";
 import { pruneAgentModelContext } from "./context";
-import { documentOf, documentView, findPosting, loadDocument, resolveEdits } from "./document";
+import { documentOf, documentView, loadDocument, resolveEdits } from "./document";
 import { mergeClientToolResponses } from "./messages-merge";
 import {
 	applyStepToUiMessage,
@@ -85,17 +84,14 @@ type AgentAttachmentRecord = typeof schema.agentAttachment.$inferSelect;
 
 type StartThreadInput = {
 	userId: string;
-	/** The document the conversation is about: a resume or a letter. */
-	resumeId?: string | undefined;
-	coverLetterId?: string | undefined;
+	/** The resume the conversation is about. */
+	resumeId: string;
 	aiProviderId?: string | undefined;
 };
 
-/** What a message shares with the model: the open document and the posting it's for. Both on by default. */
+/** What a message shares with the model: the open resume, on by default. */
 type MessageContext = {
 	document?: boolean | undefined;
-	posting?: boolean | undefined;
-	applicationId?: string | undefined;
 };
 
 type SendMessageInput = {
@@ -121,7 +117,6 @@ type AttachmentModelInput = {
 
 type ThreadSummaryRow = AgentThreadRecord & {
 	resumeName?: string | null;
-	coverLetterName?: string | null;
 	providerLabel?: string | null;
 };
 
@@ -132,10 +127,8 @@ function toThreadSummary(row: ThreadSummaryRow) {
 		status: row.status,
 		sourceResumeId: row.sourceResumeId,
 		workingResumeId: row.workingResumeId,
-		coverLetterId: row.coverLetterId,
 		aiProviderId: row.aiProviderId,
 		resumeName: row.resumeName ?? null,
-		coverLetterName: row.coverLetterName ?? null,
 		providerLabel: row.providerLabel ?? null,
 		editsProposed: row.editsProposed,
 		editsAccepted: row.editsAccepted,
@@ -728,12 +721,6 @@ function createAgent(input: {
 	threadId: string;
 	/** Null when the message leaves the document out. */
 	document: (AssistantDocument & { name: string }) | null;
-	posting: {
-		role: string;
-		company: string;
-		text: string;
-		notes?: string;
-	} | null;
 	provider: {
 		provider: Parameters<typeof getModel>[0]["provider"];
 		model: string;
@@ -771,7 +758,7 @@ function createAgent(input: {
 	const { document } = input;
 	const tools = buildAgentTools({
 		provider: input.provider,
-		document: document?.kind ?? null,
+		document: document !== null,
 		externalSearch: input.connection !== null,
 		signal: input.signal,
 		handlers: {
@@ -814,8 +801,7 @@ function createAgent(input: {
 	});
 
 	const instructionsText = buildAgentInstructions({
-		document: document ? { kind: document.kind, name: document.name } : null,
-		posting: input.posting,
+		document: document ? { name: document.name } : null,
 		searchTool:
 			"search_web" in tools
 				? "search_web"
@@ -882,23 +868,15 @@ const threadSummarySelection = {
 	createdAt: schema.agentThread.createdAt,
 	updatedAt: schema.agentThread.updatedAt,
 	resumeName: schema.resume.name,
-	coverLetterName: schema.coverLetter.name,
 	providerLabel: schema.aiProvider.label,
 };
 
-/** A document's name, locked state and whether the user owns it, or null when it's gone. */
+/** A resume's name and locked state when the user owns it, or null when it's gone. */
 async function describeDocument(userId: string, document: AssistantDocument | null) {
 	if (!document) return null;
 	try {
-		if (document.kind === "resume") {
-			const resume = await resumeService.getById({ id: document.id, userId });
-			return { ...document, name: resume.name, locked: resume.isLocked };
-		}
-		const letter = await coverLetterService.getById({
-			id: document.id,
-			userId,
-		});
-		return { ...document, name: letter.name, locked: letter.isLocked };
+		const resume = await resumeService.getById({ id: document.id, userId });
+		return { ...document, name: resume.name, locked: resume.isLocked };
 	} catch {
 		return null;
 	}
@@ -906,7 +884,7 @@ async function describeDocument(userId: string, document: AssistantDocument | nu
 
 export const agentService = {
 	threads: {
-		/** Every conversation, newest first, with its document and outcome, for past conversations. */
+		/** Every resume conversation, newest first, with its resume and outcome, for past conversations. */
 		list: async (input: { userId: string }) => {
 			assertAgentEnvironment();
 
@@ -914,39 +892,26 @@ export const agentService = {
 				.select(threadSummarySelection)
 				.from(schema.agentThread)
 				.leftJoin(schema.resume, eq(schema.agentThread.workingResumeId, schema.resume.id))
-				.leftJoin(schema.coverLetter, eq(schema.agentThread.coverLetterId, schema.coverLetter.id))
 				.leftJoin(schema.aiProvider, eq(schema.agentThread.aiProviderId, schema.aiProvider.id))
-				.where(and(eq(schema.agentThread.userId, input.userId), isNull(schema.agentThread.deletedAt)))
+				.where(
+					and(
+						eq(schema.agentThread.userId, input.userId),
+						isNull(schema.agentThread.deletedAt),
+						// Conversations about letters predate the resume-only assistant; their documents are gone.
+						isNull(schema.agentThread.coverLetterId),
+					),
+				)
 				.orderBy(desc(schema.agentThread.lastMessageAt));
 
 			return rows.map(toThreadSummary);
 		},
 
-		/** A new conversation about one document, which the assistant reads and proposes edits to. */
+		/** A new conversation about one resume, which the assistant reads and proposes edits to. */
 		start: async (input: StartThreadInput) => {
 			assertAgentEnvironment();
 
-			const document: AssistantDocument | null = input.coverLetterId
-				? { kind: "letter", id: input.coverLetterId }
-				: input.resumeId
-					? { kind: "resume", id: input.resumeId }
-					: null;
-			if (!document)
-				throw new ORPCError("BAD_REQUEST", {
-					message: "Choose a resume or a letter.",
-				});
-
-			// Confirms the caller owns the document (throws otherwise) and names it for the summary.
-			const described =
-				document.kind === "resume"
-					? await resumeService.getById({
-							id: document.id,
-							userId: input.userId,
-						})
-					: await coverLetterService.getById({
-							id: document.id,
-							userId: input.userId,
-						});
+			// Confirms the caller owns the resume (throws otherwise) and names it for the summary.
+			const described = await resumeService.getById({ id: input.resumeId, userId: input.userId });
 
 			const provider = input.aiProviderId
 				? await aiProvidersService.getRunnableById({
@@ -964,9 +929,8 @@ export const agentService = {
 				.values({
 					userId: input.userId,
 					aiProviderId: provider.id,
-					...(document.kind === "resume"
-						? { sourceResumeId: document.id, workingResumeId: document.id }
-						: { coverLetterId: document.id }),
+					sourceResumeId: input.resumeId,
+					workingResumeId: input.resumeId,
 					title: "New conversation",
 				})
 				.returning();
@@ -974,7 +938,7 @@ export const agentService = {
 
 			return toThreadSummary({
 				...thread,
-				...(document.kind === "resume" ? { resumeName: described.name } : { coverLetterName: described.name }),
+				resumeName: described.name,
 				providerLabel: provider.label,
 			});
 		},
@@ -1110,7 +1074,7 @@ export const agentService = {
 				});
 			}
 			// Opt-out applies to the entire provider context, including document-derived prose and tool results.
-			const freshContext = input.context?.document === false || input.context?.posting === false;
+			const freshContext = input.context?.document === false;
 			if (freshContext && input.message.role !== "user") {
 				throw new ORPCError("BAD_REQUEST", {
 					message: "Send a new message after removing context. Previous tool approvals cannot be continued.",
@@ -1132,10 +1096,6 @@ export const agentService = {
 				throw new ORPCError("BAD_REQUEST", {
 					message: "Unlock the document to change it.",
 				});
-			const posting =
-				input.context?.posting === false
-					? null
-					: await findPosting(input.userId, document.id, loaded, input.context?.applicationId);
 
 			const [runnableProvider, attachments] = await Promise.all([
 				aiProvidersService.getRunnableById({
@@ -1278,7 +1238,6 @@ export const agentService = {
 					userId: input.userId,
 					threadId: input.threadId,
 					document: input.context?.document === false ? null : { ...document, name: loaded.name },
-					posting,
 					connection,
 					signal: controller.signal,
 					provider: {

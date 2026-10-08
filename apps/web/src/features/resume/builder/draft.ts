@@ -26,8 +26,6 @@ export type Resume = {
 	hasPassword?: boolean | undefined;
 	isPublic?: boolean | undefined;
 	showDownloadButtons?: boolean | undefined;
-	/** The job application this resume was made for; Check's Job match reads its posting. */
-	applicationId?: string | null;
 	/** Set when this resume was created as a child of another resume; drives the parent-update review UI. */
 	parentId?: string | null;
 };

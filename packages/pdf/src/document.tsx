@@ -1,4 +1,3 @@
-import type { ResumeRenderOptions } from "./context";
 import type { SectionTitleResolver } from "./section-title";
 import type { ResolvedResumeRuntime } from "./semantic";
 import type { LayoutPage, ResumeData, Typography } from "@reactive-resume/schema/resume/data";
@@ -28,7 +27,6 @@ export type TemplatePage = ComponentType<TemplatePageProps>;
 type ResumeDocumentProps = {
 	data: ResumeData;
 	template: Template;
-	renderOptions?: ResumeRenderOptions | undefined;
 	resolveSectionTitle?: SectionTitleResolver | undefined;
 	semanticRuntime?: ResolvedResumeRuntime | undefined;
 };
@@ -36,13 +34,7 @@ type ResumeDocumentProps = {
 const getLayoutPageKey = (page: LayoutPage, pageIndex: number) =>
 	`${page.fullWidth ? "full" : "split"}:${page.main.join(",")}:${page.sidebar.join(",")}:${pageIndex}`;
 
-export const ResumeDocument = ({
-	data,
-	template,
-	renderOptions,
-	resolveSectionTitle,
-	semanticRuntime,
-}: ResumeDocumentProps) => {
+export const ResumeDocument = ({ data, template, resolveSectionTitle, semanticRuntime }: ResumeDocumentProps) => {
 	const TemplatePageComponent = getTemplatePage(template);
 	const hasCjkContent = useMemo(() => resumeContentContainsCJK(data), [data]);
 	const scripts = useMemo(() => resumeContentScripts(data), [data]);
@@ -59,14 +51,9 @@ export const ResumeDocument = ({
 	const resumeData = useMemo(() => ({ ...data, metadata: { ...data.metadata, typography } }), [data, typography]);
 	const pageSize = getTemplatePageSize(resumeData.metadata.page.format);
 	const pageMinHeightStyle = getTemplatePageMinHeightStyle(resumeData.metadata.page.format);
-	const headerResumeData = useMemo(
-		() => (renderOptions ? { ...resumeData, renderOptions } : resumeData),
-		[resumeData, renderOptions],
-	);
-	// The tree is built with the render options, so a letter printed with its header keeps it.
 	const runtime = useMemo(
-		() => semanticRuntime ?? resolveResumeRuntime({ data: headerResumeData, template }),
-		[headerResumeData, semanticRuntime, template],
+		() => semanticRuntime ?? resolveResumeRuntime({ data: resumeData, template }),
+		[resumeData, semanticRuntime, template],
 	);
 	return (
 		<SemanticRenderProvider
@@ -74,12 +61,7 @@ export const ResumeDocument = ({
 			sourceTree={runtime.sourceTree}
 			renderTree={runtime.renderTree}
 		>
-			<RenderProvider
-				data={resumeData}
-				template={template}
-				resolveSectionTitle={resolveSectionTitle}
-				renderOptions={renderOptions}
-			>
+			<RenderProvider data={resumeData} template={template} resolveSectionTitle={resolveSectionTitle}>
 				<Document
 					title={resumeData.basics.name}
 					author={resumeData.basics.name}
@@ -94,7 +76,7 @@ export const ResumeDocument = ({
 							page={page}
 							pageSize={pageSize}
 							pageMinHeightStyle={pageMinHeightStyle}
-							showHeader={shouldShowResumeHeader(headerResumeData, index)}
+							showHeader={shouldShowResumeHeader(resumeData, index)}
 							pageNumber={index + 1}
 						/>
 					))}

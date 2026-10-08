@@ -24,7 +24,7 @@ import { useConfirm, usePrompt } from "@/hooks/use-confirm";
 import { getResumeErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 
-/** A version as History lists it; resumes and letters share it. */
+/** A version as History lists it. */
 type HistoryVersion = Pick<VersionSummary, "id" | "kind" | "name" | "createdAt">;
 
 /** What History shows and does for one document: its versions, and saving, restoring, renaming and deleting them. */
@@ -76,10 +76,7 @@ function useResumeHistory(): HistorySource {
 				throw new Error(t`Couldn't save your changes. Try again before continuing.`);
 			const restored = await orpc.resume.restoreVersion.call({ resumeId: resume.id, versionId });
 			useResumeStore.getState().replaceResumeFromServer(restored as Resume);
-			queryClient.setQueryData(orpc.resume.getById.queryKey({ input: { id: resume.id } }), {
-				...restored,
-				applicationId: resume.applicationId ?? null,
-			});
+			queryClient.setQueryData(orpc.resume.getById.queryKey({ input: { id: resume.id } }), restored);
 			void refresh();
 		},
 		rename: async (versionId, name) => {
@@ -97,7 +94,7 @@ function useResumeHistory(): HistorySource {
  * History: name the current state, or pick any version to see it on the page, read-only, then restore it or
  * go back to now. Restoring saves the current state as "Before restore" first, so it can be undone.
  */
-export function HistoryTimeline({ source }: { source: HistorySource }) {
+function HistoryTimeline({ source }: { source: HistorySource }) {
 	const { i18n } = useLingui();
 	const selectedId = useEditorStore((state) => state.historyVersionId);
 	const setVersion = useEditorStore((state) => state.setHistoryVersion);

@@ -20,13 +20,9 @@ export const messagesRouter = {
 				threadId: z.string(),
 				message: uiMessageSchema,
 				attachmentIds: z.array(z.string().trim().min(1)).max(10).optional(),
-				// The context chips: leaving one out keeps it out of what's sent.
+				// The context chip: leaving the resume out keeps it out of what's sent.
 				context: z
-					.object({
-						document: z.boolean().optional().describe("Share the open document (on by default)."),
-						posting: z.boolean().optional().describe("Share the job posting it's for (on by default)."),
-						applicationId: z.string().trim().min(1).max(255).optional(),
-					})
+					.object({ document: z.boolean().optional().describe("Share the open resume (on by default).") })
 					.optional(),
 			}),
 		)

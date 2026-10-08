@@ -38,7 +38,6 @@ const PARITY_PROCEDURES = {
 	"documents.restore": router.documents.restore,
 	"documents.purge": router.documents.purge,
 	"documents.purgeExpired": router.documents.purgeExpired,
-	"documents.copyForJob": router.documents.copyForJob,
 	"ai.parsePdf": router.ai.parsePdf,
 	"ai.parseDocx": router.ai.parseDocx,
 	"ai.atsReview": router.ai.atsReview,

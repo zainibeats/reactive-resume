@@ -3,16 +3,12 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import { createSectionTitleResolverForLocale } from "@/libs/resume/section-title-locale";
 
-type ResumePdfRenderOptions = {
-	includeCoverLetterHeader?: boolean;
-};
-
 type CreateResumePdfBlobExtras = {
 	/** Receives the page map (header, section and item boxes) of this render; used by the editor canvas. */
 	onPageMap?: (pageMap: PageMap) => void;
 };
 
-type RenderInput = { data: ResumeData; template?: Template | undefined; renderOptions?: ResumePdfRenderOptions };
+type RenderInput = { data: ResumeData; template?: Template | undefined };
 
 export type PdfWorkerRequest = RenderInput & { id: number };
 export type PdfWorkerResponse =
@@ -23,7 +19,7 @@ export type PdfWorkerResponse =
 type Rendered = { blob: Blob; pageMap: PageMap | undefined };
 
 /** The same render on the main thread: where workers aren't available, or the worker failed to start. */
-async function renderHere({ data, template, renderOptions }: RenderInput): Promise<Rendered> {
+async function renderHere({ data, template }: RenderInput): Promise<Rendered> {
 	const [{ createResumePdfBlob }, resolveSectionTitle] = await Promise.all([
 		import("@reactive-resume/pdf/browser"),
 		createSectionTitleResolverForLocale(data.metadata.page.locale),
@@ -32,7 +28,6 @@ async function renderHere({ data, template, renderOptions }: RenderInput): Promi
 	const blob = await createResumePdfBlob({
 		data,
 		template,
-		...(renderOptions ? { renderOptions } : {}),
 		resolveSectionTitle,
 		onPageMap: (map) => {
 			pageMap = map;
@@ -88,10 +83,9 @@ function render(input: RenderInput): Promise<Rendered> {
 export const createResumePdfBlob = async (
 	data: ResumeData,
 	template?: Template,
-	renderOptions?: ResumePdfRenderOptions,
 	{ onPageMap }: CreateResumePdfBlobExtras = {},
 ) => {
-	const { blob, pageMap } = await render({ data, template, ...(renderOptions ? { renderOptions } : {}) });
+	const { blob, pageMap } = await render({ data, template });
 	if (pageMap) onPageMap?.(pageMap);
 	return blob;
 };

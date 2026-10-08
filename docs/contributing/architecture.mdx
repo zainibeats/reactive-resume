@@ -58,9 +58,9 @@ The server checks the environment, applies database migrations, and verifies the
 | `packages/auth`       | Better Auth configuration, helpers, and types                                                                                                         |
 | `packages/db`         | Drizzle client and schema; generated migrations live in the root `migrations/` folder                                                                 |
 | `packages/env`        | Server environment validation; loads the root `.env`                                                                                                  |
-| `packages/schema`     | Zod schemas for resumes, cover letters, applications, pages, and templates                                                                            |
+| `packages/schema`     | Zod schemas for resumes, pages, and templates                                                                                                         |
 | `packages/resume`     | Pure resume logic with no database, HTTP, or DOM dependencies, such as JSON Patch helpers and social network icons                                    |
-| `packages/pdf`        | Resume templates (which also lay out cover letters), the Forme adapter, font resolution, custom-style support, and browser and server PDF adapters    |
+| `packages/pdf`        | Resume templates, the Forme adapter, font resolution, custom-style support, and browser and server PDF adapters                                       |
 | `packages/docx`       | DOCX export                                                                                                                                           |
 | `packages/mcp`        | MCP tools, prompts, resources, and the server card                                                                                                    |
 | `packages/ai`         | AI provider types, prompts, and model-facing helpers                                                                                                  |
@@ -113,7 +113,7 @@ After you change a shared contract, an export, or an import path, run `pnpm exec
 
 ## The web app
 
-`apps/web/src/routes` stays route-owned: route files handle the URL, loaders, redirects, and metadata. Implementation lives in `apps/web/src/features`, grouped by product area: `documents`, `resume` (editor, preview, export, sharing, custom styles), `letters`, `applications`, `assistant`, `ats-checker`, `settings`, `command-palette`, `auth`, `homepage`, `theme`, `locale`, and `user`.
+`apps/web/src/routes` stays route-owned: route files handle the URL, loaders, redirects, and metadata. Implementation lives in `apps/web/src/features`, grouped by product area: `documents`, `resume` (editor, preview, export, sharing, custom styles), `assistant`, `ats-checker` (the engine behind Check mode), `settings`, `command-palette`, `auth`, `theme`, `locale`, and `user`.
 
 `apps/web/src/router.tsx` creates the router context with `queryClient`, `orpc`, `theme`, `locale`, `session`, and `flags`. Read these from route context instead of fetching them again. Never edit `routeTree.gen.ts` by hand; Vite regenerates it when you add or rename a route.
 
@@ -123,7 +123,7 @@ When you add a public marketing route, also update its server fallback and SEO h
 
 ## The API
 
-`packages/api/src/routers/index.ts` combines the feature routers (`resume`, `coverLetters`, `documents`, `applications`, `agent`, `ai`, `aiProviders`, `auth`, `storage`, `statistics`, `flags`) into the contract served at `/api/rpc`. Each feature folder owns its procedures, services, helpers, and tests.
+`packages/api/src/routers/index.ts` combines the feature routers (`resume`, `documents`, `agent`, `ai`, `aiProviders`, `webAccess`, `auth`, `storage`, `flags`) into the contract served at `/api/rpc`. Each feature folder owns its procedures, services, helpers, and tests.
 
 Use `protectedProcedure` from `packages/api/src/context.ts` for authenticated procedures, and check resource ownership inside the feature logic. API keys, bearer tokens, and cookies all resolve through the same shared auth path; don't add a separate one.
 
@@ -142,7 +142,7 @@ Default section titles in the PDF come from a generated catalog, `packages/pdf/s
 
 ## MCP
 
-`packages/mcp` implements the MCP server with canonical, unprefixed tool names such as `list_resumes`, `read_resume`, `apply_resume_patch`, `list_cover_letters`, and `list_applications`. The server process imports it from `@reactive-resume/mcp` and injects an in-process oRPC router client, so MCP tools run the same business logic as the web app. MCP must never import code from `apps/web`. For the user-facing side, see [Using the MCP server](/guides/using-the-mcp-server).
+`packages/mcp` implements the MCP server with canonical, unprefixed tool names such as `list_resumes`, `read_resume`, and `apply_resume_patch`. MCP is resume-only. The server process imports it from `@reactive-resume/mcp` and injects an in-process oRPC router client, so MCP tools run the same business logic as the web app. MCP must never import code from `apps/web`. For the user-facing side, see [Using the MCP server](/guides/using-the-mcp-server).
 
 ## Related pages
 

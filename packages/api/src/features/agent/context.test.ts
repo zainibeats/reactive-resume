@@ -58,12 +58,8 @@ function snapshotValue(message: ModelMessage | undefined) {
 }
 
 describe("pruneAgentModelContext — tier 0 (snapshot supersession)", () => {
-	it("keeps only the last cover letter snapshot too", () => {
-		const messages = [
-			user("hi"),
-			...readResumeExchange("call-1", "read_letter"),
-			...readResumeExchange("call-2", "read_letter"),
-		];
+	it("keeps only the last resume snapshot", () => {
+		const messages = [user("hi"), ...readResumeExchange("call-1"), ...readResumeExchange("call-2")];
 
 		const pruned = pruneAgentModelContext(messages, 1_000_000);
 

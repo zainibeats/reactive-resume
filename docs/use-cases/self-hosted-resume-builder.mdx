@@ -3,7 +3,7 @@ title: "Self-hosted resume builder"
 description: "Run Reactive Resume on your own server with Docker, Kubernetes or Vercel: PostgreSQL, local or S3 storage, single sign-on, and the full v6 feature set."
 ---
 
-You can run Reactive Resume on your own infrastructure instead of using [rxresu.me](https://rxresu.me). A self-hosted instance has the same features as the hosted app: resumes, cover letters, Check mode, public links, the application tracker, the AI assistant, the API and the MCP server.
+You can run Reactive Resume on your own infrastructure instead of using [rxresu.me](https://rxresu.me). A self-hosted instance has the same features as the hosted app: resumes, Check mode, public links, the AI assistant, the API and the MCP server.
 
 ## When self-hosting is a good fit
 
@@ -15,7 +15,7 @@ If you only need a resume for yourself, the hosted app is less work.
 
 The production image runs a single Node.js process on port 3000 that serves the app, the API and the MCP server. Around it you need:
 
-- **PostgreSQL** for accounts, documents and applications. Database migrations run automatically when the server starts.
+- **PostgreSQL** for accounts and resumes. Database migrations run automatically when the server starts.
 - **File storage** for photos and uploads: a local folder, any S3-compatible service, or Vercel Blob.
 - **SMTP** for account emails. Without it, emails are written to the server log, which is fine for testing.
 - **Optional: Redis and an encryption secret.** Both are needed for saved AI providers and the assistant. Core resume features work without them.

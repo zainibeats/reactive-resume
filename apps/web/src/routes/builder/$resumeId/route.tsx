@@ -11,13 +11,11 @@ import { createNoindexFollowMeta } from "@/libs/seo";
 const searchSchema = z.object({
 	// Write is the default and stays out of the URL.
 	mode: z.enum(EDITOR_MODES).optional().catch(undefined),
-	// Opens History on this version, read-only; Applications' "Open" on what was sent links here.
+	// Opens History on this version, read-only.
 	version: z.string().optional().catch(undefined),
 	// Opens the assistant on a conversation ("new" for a fresh one), or on a question to send (⌘K Ask).
 	assistant: z.string().optional().catch(undefined),
 	ask: z.string().max(2_000).optional().catch(undefined),
-	// Prepare for next step keeps the application clicked, even when a base resume serves several jobs.
-	applicationId: z.string().optional().catch(undefined),
 	// The file a resume was just imported from; Write says what came in until it's dismissed.
 	imported: z.string().max(255).optional().catch(undefined),
 });

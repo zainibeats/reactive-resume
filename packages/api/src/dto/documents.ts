@@ -1,10 +1,10 @@
 import z from "zod";
 import { paginationShape } from "../pagination";
 
-const documentTypeSchema = z.enum(["resume", "letter"]).describe("resume, or letter (a saved cover letter).");
+const documentTypeSchema = z.literal("resume").describe("Always resume: the library holds resumes only.");
 const documentRefSchema = z.object({
 	type: documentTypeSchema,
-	id: z.string().min(1).describe("The ID of the resume or cover letter."),
+	id: z.string().min(1).describe("The ID of the resume."),
 });
 
 const documentSchema = z.object({
@@ -13,13 +13,9 @@ const documentSchema = z.object({
 	name: z.string(),
 	tags: z.array(z.string()),
 	isLocked: z.boolean(),
-	trashedAt: z.date().nullable().describe("When the document moved to Trash; null while it's live."),
+	trashedAt: z.date().nullable().describe("When the resume moved to Trash; null while it's live."),
 	createdAt: z.date(),
 	updatedAt: z.date(),
-	application: z
-		.object({ id: z.string(), company: z.string(), role: z.string() })
-		.nullable()
-		.describe("The job application this document was made for, if any."),
 });
 
 export type DocumentSummary = z.infer<typeof documentSchema>;
@@ -29,14 +25,14 @@ export const documentsDto = {
 		input: z
 			.object({
 				...paginationShape,
-				trashed: z.boolean().default(false).describe("List the documents in Trash instead."),
+				trashed: z.boolean().default(false).describe("List the resumes in Trash instead."),
 			})
 			.default({ trashed: false }),
 		output: z.array(documentSchema),
 	},
 	counts: {
 		input: z.void(),
-		output: z.object({ resume: z.number(), letter: z.number(), trash: z.number() }),
+		output: z.object({ resume: z.number(), trash: z.number() }),
 	},
 	rename: {
 		input: documentRefSchema.extend({ name: z.string().trim().min(1).max(100) }),
@@ -50,21 +46,7 @@ export const documentsDto = {
 		input: documentRefSchema.extend({ isLocked: z.boolean() }),
 		output: z.void(),
 	},
-	linkApplication: {
-		input: documentRefSchema.extend({
-			applicationId: z.string().min(1).nullable().describe("The application to link, or null to unlink."),
-		}),
-		output: z.void(),
-	},
 	trash: { input: documentRefSchema, output: z.void() },
 	restore: { input: documentRefSchema, output: z.void() },
 	purge: { input: documentRefSchema, output: z.void() },
-	copyForJob: {
-		input: z.object({
-			resumeId: z.string().min(1).describe("The resume to copy."),
-			applicationId: z.string().min(1).optional().describe("The job the copy is for; omit for no job yet."),
-			name: z.string().trim().min(1).max(100).optional().describe("Defaults to “{source} — {company}”."),
-		}),
-		output: z.string().describe("The ID of the copy."),
-	},
 };

@@ -7,13 +7,12 @@ import { createSectionTitleResolverForLocale } from "@/libs/resume/section-title
 
 // Renders off the main thread, so typing, scrolling and the gallery stay smooth while a page is laid out.
 self.addEventListener("message", async ({ data: request }: MessageEvent<PdfWorkerRequest>) => {
-	const { id, data, template, renderOptions } = request;
+	const { id, data, template } = request;
 	try {
 		let pageMap: PageMap | undefined;
 		const blob = await createResumePdfBlob({
 			data,
 			template,
-			renderOptions,
 			resolveSectionTitle: await createSectionTitleResolverForLocale(data.metadata.page.locale),
 			onPageMap: (map) => {
 				pageMap = map;

@@ -13,8 +13,6 @@ export type ResumePreviewProps = {
 	pageScale?: number;
 	pageClassName?: string | undefined;
 	showPageNumbers?: boolean;
-	/** Letters show the sender's header, which a document with only a letter otherwise leaves out. */
-	includeCoverLetterHeader?: boolean;
 	/** Drawn above each page (e.g. "Page 1 · Letter"). Replaces the small page-number caption. */
 	renderPageCaption?: (page: { pageNumber: number; totalPages: number }) => ReactNode;
 	/** Drawn over each page, in page-relative coordinates; receives the page map of the render on screen. */

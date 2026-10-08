@@ -3,9 +3,8 @@ title: "Web access adapters"
 description: "Shared search and reading contracts, provider ownership, safety and contribution checks."
 ---
 
-Applications and the Assistant share `searchWeb` and `readPage` in
-`packages/api/src/features/web-access/`. Keep generic retrieval there; JobPosting parsing and the `job posting`
-query suffix belong in Applications. All three providers use the shared bounded JSON transport with validated
+The Assistant's web tools use `searchWeb` and `readPage` in `packages/api/src/features/web-access/`. Keep generic
+retrieval there; parsing that serves one feature belongs in that feature. All three providers use the shared bounded JSON transport with validated
 responses. Select one adapter by the provider discriminant, without a plugin registry or paid-provider fan-out.
 
 ## Shared contract
@@ -13,8 +12,8 @@ responses. Select one adapter by the provider discriminant, without a plugin reg
 Both functions receive a server-resolved `WebAccessConnection`, the authenticated user ID and an optional abort
 signal. Search returns public URL, title and optional snippet. Reading returns bounded content, format, requested
 and resolved URLs, retrieval time, provider fetch time when supplied, method, truncation and completeness. Optional
-HTML remains server-side for the JobPosting parser. Receiving content now does not prove it was fetched from the
-origin now, and HTTP 200 does not prove a complete job description.
+HTML stays server-side; the Assistant strips it before returning page content to the model. Receiving content now
+does not prove it was fetched from the origin now, and HTTP 200 does not prove a complete page.
 
 Resolve the selected connection per request or assistant run through `webAccessService`. Never accept credentials,
 user IDs, arbitrary headers or provider URLs from model tool inputs. Personal connections have fixed official

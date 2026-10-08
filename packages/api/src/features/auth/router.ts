@@ -3,9 +3,7 @@ import { createSelectSchema } from "drizzle-zod";
 import z from "zod";
 import { auth } from "@reactive-resume/auth/config";
 import * as schema from "@reactive-resume/db/schema";
-import { coverLetterSchema } from "@reactive-resume/schema/cover-letter/data";
 import { protectedProcedure, publicProcedure } from "../../context";
-import { applicationDto } from "../../dto/application";
 import { resumeDto } from "../../dto/resume";
 import { authService } from "./service";
 
@@ -67,7 +65,7 @@ export const authRouter = {
 			operationId: "exportAccountData",
 			summary: "Export user account data",
 			description:
-				"Returns a JSON-serializable export of the authenticated user's data, including their public profile fields, resumes, independent cover letters and job applications. Images remain URL references. Secrets such as password hashes, tokens, and API keys are never included. Requires authentication.",
+				"Returns a JSON-serializable export of the authenticated user's data, including their public profile fields and resumes. Images remain URL references. Secrets such as password hashes, tokens, and API keys are never included. Requires authentication.",
 			successDescription: "The user's exported account data.",
 		})
 		.input(z.object({}).optional())
@@ -88,15 +86,12 @@ export const authRouter = {
 				resumes: z.array(
 					resumeDto.getById.output.omit({
 						hasPassword: true,
-						applicationId: true,
 						// Child-resume lineage is instance-local; an imported backup starts unlinked.
 						revision: true,
 						parentId: true,
 						parentRevision: true,
 					}),
 				),
-				coverLetters: z.array(coverLetterSchema),
-				applications: z.array(applicationDto.getById.output),
 			}),
 		)
 		.handler(({ context }) => authService.exportData({ userId: context.user.id })),

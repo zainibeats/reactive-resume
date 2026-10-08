@@ -3,28 +3,21 @@ import type { ResumeData, SkillItem } from "@reactive-resume/schema/resume/data"
 import type { CSSProperties } from "react";
 import { t } from "@lingui/core/macro";
 import { Plural, Trans } from "@lingui/react/macro";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { buildMarkdown } from "@reactive-resume/resume/markdown";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Icon } from "@reactive-resume/ui/components/icon";
-import { Input } from "@reactive-resume/ui/components/input";
-import { Label } from "@reactive-resume/ui/components/label";
-import { NativeSelect } from "@reactive-resume/ui/components/native-select";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
-import { toast } from "@reactive-resume/ui/components/toast";
 import { generateId } from "@reactive-resume/utils/string";
 import { cn } from "@reactive-resume/utils/style";
 import { useEditorStore } from "../store";
 import { checkStateOf, editWithUndo } from "./actions";
-import { applicationsListQueryKey, applicationsListQueryOptions } from "@/features/applications/queries";
 import { openAssistantFrom } from "@/features/assistant/open";
-import { useCurrentBuilderResumeSelector, useIsResumeLocked, usePatchResume } from "@/features/resume/builder/draft";
-import { getOrpcErrorMessage } from "@/libs/error-message";
+import { useIsResumeLocked } from "@/features/resume/builder/draft";
 import { ENTER_CLASS } from "@/libs/motion";
-import { orpc } from "@/libs/orpc/client";
 
-/** Matches the applications feature's cap on a saved posting. */
+/** The longest posting the matcher reads. */
 const MAX_POSTING_CHARS = 20_000;
 
 /** A posting term, with `label` as the posting writes it ("C#" rather than the matcher's "csharp"). */
@@ -33,9 +26,7 @@ type MatchedTerm = JdTermMatch & { label: string };
 type JobMatchResult = { found: MatchedTerm[]; missing: MatchedTerm[]; total: number };
 
 export type JobMatch = {
-	/** The application the resume was made for, once the list has loaded. */
-	application: { id: string; company: string; role: string; jobDescription: string | null } | null;
-	/** The linked application's posting, or the one pasted this visit when none is linked. */
+	/** The posting pasted this visit. */
 	posting: string;
 	result: JobMatchResult | null;
 	hiddenTerms: readonly string[];
@@ -44,15 +35,11 @@ export type JobMatch = {
 const loadAtsPdf = () => import("@reactive-resume/resume/ats-pdf");
 
 /**
- * Job match reads the posting of the application the resume is linked to, or one pasted for this visit, and sorts
- * its terms into found and missing. Terms hidden as "not true for me" are left out. It isn't part of the score.
+ * Job match reads a posting pasted for this visit and sorts its terms into found and missing. Terms hidden as
+ * "not true for me" are left out. It isn't part of the score.
  */
 export function useJobMatch(data: ResumeData | undefined): JobMatch {
-	const applicationId = useCurrentBuilderResumeSelector((resume) => resume.applicationId ?? null);
-	const pasted = useEditorStore((state) => state.pastedPosting);
-	const { data: applications } = useQuery(applicationsListQueryOptions());
-	const application = applications?.find((entry) => entry.id === applicationId) ?? null;
-	const posting = application ? (application.jobDescription ?? "").trim() : pasted.trim();
+	const posting = useEditorStore((state) => state.pastedPosting).trim();
 
 	// The matcher (stemmer and skill aliases) loads only once there's a posting to match.
 	const { data: engine } = useQuery({
@@ -80,7 +67,7 @@ export function useJobMatch(data: ResumeData | undefined): JobMatch {
 		};
 	}, [engine, posting, resumeText, hiddenTerms]);
 
-	return { application, posting, result, hiddenTerms: hiddenTerms ?? [] };
+	return { posting, result, hiddenTerms: hiddenTerms ?? [] };
 }
 
 /** The first spelling of a term the posting uses, as it writes it ("Figma", not "figma"). */
@@ -95,13 +82,13 @@ function termAsWritten(forms: readonly string[], posting: string): string | unde
 type JobMatchTabProps = { match: JobMatch; data: ResumeData };
 
 export function JobMatchTab({ match }: JobMatchTabProps) {
-	const { application, posting, result, hiddenTerms } = match;
+	const { posting, result, hiddenTerms } = match;
 	const [openTerm, setOpenTerm] = useState<string | null>(null);
 	const highlightTerm = useEditorStore((state) => state.highlightTerm);
 	const setHighlightTerm = useEditorStore((state) => state.setHighlightTerm);
 	const locked = useIsResumeLocked();
 
-	if (!posting) return <NoPosting application={application} />;
+	if (!posting) return <NoPosting />;
 
 	const open = result?.missing.find((term) => term.term === openTerm);
 
@@ -130,7 +117,7 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 
 	return (
 		<div className="grid gap-3.5">
-			<PostingSource application={application} />
+			<PostingSource />
 
 			{!result ? (
 				<p className="flex items-center gap-2 text-sm text-ink-2">
@@ -288,193 +275,41 @@ const newSkill = (name: string): SkillItem => ({
 	keywords: [],
 });
 
-function useLinkApplication() {
-	const resumeId = useCurrentBuilderResumeSelector((resume) => resume.id);
-	const patchResume = usePatchResume();
-	const { mutateAsync, isPending } = useMutation(orpc.documents.linkApplication.mutationOptions());
-
-	const link = async (applicationId: string | null) => {
-		try {
-			await mutateAsync({ type: "resume", id: resumeId, applicationId });
-			patchResume((resume) => {
-				resume.applicationId = applicationId;
-			});
-		} catch (error) {
-			toast.add({
-				type: "error",
-				description: getOrpcErrorMessage(error, { fallback: t`Couldn't link the application.` }),
-			});
-		}
-	};
-
-	return { link, isPending };
-}
-
-/** Where the posting comes from, with Change (link another application or unlink) or Save as application. */
-function PostingSource({ application }: { application: JobMatch["application"] }) {
-	const [changing, setChanging] = useState(false);
+/** The pasted posting, with Clear to match against another one. */
+function PostingSource() {
 	const setPastedPosting = useEditorStore((state) => state.setPastedPosting);
-	const { link } = useLinkApplication();
-
-	if (!application) {
-		return (
-			<div className="grid gap-2 rounded-[10px] bg-bg p-3">
-				<div className="flex items-center gap-2.5">
-					<span className="grid size-7 place-items-center rounded-[7px] bg-sunken text-ink-2">
-						<Icon name="content_copy" size={16} />
-					</span>
-					<span className="grid min-w-0 flex-1">
-						<b className="text-[13px] font-semibold">
-							<Trans>Pasted posting</Trans>
-						</b>
-						<span className="text-xs text-ink-3">
-							<Trans>For this visit only</Trans>
-						</span>
-					</span>
-					<Button size="sm" variant="secondary" onClick={() => setPastedPosting("")}>
-						<Trans>Clear</Trans>
-					</Button>
-				</div>
-				<SaveAsApplication />
-			</div>
-		);
-	}
 
 	return (
-		<div className="grid gap-2 rounded-[10px] bg-bg p-3">
-			<div className="flex items-center gap-2.5">
-				<span className="grid size-7 place-items-center rounded-[7px] bg-sunken text-[13px] font-semibold text-ink-2">
-					{application.company.slice(0, 1).toUpperCase()}
+		<div className="flex items-center gap-2.5 rounded-[10px] bg-bg p-3">
+			<span className="grid size-7 place-items-center rounded-[7px] bg-sunken text-ink-2">
+				<Icon name="content_copy" size={16} />
+			</span>
+			<span className="grid min-w-0 flex-1">
+				<b className="text-[13px] font-semibold">
+					<Trans>Pasted posting</Trans>
+				</b>
+				<span className="text-xs text-ink-3">
+					<Trans>For this visit only</Trans>
 				</span>
-				<span className="grid min-w-0 flex-1">
-					<b className="truncate text-[13px] font-semibold">
-						{application.role} · {application.company}
-					</b>
-					<span className="text-xs text-ink-3">
-						<Trans>Posting from the linked application</Trans>
-					</span>
-				</span>
-				<Button size="sm" variant="secondary" aria-expanded={changing} onClick={() => setChanging(!changing)}>
-					<Trans>Change</Trans>
-				</Button>
-			</div>
-			{changing && (
-				<div className="grid gap-2">
-					<ApplicationPicker
-						value={application.id}
-						onChange={(id) => {
-							setChanging(false);
-							void link(id);
-						}}
-					/>
-					<Button
-						size="sm"
-						variant="ghost"
-						className="w-fit"
-						onClick={() => {
-							setChanging(false);
-							void link(null);
-						}}
-					>
-						<Trans>Unlink this application</Trans>
-					</Button>
-				</div>
-			)}
+			</span>
+			<Button size="sm" variant="secondary" onClick={() => setPastedPosting("")}>
+				<Trans>Clear</Trans>
+			</Button>
 		</div>
 	);
 }
 
-function ApplicationPicker({ value, onChange }: { value: string | null; onChange: (id: string) => void }) {
-	const { data: applications } = useQuery(applicationsListQueryOptions());
-	const choices = (applications ?? []).filter((application) => application.status !== "closed");
-	// Linking changes the document's details, which a locked document keeps as they are.
-	const locked = useIsResumeLocked();
-
-	return (
-		<NativeSelect
-			aria-label={t`Link an application`}
-			disabled={locked}
-			value={value ?? ""}
-			onChange={(event) => event.target.value && onChange(event.target.value)}
-		>
-			<option value="" disabled>
-				{choices.length > 0 ? t`Link an application…` : t`No applications yet`}
-			</option>
-			{choices.map((application) => (
-				<option key={application.id} value={application.id}>
-					{application.role} · {application.company}
-				</option>
-			))}
-		</NativeSelect>
-	);
-}
-
-/**
- * C2: nothing to match against. Link an existing application first; pasting a posting is the fallback. A linked
- * application without a saved posting takes one here, saved to the application.
- */
-function NoPosting({ application }: { application: JobMatch["application"] }) {
+/** C2: nothing to match against yet. Paste a posting to match the resume against it. */
+function NoPosting() {
 	const pasted = useEditorStore((state) => state.pastedPosting);
 	const setPastedPosting = useEditorStore((state) => state.setPastedPosting);
 	const [draft, setDraft] = useState(pasted);
-	const { link, isPending } = useLinkApplication();
-	const queryClient = useQueryClient();
-	const { mutate: savePosting, isPending: saving } = useMutation({
-		...orpc.applications.update.mutationOptions(),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: applicationsListQueryKey() }),
-		onError: (error) =>
-			toast.add({
-				type: "error",
-				description: getOrpcErrorMessage(error, { fallback: t`Couldn't save the posting.` }),
-			}),
-	});
-
-	if (application) {
-		return (
-			<div className="grid gap-2.5 rounded-xl border border-line p-4">
-				<strong className="text-sm font-semibold">
-					{application.role} · {application.company}
-				</strong>
-				<p className="text-[13px] leading-[19px] text-ink-2">
-					<Trans>This application has no posting saved yet. Paste it to match against it.</Trans>
-				</p>
-				<Textarea
-					aria-label={t`Job posting`}
-					rows={5}
-					maxLength={MAX_POSTING_CHARS}
-					value={draft}
-					placeholder={t`Paste a job posting…`}
-					onChange={(event) => setDraft(event.target.value)}
-				/>
-				<Button
-					size="sm"
-					className="w-fit"
-					disabled={!draft.trim() || saving}
-					onClick={() => savePosting({ id: application.id, jobDescription: draft.trim() })}
-				>
-					<Trans>Save to the application</Trans>
-				</Button>
-			</div>
-		);
-	}
 
 	return (
 		<div className="grid gap-2.5 rounded-xl border border-line p-4">
 			<strong className="text-sm font-semibold">
 				<Trans>Match against a job</Trans>
 			</strong>
-			<p className="text-[13px] leading-[19px] text-ink-2">
-				<Trans>This resume isn't linked to an application yet.</Trans>
-			</p>
-			<ApplicationPicker value={null} onChange={(id) => void link(id)} />
-			{isPending && (
-				<span className="text-xs text-ink-3">
-					<Trans>Linking…</Trans>
-				</span>
-			)}
-			<span className="text-center text-xs text-ink-3">
-				<Trans>or</Trans>
-			</span>
 			<Textarea
 				aria-label={t`Job posting`}
 				rows={4}
@@ -486,86 +321,7 @@ function NoPosting({ application }: { application: JobMatch["application"] }) {
 			<Button size="sm" className="w-fit" disabled={!draft.trim()} onClick={() => setPastedPosting(draft)}>
 				<Trans>Match this posting</Trans>
 			</Button>
-			<span className="text-xs leading-[17px] text-ink-3">
-				<Trans>A pasted posting can be saved as an application afterwards.</Trans>
-			</span>
 		</div>
-	);
-}
-
-/** Saves the pasted posting as a new application (company and role are required) and links the resume to it. */
-function SaveAsApplication() {
-	const [open, setOpen] = useState(false);
-	const [company, setCompany] = useState("");
-	const [role, setRole] = useState("");
-	const posting = useEditorStore((state) => state.pastedPosting);
-	const setPastedPosting = useEditorStore((state) => state.setPastedPosting);
-	const resumeId = useCurrentBuilderResumeSelector((resume) => resume.id);
-	const queryClient = useQueryClient();
-	const { link } = useLinkApplication();
-	const { mutateAsync: create, isPending } = useMutation(orpc.applications.create.mutationOptions());
-	const companyId = useId();
-
-	if (!open) {
-		return (
-			<Button size="sm" variant="ghost" className="w-fit" onClick={() => setOpen(true)}>
-				<Icon name="work" size={16} />
-				<Trans>Save as application…</Trans>
-			</Button>
-		);
-	}
-
-	const save = async () => {
-		try {
-			const id = await create({
-				company: company.trim(),
-				role: role.trim(),
-				jobDescription: posting.trim().slice(0, MAX_POSTING_CHARS),
-				resumeId,
-			});
-			await queryClient.invalidateQueries({ queryKey: applicationsListQueryKey() });
-			await link(id);
-			setPastedPosting("");
-			toast.add({ description: t`Saved as an application and linked` });
-		} catch (error) {
-			toast.add({
-				type: "error",
-				description: getOrpcErrorMessage(error, { fallback: t`Couldn't save the application.` }),
-			});
-		}
-	};
-
-	return (
-		<form
-			className="grid gap-2"
-			onSubmit={(event) => {
-				event.preventDefault();
-				void save();
-			}}
-		>
-			<div className="grid grid-cols-2 gap-2">
-				<div className="grid gap-1">
-					<Label htmlFor={companyId}>
-						<Trans>Company</Trans>
-					</Label>
-					<Input id={companyId} required value={company} onChange={(event) => setCompany(event.target.value)} />
-				</div>
-				<div className="grid gap-1">
-					<Label htmlFor={`${companyId}-role`}>
-						<Trans>Role</Trans>
-					</Label>
-					<Input id={`${companyId}-role`} required value={role} onChange={(event) => setRole(event.target.value)} />
-				</div>
-			</div>
-			<div className="flex gap-1.5">
-				<Button size="sm" type="submit" disabled={!company.trim() || !role.trim() || isPending}>
-					<Trans>Save and link</Trans>
-				</Button>
-				<Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
-					<Trans>Cancel</Trans>
-				</Button>
-			</div>
-		</form>
 	);
 }
 

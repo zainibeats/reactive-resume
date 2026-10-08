@@ -30,11 +30,9 @@ vi.mock("./chat", () => ({
 import { Composer, Conversation } from "./conversation";
 
 const document: AssistantDocument = {
-	kind: "resume",
 	id: "resume-1",
 	name: "Resume",
 	locked: false,
-	posting: { id: "application-2", company: "Selected Company", role: "Engineer" },
 	stateOf: () => "pending",
 	accept: () => {},
 	locationOf: () => undefined,
@@ -54,7 +52,7 @@ it("uploads a file in the initial composer before sending its first message", as
 		<I18nProvider i18n={i18n}>
 			<Composer
 				document={document}
-				context={{ document: false, posting: false }}
+				context={{ document: false }}
 				onContextChange={() => {}}
 				providerLabel="Local"
 				streaming={false}
@@ -84,8 +82,8 @@ it("uploads a file in the initial composer before sending its first message", as
 	]);
 });
 
-it("preserves first-message context exclusions, selected application and attachment IDs", async () => {
-	const context = { document: false, posting: true, applicationId: "application-2" };
+it("preserves first-message context exclusions and attachment IDs", async () => {
+	const context = { document: false };
 	render(
 		<I18nProvider i18n={i18n}>
 			<Conversation
@@ -156,7 +154,7 @@ it("reopens native and custom web results with sources, clipping and failed or u
 				activeRun={false}
 				readOnly={false}
 				providerLabel="Local"
-				initialContext={{ document: true, posting: true }}
+				initialContext={{ document: true }}
 				prompt={null}
 				promptAttachments={[]}
 				onPromptSent={() => {}}

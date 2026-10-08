@@ -5,7 +5,7 @@ import { getModel } from "./service";
 
 /** Roughly a very long resume. The client truncates the extracted text to this before sending. */
 const MAX_EXTRACTED_TEXT_CHARS = 50_000;
-/** Matches the cap the applications feature already uses for a pasted posting. */
+/** Room for a long pasted job posting. */
 const MAX_JOB_DESCRIPTION_CHARS = 20_000;
 const MAX_FINDINGS = 120;
 /** A long resume's bullets and paragraphs. */

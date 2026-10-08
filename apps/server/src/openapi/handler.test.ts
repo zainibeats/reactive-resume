@@ -22,32 +22,30 @@ describe("REST boundary", () => {
 		expect(await response.json()).toHaveProperty("disableSignups");
 		expect(response.headers.get("Cache-Control")).toBe("no-store");
 	});
-	it.each(["/resume/getRoot", "/storage/uploadFile", "/storage/deleteFile", "/missing"])(
-		"does not expose internal or unknown routes: %s",
+	it.each([
+		"/resume/getRoot",
+		"/storage/uploadFile",
+		"/storage/deleteFile",
+		"/applications",
+		"/cover-letters",
+		"/missing",
+	])("does not expose internal or unknown routes: %s", async (path) => {
+		const response = await request(path, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: "{}",
+		});
+		expect(response.status).toBe(404);
+		expect(await response.json()).toMatchObject({ code: "NOT_FOUND", status: 404 });
+	});
+	it.each(["/resumes", "/documents", "/ai-providers", "/agent/threads", "/resumes/private/exports/json"])(
+		"rejects unauthenticated private reads: %s",
 		async (path) => {
-			const response = await request(path, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: "{}",
-			});
-			expect(response.status).toBe(404);
-			expect(await response.json()).toMatchObject({ code: "NOT_FOUND", status: 404 });
+			const response = await request(path);
+			expect(response.status).toBe(401);
+			expect(await response.json()).toMatchObject({ code: "UNAUTHORIZED", status: 401 });
 		},
 	);
-	it.each([
-		"/resumes",
-		"/applications",
-		"/documents",
-		"/ai-providers",
-		"/agent/threads",
-		"/cover-letters",
-		"/resumes/private/exports/json",
-		"/cover-letters/private/exports/pdf",
-	])("rejects unauthenticated private reads: %s", async (path) => {
-		const response = await request(path);
-		expect(response.status).toBe(401);
-		expect(await response.json()).toMatchObject({ code: "UNAUTHORIZED", status: 401 });
-	});
 	it("decodes multipart public checks and returns structured errors for invalid PDF content", async () => {
 		const form = new FormData();
 		form.set("file", new File(["not a PDF"], "resume.pdf", { type: "application/pdf" }));

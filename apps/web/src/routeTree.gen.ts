@@ -26,12 +26,9 @@ import { Route as AuthVerify2faRouteImport } from "./routes/auth/verify-2fa";
 import { Route as AuthVerify2faBackupRouteImport } from "./routes/auth/verify-2fa-backup";
 import { Route as BuilderResumeIdRouteRouteImport } from "./routes/builder/$resumeId/route";
 import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
-import { Route as DashboardCoverLettersRouteImport } from "./routes/dashboard/cover-letters";
 import { Route as DashboardSettingsRouteRouteImport } from "./routes/dashboard/settings/route";
 import { Route as DashboardTrashRouteImport } from "./routes/dashboard/trash";
 import { Route as BuilderResumeIdIndexRouteImport } from "./routes/builder/$resumeId/index";
-import { Route as BuilderLetterCoverLetterIdRouteImport } from "./routes/builder/letter/$coverLetterId";
-import { Route as DashboardApplicationsIndexRouteImport } from "./routes/dashboard/applications/index";
 import { Route as DashboardResumesIndexRouteImport } from "./routes/dashboard/resumes/index";
 import { Route as DashboardSettingsIndexRouteImport } from "./routes/dashboard/settings/index";
 import { Route as DashboardSettingsAccountRouteImport } from "./routes/dashboard/settings/account";
@@ -126,11 +123,6 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: "/",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
-const DashboardCoverLettersRoute = DashboardCoverLettersRouteImport.update({
-  id: "/cover-letters",
-  path: "/cover-letters",
-  getParentRoute: () => DashboardRouteRoute,
-} as any);
 const DashboardSettingsRouteRoute = DashboardSettingsRouteRouteImport.update({
   id: "/settings",
   path: "/settings",
@@ -146,18 +138,6 @@ const BuilderResumeIdIndexRoute = BuilderResumeIdIndexRouteImport.update({
   path: "/",
   getParentRoute: () => BuilderResumeIdRouteRoute,
 } as any);
-const BuilderLetterCoverLetterIdRoute =
-  BuilderLetterCoverLetterIdRouteImport.update({
-    id: "/builder/letter/$coverLetterId",
-    path: "/builder/letter/$coverLetterId",
-    getParentRoute: () => rootRouteImport,
-  } as any);
-const DashboardApplicationsIndexRoute =
-  DashboardApplicationsIndexRouteImport.update({
-    id: "/applications/",
-    path: "/applications/",
-    getParentRoute: () => DashboardRouteRoute,
-  } as any);
 const DashboardResumesIndexRoute = DashboardResumesIndexRouteImport.update({
   id: "/resumes/",
   path: "/resumes/",
@@ -226,19 +206,16 @@ export interface FileRoutesByFullPath {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
-  "/dashboard/cover-letters": typeof DashboardCoverLettersRoute;
   "/dashboard/trash": typeof DashboardTrashRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
-  "/builder/letter/$coverLetterId": typeof BuilderLetterCoverLetterIdRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/ai": typeof DashboardSettingsAiRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/preferences": typeof DashboardSettingsPreferencesRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
-  "/dashboard/applications/": typeof DashboardApplicationsIndexRoute;
   "/dashboard/resumes/": typeof DashboardResumesIndexRoute;
   "/dashboard/settings/": typeof DashboardSettingsIndexRoute;
   "/dashboard/settings/authentication/": typeof DashboardSettingsAuthenticationIndexRoute;
@@ -254,20 +231,17 @@ export interface FileRoutesByTo {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
-  "/dashboard/cover-letters": typeof DashboardCoverLettersRoute;
   "/dashboard/trash": typeof DashboardTrashRoute;
   "/": typeof HomeIndexRoute;
   "/auth": typeof AuthIndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
-  "/builder/letter/$coverLetterId": typeof BuilderLetterCoverLetterIdRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/ai": typeof DashboardSettingsAiRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/preferences": typeof DashboardSettingsPreferencesRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/builder/$resumeId": typeof BuilderResumeIdIndexRoute;
-  "/dashboard/applications": typeof DashboardApplicationsIndexRoute;
   "/dashboard/resumes": typeof DashboardResumesIndexRoute;
   "/dashboard/settings": typeof DashboardSettingsIndexRoute;
   "/dashboard/settings/authentication": typeof DashboardSettingsAuthenticationIndexRoute;
@@ -289,20 +263,17 @@ export interface FileRoutesById {
   "/auth/resume-password": typeof AuthResumePasswordRoute;
   "/auth/verify-2fa": typeof AuthVerify2faRoute;
   "/auth/verify-2fa-backup": typeof AuthVerify2faBackupRoute;
-  "/dashboard/cover-letters": typeof DashboardCoverLettersRoute;
   "/dashboard/trash": typeof DashboardTrashRoute;
   "/_home/": typeof HomeIndexRoute;
   "/auth/": typeof AuthIndexRoute;
   "/dashboard/": typeof DashboardIndexRoute;
   "/dashboard/settings/integrations": typeof DashboardSettingsIntegrationsRouteRoute;
-  "/builder/letter/$coverLetterId": typeof BuilderLetterCoverLetterIdRoute;
   "/dashboard/settings/account": typeof DashboardSettingsAccountRoute;
   "/dashboard/settings/ai": typeof DashboardSettingsAiRoute;
   "/dashboard/settings/api-keys": typeof DashboardSettingsApiKeysRoute;
   "/dashboard/settings/preferences": typeof DashboardSettingsPreferencesRoute;
   "/dashboard/settings/profile": typeof DashboardSettingsProfileRoute;
   "/builder/$resumeId/": typeof BuilderResumeIdIndexRoute;
-  "/dashboard/applications/": typeof DashboardApplicationsIndexRoute;
   "/dashboard/resumes/": typeof DashboardResumesIndexRoute;
   "/dashboard/settings/": typeof DashboardSettingsIndexRoute;
   "/dashboard/settings/authentication/": typeof DashboardSettingsAuthenticationIndexRoute;
@@ -325,19 +296,16 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
-    | "/dashboard/cover-letters"
     | "/dashboard/trash"
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
-    | "/builder/letter/$coverLetterId"
     | "/dashboard/settings/account"
     | "/dashboard/settings/ai"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/preferences"
     | "/dashboard/settings/profile"
     | "/builder/$resumeId/"
-    | "/dashboard/applications/"
     | "/dashboard/resumes/"
     | "/dashboard/settings/"
     | "/dashboard/settings/authentication/";
@@ -353,20 +321,17 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
-    | "/dashboard/cover-letters"
     | "/dashboard/trash"
     | "/"
     | "/auth"
     | "/dashboard"
     | "/dashboard/settings/integrations"
-    | "/builder/letter/$coverLetterId"
     | "/dashboard/settings/account"
     | "/dashboard/settings/ai"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/preferences"
     | "/dashboard/settings/profile"
     | "/builder/$resumeId"
-    | "/dashboard/applications"
     | "/dashboard/resumes"
     | "/dashboard/settings"
     | "/dashboard/settings/authentication";
@@ -387,20 +352,17 @@ export interface FileRouteTypes {
     | "/auth/resume-password"
     | "/auth/verify-2fa"
     | "/auth/verify-2fa-backup"
-    | "/dashboard/cover-letters"
     | "/dashboard/trash"
     | "/_home/"
     | "/auth/"
     | "/dashboard/"
     | "/dashboard/settings/integrations"
-    | "/builder/letter/$coverLetterId"
     | "/dashboard/settings/account"
     | "/dashboard/settings/ai"
     | "/dashboard/settings/api-keys"
     | "/dashboard/settings/preferences"
     | "/dashboard/settings/profile"
     | "/builder/$resumeId/"
-    | "/dashboard/applications/"
     | "/dashboard/resumes/"
     | "/dashboard/settings/"
     | "/dashboard/settings/authentication/";
@@ -412,7 +374,6 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
   BuilderResumeIdRouteRoute: typeof BuilderResumeIdRouteRouteWithChildren;
   UsernameSlugRoute: typeof UsernameSlugRoute;
-  BuilderLetterCoverLetterIdRoute: typeof BuilderLetterCoverLetterIdRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -536,13 +497,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
-    "/dashboard/cover-letters": {
-      id: "/dashboard/cover-letters";
-      path: "/cover-letters";
-      fullPath: "/dashboard/cover-letters";
-      preLoaderRoute: typeof DashboardCoverLettersRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
-    };
     "/dashboard/settings": {
       id: "/dashboard/settings";
       path: "/settings";
@@ -563,20 +517,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/builder/$resumeId/";
       preLoaderRoute: typeof BuilderResumeIdIndexRouteImport;
       parentRoute: typeof BuilderResumeIdRouteRoute;
-    };
-    "/builder/letter/$coverLetterId": {
-      id: "/builder/letter/$coverLetterId";
-      path: "/builder/letter/$coverLetterId";
-      fullPath: "/builder/letter/$coverLetterId";
-      preLoaderRoute: typeof BuilderLetterCoverLetterIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard/applications/": {
-      id: "/dashboard/applications/";
-      path: "/applications";
-      fullPath: "/dashboard/applications/";
-      preLoaderRoute: typeof DashboardApplicationsIndexRouteImport;
-      parentRoute: typeof DashboardRouteRoute;
     };
     "/dashboard/resumes/": {
       id: "/dashboard/resumes/";
@@ -718,19 +658,15 @@ const DashboardSettingsRouteRouteWithChildren =
 
 interface DashboardRouteRouteChildren {
   DashboardSettingsRouteRoute: typeof DashboardSettingsRouteRouteWithChildren;
-  DashboardCoverLettersRoute: typeof DashboardCoverLettersRoute;
   DashboardTrashRoute: typeof DashboardTrashRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
-  DashboardApplicationsIndexRoute: typeof DashboardApplicationsIndexRoute;
   DashboardResumesIndexRoute: typeof DashboardResumesIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardSettingsRouteRoute: DashboardSettingsRouteRouteWithChildren,
-  DashboardCoverLettersRoute: DashboardCoverLettersRoute,
   DashboardTrashRoute: DashboardTrashRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardApplicationsIndexRoute: DashboardApplicationsIndexRoute,
   DashboardResumesIndexRoute: DashboardResumesIndexRoute,
 };
 
@@ -755,7 +691,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   BuilderResumeIdRouteRoute: BuilderResumeIdRouteRouteWithChildren,
   UsernameSlugRoute: UsernameSlugRoute,
-  BuilderLetterCoverLetterIdRoute: BuilderLetterCoverLetterIdRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

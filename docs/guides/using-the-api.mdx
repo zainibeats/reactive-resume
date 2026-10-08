@@ -3,7 +3,7 @@ title: "Using the API"
 description: "Create a Reactive Resume API key, send authenticated REST requests to read and edit your resumes, and revoke keys you no longer need."
 ---
 
-The Reactive Resume REST API lets your own scripts, extensions and automations read and change your documents and job applications. You authenticate with an API key that you create in Settings. This guide walks you through creating a key, making your first request and revoking the key when you're done.
+The Reactive Resume REST API lets your own scripts, extensions and automations read and change your resumes. You authenticate with an API key that you create in Settings. This guide walks you through creating a key, making your first request and revoking the key when you're done.
 
 ## Before you start
 
@@ -103,26 +103,24 @@ The response is the new resume's ID as a JSON string.
 
 Every endpoint, with its parameters, request body and responses, is listed in the **API Reference** tab of these docs. Your own instance also serves the machine-readable OpenAPI document at `/api/openapi/spec.json` (for example `https://rxresu.me/api/openapi/spec.json`). Use the spec from the version you run when you generate a client.
 
-| Area          | Paths                                   | What you can do                                                                                                                                        |
-| ------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Resumes       | `/resumes`, `/resumes/{id}`             | List, read, create, import, update, patch, lock, duplicate, move to Trash, set a sharing password, download a PDF, read version history and statistics |
-| Cover letters | `/cover-letters`                        | List, read, create, update, duplicate, export and import letters, restore versions, refresh their design from a resume                                 |
-| Documents     | `/documents`                            | Work across resumes and letters: rename, tag, lock, link to an application, move to Trash, restore, delete now                                         |
-| Applications  | `/applications`                         | Track job applications: stages, notes, interviews, attached PDFs, bulk changes, import, statistics                                                     |
-| AI            | `/ai-providers`, `/ai`, `/agent`        | Manage your AI providers, run AI tools such as resume import from PDF, work with assistant conversations                                               |
-| Account       | `/auth/account/export`, `/auth/account` | Export your account data, delete your account                                                                                                          |
+| Area      | Paths                                   | What you can do                                                                                                                                        |
+| --------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Resumes   | `/resumes`, `/resumes/{id}`             | List, read, create, import, update, patch, lock, duplicate, move to Trash, set a sharing password, download a PDF, read version history and statistics |
+| Documents | `/documents`                            | Work across your resumes: rename, tag, lock, move to Trash, restore, delete now                                                                        |
+| AI        | `/ai-providers`, `/ai`, `/agent`        | Manage your AI providers, run AI tools such as resume import from PDF, work with assistant conversations                                               |
+| Account   | `/auth/account/export`, `/auth/account` | Export your account data, delete your account                                                                                                          |
 
 Additional app workflows have REST endpoints:
 
-| Workflow                                                                                | Endpoint                                                                         |
-| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| PDF, JSON Resume, Reactive Resume v4/current, LinkedIn imports                          | `POST /resumes/file-imports`                                                     |
-| PDF, Word, Markdown and JSON exports                                                    | `GET /resumes/{id}/exports/{format}`, `GET /cover-letters/{id}/exports/{format}` |
-| Editor content checks and job-term matching                                             | `GET /resumes/{id}/checks`, `POST /resumes/{id}/job-matches`                     |
-| Public PDF readability checker                                                          | `POST /pdf-checks`                                                               |
-| File uploads and deletion                                                               | `POST /files`, `DELETE /files`                                                   |
-| Web search integration settings and connection tests                                    | `/integrations/web-access`                                                       |
-| Sign-in, sessions, profile, passwords, two-factor authentication, passkeys and API keys | `/api/auth/*` (outside `/api/openapi`)                                           |
+| Workflow                                                                                | Endpoint                                                     |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| PDF, JSON Resume, Reactive Resume v4/current, LinkedIn imports                          | `POST /resumes/file-imports`                                 |
+| PDF, Word, Markdown and JSON exports                                                    | `GET /resumes/{id}/exports/{format}`                         |
+| Editor content checks and job-term matching                                             | `GET /resumes/{id}/checks`, `POST /resumes/{id}/job-matches` |
+| Public PDF readability checker                                                          | `POST /pdf-checks`                                           |
+| File uploads and deletion                                                               | `POST /files`, `DELETE /files`                               |
+| Web search integration settings and connection tests                                    | `/integrations/web-access`                                   |
+| Sign-in, sessions, profile, passwords, two-factor authentication, passkeys and API keys | `/api/auth/*` (outside `/api/openapi`)                       |
 
 Authentication workflows use Better Auth's native HTTP API and its own error contract. Your instance publishes their specification at `/api/auth/open-api/generate-schema`; use that specification for the enabled authentication methods. Browser interactions such as zoom, print dialogs and local undo do not require separate server endpoints: use document changes, versions and exports for the corresponding data workflows.
 
@@ -145,14 +143,14 @@ Exports accept `pdf`, `docx`, `md` or `json` and return a downloadable file. The
 
 ## Pagination and partial updates
 
-Collection endpoints support `limit` (1–100) and `offset` (zero-based). For existing array responses, omitting both preserves the complete array for compatibility. Supplying only `offset` selects a page size of 20. The `X-Total-Count` header reports the total before slicing; paginated responses also include `X-Limit` and `X-Offset`. The cover-letter list retains its existing `{ items, total }` response and default pagination.
+Collection endpoints support `limit` (1–100) and `offset` (zero-based). For existing array responses, omitting both preserves the complete array for compatibility. Supplying only `offset` selects a page size of 20. The `X-Total-Count` header reports the total before slicing; paginated responses also include `X-Limit` and `X-Offset`.
 
 ```bash
 curl "https://rxresu.me/api/openapi/resumes?limit=20&offset=20" \
   -H "x-api-key: YOUR_API_KEY" -i
 ```
 
-Use `PATCH` for partial application, interview, timeline-entry and cover-letter updates. Resume content uses JSON Patch at `/resumes/{id}`; metadata uses `PATCH /resumes/{id}/metadata`. Resource-oriented paths such as `/resumes/{id}/copies` and `/documents/{type}/{id}/trash` are preferred for new integrations. Existing verb-based routes, partial `PUT` routes, response shapes and enum values remain supported.
+Resume content uses JSON Patch at `/resumes/{id}`; metadata uses `PATCH /resumes/{id}/metadata`. Resource-oriented paths such as `/resumes/{id}/copies` and `/documents/{type}/{id}/trash` are preferred for new integrations. Existing verb-based routes, partial `PUT` routes, response shapes and enum values remain supported.
 
 ## Retries
 
@@ -176,15 +174,15 @@ REST data responses use `Cache-Control: no-store`. Uploaded profile images are p
 
 ## Limits
 
-| Limit                                                                                           | Value                                                         |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Requests per API key                                                                            | 1,000 per hour                                                |
-| Changes to one resume, document or application (create, update, patch, lock, duplicate, delete) | 300 per minute                                                |
-| PDF downloads of one resume (`GET /resumes/{id}/pdf`)                                           | 5 per minute                                                  |
-| Public PDF checks per client address                                                            | 5 per minute                                                  |
-| REST request body size (before endpoint-specific limits)                                        | 40 MiB                                                        |
-| AI requests                                                                                     | 20 per minute                                                 |
-| Request body size on Vercel installations                                                       | 4.5 MB (see [Large RPC requests](/guides/large-rpc-requests)) |
+| Limit                                                                              | Value                                                         |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Requests per API key                                                               | 1,000 per hour                                                |
+| Changes to one resume or document (create, update, patch, lock, duplicate, delete) | 300 per minute                                                |
+| PDF downloads of one resume (`GET /resumes/{id}/pdf`)                              | 5 per minute                                                  |
+| Public PDF checks per client address                                               | 5 per minute                                                  |
+| REST request body size (before endpoint-specific limits)                           | 40 MiB                                                        |
+| AI requests                                                                        | 20 per minute                                                 |
+| Request body size on Vercel installations                                          | 4.5 MB (see [Large RPC requests](/guides/large-rpc-requests)) |
 
 Procedure limits apply in production. When you hit a limit, the API responds with `429`. On a self-hosted installation, `FLAG_DISABLE_API_RATE_LIMIT` turns off the per-key limit together with the sign-in limits; the procedure limits also turn off (see [Environment variables](/self-hosting/environment-variables)).
 
@@ -226,11 +224,9 @@ The web app talks to the server through oRPC at `/api/rpc`, using the same proce
 If you built against the v5 API, check these changes:
 
 - **Structured dates.** Dated entries have a `dates` object (`start`, `end`, `present`). The text fields `period` and `date` are still returned, but the server rewrites them from `dates` on every save, so writing only the text has no effect. See [Using the patch API](/guides/using-the-patch-api#dates).
-- **Cover letters are their own documents.** Resumes no longer hold cover letters. Use the `/cover-letters` endpoints. If you send a resume that still contains a cover-letter section (for example an old export), the server saves each letter as a separate cover letter and removes the section from the resume.
-- **Application link.** `GET /resumes/{id}` includes `applicationId` for a tailored resume. Trash and automatic naming remain managed through the documents API.
+- **Cover letters stay in the resume.** This version has no separate cover-letter endpoints. A cover letter is a custom section of type `cover-letter` inside the resume data.
 - **No cover-letter PDF from resumes.** `GET /resumes/{id}/pdf` only accepts `target=resume` (or no target). Old signed download links that ask for a cover letter return `404`.
-- **Delete moves to Trash.** `DELETE /resumes/{id}` and `DELETE /cover-letters/{id}` move the document to Trash for 30 days. Use the `/documents/restore` and `/documents/purge` endpoints to bring it back or delete it at once.
-- **Application stages.** The `rejected` stage and the `archived` flag are gone. Close an application with the `closed` stage and a `closedReason` (`not-selected`, `withdrew`, `accepted-other` or `no-response`).
+- **Delete moves to Trash.** `DELETE /resumes/{id}` moves the resume to Trash for 30 days. Use the `/documents/restore` and `/documents/purge` endpoints to bring it back or delete it at once.
 - **Resume versions.** Versions have a `kind` and an optional `name` instead of a free-text label.
 
 Self-hosters upgrading an installation can read [Migrating from v5](/self-hosting/upgrading-to-v6).

@@ -18,7 +18,7 @@ type VersionSummary<TKind extends string> = { id: string; kind: TKind; name: str
 type VersionTable = {
 	table: PgTable;
 	id: PgColumn;
-	/** The document the version belongs to (`resumeId`, `coverLetterId`). */
+	/** The document the version belongs to (`resumeId`). */
 	document: PgColumn;
 	documentKey: string;
 	userId: PgColumn;
@@ -32,7 +32,7 @@ type VersionTable = {
 type Owned = { documentId: string; userId: string };
 
 /**
- * History for one kind of document (resumes, letters): versions are written with a kind, autosaves collapse into one
+ * History for one kind of document (resumes): versions are written with a kind, autosaves collapse into one
  * per editing session, expiring kinds age out after 90 days, and only named versions can be renamed or deleted.
  * Retention runs whenever a version is written, so it needs no scheduler.
  */

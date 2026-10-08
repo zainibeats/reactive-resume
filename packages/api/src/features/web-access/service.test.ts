@@ -5,7 +5,6 @@ import { lookup } from "node:dns/promises";
 import { EventEmitter } from "node:events";
 import { createServer } from "node:http";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { searchJobPostings } from "../applications/posting";
 import { probeWebAccess, readPage, searchWeb } from "./service";
 
 const fixtures = vi.hoisted(() => ({
@@ -377,11 +376,11 @@ describe.each(PROVIDERS)("%s adapter at shared boundary", (provider) => {
 });
 
 describe("public targets and bounded fallback", () => {
-	it("accepts a maximum-length Applications query including its job intent suffix", async () => {
-		const query = "x".repeat(500);
-		const results = await searchJobPostings(query, context("tavily"));
-		expect(results).toMatchObject([{ url: URL, title: "Designer", description: "Berlin" }]);
-		expect(requests[0]?.body.query).toBe(`${query} job posting`);
+	it("accepts a maximum-length search query", async () => {
+		const query = "x".repeat(512);
+		const results = await searchWeb(query, context("tavily"));
+		expect(results).toMatchObject([{ url: URL, title: "Designer", snippet: "Berlin" }]);
+		expect(requests[0]?.body.query).toBe(query);
 	});
 	it.each([
 		"http://jobs.example.com/role",

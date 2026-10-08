@@ -39,7 +39,7 @@ describe("createResumePdfBlob", () => {
 		const { createResumePdfBlob } = await import("./pdf-document");
 		const onPageMap = vi.fn();
 
-		await expect(createResumePdfBlob(sampleResumeData, undefined, undefined, { onPageMap })).resolves.toBe(blob);
+		await expect(createResumePdfBlob(sampleResumeData, undefined, { onPageMap })).resolves.toBe(blob);
 		expect(onPageMap).toHaveBeenCalledWith(pageMap);
 		// Later renders skip the broken worker.
 		await createResumePdfBlob(sampleResumeData);

@@ -66,7 +66,7 @@ function reply(request: ChatRequest, response: ServerResponse) {
 	const said = text(lastUser?.content).toLowerCase();
 	const sinceUser = messages.slice(messages.lastIndexOf(lastUser as ChatMessage) + 1);
 	const lastTool = [...sinceUser].reverse().find((message) => message.role === "tool");
-	const readTool = tools.has("read_letter") ? "read_letter" : "read_resume";
+	const readTool = "read_resume";
 
 	response.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache" });
 

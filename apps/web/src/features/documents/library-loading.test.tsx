@@ -18,7 +18,7 @@ vi.mock("@tanstack/react-router", () => ({
 	Link: ({ children }: { children: ReactNode }) => <a href="/dashboard">{children}</a>,
 }));
 vi.mock("@/features/resume/builder/draft", () => ({ isEditableElementFocused: () => false }));
-vi.mock("./document-actions", () => ({ TagsDialog: () => null, LinkApplicationDialog: () => null }));
+vi.mock("./document-actions", () => ({ TagsDialog: () => null }));
 vi.mock("./document-card", () => ({ DocumentCard: () => null, DocumentRow: () => null }));
 vi.mock("./new-document-dialog", () => ({
 	useStartDocument: () => ({ startBlank: vi.fn(), trySample: vi.fn(), creating: false }),
@@ -32,7 +32,7 @@ it.each(["documents", "trash"])("keeps %s load failures distinct from empty stat
 		<I18nProvider i18n={i18n}>
 			<QueryClientProvider client={queryClient}>
 				{page === "documents" ? (
-					<DocumentsPage search={{ type: "all", q: "", tags: [], sort: "edited" }} onSearchChange={vi.fn()} />
+					<DocumentsPage search={{ q: "", tags: [], sort: "edited" }} onSearchChange={vi.fn()} />
 				) : (
 					<TrashPage />
 				)}

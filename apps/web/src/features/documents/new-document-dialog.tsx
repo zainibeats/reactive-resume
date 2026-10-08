@@ -1,36 +1,27 @@
 import type { ImportKind } from "@/features/resume/import/read-file";
+import type { IconName } from "@reactive-resume/ui/components/icon";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import { t } from "@lingui/core/macro";
-import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@reactive-resume/ui/components/dialog";
+import { DialogContent, DialogHeader, DialogTitle } from "@reactive-resume/ui/components/dialog";
 import { Icon } from "@reactive-resume/ui/components/icon";
-import { Input } from "@reactive-resume/ui/components/input";
 import { Spinner } from "@reactive-resume/ui/components/spinner";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { generateRandomName } from "@reactive-resume/utils/string";
 import { cn } from "@reactive-resume/utils/style";
 import { useNewDocumentsStore } from "./new-documents";
 import { useDialogStore } from "@/dialogs/store";
-import { applicationsListQueryOptions } from "@/features/applications/queries";
 import { detectImportKind, ImportError, readResumeFile, summarizeImport } from "@/features/resume/import/read-file";
 import { useHasUsableAiProvider } from "@/features/settings/integrations/hooks/use-has-usable-ai-provider";
 import { getOrpcErrorMessage } from "@/libs/error-message";
-import { formatRelativeTime } from "@/libs/locale";
 import { ENTER_CLASS, POP_CLASS } from "@/libs/motion";
 import { client, orpc } from "@/libs/orpc/client";
 
 export type NewDocumentDialogData = {
-	/** Open on a step other than the three choices. */
-	step?: "copy";
-	/** Copy for a job: the resume to start from. */
-	sourceResumeId?: string;
-	/** Copy for a job: the application it's for. */
-	applicationId?: string;
 	/** A file dropped on the page, imported straight away. */
 	file?: File;
 };
@@ -39,10 +30,7 @@ type Step =
 	| { name: "choose" }
 	| { name: "importing"; file: File; stage: number; notes: string[] }
 	| { name: "imported"; file: File; resumeId: string; sections: number; entries: number; flagged: number }
-	| { name: "failed"; file: File; message: string }
-	| { name: "copy" };
-
-type OpenResumeOptions = { withAssistant?: boolean; importedFrom?: string };
+	| { name: "failed"; file: File; message: string };
 
 const ACCEPT = ".pdf,.docx,.json,.zip,application/pdf,application/json,application/zip";
 
@@ -59,11 +47,7 @@ function requireImportKind(kind: ImportKind | null): ImportKind {
 }
 
 /** Runs an import and reports each stage into the dialog's step; a newer run or a cancel drops the older one's updates. */
-function useResumeImport(
-	setStep: Dispatch<SetStateAction<Step>>,
-	openLetter: (coverLetterId: string) => void,
-	applicationId?: string,
-) {
+function useResumeImport(setStep: Dispatch<SetStateAction<Step>>) {
 	const queryClient = useQueryClient();
 	const markNew = useNewDocumentsStore((state) => state.markNew);
 	const { hasUsableProvider } = useHasUsableAiProvider();
@@ -85,17 +69,6 @@ function useResumeImport(
 		setStep({ name: "importing", file, stage: 0, notes: [] });
 		try {
 			const kind = requireImportKind(await detectImportKind(file));
-
-			if (kind === "cover-letter-json") {
-				const letter = await client.coverLetters.import({ document: JSON.parse(await file.text()) });
-				if (!current()) return;
-				markNew(letter.id);
-				void refreshDocuments();
-				toast.add({ description: t`Cover letter imported` });
-				openLetter(letter.id);
-				return;
-			}
-
 			const resume = await readResumeFile(file, kind, {
 				aiAvailable: hasUsableProvider,
 				onRead: (note) => advance(1, note),
@@ -106,8 +79,6 @@ function useResumeImport(
 			advance(2, t`${summary.sections} sections`);
 
 			const resumeId = await client.resume.import({ data: resume });
-			if (!current()) return;
-			if (applicationId) await client.documents.linkApplication({ type: "resume", id: resumeId, applicationId });
 			if (!current()) return;
 			markNew(resumeId);
 			void refreshDocuments();
@@ -133,39 +104,27 @@ function useResumeImport(
 		setStep({ name: "choose" });
 	};
 
-	return { importFile, cancel, refreshDocuments };
+	return { importFile, cancel };
 }
 
+type NewDocumentDialogProps = { data?: NewDocumentDialogData | undefined };
+
 /**
- * New: import a file, copy a resume for a job, or start blank; no name, slug or tags are asked for first.
+ * New: import a file or start blank; no name, slug or tags are asked for first.
  * Importing shows three labelled steps rather than a spinner, so a slow parse still looks like progress.
  */
-export function NewDocumentDialog({ data }: { data?: NewDocumentDialogData | undefined }) {
+export function NewDocumentDialog({ data }: NewDocumentDialogProps) {
 	const navigate = useNavigate();
-	const { hasUsableProvider } = useHasUsableAiProvider();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
-	const markNew = useNewDocumentsStore((state) => state.markNew);
-	const [step, setStep] = useState<Step>({ name: data?.step ?? "choose" } as Step);
+	const [step, setStep] = useState<Step>({ name: "choose" });
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	// A copy made for a job opens with the assistant ready to tailor it.
-	const openResume = (resumeId: string, { withAssistant = false, importedFrom }: OpenResumeOptions = {}) => {
+	const openResume = (resumeId: string, importedFrom: string) => {
 		closeDialog();
-		void navigate({
-			to: "/builder/$resumeId",
-			params: { resumeId },
-			search: {
-				...(withAssistant ? { assistant: "new" } : {}),
-				...(importedFrom ? { imported: importedFrom } : {}),
-			},
-		});
-	};
-	const openLetter = (coverLetterId: string) => {
-		closeDialog();
-		void navigate({ to: "/builder/letter/$coverLetterId", params: { coverLetterId } });
+		void navigate({ to: "/builder/$resumeId", params: { resumeId }, search: { imported: importedFrom } });
 	};
 
-	const { importFile, cancel, refreshDocuments } = useResumeImport(setStep, openLetter, data?.applicationId);
+	const { importFile, cancel } = useResumeImport(setStep);
 
 	// A file dropped on the page starts importing as soon as the dialog opens.
 	const dropped = useRef(data?.file);
@@ -176,7 +135,7 @@ export function NewDocumentDialog({ data }: { data?: NewDocumentDialogData | und
 		void importFile(file);
 	});
 
-	const { startBlank, trySample, newLetter, creating } = useStartDocument(data?.applicationId);
+	const { startBlank, trySample, creating } = useStartDocument();
 
 	const chooseFile = () => inputRef.current?.click();
 
@@ -195,20 +154,7 @@ export function NewDocumentDialog({ data }: { data?: NewDocumentDialogData | und
 				}}
 			/>
 			{/* Each step fades up into place as it replaces the last; the dialog's height changes in the same frame. */}
-			{step.name === "copy" ? (
-				<div key="copy" className={cn(ENTER_CLASS, "grid gap-4")}>
-					<CopyForJob
-						initialSourceId={data?.sourceResumeId}
-						initialJobId={data?.applicationId}
-						onBack={() => setStep({ name: "choose" })}
-						onCreated={(resumeId, forJob) => {
-							markNew(resumeId);
-							void refreshDocuments();
-							openResume(resumeId, { withAssistant: forJob && hasUsableProvider });
-						}}
-					/>
-				</div>
-			) : step.name !== "choose" ? (
+			{step.name !== "choose" ? (
 				<ImportStep
 					key="progress"
 					step={step}
@@ -217,7 +163,7 @@ export function NewDocumentDialog({ data }: { data?: NewDocumentDialogData | und
 					onStartBlank={() => void startBlank()}
 					onChooseFile={chooseFile}
 					onClose={closeDialog}
-					onOpen={(resumeId, importedFrom) => openResume(resumeId, { importedFrom })}
+					onOpen={openResume}
 				/>
 			) : (
 				<div key="choose" className={cn(ENTER_CLASS, "grid gap-4")}>
@@ -225,9 +171,6 @@ export function NewDocumentDialog({ data }: { data?: NewDocumentDialogData | und
 						<DialogTitle className="font-display text-[22px] font-medium">
 							<Trans>New document</Trans>
 						</DialogTitle>
-						<DialogDescription className="sr-only">
-							<Trans>Import a resume, copy one for a job, or start blank.</Trans>
-						</DialogDescription>
 					</DialogHeader>
 
 					<button
@@ -257,31 +200,15 @@ export function NewDocumentDialog({ data }: { data?: NewDocumentDialogData | und
 						</span>
 					</button>
 
-					<div className="grid gap-3 sm:grid-cols-2">
-						<ChoiceTile
-							icon="content_copy"
-							title={t`Copy a resume for a job`}
-							description={t`Start from one you have and link the application.`}
-							onClick={() => setStep({ name: "copy" })}
-						/>
-						<ChoiceTile
-							icon="note_add"
-							title={t`Start blank`}
-							description={t`Opens the editor on your name. Nothing else to fill in first.`}
-							disabled={creating}
-							onClick={() => void startBlank()}
-						/>
-					</div>
+					<ChoiceTile
+						icon="note_add"
+						title={t`Start blank`}
+						description={t`Opens the editor on your name. Nothing else to fill in first.`}
+						disabled={creating}
+						onClick={() => void startBlank()}
+					/>
 
-					<div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 text-[13px]">
-						<button
-							type="button"
-							className="flex items-center gap-1.5 text-ink-2 hover:text-ink"
-							onClick={() => void newLetter()}
-						>
-							<Icon name="mail" size={18} />
-							<Trans>New cover letter instead</Trans>
-						</button>
+					<div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4 text-[13px]">
 						<button
 							type="button"
 							className="text-ink-2 underline underline-offset-2 hover:text-ink"
@@ -402,20 +329,17 @@ function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onCl
 	);
 }
 
-/** Start blank, try a sample, or a new letter: each creates the document at once and opens it. */
-export function useStartDocument(applicationId?: string) {
+/** Start blank or try a sample: each creates the resume at once and opens it. */
+export function useStartDocument() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const closeDialog = useDialogStore((state) => state.closeDialog);
 	const markNew = useNewDocumentsStore((state) => state.markNew);
 	const { mutateAsync: createResume, isPending: creating } = useMutation(orpc.resume.create.mutationOptions());
-	const { mutateAsync: createLetter } = useMutation(orpc.coverLetters.create.mutationOptions());
 
-	const created = async (id: string, type: "resume" | "letter") => {
-		if (applicationId) await client.documents.linkApplication({ type, id, applicationId });
+	const created = (id: string) => {
 		markNew(id);
 		void queryClient.invalidateQueries({ queryKey: orpc.documents.key() });
-		if (applicationId) void queryClient.invalidateQueries({ queryKey: orpc.applications.key() });
 		closeDialog();
 	};
 	const failed = (error: unknown) =>
@@ -434,7 +358,7 @@ export function useStartDocument(applicationId?: string) {
 					autoName: true,
 					withSampleData: false,
 				});
-				await created(resumeId, "resume");
+				created(resumeId);
 				void navigate({ to: "/builder/$resumeId", params: { resumeId } });
 			} catch (error) {
 				failed(error);
@@ -443,29 +367,9 @@ export function useStartDocument(applicationId?: string) {
 		trySample: async () => {
 			try {
 				const resumeId = await createResume({ name: generateRandomName(), tags: [], withSampleData: true });
-				await created(resumeId, "resume");
+				created(resumeId);
 				toast.add({ description: t`Sample resume added. Delete it anytime.` });
 				void navigate({ to: "/builder/$resumeId", params: { resumeId } });
-			} catch (error) {
-				failed(error);
-			}
-		},
-		newLetter: async () => {
-			// A new letter takes its sender details and design from the resume edited most recently.
-			const documents = queryClient.getQueryData(orpc.documents.list.queryKey({ input: { trashed: false } }));
-			const resume = documents
-				?.filter((document) => document.type === "resume")
-				.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
-			const input = {
-				name: t`Untitled letter`,
-				recipient: "",
-				content: "",
-				...(resume ? { resumeId: resume.id } : {}),
-			};
-			try {
-				const letter = await createLetter(input);
-				await created(letter.id, "letter");
-				void navigate({ to: "/builder/letter/$coverLetterId", params: { coverLetterId: letter.id } });
 			} catch (error) {
 				failed(error);
 			}
@@ -474,7 +378,7 @@ export function useStartDocument(applicationId?: string) {
 }
 
 type ChoiceTileProps = {
-	icon: "content_copy" | "note_add";
+	icon: IconName;
 	title: string;
 	description: string;
 	onClick: () => void;
@@ -540,160 +444,5 @@ function ImportProgress({ stage, notes }: { stage: number; notes: string[] }) {
 				/>
 			</div>
 		</div>
-	);
-}
-
-type CopyForJobProps = {
-	initialSourceId?: string | undefined;
-	initialJobId?: string | undefined;
-	onBack: () => void;
-	/** The new resume, and whether it was made for a job. */
-	onCreated: (resumeId: string, forJob: boolean) => void;
-};
-
-/** Pick a resume and a job; the copy is named from both and linked to the application. */
-function CopyForJob({ initialSourceId, initialJobId, onBack, onCreated }: CopyForJobProps) {
-	const { i18n } = useLingui();
-	const nameId = useId();
-	const { data: documents } = useQuery(orpc.documents.list.queryOptions({ input: { trashed: false } }));
-	const { data: applications } = useQuery(applicationsListQueryOptions());
-	const resumes = (documents ?? []).filter((document) => document.type === "resume");
-	const jobs = (applications ?? []).filter((application) => application.status !== "closed");
-	const [sourceId, setSourceId] = useState(initialSourceId);
-	const [jobId, setJobId] = useState<string | null>(initialJobId ?? null);
-	const [name, setName] = useState<string | null>(null);
-	const { mutateAsync: copyForJob, isPending } = useMutation(orpc.documents.copyForJob.mutationOptions());
-
-	const source = resumes.find((resume) => resume.id === sourceId) ?? resumes[0];
-	const job = jobs.find((application) => application.id === jobId);
-	const base = (source?.name ?? "").split(" — ")[0] ?? "";
-	const suggested = job ? `${base} — ${job.company}` : t`${base} (copy)`;
-	const finalName = (name ?? suggested).trim();
-
-	const create = async () => {
-		if (!source) return;
-		const input = {
-			resumeId: source.id,
-			...(job ? { applicationId: job.id } : {}),
-			...(finalName ? { name: finalName } : {}),
-		};
-		const message = job ? t`Created and linked to ${job.company}` : t`Created “${finalName}”`;
-		try {
-			const resumeId = await copyForJob(input);
-			toast.add({ description: message });
-			onCreated(resumeId, Boolean(job));
-		} catch (error) {
-			toast.add({ type: "error", description: getOrpcErrorMessage(error, { fallback: t`Couldn't copy the resume.` }) });
-		}
-	};
-
-	return (
-		<>
-			<DialogHeader>
-				<DialogTitle className="font-display text-[22px] font-medium">
-					<Trans>Copy a resume for a job</Trans>
-				</DialogTitle>
-			</DialogHeader>
-
-			<fieldset className="grid gap-1.5">
-				<legend className="mb-1.5 text-xs font-medium text-ink-2">
-					<Trans>Start from</Trans>
-				</legend>
-				{documents && resumes.length === 0 && (
-					<p className="text-sm text-ink-2">
-						<Trans>
-							You don't have a resume to copy yet. Import or create a resume first, then return to copy it for this job.
-						</Trans>
-					</p>
-				)}
-				<div className="grid max-h-56 gap-1 overflow-y-auto">
-					{resumes.map((resume) => (
-						<label
-							key={resume.id}
-							className={cn(
-								"relative flex cursor-pointer items-center gap-3 rounded-[10px] border px-3 py-2.5 transition-colors duration-quick",
-								resume.id === source?.id ? "border-accent bg-accent-soft" : "border-line hover:bg-hover",
-							)}
-						>
-							<input
-								type="radio"
-								name="copy-source"
-								className="sr-only"
-								checked={resume.id === source?.id}
-								onChange={() => {
-									setSourceId(resume.id);
-									setName(null);
-								}}
-							/>
-							<Icon name="description" className="text-ink-2" />
-							<span className="grid min-w-0 flex-1">
-								<span className="truncate text-sm font-medium">{resume.name}</span>
-								<span className="text-xs text-ink-3">{formatRelativeTime(resume.updatedAt, i18n.locale)}</span>
-							</span>
-						</label>
-					))}
-				</div>
-			</fieldset>
-
-			<fieldset className="grid gap-1.5">
-				<legend className="mb-1.5 text-xs font-medium text-ink-2">
-					<Trans>For which job?</Trans>
-				</legend>
-				<div className="flex flex-wrap gap-1.5">
-					{[
-						...jobs.map((application) => ({ id: application.id, label: application.company })),
-						{ id: null, label: t`No job yet` },
-					].map((option) => (
-						<button
-							key={option.id ?? "none"}
-							type="button"
-							aria-pressed={jobId === option.id}
-							onClick={() => {
-								setJobId(option.id);
-								setName(null);
-							}}
-							className={cn(
-								"flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] transition-[background-color,border-color,color,scale] duration-quick ease-enter active:scale-[0.97]",
-								jobId === option.id
-									? "border-accent bg-accent-soft text-accent-text"
-									: "border-line-2 text-ink-2 hover:bg-hover",
-							)}
-						>
-							{option.id && <Icon name="work" size={16} />}
-							{option.label}
-						</button>
-					))}
-				</div>
-				{job && (
-					<span className="text-xs text-ink-3">
-						<Trans>The copy is linked to the application, so Check and the assistant use its posting.</Trans>
-					</span>
-				)}
-			</fieldset>
-
-			<div className="grid gap-1.5">
-				<label htmlFor={nameId} className="text-xs font-medium text-ink-2">
-					<Trans>Name</Trans>
-				</label>
-				<Input
-					id={nameId}
-					value={name ?? suggested}
-					maxLength={100}
-					onChange={(event) => setName(event.target.value)}
-				/>
-				<span className="text-xs text-ink-3">
-					<Trans>Suggested from the source and the job. Change it anytime.</Trans>
-				</span>
-			</div>
-
-			<div className="flex flex-wrap justify-end gap-2">
-				<Button variant="ghost" onClick={onBack}>
-					{documents && resumes.length === 0 ? <Trans>Import or create a resume</Trans> : <Trans>Back</Trans>}
-				</Button>
-				<Button disabled={!source || !finalName || isPending} onClick={() => void create()}>
-					<Trans>Create and open</Trans>
-				</Button>
-			</div>
-		</>
 	);
 }

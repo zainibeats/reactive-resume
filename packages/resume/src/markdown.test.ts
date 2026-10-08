@@ -1,19 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
-import { copyCoverLetterStyle, createCoverLetterResumeData } from "./cover-letter";
 import { getResumeExportData } from "./export-sections";
 import { buildMarkdown, htmlToMarkdown } from "./markdown";
 
-// A letter's document, as the letter export builds it: resume data with one cover-letter section.
+// A resume carrying a cover letter: a cover-letter section on a page of its own.
 const withLetter = () => {
 	const data = structuredClone(sampleResumeData);
-	const letter = createCoverLetterResumeData({
-		name: "Cover Letter",
-		recipient: "<p>Hiring Manager</p>",
-		content: "<p>Dear Hiring Manager,</p><p>I'm excited to apply.</p>",
-		style: copyCoverLetterStyle(data, "letter-section", "letter-item"),
+	data.customSections.push({
+		id: "letter-section",
+		type: "cover-letter",
+		title: "Cover Letter",
+		icon: "envelope",
+		columns: 1,
+		hidden: false,
+		keepTogether: false,
+		startOnNewPage: false,
+		items: [
+			{
+				id: "letter-item",
+				hidden: false,
+				recipient: "<p>Hiring Manager</p>",
+				content: "<p>Dear Hiring Manager,</p><p>I'm excited to apply.</p>",
+			},
+		],
 	});
-	data.customSections.push(...letter.customSections);
 	data.metadata.layout.pages.push({ fullWidth: true, main: ["letter-section"], sidebar: [] });
 	return data;
 };

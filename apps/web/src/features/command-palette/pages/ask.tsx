@@ -11,8 +11,8 @@ import { openAssistantFrom } from "@/features/assistant/open";
 import { orpc } from "@/libs/orpc/client";
 
 /**
- * Always the last row: "Ask the assistant '…'". In the editor it asks about the open document; anywhere else it
- * opens the document edited last, with the assistant ready and the question sent.
+ * Always the last row: "Ask the assistant '…'". In the editor it asks about the open resume; anywhere else it
+ * opens the resume edited last, with the assistant ready and the question sent.
  */
 export function AskCommandGroup() {
 	const search = useCommandPaletteStore((state) => state.search);
@@ -37,13 +37,7 @@ export function AskCommandGroup() {
 			toast.add({ description: t`Create a resume first, then ask about it.` });
 			return;
 		}
-		if (latest.type === "letter")
-			await navigate({
-				to: "/builder/letter/$coverLetterId",
-				params: { coverLetterId: latest.id },
-				search: { ask: question },
-			});
-		else await navigate({ to: "/builder/$resumeId", params: { resumeId: latest.id }, search: { ask: question } });
+		await navigate({ to: "/builder/$resumeId", params: { resumeId: latest.id }, search: { ask: question } });
 	};
 
 	return (

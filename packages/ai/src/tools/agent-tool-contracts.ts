@@ -91,7 +91,7 @@ export function agentWebSources(message: UIMessage): AgentWebSource[] {
 
 /** One edit: rewrite a passage of the document, or add a new passage after it. */
 export const proposedEditInputSchema = z.object({
-	passageId: z.string().trim().min(1).describe("The id of a passage from read_resume or read_letter."),
+	passageId: z.string().trim().min(1).describe("The id of a passage from read_resume."),
 	text: z
 		.string()
 		.trim()
@@ -170,6 +170,7 @@ export type AgentMessageMetadata = z.infer<typeof agentMessageMetadataSchema>;
 export type AgentTools = {
 	ask_user_question: { input: AskUserQuestionInput; output: string };
 	read_resume: { input: Record<string, never>; output: unknown };
+	// Conversations about letters, from before the assistant was resume-only, stay readable.
 	read_letter: { input: Record<string, never>; output: unknown };
 	read_attachment: { input: { attachmentId: string }; output: unknown };
 	propose_edits: { input: ProposeEditsInput; output: ProposeEditsOutput };

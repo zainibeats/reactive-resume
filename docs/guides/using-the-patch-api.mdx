@@ -203,7 +203,7 @@ If the resume has moved on, you get `409` with the code `RESUME_VERSION_CONFLICT
 - **All or nothing.** The operations run in order inside one transaction. If any operation fails, or the result doesn't match the resume schema, none of them are saved.
 - **Validation.** The patched resume must pass the same validation as any other save. For example, `/metadata/template` must be one of the available templates. Rich-text fields such as `description` and `/summary/content` are HTML strings, so send HTML (`<p>…</p>`) rather than plain text or Markdown.
 - **History.** Each successful patch saves a version in the resume's history. It appears as **AI edit**, described as "from the assistant or API", and you can restore an earlier version from the editor. See [Undoing changes and version history](/guides/undoing-changes-and-version-history).
-- **Cover letters leave the resume.** If a patch adds a section of type `cover-letter`, the server saves its letter as a separate cover letter linked to the resume and removes the section. Manage letters with the `/cover-letters` endpoints instead.
+- **Cover letters stay in the resume.** A section of type `cover-letter` is ordinary resume content. Patch it like any other custom section; there are no separate cover-letter endpoints.
 - **Public resumes update at once.** If the resume is public, the change is visible on its public page straight away.
 
 ## Errors

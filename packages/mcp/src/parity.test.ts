@@ -144,11 +144,11 @@ it("rejects foreign and traversing file references before reading storage or inv
 	expect(calls.rest.fileUpload).not.toHaveBeenCalled();
 });
 
-it("keeps cover-letter, application and platform-statistics procedures off MCP", async () => {
+it("keeps cover-letter, job-application and platform-statistics procedures off MCP", async () => {
 	const { tools } = await client.listTools();
 	const names = tools.map((tool) => tool.name);
 
-	expect(names.filter((name) => /cover_letter|application|^api_statistics_/.test(name))).toEqual([]);
+	expect(names.filter((name) => /letter|application|job|^api_statistics_/.test(name))).toEqual([]);
 });
 
 it("embeds actual resume JSON in prompts and propagates inaccessible-document errors", async () => {

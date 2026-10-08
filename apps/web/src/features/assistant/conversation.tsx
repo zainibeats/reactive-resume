@@ -403,10 +403,9 @@ function ToolPartView({
 
 	switch (part.type) {
 		case "tool-read_resume":
-		case "tool-read_letter":
 			return (
 				<Status working={working}>
-					{part.type === "tool-read_letter" ? <Trans>Read the letter</Trans> : <Trans>Read the resume</Trans>}
+					<Trans>Read the resume</Trans>
 				</Status>
 			);
 		case "tool-read_attachment":
@@ -678,51 +677,24 @@ export function Composer(props: ComposerProps) {
 		}
 	};
 
-	const chips = [
-		{
-			key: "document" as const,
-			icon: document.kind === "letter" ? ("mail" as const) : ("description" as const),
-			label: document.name,
-		},
-		...(document.posting
-			? [
-					{
-						key: "posting" as const,
-						icon: "work" as const,
-						label: t`${document.posting.company} posting`,
-					},
-				]
-			: []),
-	].filter((chip) => context[chip.key]);
-
 	const provider = props.providerLabel;
-	const sharesPosting = context.posting && document.posting;
 	const disclosure = context.document
-		? document.kind === "letter"
-			? sharesPosting
-				? t`Sends this letter and the posting to ${provider} with your key, only when you press send.`
-				: t`Sends this letter to ${provider} with your key, only when you press send.`
-			: sharesPosting
-				? t`Sends this resume and the posting to ${provider} with your key, only when you press send.`
-				: t`Sends this resume to ${provider} with your key, only when you press send.`
-		: sharesPosting
-			? t`Sends your message and the posting to ${provider} with your key, only when you press send.`
-			: t`Sends your message to ${provider} with your key, only when you press send.`;
+		? t`Sends this resume to ${provider} with your key, only when you press send.`
+		: t`Sends your message to ${provider} with your key, only when you press send.`;
 
 	return (
 		<div className="grid gap-2 border-t border-line bg-surface px-3 pt-2.5 pb-3">
-			{(chips.length > 0 || attachments.length > 0) && (
+			{(context.document || attachments.length > 0) && (
 				<div className="flex flex-wrap gap-1.5">
-					{chips.map((chip) => (
+					{context.document && (
 						<RemovableChip
-							key={chip.key}
-							icon={chip.icon}
-							label={chip.label}
+							icon="description"
+							label={document.name}
 							maxWidth="max-w-[160px]"
-							removeLabel={t`Don't send ${chip.label}`}
-							onRemove={() => onContextChange({ ...context, [chip.key]: false })}
+							removeLabel={t`Don't send ${document.name}`}
+							onRemove={() => onContextChange({ document: false })}
 						/>
-					))}
+					)}
 					{attachments.map((attachment) => (
 						<RemovableChip
 							key={attachment.id}
@@ -794,7 +766,7 @@ export function Composer(props: ComposerProps) {
 
 			<p className="text-xs leading-4 text-ink-3">
 				{disclosure}{" "}
-				{!context.document || !context.posting ? (
+				{!context.document ? (
 					<Trans>
 						Each send starts fresh with this message and selected files. Previous conversation history stays here.
 					</Trans>

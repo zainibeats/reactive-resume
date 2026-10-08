@@ -6,7 +6,7 @@ import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { createContext, useContext, useId, useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
@@ -40,18 +40,12 @@ type Metadata = Pick<ResumeData["metadata"], "typography" | "design" | "page">;
 /** Edits the design; `key` names the control, so dragging a slider is one undo step. */
 type DesignWriter = (key: string, mutate: (metadata: WritableDraft<Metadata>) => void, discrete?: boolean) => void;
 
-export type DesignSource = { metadata: Metadata | undefined; write: DesignWriter };
+type DesignSource = { metadata: Metadata | undefined; write: DesignWriter };
 
-const DesignSourceContext = createContext<DesignSource | null>(null);
-
-/** Points the Type, Color and Page groups at another design than the open resume's (a letter's own). */
-export const DesignSourceProvider = DesignSourceContext.Provider;
-
+/** The open resume's design, for the Type, Color and Page groups. */
 function useDesign(): DesignSource {
-	const source = useContext(DesignSourceContext);
 	const data = useResumeData();
 	const updateResumeData = useUpdateResumeData();
-	if (source) return source;
 	return {
 		metadata: data?.metadata,
 		write: (key, mutate, discrete = false) =>

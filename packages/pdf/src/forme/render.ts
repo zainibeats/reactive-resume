@@ -1,4 +1,3 @@
-import type { ResumeRenderOptions } from "../context";
 import type { PageMap } from "../page-map";
 import type { SectionTitleResolver } from "../section-title";
 import type { ConvertedDocument } from "./to-forme";
@@ -27,7 +26,6 @@ export type RenderResumeInput = {
 	/** Parsed with `parseResumeData`: the entry points check data at their boundary. */
 	data: ResumeData;
 	template?: Template | undefined;
-	renderOptions?: ResumeRenderOptions | undefined;
 	resolveSectionTitle?: SectionTitleResolver | undefined;
 	readImage?: ((source: string) => Promise<Uint8Array>) | undefined;
 };
@@ -152,7 +150,7 @@ function measuredHeight(result: RenderWithLayoutResult, pageIndex: number, margi
 }
 
 /**
- * Renders a resume or letter to PDF bytes with its page map. Every PDF in the app goes through here: the live
+ * Renders a resume to PDF bytes with its page map. Every PDF in the app goes through here: the live
  * preview, downloads, thumbnails, the public page and the server export.
  */
 export function renderResume(engine: FormeEngine, input: RenderResumeInput): Promise<RenderedResume> {
@@ -162,7 +160,6 @@ export function renderResume(engine: FormeEngine, input: RenderResumeInput): Pro
 		createElement(ResumeDocument, {
 			data,
 			template: input.template ?? data.metadata.template,
-			...(input.renderOptions ? { renderOptions: input.renderOptions } : {}),
 			resolveSectionTitle: input.resolveSectionTitle,
 		}),
 		input.readImage,

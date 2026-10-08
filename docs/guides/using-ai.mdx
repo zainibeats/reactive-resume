@@ -3,7 +3,7 @@ title: "Connecting an AI provider"
 description: "Add your own AI provider key in Reactive Resume, test the connection, and choose which provider the assistant and other AI features use."
 ---
 
-Reactive Resume doesn't include an AI model of its own. To use the assistant, AI imports, drafting and the other AI features, connect a provider such as OpenAI, Anthropic or Google Gemini. Everything else in the app works without AI.
+Reactive Resume doesn't include an AI model of its own. To use the assistant, AI imports and the other AI features, connect a provider such as OpenAI, Anthropic or Google Gemini. Everything else in the app works without AI.
 
 On a self-hosted instance, the administrator can [configure a shared provider](/self-hosting/job-search-and-ai).
 Settings then show that AI is enabled globally, and personal provider controls are hidden. You can use AI features
@@ -135,14 +135,12 @@ Self-hosted instances encrypt keys with the `ENCRYPTION_SECRET` environment vari
 
 Requests go from the Reactive Resume server to the provider you chose, using your key. Nothing is sent until you use an AI feature, and each feature sends only what it needs:
 
-| Feature                      | What is sent                                                                                                                                                                                                                                  |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Assistant                    | Your message, the open resume or letter (unless you remove it from the message), the job posting and your notes on the linked application (unless you remove the posting), attachments you add, and the earlier messages in the conversation. |
-| **Improve selected line**    | The line you're improving and the rest of that field.                                                                                                                                                                                         |
-| **Check → Writing**          | The text of your resume.                                                                                                                                                                                                                      |
-| Importing a PDF or Word file | The file you import.                                                                                                                                                                                                                          |
-| Drafting a letter            | The linked resume and the application's job posting.                                                                                                                                                                                          |
-| Adding an application        | Job posting text you paste or import from a URL.                                                                                                                                                                                              |
+| Feature                      | What is sent                                                                                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Assistant                    | Your message, the open resume (unless you remove it from the message), attachments you add, and the earlier messages in the conversation. |
+| **Improve selected line**    | The line you're improving and the rest of that field.                                                                                     |
+| **Check → Writing**          | The text of your resume.                                                                                                                  |
+| Importing a PDF or Word file | The file you import.                                                                                                                      |
 
 Your provider handles that data under its own terms and privacy policy. Reactive Resume keeps assistant conversations and their attachments in your account until you delete the conversation.
 

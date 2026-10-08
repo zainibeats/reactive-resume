@@ -18,7 +18,7 @@ resume[template="azurill"] template-part[name="timeline-dot"] { background-color
 `,
 } as const;
 
-/** A cover letter, as resumes carried them and as a letter's own document still renders it. */
+/** A cover letter, as resumes carry it. */
 const LETTER_SECTION: ResumeData["customSections"][number] = {
 	title: "Cover Letter",
 	icon: "envelope-simple",
@@ -74,7 +74,7 @@ export const buildAllTemplatesFixture = (template: Template) => {
 	for (const certification of data.sections.certifications.items) {
 		certification.description = "<p>Verified certification.</p>";
 	}
-	// Letters render through the same templates, as a cover-letter section; the fixture keeps one to cover it.
+	// Cover letters render through the same templates, as a cover-letter section; the fixture keeps one to cover it.
 	data.customSections.push(LETTER_SECTION);
 	data.metadata.layout.pages.push({ fullWidth: true, main: [LETTER_SECTION.id], sidebar: [] });
 	data.metadata.template = template;

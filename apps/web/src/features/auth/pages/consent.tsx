@@ -95,12 +95,12 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 							<>
 								{scopes.has("api:read") && (
 									<li>
-										<Trans>Read your documents and job applications.</Trans>
+										<Trans>Read your documents.</Trans>
 									</li>
 								)}
 								{scopes.has("api:write") && (
 									<li>
-										<Trans>Create and change your documents and job applications.</Trans>
+										<Trans>Create and change your documents.</Trans>
 									</li>
 								)}
 								{scopes.has("api:delete") && (
@@ -112,8 +112,7 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 						) : (
 							<li>
 								<Trans>
-									Access your account through the API, including reading, changing and deleting your documents and job
-									applications.
+									Access your account through the API, including reading, changing and deleting your documents.
 								</Trans>
 							</li>
 						)}

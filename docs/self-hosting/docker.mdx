@@ -23,13 +23,13 @@ The official image runs a single Node.js process on port `3000`. It serves the w
 uploaded files from one address. PDFs are rendered by the app itself, in the browser or on the server, so there is no
 separate printer service.
 
-| Service                      | Required | Purpose                                                                                                                                 |
-| ---------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| PostgreSQL                   | Yes      | Stores accounts, resumes, cover letters and applications. Runs as its own container or managed database.                                |
-| Upload storage               | Yes      | A folder mounted at `/app/data`, or an S3-compatible bucket instead.                                                                    |
-| SMTP server                  | No       | Sends verification and password reset emails. Without it, emails are written to the app log.                                            |
-| Redis                        | No       | Shares state between several app processes and lets Assistant replies survive a page reload.                                            |
-| Firecrawl and an AI provider | No       | Enable keyword job search, read posting URLs and extract application details. See [Job search and AI](/self-hosting/job-search-and-ai). |
+| Service                       | Required | Purpose                                                                                                                                        |
+| ----------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL                    | Yes      | Stores accounts and resumes. Runs as its own container or managed database.                                                                    |
+| Upload storage                | Yes      | A folder mounted at `/app/data`, or an S3-compatible bucket instead.                                                                           |
+| SMTP server                   | No       | Sends verification and password reset emails. Without it, emails are written to the app log.                                                   |
+| Redis                         | No       | Shares state between several app processes and lets Assistant replies survive a page reload.                                                   |
+| Web access and an AI provider | No       | Power the Assistant and other AI features, and let it search the web and read pages. See [Web access and AI](/self-hosting/job-search-and-ai). |
 
 The image is published to two registries with the same tags:
 
@@ -174,8 +174,8 @@ Your instance is running. Next, you might want to:
 - **Keep it private.** After your own account exists, add `FLAG_DISABLE_SIGNUPS="true"` to `.env` and run
   `docker compose up -d`. Nobody else can sign up; existing accounts keep working.
 - **Send real emails.** Add the `SMTP_*` settings from the [reference](/self-hosting/environment-variables#email).
-- **Turn on job search and AI.** Connect shared Firecrawl and AI services, or enable personal keys with
-  `ENCRYPTION_SECRET`. See [Job search and AI](/self-hosting/job-search-and-ai).
+- **Turn on AI and web access.** Connect shared AI and web-access services, or enable personal keys with
+  `ENCRYPTION_SECRET`. See [Web access and AI](/self-hosting/job-search-and-ai).
 - **Serve it over HTTPS.** Put a reverse proxy in front and set `APP_URL` to the public `https://` address. See
   [Deployment examples](/self-hosting/examples).
 
@@ -362,7 +362,7 @@ There is no official app template. Use your platform's generic container setting
 
 <Accordion title="The Assistant says it isn't set up on this server">
   Configure a shared AI provider, or set `ENCRYPTION_SECRET` to at least 32 characters so users can save personal
-  providers. Recreate the container, then check [Job search and AI](/self-hosting/job-search-and-ai).
+  providers. Recreate the container, then check [Web access and AI](/self-hosting/job-search-and-ai).
 </Accordion>
 
   <Accordion title="PDF download fails in the browser">
@@ -375,6 +375,6 @@ There is no official app template. Use your platform's generic container setting
 
 - [Environment variables](/self-hosting/environment-variables): every setting, with defaults.
 - [Deployment examples](/self-hosting/examples): reverse proxies, S3 storage, Redis and local AI.
-- [Job search and AI](/self-hosting/job-search-and-ai): Firecrawl, SearXNG and shared or personal AI providers.
+- [Web access and AI](/self-hosting/job-search-and-ai): shared or personal AI providers, Firecrawl, Tavily, Exa and SearXNG.
 - [Self-hosting with Kubernetes](/self-hosting/kubernetes): the same setup as Kubernetes manifests.
 - [Checking service status](/guides/checking-service-status): the status of the hosted instance.
