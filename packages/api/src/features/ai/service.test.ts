@@ -10,13 +10,40 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-function stubOpenAICompatibleResponse() {
+function stubOpenAIResponse() {
 	let requestBody: unknown;
 
-	const fetchMock = vi.fn((_input: unknown, init?: { body?: unknown }) => {
-		const body = JSON.parse(String(init?.body ?? "{}")) as { max_tokens?: number };
+	const fetchMock = vi.fn((input: unknown, init?: { body?: unknown }) => {
+		const body = JSON.parse(String(init?.body ?? "{}")) as {
+			max_tokens?: number;
+			max_completion_tokens?: number;
+			max_output_tokens?: number;
+		};
 		requestBody = body;
-		const hasEnoughOutputTokens = (body.max_tokens ?? 0) >= 128;
+		const hasEnoughOutputTokens = (body.max_tokens ?? body.max_completion_tokens ?? body.max_output_tokens ?? 0) >= 128;
+		const text = hasEnoughOutputTokens ? "1" : "";
+		if (String(input).endsWith("/responses")) {
+			return new Response(
+				JSON.stringify({
+					id: "resp-test",
+					object: "response",
+					created_at: 1,
+					model: "test-model",
+					status: "completed",
+					output: [
+						{
+							type: "message",
+							id: "msg-test",
+							role: "assistant",
+							status: "completed",
+							content: [{ type: "output_text", text, annotations: [] }],
+						},
+					],
+					usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+				}),
+				{ headers: { "Content-Type": "application/json" } },
+			);
+		}
 
 		return new Response(
 			JSON.stringify({
@@ -27,7 +54,7 @@ function stubOpenAICompatibleResponse() {
 				choices: [
 					{
 						index: 0,
-						message: { role: "assistant", content: hasEnoughOutputTokens ? "1" : "" },
+						message: { role: "assistant", content: text },
 						finish_reason: hasEnoughOutputTokens ? "stop" : "length",
 					},
 				],
@@ -46,7 +73,7 @@ const { testConnection } = await import("./service");
 
 describe("AI chat service", () => {
 	it("tests OpenAI-compatible providers without requiring structured output", async () => {
-		const openAiCompatible = stubOpenAICompatibleResponse();
+		const openAiCompatible = stubOpenAIResponse();
 
 		await expect(
 			testConnection({
@@ -59,6 +86,18 @@ describe("AI chat service", () => {
 
 		expect(openAiCompatible.fetchMock).toHaveBeenCalledTimes(1);
 		expect(openAiCompatible.getRequestBody()).not.toHaveProperty("response_format");
-		expect(openAiCompatible.getRequestBody()).toMatchObject({ max_tokens: 128, temperature: 0 });
+		expect(openAiCompatible.getRequestBody()).toMatchObject({ max_tokens: 128 });
+	});
+	it("tests OpenAI reasoning models without unsupported setting warnings", async () => {
+		const { fetchMock } = stubOpenAIResponse();
+		const warnings = vi.fn();
+		vi.stubGlobal("AI_SDK_LOG_WARNINGS", warnings);
+
+		await expect(
+			testConnection({ provider: "openai", model: "gpt-6.1-sol", apiKey: "test-key", baseURL: "" }),
+		).resolves.toEqual({ ok: true });
+
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(warnings).not.toHaveBeenCalled();
 	});
 });
