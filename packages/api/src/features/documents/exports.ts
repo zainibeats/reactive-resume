@@ -53,6 +53,7 @@ export const documentExports = {
 			tags: ["Resumes"],
 			operationId: "exportResumeFile",
 			summary: "Download a resume in PDF, DOCX, Markdown or JSON",
+			description: "Renders the resume as a file in the chosen format.",
 			outputStructure: "detailed",
 		})
 		.input(exportInput)
