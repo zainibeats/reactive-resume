@@ -55,6 +55,9 @@ const resumeDataReference = {
 		"Reactive Resume data (basics, summary, sections, customSections, metadata). Full JSON Schema: the resume://_meta/schema MCP resource, also served at /schema.json on this server.",
 } as const;
 
+// Directories reject input parameters without a type, so free-form JSON inputs list every JSON type.
+const anyJsonTypes = (["string", "number", "boolean", "object", "array", "null"] as const).map((type) => ({ type }));
+
 /** MCP JSON values retain the API's native dates and files through explicit wire forms. */
 export function wireJsonSchema(schema: z.ZodType, io: "input" | "output" = "output") {
 	return z.toJSONSchema(schema, {
@@ -70,6 +73,8 @@ export function wireJsonSchema(schema: z.ZodType, io: "input" | "output" = "outp
 			throw new Error(`Unsupported MCP schema: ${zodSchema._zod.def.type}`);
 		},
 		override: ({ zodSchema, jsonSchema }) => {
+			const type = zodSchema._zod.def.type;
+			if (io === "input" && (type === "unknown" || type === "any")) jsonSchema.anyOf = anyJsonTypes;
 			if (zodSchema === resumeDataSchema) {
 				for (const key of Object.keys(jsonSchema)) delete jsonSchema[key];
 				Object.assign(jsonSchema, resumeDataReference);
