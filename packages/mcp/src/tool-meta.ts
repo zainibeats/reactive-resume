@@ -333,7 +333,17 @@ const pagination = {
 	offset: z.number().int().min(0).default(0).describe("Rows to skip; default 0."),
 };
 // Shared DTOs keep fields, validation and limits aligned with API contracts.
-export const TOOL_META = {
+// Directories show annotations.title as the tool's name, so every tool repeats its title there.
+function withAnnotationTitles<T extends Record<string, { title: string; annotations: ToolAnnotations }>>(meta: T): T {
+	return Object.fromEntries(
+		Object.entries(meta).map(([name, tool]) => [
+			name,
+			{ ...tool, annotations: { title: tool.title, ...tool.annotations } },
+		]),
+	) as T;
+}
+
+export const TOOL_META = withAnnotationTitles({
 	...BASE_TOOL_META,
 	[T.listResumes]: {
 		...BASE_TOOL_META[T.listResumes],
@@ -392,4 +402,4 @@ export const TOOL_META = {
 				.extend({ shareUrl: z.string() }),
 		),
 	},
-} as const;
+} as const);
