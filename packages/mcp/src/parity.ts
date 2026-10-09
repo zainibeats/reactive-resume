@@ -89,11 +89,12 @@ const readOnlyPosts = new Set([
 ]);
 const exportPaths = new Set(["rest.documentExports.resume"]);
 const destructiveWrites = new Set(["agent.messages.stop"]);
-// Changes what a public resume link shows, or sends content to the user's AI provider.
+// Changes what a public resume link or uploaded file URL shows, or sends content to the user's AI provider.
 const openWorldPaths = new Set([
 	"resume.update",
 	"resume.restoreVersion",
 	"resume.removePassword",
+	"rest.fileUpload",
 	"agent.messages.send",
 ]);
 
