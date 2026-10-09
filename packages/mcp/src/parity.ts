@@ -27,7 +27,6 @@ const PARITY_PROCEDURES = {
 	"resume.update": router.resume.update,
 	"resume.statistics.getDailyById": router.resume.statistics.getDailyById,
 	"resume.statistics.recordDownload": router.resume.statistics.recordDownload,
-	"resume.updates.subscribe": router.resume.updates.subscribe,
 	"documents.list": router.documents.list,
 	"documents.counts": router.documents.counts,
 	"documents.rename": router.documents.rename,
@@ -89,6 +88,14 @@ const readOnlyPosts = new Set([
 	"webAccess.test",
 ]);
 const exportPaths = new Set(["rest.documentExports.resume"]);
+const destructiveWrites = new Set(["agent.messages.stop"]);
+// Changes what a public resume link shows, or sends content to the user's AI provider.
+const openWorldPaths = new Set([
+	"resume.update",
+	"resume.restoreVersion",
+	"resume.removePassword",
+	"agent.messages.send",
+]);
 
 /** These workflows require browser interaction so secrets and security ceremonies stay with the user. */
 const BROWSER_HANDOFFS = {
@@ -211,9 +218,7 @@ export function parityToolContract(path: string, procedure: AnyProcedure): Parit
 		? z.object({ url: z.url(), requiresAuthentication: z.literal(true) })
 		: streamingPaths.has(path)
 			? z.object({ events: z.array(z.string()), truncated: z.boolean() })
-			: path === "resume.updates.subscribe"
-				? toWireObjectSchema(requireZod(router.resume.getById["~orpc"].outputSchema))
-				: toWireObjectSchema(requireZod(definition.outputSchema));
+			: toWireObjectSchema(requireZod(definition.outputSchema));
 	const contract = { inputJson, inputSchema: boundedInput, outputSchema };
 	if (!contracts) {
 		contracts = new Map();
@@ -242,15 +247,18 @@ export const PARITY_TOOL_META: Record<
 				parityToolName(path),
 				{
 					title,
-					description: `${route.description ?? route.summary ?? path}${path === "resume.updates.subscribe" ? " Returns an owned snapshot; poll updatedAt for changes over stateless MCP." : ""}${streamingPaths.has(path) ? " Returns collected stream chunks, at most 500,000 characters; use the thread getter to retrieve persisted assistant replies." : ""}${exportPaths.has(path) ? " Returns an authenticated REST download URL; send the same bearer token or API key to download. Rendering occurs when downloaded." : ""}`,
+					description: `${sentence(route.description ?? route.summary ?? path)}${path.startsWith("agent.messages.") && streamingPaths.has(path) ? " Returns collected stream chunks, at most 500,000 characters; use the thread getter to retrieve persisted assistant replies." : ""}${exportPaths.has(path) ? " Returns an authenticated REST download URL; send the same bearer token or API key to download. Rendering occurs when downloaded." : ""}`,
 					inputSchema: contract.inputSchema,
 					outputSchema: contract.outputSchema,
 					annotations: {
 						title,
 						readOnlyHint: readOnly,
-						destructiveHint: !readOnly && /update|delete|purge|remove|restore|password|trash|set/i.test(path),
+						destructiveHint:
+							!readOnly &&
+							(destructiveWrites.has(path) || /update|delete|purge|remove|restore|password|trash|set/i.test(path)),
 						idempotentHint: readOnly && !/draft|parse|test|search|improve|review/i.test(path),
-						openWorldHint: /ai|webAccess|storage|attachments|Exports|importResumeFile/i.test(path),
+						openWorldHint:
+							openWorldPaths.has(path) || /ai|webAccess|storage|attachments|Exports|importResumeFile/i.test(path),
 					},
 				},
 			];
@@ -259,6 +267,11 @@ export const PARITY_TOOL_META: Record<
 	...browserToolMeta,
 	open_account_settings: accountToolMeta,
 };
+
+/** Route summaries have no full stop; descriptions append further sentences. */
+function sentence(text: string) {
+	return /[.!?]$/.test(text) ? text : `${text}.`;
+}
 
 function requireZod(schema: unknown): z.ZodType {
 	if (!(schema instanceof z.ZodType)) throw new Error("MCP procedure requires a Zod contract.");
@@ -394,7 +407,7 @@ export function registerParityTools(
 						...(context.signal && { signal: context.signal }),
 					});
 				} else {
-					result = await getClientCall(client, path === "resume.updates.subscribe" ? "resume.getById" : path)(input);
+					result = await getClientCall(client, path)(input);
 				}
 				if (streamingPaths.has(path)) {
 					const events: string[] = [];
