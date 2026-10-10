@@ -3,6 +3,11 @@
 Reactive Resume is a self-hostable resume builder for one owner. Create, import, edit, export, and share resumes from a
 focused web interface. The builder includes an optional AI assistant for improving the resume currently being edited.
 
+> This is a simplified fork of [Reactive Resume](https://github.com/reactive-resume/reactive-resume) by Amruth Pillai.
+> It is a single-owner resume builder: the marketing site, job-application tracker, cover-letter documents, Career area,
+> platform statistics, and admin/multi-user features are removed. Upstream fixes and resume-builder improvements are
+> cherry-picked selectively, so this fork no longer tracks upstream wholesale.
+
 ## What it does
 
 - Builds resumes with live PDF previews and configurable templates.
