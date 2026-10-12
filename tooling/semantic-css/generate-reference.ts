@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import {
 	createCustomSectionItemJsonSchemas,
@@ -6,7 +6,6 @@ import {
 } from "@reactive-resume/schema/resume/json-schema";
 
 export type DocumentationPaths = {
-	jsonSchemaGuide: string;
 	skillSchemaReference: string;
 };
 
@@ -29,7 +28,6 @@ export type JsonSchema = {
 };
 
 const defaultPaths: DocumentationPaths = {
-	jsonSchemaGuide: fileURLToPath(new URL("../../docs/guides/json-resume-schema.mdx", import.meta.url)),
 	skillSchemaReference: fileURLToPath(new URL("../../skills/resume-builder/references/schema.md", import.meta.url)),
 };
 
@@ -43,22 +41,6 @@ const sentenceList = (values: readonly unknown[]) => {
 };
 const table = (headers: readonly string[], rows: readonly string[]) =>
 	[`| ${headers.join(" | ")} |`, `| ${headers.map(() => "---").join(" | ")} |`, ...rows].join("\n");
-
-export function replaceGeneratedBlock(source: string, name: string, body: string, path: string): string {
-	const start = `{/* ${name}:START */}`;
-	const end = `{/* ${name}:END */}`;
-	const startMatches = source.split(start).length - 1;
-	const endMatches = source.split(end).length - 1;
-
-	if (startMatches === 0 || endMatches === 0) throw new Error(`Missing generated markers ${name} in ${path}.`);
-	if (startMatches !== 1 || endMatches !== 1) throw new Error(`Duplicate generated markers ${name} in ${path}.`);
-
-	const startIndex = source.indexOf(start);
-	const endIndex = source.indexOf(end);
-	if (endIndex < startIndex) throw new Error(`Generated markers ${name} are out of order in ${path}.`);
-
-	return `${source.slice(0, startIndex)}${start}\n${body}\n${end}${source.slice(endIndex + end.length)}`;
-}
 
 function schemaType(schema: JsonSchema): string {
 	const union = schema.anyOf ?? schema.oneOf;
@@ -166,28 +148,14 @@ export function renderSchemaReference(schema: JsonSchema) {
 	].join("\n");
 }
 
-export async function buildGeneratedDocumentation(paths: Partial<DocumentationPaths> = {}) {
-	const resolvedPaths = { ...defaultPaths, ...paths };
-	const jsonSchemaSource = await readFile(resolvedPaths.jsonSchemaGuide, "utf8");
+export function buildGeneratedDocumentation(): Record<keyof DocumentationPaths, string> {
 	const schema = createResumeDataJsonSchema() as JsonSchema;
-	const fullSchemaBlock = ["```json /schema.json lines expandable", JSON.stringify(schema, null, "\t"), "```"].join(
-		"\n",
-	);
-
-	return {
-		jsonSchemaGuide: replaceGeneratedBlock(
-			jsonSchemaSource,
-			"RESUME-JSON-SCHEMA",
-			fullSchemaBlock,
-			resolvedPaths.jsonSchemaGuide,
-		),
-		skillSchemaReference: renderSchemaReference(schema),
-	};
+	return { skillSchemaReference: renderSchemaReference(schema) };
 }
 
 export async function updateGeneratedDocumentation(paths: Partial<DocumentationPaths> = {}): Promise<void> {
 	const resolvedPaths = { ...defaultPaths, ...paths };
-	const output = await buildGeneratedDocumentation(resolvedPaths);
+	const output = buildGeneratedDocumentation();
 	await Promise.all(
 		(Object.keys(output) as (keyof DocumentationPaths)[]).map((name) => writeFile(resolvedPaths[name], output[name])),
 	);
