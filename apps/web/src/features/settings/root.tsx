@@ -76,14 +76,6 @@ export function SettingsRoot() {
 				</Link>
 			</nav>
 
-			<a
-				href="https://docs.rxresu.me"
-				target="_blank"
-				rel="noopener noreferrer"
-				className="flex h-12 items-center rounded-[14px] border border-line bg-surface px-3.5 font-medium transition-colors duration-quick ease-enter active:bg-press"
-			>
-				<Trans>Help & docs</Trans>
-			</a>
 			<SignOutButton />
 		</div>
 	);

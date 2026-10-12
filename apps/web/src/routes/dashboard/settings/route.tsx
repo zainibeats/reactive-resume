@@ -2,7 +2,6 @@ import type { IconName } from "@reactive-resume/ui/components/icon";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Fragment } from "react";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { popTransition } from "@/features/settings/root";
 
@@ -17,15 +16,6 @@ const SETTINGS_PAGES: Page[] = [
 	{ to: "/dashboard/settings/account", icon: "account_circle", label: () => t`Account` },
 	{ to: "/dashboard/settings/preferences", icon: "tune", label: () => t`Preferences` },
 	{ to: "/dashboard/settings/ai", icon: "hub", label: () => t`AI & developer` },
-];
-
-// The project's own links: where to read up, see the code, help translate, report a problem or donate.
-const getProjectLinks = () => [
-	{ href: "https://docs.rxresu.me", label: t`Docs` },
-	{ href: "https://github.com/reactive-resume/reactive-resume", label: t`Source` },
-	{ href: "https://crowdin.com/project/reactive-resume", label: t`Translate` },
-	{ href: "https://github.com/reactive-resume/reactive-resume/issues", label: t`Report a bug` },
-	{ href: "https://opencollective.com/reactive-resume/donate", label: t`Donate` },
 ];
 
 export const Route = createFileRoute("/dashboard/settings")({ component: RouteComponent });
@@ -58,15 +48,6 @@ function RouteComponent() {
 				</div>
 				<p className="mt-auto px-2.5 text-xs leading-[18px] text-ink-3 max-lg:hidden">
 					<Trans>Reactive Resume {__APP_VERSION__} · MIT</Trans>
-					<br />
-					{getProjectLinks().map((link, index) => (
-						<Fragment key={link.href}>
-							{index > 0 && " · "}
-							<a className="underline" href={link.href} target="_blank" rel="noopener noreferrer">
-								{link.label}
-							</a>
-						</Fragment>
-					))}
 				</p>
 			</nav>
 

@@ -94,6 +94,7 @@ This repo tracks `upstream/main` (github.com/reactive-resume/reactive-resume; fo
 - Public-resume social-card SEO (`createPublicResumeSeoMarkup`, `packages/api/src/features/resume/social-meta.ts`, and the `/` + `/ats-checker` markup injection in `apps/server/src/static/web.ts`) — not adopted, because upstream defines it inside the same homepage SEO/structured-data block this fork removes. Revisit if public resume link previews become a priority.
 - Homepage SEO helpers in `apps/web/src/libs/seo.ts` (JSON-LD, `serializeJsonLd`, `getHomepageMeta`, `getAtsCheckerMeta`). The file is **kept** with only `createNoindexFollowMeta`. `apps/web/src/routes/_home/index.tsx` must not emit `scripts` or a client-side canonical link (the server shell writes it); `-index.test.ts` pins that. The generated sitemap lists only the instance root.
 - Upstream's internal planning/launch notes (`docs/plans/*`, `docs/research/*`), like the earlier `docs/superpowers` content.
+- v6's in-app links to the hosted project: the settings nav's Docs/Source/Translate/Report a bug/Donate row (`apps/web/src/routes/dashboard/settings/route.tsx`), the mobile settings "Help & docs" row (`apps/web/src/features/settings/root.tsx`), the MCP "Setup guide" link (`apps/web/src/features/settings/ai/mcp.tsx`), the stylesheet editor's custom-styles guide link, and the post-download donation prompt (`apps/web/src/features/resume/share/download-tab.tsx`). Also v6's `/dashboard/resumes` redirect stub for pre-v6 links.
 
 **Behavior kept intentionally different from upstream:**
 
