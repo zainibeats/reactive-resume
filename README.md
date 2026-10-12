@@ -11,6 +11,9 @@ assistant for improving the resume currently being edited.
 > cherry-picked selectively, so this fork no longer tracks upstream wholesale.
 >
 > This fork's changes are AI-generated, written with AI coding agents.
+>
+> This fork depends on upstream's work. If it is useful to you, consider supporting the original project through
+> [GitHub Sponsors](https://github.com/sponsors/AmruthPillai) or [Open Collective](https://opencollective.com/reactive-resume).
 
 ## What it does
 
