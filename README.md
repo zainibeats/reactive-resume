@@ -1,7 +1,9 @@
-# Reactive Resume
+# Reactive Resume (Personal Fork)
 
-Reactive Resume is a self-hostable resume builder for one owner. Create, import, edit, export, and share resumes from a
-focused web interface. The builder includes an optional AI assistant for improving the resume currently being edited.
+Personal, self-hosted resume builder. Simplified fork of Reactive Resume with linked resume variants and local AI support.
+
+Create, import, edit, export, and share resumes from a focused web interface. The builder includes an optional AI
+assistant for improving the resume currently being edited.
 
 > This is a simplified fork of [Reactive Resume](https://github.com/reactive-resume/reactive-resume) by Amruth Pillai.
 > It is a single-owner resume builder: the marketing site, job-application tracker, cover-letter documents, Career area,
@@ -13,8 +15,10 @@ focused web interface. The builder includes an optional AI assistant for improvi
 - Builds resumes with live PDF previews and configurable templates.
 - Imports resume data and exports PDF, DOCX, and JSON.
 - Supports rich text, custom sections, page layout, fonts, colors, and spacing.
+- Creates child resumes linked to a parent, and pulls in selected parent updates without overwriting the child's own edits.
 - Shares resumes through public links with optional password protection.
-- Integrates AI providers including OpenAI, Anthropic, Google Gemini, and compatible custom endpoints.
+- Integrates AI providers including OpenAI, Anthropic, Google Gemini, local Ollama and LM Studio, and compatible custom
+  endpoints.
 - Stores uploads on the local filesystem by default; S3-compatible storage is optional.
 
 The first account created on an instance becomes its owner. Registration then closes automatically. The application does not
@@ -25,7 +29,7 @@ provide teams, organizations, billing, tenant administration, or collaboration w
 Requirements: Docker with Compose support.
 
 ```bash
-git clone --depth=1 https://github.com/amruthpillai/reactive-resume.git
+git clone --depth=1 https://github.com/zainibeats/reactive-resume.git
 cd reactive-resume
 cp .env.example .env
 ```
