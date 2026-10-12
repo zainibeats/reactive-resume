@@ -9,6 +9,8 @@ assistant for improving the resume currently being edited.
 > It is a single-owner resume builder: the marketing site, job-application tracker, cover-letter documents, Career area,
 > platform statistics, and admin/multi-user features are removed. Upstream fixes and resume-builder improvements are
 > cherry-picked selectively, so this fork no longer tracks upstream wholesale.
+>
+> This fork's changes are AI-generated, written with AI coding agents.
 
 ## What it does
 
