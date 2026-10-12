@@ -116,6 +116,31 @@ This repo tracks `upstream/main` (github.com/reactive-resume/reactive-resume; fo
 
 Prerequisites: **Node.js 24** (pinned in `.nvmrc`; matches Dockerfile `ARG NODE_VERSION=24`), **pnpm 12.9.1** (pinned by `packageManager` in the root `package.json`; pnpm self-manages to it, so any recent pnpm can bootstrap — the Dockerfile's `ARG PNPM_VERSION` only picks the base image) ([install guide](https://pnpm.io/installation)), and **Docker** for PostgreSQL (`sudo dockerd &` if the daemon isn't running).
 
+## Downstream consumer: czaini.net portfolio
+
+The owner's portfolio site (`zainibeats/czaini-monorepo`, deployed on Vercel at czaini.net/portfolio) renders part of its content directly from this app's **JSON export** of the public resume. The owner uploads that export to an R2 bucket at `files/public-resume.json`. The site fetches it server-side (`https://pub-ce3c1c9953b7492c8531cc682159ab2e.r2.dev/files/public-resume.json`) and re-fetches it hourly. **Changing the shape of the exported resume JSON can break the live site**, so treat the fields below as a public contract.
+
+Fields the site reads (consumer code: `apps/web/src/sites/portfolio/lib/resume.ts` and `lib/html.ts` in that repo):
+
+| JSON path                                                | Used for                                                   |
+| -------------------------------------------------------- | ---------------------------------------------------------- |
+| `basics.email`, `basics.location`                        | Hero kicker and Contact section                            |
+| `sections.{experience,education,certifications}.hidden`  | Hidden sections are skipped                                |
+| `sections.{experience,education,certifications}.items[]` | Lists rendered in order                                    |
+| `items[].id`, `items[].hidden`                           | React keys / site-only links; hidden items skipped         |
+| `experience.items[].{company,position,location,period}`  | Experience rows (strings rendered as-is)                   |
+| `experience.items[].description`                         | HTML; the site extracts `<li>` text, falling back to `<p>` |
+| `education.items[].{school,degree,area,period}`          | Education rows (`degree, area` joined)                     |
+| `certifications.items[].{title,issuer,website.url}`      | Certification links                                        |
+
+Rules:
+
+- Do not rename, remove, retype or re-nest these fields, and do not change `description` from HTML to another format (e.g. Markdown or plain text), without telling the owner. The portfolio must be updated in the same rollout.
+- Keep item `id`s stable across edits and exports. The site maps the music experience entry (`mpv569j6xclzcdn3762qf0qw`) to a `/music` link by id.
+- Adding new fields is safe. The site ignores anything it does not read.
+- Failure mode: if the file is missing, returns non-2xx (for example a 403 from Cloudflare Bot Fight Mode on the custom domain, which is why the site uses the `r2.dev` URL) or has a different shape, the Vercel build fails. At runtime, Next.js keeps serving the last good render.
+- Upstream cherry-picks that touch `packages/schema/src/resume/*` or the JSON export path need the same check.
+
 ## Ownership map
 
 Where each concern lives, and where new code for it goes:
@@ -169,7 +194,7 @@ Where each concern lives, and where new code for it goes:
 
 Multi-place changes:
 
-- **Resume data shape**: `packages/schema/src/resume/*` first, then API DTOs, importers, PDF rendering, and web forms consuming it.
+- **Resume data shape**: `packages/schema/src/resume/*` first, then API DTOs, importers, PDF rendering, and web forms consuming it. Also check the external czaini.net portfolio contract (see "Downstream consumer: czaini.net portfolio").
 - **New template**: `packages/schema/src/templates.ts`, `packages/pdf/src/templates/index.ts`, source under `packages/pdf/src/templates/<name>/`, and previews under `apps/web/public/templates/{jpg,pdf}`.
 - **New DB column/table**: `packages/db/src/schema/*`, then `pnpm db:generate`.
 - **New env var**: `packages/env/src/server.ts`, `.env.example`, **and** the `globalPassThroughEnv` array (plus applicable test-task `env` arrays) in `turbo.json`. Turborepo 2.x strict env mode filters out unlisted vars, so the variable will be `undefined` in child processes at runtime even when correctly set in the OS/container environment.
