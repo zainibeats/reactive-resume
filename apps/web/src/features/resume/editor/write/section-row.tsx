@@ -47,8 +47,8 @@ export function useSectionTitle(section: WriteSection) {
 type SectionRowProps = {
 	section: WriteSection;
 	locked: boolean;
-	/** ⌥↑ / ⌥↓ on the focused title. */
-	onMove: (direction: "up" | "down") => void;
+	/** ⌥↑ / ⌥↓ on the focused title. Hidden sections sit outside the print order, so they have none. */
+	onMove?: ((direction: "up" | "down") => void) | undefined;
 	children: ReactNode;
 };
 
@@ -68,7 +68,7 @@ export function SectionRow({ section, locked, onMove, children }: SectionRowProp
 	const updateResumeData = useUpdateResumeData();
 	const { setNodeRef, transform, transition, isDragging, attributes, listeners } = useSortable({
 		id: section.id,
-		disabled: locked,
+		disabled: locked || hidden,
 		transition: DRAG_SETTLE,
 	});
 
@@ -84,7 +84,7 @@ export function SectionRow({ section, locked, onMove, children }: SectionRowProp
 	const onTitleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
 		if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
 		event.preventDefault();
-		onMove(event.key === "ArrowUp" ? "up" : "down");
+		onMove?.(event.key === "ArrowUp" ? "up" : "down");
 	};
 
 	return (
@@ -102,8 +102,11 @@ export function SectionRow({ section, locked, onMove, children }: SectionRowProp
 				<button
 					type="button"
 					aria-label={t`Reorder ${title}`}
-					disabled={locked}
-					className="flex h-11 w-7 shrink-0 cursor-grab items-center justify-center text-ink-3 active:cursor-grabbing disabled:cursor-default"
+					disabled={locked || hidden}
+					className={cn(
+						"flex h-11 w-7 shrink-0 cursor-grab items-center justify-center text-ink-3 active:cursor-grabbing disabled:cursor-default",
+						hidden && "opacity-40",
+					)}
 					{...attributes}
 					{...listeners}
 				>
@@ -168,7 +171,7 @@ export function SectionRow({ section, locked, onMove, children }: SectionRowProp
 	);
 }
 
-type SectionMenuProps = { section: WriteSection; title: string; onMove: (direction: "up" | "down") => void };
+type SectionMenuProps = Pick<SectionRowProps, "section" | "onMove"> & { title: string };
 
 /** Everything else a section can do: add, sort, heading, rename, icon, layout and reset or delete. */
 function SectionMenu({ section, title, onMove }: SectionMenuProps) {
@@ -277,14 +280,18 @@ function SectionMenu({ section, title, onMove }: SectionMenuProps) {
 							<Trans>Sort by date</Trans>
 						</DropdownMenuItem>
 					)}
-					<DropdownMenuItem onClick={() => onMove("up")}>
-						<Icon name="arrow_upward" />
-						<Trans>Move up</Trans>
-					</DropdownMenuItem>
-					<DropdownMenuItem onClick={() => onMove("down")}>
-						<Icon name="arrow_downward" />
-						<Trans>Move down</Trans>
-					</DropdownMenuItem>
+					{onMove && (
+						<>
+							<DropdownMenuItem onClick={() => onMove("up")}>
+								<Icon name="arrow_upward" />
+								<Trans>Move up</Trans>
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => onMove("down")}>
+								<Icon name="arrow_downward" />
+								<Trans>Move down</Trans>
+							</DropdownMenuItem>
+						</>
+					)}
 					<DropdownMenuItem onClick={rename}>
 						<Icon name="edit" />
 						<Trans>Rename…</Trans>
