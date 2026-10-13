@@ -108,6 +108,7 @@ export type Script =
 	| "hebrew"
 	| "thai"
 	| "emoji"
+	| "arrows"
 	| "symbols";
 
 // The CJK subset of `Script`. CJK needs extra per-character line breaking that
