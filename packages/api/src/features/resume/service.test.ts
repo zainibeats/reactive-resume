@@ -7,6 +7,7 @@ import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 const dbMock = vi.hoisted(() => ({
 	select: vi.fn(),
 	transaction: vi.fn(),
+	update: vi.fn(),
 }));
 const compareMock = vi.hoisted(() => vi.fn());
 const publishResumeUpdatedMock = vi.hoisted(() => vi.fn());
@@ -65,7 +66,7 @@ vi.mock("drizzle-orm", () => ({
 		join: (values: unknown[]) => values,
 	}),
 }));
-vi.mock("bcryptjs", () => ({ hash: vi.fn(), compare: compareMock }));
+vi.mock("bcryptjs", () => ({ hash: vi.fn(async () => "hashed-password"), compare: compareMock }));
 vi.mock("./events", () => ({ publishResumeUpdated: publishResumeUpdatedMock }));
 vi.mock("./access", () => ({
 	grantResumeAccess: grantResumeAccessMock,
@@ -172,6 +173,7 @@ const createRestoreHarness = (currentData: ResumeData, restoredData: ResumeData)
 beforeEach(() => {
 	dbMock.select.mockReset();
 	dbMock.transaction.mockReset();
+	dbMock.update.mockReset();
 	compareMock.mockReset();
 	publishResumeUpdatedMock.mockReset();
 	grantResumeAccessMock.mockReset();
@@ -384,6 +386,34 @@ describe("delete", () => {
 			code: "RESUME_LOCKED",
 			status: 403,
 		});
+	});
+});
+
+describe.each([
+	{
+		name: "setPassword",
+		run: () => resumeService.setPassword({ id: "r1", userId: "u1", password: "newPassword123" }),
+		written: "hashed-password",
+	},
+	{ name: "removePassword", run: () => resumeService.removePassword({ id: "r1", userId: "u1" }), written: null },
+])("$name", ({ run, written }) => {
+	it("writes the password when the resume is unlocked", async () => {
+		const update = createUpdateChain([{ id: "r1", updatedAt: new Date() }]);
+		dbMock.update.mockReturnValueOnce(update.chain);
+
+		await expect(run()).resolves.toBeUndefined();
+		expect(update.set).toHaveBeenCalledWith({ password: written });
+		expect(update.where).toHaveBeenCalledWith(expect.arrayContaining([["is_locked", false]]));
+	});
+
+	it.each([
+		{ code: "RESUME_LOCKED", rows: [{ id: "r1" }] },
+		{ code: "NOT_FOUND", rows: [] },
+	])("throws $code when no unlocked row matches", async ({ code, rows }) => {
+		dbMock.update.mockReturnValueOnce(createUpdateChain([]).chain);
+		dbMock.select.mockReturnValueOnce(createSelectChain(rows));
+
+		await expect(run()).rejects.toMatchObject({ code });
 	});
 });
 

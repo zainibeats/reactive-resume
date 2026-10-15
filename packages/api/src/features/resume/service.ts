@@ -447,6 +447,29 @@ function createResumeSyncDiffs(input: {
 	});
 }
 
+// One conditional UPDATE skips locked rows atomically; only a miss pays for the read that says why.
+async function updateResumePassword(input: { id: string; userId: string; password: string | null }) {
+	const owned = and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId));
+	const [resume] = await db
+		.update(schema.resume)
+		.set({ password: input.password })
+		.where(and(owned, eq(schema.resume.isLocked, false)))
+		.returning({ id: schema.resume.id, updatedAt: schema.resume.updatedAt });
+
+	if (!resume) {
+		const [existing] = await db.select({ id: schema.resume.id }).from(schema.resume).where(owned);
+		throw existing ? new ORPCError("RESUME_LOCKED", { status: 403 }) : new ORPCError("NOT_FOUND");
+	}
+
+	await notifyResumeUpdated({
+		type: "resume.updated",
+		resumeId: resume.id,
+		userId: input.userId,
+		updatedAt: resume.updatedAt.toISOString(),
+		mutation: "password",
+	});
+}
+
 export const resumeService = {
 	tags,
 	statistics,
@@ -1151,25 +1174,8 @@ export const resumeService = {
 		});
 	},
 
-	setPassword: async (input: { id: string; userId: string; password: string }) => {
-		const hashedPassword = await hash(input.password, 10);
-
-		const [resume] = await db
-			.update(schema.resume)
-			.set({ password: hashedPassword })
-			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
-			.returning({ id: schema.resume.id, updatedAt: schema.resume.updatedAt });
-
-		if (!resume) throw new ORPCError("NOT_FOUND");
-
-		await notifyResumeUpdated({
-			type: "resume.updated",
-			resumeId: resume.id,
-			userId: input.userId,
-			updatedAt: resume.updatedAt.toISOString(),
-			mutation: "password",
-		});
-	},
+	setPassword: async (input: { id: string; userId: string; password: string }) =>
+		updateResumePassword({ ...input, password: await hash(input.password, 10) }),
 
 	verifyPassword: async (input: { slug: string; username: string; password: string; responseHeaders?: Headers }) => {
 		const [resume] = await db
@@ -1199,23 +1205,7 @@ export const resumeService = {
 		return true;
 	},
 
-	removePassword: async (input: { id: string; userId: string }) => {
-		const [resume] = await db
-			.update(schema.resume)
-			.set({ password: null })
-			.where(and(eq(schema.resume.id, input.id), eq(schema.resume.userId, input.userId)))
-			.returning({ id: schema.resume.id, updatedAt: schema.resume.updatedAt });
-
-		if (!resume) throw new ORPCError("NOT_FOUND");
-
-		await notifyResumeUpdated({
-			type: "resume.updated",
-			resumeId: resume.id,
-			userId: input.userId,
-			updatedAt: resume.updatedAt.toISOString(),
-			mutation: "password",
-		});
-	},
+	removePassword: (input: { id: string; userId: string }) => updateResumePassword({ ...input, password: null }),
 
 	delete: async (input: { id: string; userId: string }) => {
 		await db.transaction(async (tx) => {
