@@ -6,6 +6,7 @@ import {
 	getFont,
 	getPdfFallbackFontFamilies,
 	getWebFontSource,
+	isCjkFontFamily,
 	isStandardPdfFontFamily,
 	resolveBoldFontWeight,
 	resolveLegacyFontAlias,
@@ -241,7 +242,9 @@ export const resolvePdfFonts = (
 	const registerFont = (family: string, weight: number, italic = false) => {
 		if (isStandardPdfFontFamily(family)) return;
 
-		const normalizedWeight = toFontWeight(weight);
+		// A CJK face is 10–15 MB, so CJK families get Regular and Bold only; Forme draws other weights with the
+		// nearest one. Every stored weight made a CJK resume's first preview download up to ~70 MB (#3593, #3627).
+		const normalizedWeight = isCjkFontFamily(family) ? (weight <= 500 ? "400" : "700") : toFontWeight(weight);
 		const key = `${family}:${normalizedWeight}:${italic}`;
 		if (fonts.has(key)) return;
 
