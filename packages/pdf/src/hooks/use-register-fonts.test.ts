@@ -73,10 +73,10 @@ describe("resolvePdfFonts", () => {
 			heading: { ...typography.heading, fontFamily: "Noto Sans SC", fontWeights: ["600"] },
 		} satisfies Typography;
 
-		registerFonts(cjkTypography, "zh-CN", true, new Set(["han-simplified"]), false);
+		registerFonts(cjkTypography, "zh-CN", true, new Set(["han-simplified"]));
 
 		const cjkFaces = registered
-			.filter((font) => font.family.endsWith(" SC"))
+			.filter((font) => font.family.endsWith(" SC") && !font.italic)
 			.map((font) => `${font.family} ${font.weight}`)
 			.sort();
 		expect(cjkFaces).toEqual(["Noto Sans SC 700", "Noto Serif SC 400", "Noto Serif SC 700"]);
