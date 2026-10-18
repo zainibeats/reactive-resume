@@ -188,7 +188,6 @@ const SECTION_ITEM_PLACEHOLDER_KEYS = [
 ] as const;
 
 const defaultSectionHeadingContainerStyle = {
-	flexDirection: "row",
 	alignItems: "flex-start",
 	columnGap: 4,
 } satisfies Style;
@@ -406,7 +405,7 @@ const SectionShell = ({ sectionId, title, showHeading = true, children }: Sectio
 						{...resolvedPdfFlowProps(sectionHeadingResolved)}
 						style={composeStyles(
 							sectionHeadingStyle,
-							defaultSectionHeadingContainerStyle,
+							{ ...defaultSectionHeadingContainerStyle, flexDirection: createRtlStyleHelpers(data.rtl).row },
 							sectionHeadingContainerStyle,
 							sectionHeadingResolved.style,
 						)}
