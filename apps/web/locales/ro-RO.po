@@ -72,6 +72,11 @@ msgstr "{0, plural, one {„{1}” apare o dată în anunțul de locuri de munc�
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {Caracter #} other {# caractere}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {# document mutat în Coșul de gunoi} few {# documente mutate în Coșul de gunoi} other {# de documente mutate în Coșul de gunoi}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {# a propus modificarea} other {# editări propuse}}"
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {Citind pasajul # din CV-ul dvs....} other {Citirea intrărilor din lista # și a paragrafelor din CV-ul dvs....}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {Fontul selectat nu poate afișa {list}. Apare ca “?”. În Design, alegeți un font care îl conține.} few {Fontul selectat nu poate afișa {list}. Apar ca “?”. În Design, alegeți un font care le conține.} other {Fontul selectat nu poate afișa {list}. Apar ca “?”. În Design, alegeți un font care le conține.}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {Coloana #} other {coloane #}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {# intrare} other {# intrări}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "{count} selectate"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {document #} other {documente #}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {# document actualizat} few {# documente actualizate} other {# de documente actualizate}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "Furnizorii de inteligență artificială nu au putut fi încărcați. Re
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "Albaneză"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "Aliniere la centru"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "Aliniere la stânga"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "Aliniere la dreapta"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "Cel mai bun pentru aplicare"
 msgid "Blocker"
 msgstr "Blocaj"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "Albastru"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "Ștergeți secțiunea"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "Ștergeți selecția"
 
@@ -1274,6 +1310,10 @@ msgstr "Închideți {title}"
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "Închideți asistentul"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "Cod"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "Datele încep în viitor"
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "Datele nu vor fi citite"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "Implicit"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "Greutăți font"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "Fonturile nu au putut fi încărcate. Reîncercați exportul."
+msgid "Fonts could not be loaded. Try again."
+msgstr "Fonturile nu au putut fi încărcate. Încercați din nou."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "De exemplu, notați cărei companii i-ați trimis acest CV sau linkuri către anunțurile de angajare."
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "Pentru LibreOffice și alte editoare open-source. Aspectul este simplificat."
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "Notă"
 msgid "Greek"
 msgstr "Greacă"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "Verde"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "Gri"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "Grilă"
@@ -2665,6 +2721,18 @@ msgstr "Antet"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "Titlu"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "Titlu 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "Titlu 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "Titlu 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "Ascunde fotografia"
 msgid "High"
 msgstr "Ridicat"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "Evidențiere"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "Hindi"
@@ -2758,6 +2830,10 @@ msgstr "Istorie"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "Acasă"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "Linie orizontală"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "Se îmbunătățește…"
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "Măriți spațierea între rânduri, astfel încât două rânduri să nu se contopească într-unul singur."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "Mărire indentare"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "john.doe"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON citit"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "Aliniere stânga-dreapta"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,8 +3285,9 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
-msgstr "Scrisoare"
+msgstr "US Letter"
 
 #: src/features/resume/editor/write/entries.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3343,7 +3428,12 @@ msgstr "Se încarcă CV-urile…"
 msgid "Location"
 msgstr "Locație"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "Blocați editarea"
@@ -3499,6 +3589,10 @@ msgstr "Model: {label}"
 msgid "More download formats"
 msgstr "Mai multe formate de descărcare"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "Mai multe opțiuni de formatare"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "Mai multe opțiuni"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "Mută în"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "Mutați în Coșul de gunoi"
@@ -3579,6 +3674,12 @@ msgstr "Mișcă-te în sus"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "Mutați e-mailul și numărul de telefon în partea de sus a primei pagini."
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "Au fost mutate {0} din {1} în Coșul de gunoi. Documentele blocate au fost omise."
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "sau continuați cu"
 msgid "Or in your own words…"
 msgstr "Sau cu propriile tale cuvinte..."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "Portocaliu"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "Organizație"
@@ -4055,6 +4160,10 @@ msgstr "din 100"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "Învechit: textul s-a schimbat de atunci."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "Micșorare indentare"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "Vizualizare pagină"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "Hârtie"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "Paragraf"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "Preferați o singură coloană, sau păstrați coloana laterală pentru 
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "Publicații"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "Editor"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "Violet"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "Dreptunghi"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "Dreptunghi (lățime completă)"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "Roșu"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "Secțiuni · comanda tipărire"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "Secțiunile folosesc titluri, sistemele de recunoaștere, iar experiența de lucru arată."
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "Selectați"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "Selectați {0}"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "Selectați tot"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "Selectează..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "Documente selectate"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "Afișați șabloanele"
 msgid "Show them again"
 msgstr "Arată-le din nou"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "Afișează etichetele comune tuturor. Etichetele pe care le adăugați se aplică fiecărui document; cele pe care le eliminați sunt scoase din toate. Documentele blocate rămân neschimbate."
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "Un formular cu o singură coloană inspirat de CV-ul japonez rirekisho: un antet format din câmpuri mărginite și fiecare secțiune prezentată ca un tabel cu o bară de titlu solidă. Compact și ușor de scanat, potrivit pentru joburi de inginerie, operațiuni sau aplicații de job în Japonia."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "Un aspect cu o singură coloană inspirat dintr-un articol de revistă: numele dvs. cu caractere mari sub un titlu scurt cu majuscule, un rezumat cu caractere cursive și titlurile secțiunilor cu caractere cursive. Un design rafinat pentru scriitori, designeri și profesioniști în comunicare."
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "O singură coloană, așezată ca un articol de revistă: un nume mare sub un supratitlu cu majuscule și rezumatul ca un șapou mai mare; rafinat pentru scriitori, designeri și roluri în comunicare."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "Unele glife nu au sens în afara acestui fișier."
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "Unele rânduri sunt stocate în afara ordinii de citire."
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "Un text PDF nu a putut fi redat. Alegeți un font care conține aceste caractere, apoi încercați din nou exportul."
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "Oprește"
 msgid "Stopped. No edits were proposed."
 msgstr "oprit. Nu au fost propuse modificări."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "Tăiat"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "Verb mai puternic"
@@ -5531,12 +5671,18 @@ msgstr "Sistemele caută o secțiune de experiență. Proiectele sau voluntariat
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "Etichete"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "Etichetele pot fi folosite pentru a categoriza CV-ul după cuvinte cheie."
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "Etichete pentru documente: {0}"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,9 +5748,17 @@ msgstr "Testarea…"
 msgid "Text"
 msgstr "Text"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "Alinierea textului"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
 msgstr "Culoare text"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
+msgstr "Culoarea textului"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text comes out in the order a person reads it, at a size and spacing that survive."
@@ -5633,6 +5787,10 @@ msgstr "Textul se află în zona de antet sau de subsol."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "Dimensiunea textului"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "Stil text"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "Tipografie"
 msgid "Ukrainian"
 msgstr "Ucraineană"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "Subliniat"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "Subliniați linkurile"
@@ -6181,6 +6343,7 @@ msgstr "Subliniați linkurile"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "Se deconectează contul {providerName}..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "Deblocare"
@@ -6238,6 +6402,10 @@ msgstr "Actualizați CV-ul"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "Actualizați-vă parola"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "margini largi"
 msgid "Width"
 msgstr "Lăţime"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "Cuvintele se contopesc atunci când textul este extras."
@@ -6665,6 +6829,10 @@ msgstr "Contul dvs. a fost șters."
 msgid "Your body text is very small."
 msgstr "Textul corpului tău este foarte mic."
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "Agentul AI din browserul dvs. a editat acest CV."
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "Punctele dvs. sunt formate din caractere neobișnuite."
@@ -6744,6 +6912,10 @@ msgstr "CV-ul dumneavoastră a fost actualizat."
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "CV-ul dvs. folosește „eu” și „al meu”."
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "Fontul selectat nu poate afișa unele caractere. Apar ca “?”. În Design, alegeți un font care le conține."
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"

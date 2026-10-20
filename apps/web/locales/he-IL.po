@@ -72,6 +72,11 @@ msgstr "{0, plural, one {\"{1}\" מופיע פעם אחת בפרסום המשר�
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {תו #} other {תווים #}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {# מסמך הועבר לאשפה} other {# מסמכים הועברו לאשפה}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {עריכה מוצעת של #} other {# עריכות מ�
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {קורא את הקטע # בקורות החיים שלך...} other {קורא ערכים ופסקאות ברשימת # בקורות החיים שלך...}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {הגופן שבחרת לא יכול להציג את {list}. הוא מוצג כ־“?”. בלשונית עיצוב, בחר גופן שכולל אותו.} other {הגופן שבחרת לא יכול להציג את {list}. הם מוצגים כ־“?”. בלשונית עיצוב, בחר גופן שכולל אותם.}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {עמודה #} other {# עמודות}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {ערך #} other {ערכי #}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "{count} נבחרו"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {מסמך #} other {מסמכי #}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {# מסמך עודכן} other {# מסמכים עודכנו}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "לא ניתן היה לטעון ספקי AI. טען מחדש כדי לנ
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "אלבנית"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "יישור למרכז"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "יישור לשמאל"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "יישור לימין"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "הטוב ביותר ליישום"
 msgid "Blocker"
 msgstr "חוסם"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "כחול"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "נקה סעיף"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "נקה את הבחירה"
 
@@ -1274,6 +1310,10 @@ msgstr "סגור את ה-{title}"
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "סגור את העוזר"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "קוד"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "התאריכים מתחילים בעתיד"
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "תאריכים לא יקראו"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "ברירת מחדל"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "הגווני גופן"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "לא ניתן היה לטעון גופנים. נסה שוב לייצא."
+msgid "Fonts could not be loaded. Try again."
+msgstr "לא ניתן היה לטעון את הגופנים. נסה שוב."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "לדוגמה, רשום לאילו חברות שלחת את קורות החיים האלה, או קישורים לתיאורי המשרה."
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "עבור LibreOffice ועורכי קוד פתוח אחרים. הפריסה פשוטה יותר."
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "ציון"
 msgid "Greek"
 msgstr "יוונית"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "ירוק"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "אפור"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "רשת"
@@ -2665,6 +2721,18 @@ msgstr "כּוֹתֶרֶת"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "כותרת"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "כותרת 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "כותרת 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "כותרת 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "הסתר את התמונה"
 msgid "High"
 msgstr "גָבוֹהַ"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "מרקר"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "הינדי"
@@ -2758,6 +2830,10 @@ msgstr "הִיסטוֹרִיָה"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "דף הבית"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "קו אופקי"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "משפר..."
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "הגדל את מרווח השורות כדי ששתי שורות לא יתמזגו לאחת."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "הגדלת כניסה"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "ג'ון דו"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON לקרוא"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "יישור לשני הצדדים"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,8 +3285,9 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
-msgstr "מכתב"
+msgstr "US Letter"
 
 #: src/features/resume/editor/write/entries.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3343,7 +3428,12 @@ msgstr "טוען קורות חיים…"
 msgid "Location"
 msgstr "מקום"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "נעילת עריכה"
@@ -3499,6 +3589,10 @@ msgstr "דגם: {label}"
 msgid "More download formats"
 msgstr "פורמטים נוספים להורדה"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "עוד אפשרויות עיצוב"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "אפשרויות נוספות"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "העברה אל"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "העבר לאשפה"
@@ -3579,6 +3674,12 @@ msgstr "לזוז למעלה"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "הזז את הדוא״ל ומספר הטלפון שלך לראש העמוד הראשון."
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "{0} מתוך {1} הועברו לאשפה. מסמכים נעולים דולגו."
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "או להמשיך עם"
 msgid "Or in your own words…"
 msgstr "או במילים שלך..."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "כתום"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "ארגון"
@@ -4055,6 +4160,10 @@ msgstr "מתוך 100"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "לא מעודכן: הטקסט השתנה מאז."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "הקטנת כניסה"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "תצוגת עמוד"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "נְיָר"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "פסקה"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "עדיף עמודה אחת, או שמור על העמודה הצדדית
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "פרסומים"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "מוציא לאור"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "סגול"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "מלבן"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "מלבן (רוחב מלא)"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "אדום"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "מדורים · סדר הדפסה"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "מדורים משתמשים בכותרות שמערכות מזהות, וניסיון העבודה מראה."
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "בחירה"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "בחר את {0}"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "בחר הכול"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "בחר..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "מסמכים נבחרים"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "הצג תבניות"
 msgid "Show them again"
 msgstr "תראה אותם שוב"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "מציג את התגיות המשותפות לכולם. תגיות שתוסיף יתווספו לכל מסמך; תגיות שתסיר יוסרו מכולם. מסמכים נעולים יישארו כפי שהם."
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "צורה של עמודה אחת בהשראת הרזומה של הריקישו היפני: כותרת עליונה משדות עם גבול, וכל חלק מוצג כטבלה עם שורת כותרת מוצקה. קומפקטי וקל לסריקה, מתאים לעבודות הנדסה, עבודות תפעול או יישומי עבודה ביפן."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "פריסת עמודה אחת בהשראת מאמר מגזין: שמך בכתב גדול מתחת לכותרת קצרה באותיות רישיות, תקציר באותיות נטוי וכותרות מדור באותיות נטוי. עיצוב מעודן לסופרים, מעצבים ואנשי תקשורת."
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "עמודה אחת בעימוד של כתבת מגזין: שם גדול בגופן תצוגה מתחת לכותרת גג באותיות רישיות, והתקציר כפסקת פתיחה גדולה יותר; מלוטש לכותבים, למעצבים ולתפקידי תקשורת."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "לחלק מהגליפים אין משמעות מחוץ לקובץ הזה
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "חלק מהשורות מאוחסנות שלא בסדר הקריאה."
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "לא ניתן היה להציג חלק מטקסט PDF. בחר גופן המכיל את התווים הללו ולאחר מכן נסה שוב לייצא."
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "לְהַפְסִיק"
 msgid "Stopped. No edits were proposed."
 msgstr "נֶעצָר. לא הוצעו עריכות."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "קו חוצה"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "פועל חזק יותר"
@@ -5531,12 +5671,18 @@ msgstr "מערכות מחפשות סעיף ניסיון. פרויקטים או �
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "תגיות"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "אפשר להשתמש בתגיות כדי לסווג את קורות החיים שלך לפי מילות מפתח."
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "תגיות עבור {0} מסמכים"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,9 +5748,17 @@ msgstr "בדיקות…"
 msgid "Text"
 msgstr "טֶקסט"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "יישור טקסט"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
 msgstr "צבע כתב"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
+msgstr "צבע טקסט"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text comes out in the order a person reads it, at a size and spacing that survive."
@@ -5633,6 +5787,10 @@ msgstr "הטקסט נמצא באזור הכותרת העליונה או התחת
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "גודל טקסט"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "סגנון טקסט"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "טיפוגרפיה"
 msgid "Ukrainian"
 msgstr "אוקראינית"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "קו תחתון"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "קו תחתון של קישורים"
@@ -6181,6 +6343,7 @@ msgstr "קו תחתון של קישורים"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "מנתק את חשבון {providerName} שלך..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "שחרור"
@@ -6238,6 +6402,10 @@ msgstr "עדכון קורות חיים"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "עדכון הסיסמה שלך"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "שוליים רחבים"
 msgid "Width"
 msgstr "רוֹחַב"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "מילים מתמזגות זו בזו כשהטקסט מחולץ."
@@ -6665,6 +6829,10 @@ msgstr "החשבון שלך נמחק."
 msgid "Your body text is very small."
 msgstr "טקסט גוף הקורות חיים שלך קטן מאוד."
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "סוכן הבינה המלאכותית של הדפדפן שלך ערך את קורות החיים האלה."
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "התבליטים שלך מצוירים בתווים חריגים."
@@ -6744,6 +6912,10 @@ msgstr "קורות החיים שלך עודכנו."
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "קורות החיים שלך משתמשים ב־״I״ וב־״my״."
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "הגופן שבחרת לא יכול להציג חלק מהתווים. הם מוצגים כ־“?”. בלשונית עיצוב, בחר גופן שכולל אותם."
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"

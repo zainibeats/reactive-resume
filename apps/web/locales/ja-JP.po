@@ -72,6 +72,11 @@ msgstr "{0, plural, one {「{1}」は求人情報に 1 回表示されます。}
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {# 文字} other {# 文字}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {# 件の書類をゴミ箱に移動しました} other {# 件の書類をゴミ箱に移動しました}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {# による編集提案} other {# が提案した編集
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {履歴書の # 部分を読んでいます…} other {履歴書の # リストのエントリと段落を読んでいます…}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {選択したフォントでは {list} を表示できないため、“?” と表示されます。デザインで、この文字を含むフォントを選んでください。} other {選択したフォントでは {list} を表示できないため、“?” と表示されます。デザインで、これらの文字を含むフォントを選んでください。}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {#列} other {#列}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {# エントリ} other {# エントリ}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "{count} 件選択中"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {# ドキュメント} other {# ドキュメント}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {# 件の書類を更新しました} other {# 件の書類を更新しました}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "AI プロバイダーを読み込めませんでした。リロードし
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "アルバニア語"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "中央揃え"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "左揃え"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "右揃え"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "応募に最適"
 msgid "Blocker"
 msgstr "ブロッカー"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "青"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "クリアセクション"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "選択をクリア"
 
@@ -1274,6 +1310,10 @@ msgstr "{title}を閉じます"
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "アシスタントを閉じます"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "コード"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "日付は将来から始まります"
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "日付は読み取られません"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "デフォルト"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "フォントの太さのプリセット"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "フォントを読み込めませんでした。エクスポートを再試行します。"
+msgid "Fonts could not be loaded. Try again."
+msgstr "フォントを読み込めませんでした。もう一度お試しください。"
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "たとえば、この履歴書をどの企業に送ったかや、求人情報へのリンクをメモしておきましょう。"
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "LibreOffice などのオープンソースのエディター向け。レイアウトが簡素化されています。"
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "成績"
 msgid "Greek"
 msgstr "ギリシャ語"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "緑"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "グレー"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "グリッド表示"
@@ -2665,6 +2721,18 @@ msgstr "ヘッダ"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "見出し"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "見出し 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "見出し 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "見出し 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "写真を隠す"
 msgid "High"
 msgstr "高い"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "ハイライト"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "ヒンディー語"
@@ -2758,6 +2830,10 @@ msgstr "歴史"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "ホーム"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "水平線"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "改善中…"
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "行間を広げて、2行が1行に結合されないようにしてください。"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "インデントを増やす"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "taro.yamada"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON 読み取り"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "両端揃え"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,6 +3285,7 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
 msgstr "レター"
 
@@ -3343,7 +3428,12 @@ msgstr "履歴書を読み込み中…"
 msgid "Location"
 msgstr "所在地"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "編集をロックする"
@@ -3499,6 +3589,10 @@ msgstr "モデル: {label}"
 msgid "More download formats"
 msgstr "その他のダウンロード形式"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "その他の書式"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "その他のオプション"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "移動先"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "ゴミ箱に移動"
@@ -3579,6 +3674,12 @@ msgstr "上に移動"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "メールアドレスと電話番号を1ページ目の上部に移動してください。"
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "{1} 件中 {0} 件をゴミ箱に移動しました。ロックされた書類はスキップされました。"
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "または次で続行"
 msgid "Or in your own words…"
 msgstr "あるいはあなた自身の言葉で…"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "オレンジ"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "組織名"
@@ -4055,6 +4160,10 @@ msgstr "100点満点中"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "期限切れ: テキストは変更されています。"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "インデントを減らす"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "ページビュー"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "紙"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "段落"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "単一列のレイアウトを優先するか、サイドの列は短く
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "著作物"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "出版社"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "紫"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "長方形"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "長方形（全幅）"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "赤"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "セクション・印刷注文"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "セクションには、システムが認識する見出しが使用され、作業経験が表示されます。"
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "選択"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "{0} を選択"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "すべて選択"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "選択..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "選択した書類"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "テンプレートを表示"
 msgid "Show them again"
 msgstr "もう一度見せてください"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "すべてに共通するタグを表示します。追加したタグはすべての書類に付き、削除したタグはすべての書類から外れます。ロックされた書類はそのままです。"
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "日本の履歴書の履歴書からインスピレーションを得た 1 列のフォームです。ヘッダーは枠線で囲まれたフィールドで構成され、各セクションは実線のタイトル バーが付いた表として表示されます。コンパクトでスキャンしやすく、日本のエンジニアリング職、オペレーション職、求人応募に適しています。"
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "雑誌の記事をヒントにした 1 列のレイアウト。大文字の短い見出しの下に大きな文字であなたの名前、斜体で概要、斜体でセクション見出しが表示されます。ライター、デザイナー、コミュニケーションの専門家向けの洗練されたデザイン。"
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "雑誌の特集記事のような1カラムレイアウト。大文字のキッカーの下に大きな名前を配置し、サマリーを大きめのリード文として表示します。ライター、デザイナー、広報職向けに洗練されています。"
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "一部のグリフは、このファイルの外では意味を持ちま
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "一部の行が読み取り順とは異なる順序で保存されています。"
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "一部の PDF テキストをレンダリングできませんでした。これらの文字を含むフォントを選択して、エクスポートを再試行してください。"
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "停止"
 msgid "Stopped. No edits were proposed."
 msgstr "止まった。編集は提案されませんでした。"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "取り消し線"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "より強い動詞"
@@ -5531,12 +5671,18 @@ msgstr "システムはエクスペリエンスセクションを探します。
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "タグ"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "タグを使って、レジュメをキーワードで分類できます。"
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "{0} 件の書類のタグ"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,9 +5748,17 @@ msgstr "テスト…"
 msgid "Text"
 msgstr "文章"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "テキストの配置"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
 msgstr "テキストカラー"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
+msgstr "文字色"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text comes out in the order a person reads it, at a size and spacing that survive."
@@ -5633,6 +5787,10 @@ msgstr "テキストがヘッダーまたはフッター領域に配置されて
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "文字サイズ"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "テキストスタイル"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "タイポグラフィ"
 msgid "Ukrainian"
 msgstr "ウクライナ語"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "下線"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "リンクに下線を引く"
@@ -6181,6 +6343,7 @@ msgstr "リンクに下線を引く"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "{providerName} アカウントのリンクを解除しています..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "ロック解除"
@@ -6238,6 +6402,10 @@ msgstr "レジュメを更新"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "パスワードを更新してください。"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "広い余白"
 msgid "Width"
 msgstr "幅"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "テキストを抽出すると単語同士がつながってしまいます。"
@@ -6665,6 +6829,10 @@ msgstr "あなたのアカウントは削除されました。"
 msgid "Your body text is very small."
 msgstr "本文のテキストが非常に小さいです。"
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "ブラウザのAIエージェントがこのレジュメを編集しました。"
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "箇条書きに一般的でない文字が使われています。"
@@ -6744,6 +6912,10 @@ msgstr "履歴書を更新しました。"
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "履歴書内に「I」や「my」が使われています。"
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "選択したフォントでは一部の文字を表示できないため、“?” と表示されます。デザインで、これらの文字を含むフォントを選んでください。"
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"

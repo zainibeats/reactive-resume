@@ -72,6 +72,11 @@ msgstr "{0, plural, one {“{1}” xuất hiện một lần trong tin tuyển d
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {Ký tự #} other {Ký tự #}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {Đã chuyển # tài liệu vào Thùng rác} other {Đã chuyển # tài liệu vào Thùng rác}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {Đề xuất chỉnh sửa #} other {# đề xuất ch�
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {Đọc đoạn # trong sơ yếu lý lịch của bạn…} other {Đọc các mục và đoạn trong danh sách # trong sơ yếu lý lịch của bạn…}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {Phông chữ bạn chọn không hiển thị được {list}. Ký tự này hiện thành “?”. Trong mục Thiết kế, hãy chọn phông chữ có ký tự này.} other {Phông chữ bạn chọn không hiển thị được {list}. Các ký tự này hiện thành “?”. Trong mục Thiết kế, hãy chọn phông chữ có các ký tự này.}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {Cột #} other {Cột #}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {Mục nhập #} other {Các mục #}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "Đã chọn {count}"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {Tài liệu #} other {Tài liệu #}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {Đã cập nhật # tài liệu} other {Đã cập nhật # tài liệu}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "Không thể tải nhà cung cấp AI. Hãy tải lại để thử lạ
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "Tiếng Albania"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "Căn giữa"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "Căn trái"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "Căn phải"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "Tốt nhất để áp dụng"
 msgid "Blocker"
 msgstr "Lỗi nghiêm trọng"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "Xanh dương"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "Xóa phần"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "Xóa lựa chọn"
 
@@ -1274,6 +1310,10 @@ msgstr "Đóng {title}"
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "Đóng trợ lý"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "Mã"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "Ngày bắt đầu trong tương lai"
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "Ngày tháng sẽ không được đọc"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "Mặc định"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "Các độ đậm Font"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "Không thể tải phông chữ. Hãy thử xuất lại."
+msgid "Fonts could not be loaded. Try again."
+msgstr "Không thể tải phông chữ. Hãy thử lại."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "Ví dụ, ghi lại bạn đã gửi sơ yếu lý lịch này đến những công ty nào, hoặc liên kết đến các mô tả công việc."
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "Dành cho LibreOffice và các trình soạn thảo mã nguồn mở khác. Bố cục được đơn giản hóa."
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "Điểm số"
 msgid "Greek"
 msgstr "Tiếng Hy Lạp"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "Xanh lá"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "Xám"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "Lưới"
@@ -2665,6 +2721,18 @@ msgstr "tiêu đề"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "Tiêu đề"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "Tiêu đề 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "Tiêu đề 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "Tiêu đề 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "Ẩn ảnh"
 msgid "High"
 msgstr "Cao"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "Tô sáng"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "Tiếng Hindi"
@@ -2758,6 +2830,10 @@ msgstr "Lịch sử"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "Trang chủ"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "Đường kẻ ngang"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "Cải thiện…"
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "Tăng khoảng cách dòng để hai dòng không bị hợp nhất thành một."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "Tăng thụt lề"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "John Doe"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON đọc"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "Căn đều hai bên"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,8 +3285,9 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
-msgstr "Chữ cái"
+msgstr "Letter"
 
 #: src/features/resume/editor/write/entries.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3343,7 +3428,12 @@ msgstr "Đang tải sơ yếu lý lịch…"
 msgid "Location"
 msgstr "Vị trí"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "Khóa chỉnh sửa"
@@ -3499,6 +3589,10 @@ msgstr "Mô hình: {label}"
 msgid "More download formats"
 msgstr "Nhiều định dạng tải xuống hơn"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "Định dạng khác"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "Nhiều lựa chọn hơn"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "Chuyển đến"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "Chuyển vào Thùng rác"
@@ -3579,6 +3674,12 @@ msgstr "Di chuyển lên"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "Di chuyển email và số điện thoại của bạn lên đầu trang một."
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "Đã chuyển {0} trên {1} tài liệu vào Thùng rác. Đã bỏ qua các tài liệu bị khóa."
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "hoặc tiếp tục với"
 msgid "Or in your own words…"
 msgstr "Hoặc theo cách nói của bạn…"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "Cam"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "Tổ chức"
@@ -4055,6 +4160,10 @@ msgstr "trên 100"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "Lỗi thời: văn bản đã thay đổi kể từ đó."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "Giảm thụt lề"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "Lượt xem trang"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "Giấy"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "Đoạn văn"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "Ưu tiên bố cục một cột, hoặc chỉ dùng cột bên để ch
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "Ấn phẩm"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "Nhà xuất bản"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "Tím"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "Hình chữ nhật"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "Hình chữ nhật (Toàn bộ chiều rộng)"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "Đỏ"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "Phần · thứ tự in"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "Các phần sử dụng tiêu đề được hệ thống nhận biết và thể hiện kinh nghiệm làm việc."
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "Lựa chọn"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "Chọn {0}"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "Chọn tất cả"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "Chọn..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "Tài liệu đã chọn"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "Hiển thị mẫu"
 msgid "Show them again"
 msgstr "Hiển thị lại chúng"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "Hiển thị các thẻ mà tất cả đều có. Thẻ bạn thêm sẽ được gắn vào mọi tài liệu; thẻ bạn xóa sẽ bị gỡ khỏi mọi tài liệu. Tài liệu bị khóa được giữ nguyên."
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "Biểu mẫu một cột lấy cảm hứng từ sơ yếu lý lịch rirekisho của Nhật Bản: tiêu đề được tạo từ các trường có viền và mọi phần được trình bày dưới dạng bảng có thanh tiêu đề vững chắc. Nhỏ gọn và dễ quét, phù hợp với các công việc kỹ thuật, công việc vận hành hoặc xin việc tại Nhật Bản."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "Bố cục một cột lấy cảm hứng từ một bài báo trên tạp chí: tên của bạn được viết cỡ lớn bên dưới một tiêu đề ngắn viết hoa, một bản tóm tắt in nghiêng và các tiêu đề phần in nghiêng. Một thiết kế tinh tế dành cho các nhà văn, nhà thiết kế và chuyên gia truyền thông."
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "Bố cục một cột như một bài viết tạp chí: tên lớn nổi bật bên dưới dòng dẫn viết hoa, phần tóm tắt thành đoạn mở đầu cỡ lớn; tinh tế, phù hợp với người viết, nhà thiết kế và các vị trí truyền thông."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "Một số ký hiệu không có ý nghĩa bên ngoài tệp này."
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "Một số dòng được lưu trữ không theo thứ tự đọc."
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "Không thể hiển thị một số văn bản PDF. Chọn phông chữ chứa các ký tự này rồi thử xuất lại."
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "Dừng lại"
 msgid "Stopped. No edits were proposed."
 msgstr "Đã dừng lại. Không có chỉnh sửa nào được đề xuất."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "Gạch ngang"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "Động từ mạnh hơn"
@@ -5531,12 +5671,18 @@ msgstr "Hệ thống tìm kiếm phần trải nghiệm. Các dự án hoặc ho
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "Thẻ"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "Thẻ có thể được dùng để phân loại hồ sơ của bạn theo từ khóa."
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "Thẻ cho {0} tài liệu"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,8 +5748,16 @@ msgstr "Đang kiểm tra…"
 msgid "Text"
 msgstr "Chữ"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "Căn lề văn bản"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
+msgstr "Màu chữ"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
 msgstr "Màu chữ"
 
 #: src/features/resume/editor/check/issues.ts
@@ -5633,6 +5787,10 @@ msgstr "Văn bản nằm trong vùng đầu trang hoặc chân trang."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "Kích thước văn bản"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "Kiểu văn bản"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "Kiểu chữ"
 msgid "Ukrainian"
 msgstr "Ukraina"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "Gạch chân"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "Gạch chân các liên kết"
@@ -6181,6 +6343,7 @@ msgstr "Gạch chân các liên kết"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "Đang hủy liên kết tài khoản {providerName} của bạn..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "Mở khoá"
@@ -6238,6 +6402,10 @@ msgstr "Cập nhật resume"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "Cập nhật mật khẩu của bạn"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "lề rộng"
 msgid "Width"
 msgstr "Chiều rộng"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "Các từ bị dính liền nhau khi văn bản được trích xuất."
@@ -6665,6 +6829,10 @@ msgstr "Tài khoản của bạn đã bị xóa."
 msgid "Your body text is very small."
 msgstr "Văn bản nội dung của bạn rất nhỏ."
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "Tác nhân AI trong trình duyệt của bạn đã chỉnh sửa sơ yếu lý lịch này."
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "Các gạch đầu dòng của bạn được tạo bằng những ký tự khác thường."
@@ -6744,6 +6912,10 @@ msgstr "Sơ yếu lý lịch của bạn đã được cập nhật."
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "Sơ yếu lý lịch của bạn sử dụng \"tôi\" và \"của tôi\"."
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "Phông chữ bạn chọn không hiển thị được một số ký tự. Các ký tự này hiện thành “?”. Trong mục Thiết kế, hãy chọn phông chữ có các ký tự này."
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"

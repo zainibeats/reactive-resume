@@ -72,6 +72,11 @@ msgstr "{0, plural, one {„{1}“ vieną kartą pasirodo darbo skelbime.} other
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {# simbolis} other {# simboliai}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {# dokumentas perkeltas į šiukšliadėžę} few {# dokumentai perkelti į šiukšliadėžę} many {# dokumento perkelta į šiukšliadėžę} other {# dokumentų perkelta į šiukšliadėžę}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {# siūlomas redagavimas} other {# siūlomi pakeitimai}}
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {Skaitydami savo gyvenimo aprašymo ištrauką #…} other {Skaityti # sąrašo įrašus ir savo gyvenimo aprašymo pastraipas…}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {Pasirinktas šriftas negali parodyti {list}. Jis rodomas kaip “?”. Skiltyje Dizainas pasirinkite šriftą, kuriame jis yra.} few {Pasirinktas šriftas negali parodyti {list}. Jie rodomi kaip “?”. Skiltyje Dizainas pasirinkite šriftą, kuriame jie yra.} many {Pasirinktas šriftas negali parodyti {list}. Jie rodomi kaip “?”. Skiltyje Dizainas pasirinkite šriftą, kuriame jie yra.} other {Pasirinktas šriftas negali parodyti {list}. Jie rodomi kaip “?”. Skiltyje Dizainas pasirinkite šriftą, kuriame jie yra.}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {# kolonėlė} other {# kolonos}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {# įrašas} other {# įrašai}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "Pasirinkta: {count}"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {# dokumentas} other {# dokumentus}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {# dokumentas atnaujintas} few {# dokumentai atnaujinti} many {# dokumento atnaujinta} other {# dokumentų atnaujinta}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "AI teikėjų nepavyko įkelti. Įkelkite iš naujo ir bandykite dar kart
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "Albanų"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "Lygiuoti centre"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "Lygiuoti kairėje"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "Lygiuoti dešinėje"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "Geriausia kreiptis"
 msgid "Blocker"
 msgstr "Blokuojanti problema"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "Mėlyna"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "Išvalyti skyrių"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "Išvalyti pasirinkimą"
 
@@ -1274,6 +1310,10 @@ msgstr "Uždarykite {title}"
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "Uždarykite asistentą"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "Kodas"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "Pasimatymai prasideda ateityje"
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "Datos nebus skaitomos"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "Numatytasis"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "Šrifto variantai"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "Nepavyko įkelti šriftų. Bandykite eksportuoti dar kartą."
+msgid "Fonts could not be loaded. Try again."
+msgstr "Nepavyko įkelti šriftų. Bandykite dar kartą."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "Pavyzdžiui, pasižymėkite, kurioms įmonėms siuntėte šį gyvenimo aprašymą, arba nuorodas į darbo skelbimus."
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "LibreOffice ir kitoms atvirojo kodo redagavimo programoms. Išdėstymas supaprastintas."
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "Pažymys"
 msgid "Greek"
 msgstr "Graikų"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "Žalia"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "Pilka"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "Tinklelis"
@@ -2665,6 +2721,18 @@ msgstr "Antraštė"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "Antraštė"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "Antraštė 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "Antraštė 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "Antraštė 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "Paslėpti nuotrauką"
 msgid "High"
 msgstr "Aukštas"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "Žymeklis"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "Hindi"
@@ -2758,6 +2830,10 @@ msgstr "Istorija"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "Pradžia"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "Horizontali linija"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "Tobulinama…"
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "Padidinkite eilučių intervalą, kad dvi eilutės nesusilietų į vieną."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "Didinti įtrauką"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "john.doe"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON skaitymas"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "Lygiuoti abipus"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,8 +3285,9 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
-msgstr "Laiškas"
+msgstr "Letter"
 
 #: src/features/resume/editor/write/entries.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3343,7 +3428,12 @@ msgstr "Kraunami gyvenimo aprašymai…"
 msgid "Location"
 msgstr "Vieta"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "Užrakto redagavimas"
@@ -3499,6 +3589,10 @@ msgstr "Modelis: {label}"
 msgid "More download formats"
 msgstr "Daugiau atsisiuntimo formatų"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "Daugiau formatavimo"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "Daugiau parinkčių"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "Perkelti į"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "Perkelti į šiukšliadėžę"
@@ -3579,6 +3674,12 @@ msgstr "Judėti aukštyn"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "Perkelkite savo el. paštą ir telefono numerį į pirmo puslapio viršų."
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "Į šiukšliadėžę perkelta {0} iš {1}. Užrakinti dokumentai praleisti."
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "arba tęsti su"
 msgid "Or in your own words…"
 msgstr "Arba savais žodžiais..."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "Oranžinė"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "Organizacija"
@@ -4055,6 +4160,10 @@ msgstr "iš 100"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "Pasenęs: nuo tada tekstas pasikeitė."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "Mažinti įtrauką"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "Puslapio peržiūra"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "Popierius"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "Pastraipa"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "Rinkitės vieną stulpelį arba šalutiniame stulpelyje palikite tik tru
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "Publikacijos"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "Leidėjas"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "Violetinė"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "Stačiakampis"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "Stačiakampis (visas plotis)"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "Raudona"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "Skyriai · spausdinimo tvarka"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "Skyriuose naudojamos antraščių sistemos atpažinimas, o darbo patirtis rodo."
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "Pasirinkite"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "Pasirinkti {0}"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "Pasirinkti viską"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "Pasirinkite..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "Pasirinkti dokumentai"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "Rodyti šablonus"
 msgid "Show them again"
 msgstr "Parodykite juos dar kartą"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "Rodomos visiems bendros žymos. Pridėtos žymos priskiriamos kiekvienam dokumentui, o pašalintos – pašalinamos iš visų. Užrakinti dokumentai paliekami nepakeisti."
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "Vieno stulpelio forma, įkvėpta japoniško rirekisho gyvenimo aprašymo: antraštė sudaryta iš apvaduotų laukų ir kiekviena sekcija pateikiama kaip lentelė su vientisa pavadinimo juosta. Kompaktiškas ir lengvai nuskaitomas, tinka inžineriniams darbams, operacijų darbams ar darbo paraiškoms Japonijoje."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "Vieno stulpelio išdėstymas, įkvėptas žurnalo straipsnio: jūsų vardas dideliu šriftu po trumpa antrašte didžiosiomis raidėmis, santrauka kursyvu ir skyrių antraštės kursyvu. Rafinuotas dizainas rašytojams, dizaineriams ir komunikacijos profesionalams."
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "Vieno stulpelio išdėstymas lyg žurnalo straipsnis: didelis vardas po nedidele didžiųjų raidžių eilute, o santrauka – kaip didesnė įžanga; išgryninta rašytojams, dizaineriams ir komunikacijos specialistams."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "Kai kurie glifai už šio failo ribų neturi jokios reikšmės."
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "Kai kurios eilutės saugomos ne skaitymo tvarka."
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "Kai kurio PDF teksto nepavyko pateikti. Pasirinkite šriftą, kuriame yra šie simboliai, tada bandykite eksportuoti dar kartą."
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "Sustok"
 msgid "Stopped. No edits were proposed."
 msgstr "Sustojo. Redaguoti nebuvo pasiūlyta."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "Perbraukta"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "Stipresnis veiksmažodis"
@@ -5531,12 +5671,18 @@ msgstr "Sistemos ieško patirties skyriaus. Projektai ar savanorystė gali parod
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "Žymos"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "Žymomis galite grupuoti savo gyvenimo aprašymą pagal raktinius žodžius."
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "Dokumentų žymos ({0})"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,8 +5748,16 @@ msgstr "Testavimas…"
 msgid "Text"
 msgstr "Tekstas"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "Teksto lygiavimas"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
+msgstr "Teksto spalva"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
 msgstr "Teksto spalva"
 
 #: src/features/resume/editor/check/issues.ts
@@ -5633,6 +5787,10 @@ msgstr "Tekstas yra antraštės arba poraštės srityje."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "Teksto dydis"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "Teksto stilius"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "Tipografija"
 msgid "Ukrainian"
 msgstr "Ukrainiečių"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "Pabraukta"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "Pabraukite nuorodas"
@@ -6181,6 +6343,7 @@ msgstr "Pabraukite nuorodas"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "Atsiejamas jūsų {providerName} profilis..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "Atrakinti"
@@ -6238,6 +6402,10 @@ msgstr "Atnaujinti gyvenimo aprašymą"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "Atnaujinkite savo slaptažodį"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "plačios paraštės"
 msgid "Width"
 msgstr "Plotis"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "Ištraukiant tekstą žodžiai susilieja."
@@ -6665,6 +6829,10 @@ msgstr "Jūsų paskyra buvo ištrinta."
 msgid "Your body text is very small."
 msgstr "Jūsų tekstas labai mažas."
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "Jūsų naršyklės DI agentas redagavo šį gyvenimo aprašymą."
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "Jūsų punktai pažymėti neįprastais simboliais."
@@ -6744,6 +6912,10 @@ msgstr "Jūsų gyvenimo aprašymas atnaujintas."
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "Jūsų gyvenimo aprašyme naudojami žodžiai „I“ ir „my“."
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "Pasirinktas šriftas negali parodyti kai kurių simbolių. Jie rodomi kaip “?”. Skiltyje Dizainas pasirinkite šriftą, kuriame jie yra."
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"

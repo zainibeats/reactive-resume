@@ -72,6 +72,11 @@ msgstr "{0, plural, one {A „{1}” egyszer megjelenik az álláshirdetésben.}
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {# karakter} other {# karakterek}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {# dokumentum a kukába került} other {# dokumentum a kukába került}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {# javasolt szerkesztés} other {# javasolt szerkesztés
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {Az önéletrajz # szakaszának olvasása…} other {A # listabejegyzések és az önéletrajz bekezdéseinek olvasása…}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {A kiválasztott betűtípus nem tudja megjeleníteni ezt: {list}. “?” jelként jelenik meg. A Dizájn részben válassz olyan betűtípust, amely tartalmazza.} other {A kiválasztott betűtípus nem tudja megjeleníteni ezeket: {list}. “?” jelként jelennek meg. A Dizájn részben válassz olyan betűtípust, amely tartalmazza őket.}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {# oszlop} other {# oszlopok}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {# bejegyzés} other {# bejegyzések}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "{count} kiválasztva"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {# dokumentum} other {# dokumentumok}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {# dokumentum frissítve} other {# dokumentum frissítve}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "Az AI-szolgáltatókat nem sikerült betölteni. Töltse be újra az új
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "albán"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "Középre igazítás"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "Balra igazítás"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "Jobbra igazítás"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "Legjobb a jelentkezéshez"
 msgid "Blocker"
 msgstr "Blokkoló"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "Kék"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "Törölje a szakaszt"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "Kijelölés törlése"
 
@@ -1274,6 +1310,10 @@ msgstr "Zárja be a {title}-t"
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "Zárja be az asszisztenst"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "Kód"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "A dátumok a jövőben kezdődnek"
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "A dátumok nem lesznek olvasva"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "Alapértelmezett"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "Betűsúlyok"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "A betűtípusokat nem sikerült betölteni. Próbálja újra az exportálást."
+msgid "Fonts could not be loaded. Try again."
+msgstr "A betűtípusokat nem sikerült betölteni. Próbáld újra."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "Például jegyezze fel, mely cégeknek küldte el ezt az önéletrajzot, vagy tegyen ide linkeket az álláshirdetésekhez."
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "LibreOffice-hoz és más nyílt forráskódú szerkesztőkhöz. Az elrendezés egyszerűsített."
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "Osztályzat"
 msgid "Greek"
 msgstr "görög"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "Zöld"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "Szürke"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "Rács"
@@ -2665,6 +2721,18 @@ msgstr "Fejléc"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "Címsor"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "Címsor 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "Címsor 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "Címsor 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "A fénykép elrejtése"
 msgid "High"
 msgstr "Magas"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "Kiemelés"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "hindi"
@@ -2758,6 +2830,10 @@ msgstr "Történelem"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "Kezdőlap"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "Vízszintes vonal"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "Javuló…"
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "Növeld a sorközt, hogy két sor ne olvadjon eggyé."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "Behúzás növelése"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "John.Doe"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON olvasható"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "Sorkizárás"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,8 +3285,9 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
-msgstr "Levél"
+msgstr "Letter"
 
 #: src/features/resume/editor/write/entries.tsx
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
@@ -3343,7 +3428,12 @@ msgstr "Önéletrajzok betöltése…"
 msgid "Location"
 msgstr "Helyszín"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "Zár szerkesztése"
@@ -3499,6 +3589,10 @@ msgstr "Típus: {label}"
 msgid "More download formats"
 msgstr "További letöltési formátumok"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "További formázás"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "További lehetőségek"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "Áthelyezés ide"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "Áthelyezés a Kukába"
@@ -3579,6 +3674,12 @@ msgstr "Lépj felfelé"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "Helyezd az e-mail címedet és telefonszámodat az első oldal tetejére."
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "{1} dokumentumból {0} a kukába került. A zárolt dokumentumokat kihagytuk."
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "vagy folytassa ezzel"
 msgid "Or in your own words…"
 msgstr "Vagy a saját szavaiddal..."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "Narancssárga"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "Szervezet"
@@ -4055,6 +4160,10 @@ msgstr "100-ból"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "Elavult: a szöveg azóta megváltozott."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "Behúzás csökkentése"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "Oldalnézet"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "Papír"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "Bekezdés"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "Részesítsd előnyben az egyoszlopos elrendezést, vagy tartsd meg az o
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "Publikációk"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "Kiadó"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "Lila"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "Téglalap"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "Téglalap (teljes szélesség)"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "Piros"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "Szakaszok · nyomtatási rendelés"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "A szakaszok fejlécrendszerek felismerését használják, és a munkatapasztalat azt mutatja."
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "Válassza ki"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "{0} kiválasztása"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "Az összes kiválasztása"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "Kiválasztás..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "Kiválasztott dokumentumok"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "Sablonok megjelenítése"
 msgid "Show them again"
 msgstr "Mutasd meg őket újra"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "A közös címkéiket mutatja. Az általad hozzáadott címkék minden dokumentumra rákerülnek, az eltávolítottak pedig mindegyikről lekerülnek. A zárolt dokumentumok változatlanok maradnak."
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "A japán rirekisho önéletrajz által ihletett egyoszlopos forma: egy fejléc szegélyezett mezőkből, és minden szakasz táblázatként jelenik meg tömör címsorral. Kompakt és könnyen beolvasható, alkalmas mérnöki munkákra, üzemeltetési munkákra vagy munkaalkalmazásokra Japánban."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "Magazincikk által ihletett egyoszlopos elrendezés: az Ön neve nagy betűkkel a rövid címsor alatt nagybetűvel, az összefoglaló dőlt betűvel, a szakaszcímek dőlt betűkkel. Kifinomult design íróknak, tervezőknek és kommunikációs szakembereknek."
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "Magazincikkszerű, egyhasábos elrendezés: nagy méretű név egy nagybetűs felülcím alatt, az összefoglaló pedig nagyobb betűs bevezetőként; írók, tervezők és kommunikációs szakemberek számára finomítva."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "Néhány karakterjelnek nincs jelentése ezen a fájlon kívül."
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "Néhány sor nem az olvasási sorrendben van tárolva."
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "Egyes PDF szövegek nem jeleníthetők meg. Válasszon egy betűtípust, amely ezeket a karaktereket tartalmazza, majd próbálja meg újra az exportálást."
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "Leállítás"
 msgid "Stopped. No edits were proposed."
 msgstr "Megállt. Nem javasoltak szerkesztést."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "Áthúzás"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "Erősebb ige"
@@ -5531,12 +5671,18 @@ msgstr "A rendszerek tapasztalati részt keresnek. A projektek vagy az önkénte
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "Címkék"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "A címkékkel kulcsszavak alapján kategorizálhatod az önéletrajzodat."
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "{0} dokumentum címkéi"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,8 +5748,16 @@ msgstr "Tesztelés…"
 msgid "Text"
 msgstr "Szöveg"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "Szövegigazítás"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
+msgstr "Szövegszín"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
 msgstr "Szövegszín"
 
 #: src/features/resume/editor/check/issues.ts
@@ -5633,6 +5787,10 @@ msgstr "A szöveg az élőfej vagy élőláb területén helyezkedik el."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "Szöveg mérete"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "Szövegstílus"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "Tipográfia"
 msgid "Ukrainian"
 msgstr "ukrán"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "Aláhúzás"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "A hivatkozások aláhúzása"
@@ -6181,6 +6343,7 @@ msgstr "A hivatkozások aláhúzása"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "{providerName} fiókod leválasztása..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "Feloldás"
@@ -6238,6 +6402,10 @@ msgstr "Önéletrajz frissítése"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "Jelszó frissítése"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "széles margók"
 msgid "Width"
 msgstr "Szélesség"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "A szavak összefolynak, amikor a szöveg kinyerésre kerül."
@@ -6665,6 +6829,10 @@ msgstr "Fiókját törölték."
 msgid "Your body text is very small."
 msgstr "A törzsszövege nagyon kicsi."
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "A böngésződ MI-ügynöke szerkesztette ezt az önéletrajzot."
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "A felsoroláspontjaid szokatlan karakterekkel vannak jelölve."
@@ -6744,6 +6912,10 @@ msgstr "Az önéletrajza frissítve lett."
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "Az önéletrajzod \"én\"-t és \"enyém\"-et használ."
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "A kiválasztott betűtípus nem tud megjeleníteni néhány karaktert. Ezek “?” jelként jelennek meg. A Dizájn részben válassz olyan betűtípust, amely tartalmazza őket."
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"

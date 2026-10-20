@@ -72,6 +72,11 @@ msgstr "{0, plural, one {채용 공고에 \"{1}\"가 한 번 나타납니다.} o
 msgid "{0, plural, one {# character} other {# characters}}"
 msgstr "{0, plural, one {# 문자} other {# 문자}}"
 
+#. placeholder {0}: done.length
+#: src/features/documents/document-actions.tsx
+msgid "{0, plural, one {# document moved to Trash} other {# documents moved to Trash}}"
+msgstr "{0, plural, one {서류 #개를 휴지통으로 이동했습니다} other {서류 #개를 휴지통으로 이동했습니다}}"
+
 #. placeholder {0}: output.skipped.length
 #: src/features/assistant/conversation.tsx
 msgid "{0, plural, one {# edit couldn't be placed: its text changed. Ask again to redo it.} other {# edits couldn't be placed: their text changed. Ask again to redo them.}}"
@@ -92,6 +97,11 @@ msgstr "{0, plural, one {# 제안된 편집} other {# 제안된 편집}}"
 #: src/features/resume/editor/check/writing-tab.tsx
 msgid "{0, plural, one {Reading # passage of your resume…} other {Reading # bullets and paragraphs of your resume…}}"
 msgstr "{0, plural, one {이력서의 # 구절을 읽는 중…} other {이력서의 # 목록 항목과 단락을 읽는 중…}}"
+
+#. placeholder {0}: characters.length
+#: src/libs/error-message.ts
+msgid "{0, plural, one {Your selected font can't display {list}. It shows as “?”. In Design, choose a font that has it.} other {Your selected font can't display {list}. They show as “?”. In Design, choose a font that has them.}}"
+msgstr "{0, plural, one {선택한 글꼴로는 {list}을(를) 표시할 수 없어 “?”로 표시됩니다. 디자인에서 이 문자가 포함된 글꼴을 선택하세요.} other {선택한 글꼴로는 {list}을(를) 표시할 수 없어 “?”로 표시됩니다. 디자인에서 이 문자들이 포함된 글꼴을 선택하세요.}}"
 
 #. placeholder {0}: document.name
 #: src/features/documents/document-actions.tsx
@@ -216,9 +226,17 @@ msgstr "{column, plural, one {# 컬럼} other {# 컬럼}}"
 msgid "{count, plural, one {# entry} other {# entries}}"
 msgstr "{count, plural, one {# 항목} other {# 항목}}"
 
+#: src/features/documents/documents-page.tsx
+msgid "{count} selected"
+msgstr "{count}개 선택됨"
+
 #: src/features/settings/account/data.tsx
 msgid "{documents, plural, one {# document} other {# documents}}"
 msgstr "{documents, plural, one {# 문서} other {# 문서}}"
+
+#: src/features/documents/document-actions.tsx
+msgid "{done, plural, one {# document updated} other {# documents updated}}"
+msgstr "{done, plural, one {서류 #개를 업데이트했습니다} other {서류 #개를 업데이트했습니다}}"
 
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "{entries, plural, one {# entry} other {# entries}}"
@@ -464,6 +482,7 @@ msgid "Access your account through the API, including reading, changing and dele
 msgstr ""
 
 #: src/features/command-palette/pages/navigation.tsx
+#: src/features/settings/account/page.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/-components/app-shell.tsx
 #: src/routes/dashboard/settings/route.tsx
@@ -728,6 +747,18 @@ msgstr "AI 제공자를 로드할 수 없습니다. 다시 시도하려면 새�
 #: src/libs/locale.ts
 msgid "Albanian"
 msgstr "알바니아어"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align centre"
+msgstr "가운데 정렬"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align left"
+msgstr "왼쪽 정렬"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Align right"
+msgstr "오른쪽 정렬"
 
 #: src/features/resume/editor/design/template-group.tsx
 msgid "All"
@@ -1023,6 +1054,10 @@ msgstr "신청하기에 가장 좋습니다"
 msgid "Blocker"
 msgstr "차단 요소"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Blue"
+msgstr "파란색"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/typography.tsx
 msgctxt "Body Text (paragraphs, lists, etc.)"
 msgid "Body"
@@ -1251,6 +1286,7 @@ msgid "Clear section"
 msgstr "섹션 지우기"
 
 #: src/components/ui/combobox.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Clear selection"
 msgstr "선택 해제"
 
@@ -1274,6 +1310,10 @@ msgstr "{title}를 닫습니다."
 #: src/features/assistant/assistant-panel.tsx
 msgid "Close the assistant"
 msgstr "어시스턴트 닫기"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Code"
+msgstr "코드"
 
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
 msgid "Color"
@@ -1779,6 +1819,10 @@ msgstr "날짜가 미래에 시작됩니다."
 #: src/features/resume/editor/check/issues.ts
 msgid "Dates won't be read"
 msgstr "날짜를 읽을 수 없습니다."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Default"
+msgstr "기본값"
 
 #: src/features/resume/editor/write/entries.tsx
 msgid "Degree"
@@ -2513,12 +2557,16 @@ msgid "Font Weights"
 msgstr "글꼴 두께"
 
 #: src/libs/error-message.ts
-msgid "Fonts could not be loaded. Retry the export."
-msgstr "글꼴을 로드할 수 없습니다. 내보내기를 다시 시도하십시오."
+msgid "Fonts could not be loaded. Try again."
+msgstr "글꼴을 불러오지 못했습니다. 다시 시도하세요."
 
 #: src/routes/builder/$resumeId/-sidebar/right/sections/notes.tsx
 msgid "For example, note which companies you sent this resume to, or links to the job descriptions."
 msgstr "예를 들어 이 이력서를 어느 회사에 보냈는지, 또는 채용 공고 링크를 적어 두세요."
+
+#: src/features/resume/share/download-tab.tsx
+msgid "For LibreOffice and other open-source editors. Layout is simplified."
+msgstr "LibreOffice 및 기타 오픈 소스 편집기용. 레이아웃이 단순화되었습니다."
 
 #: src/features/resume/share/download-tab.tsx
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
@@ -2645,6 +2693,14 @@ msgstr "성적"
 msgid "Greek"
 msgstr "그리스어"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Green"
+msgstr "초록색"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Grey"
+msgstr "회색"
+
 #: src/features/documents/documents-page.tsx
 msgid "Grid"
 msgstr "그리드"
@@ -2665,6 +2721,18 @@ msgstr "헤더"
 msgctxt "Headings or Titles (H1, H2, H3, H4, H5, H6)"
 msgid "Heading"
 msgstr "제목"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 1"
+msgstr "제목 1"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 2"
+msgstr "제목 2"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Heading 3"
+msgstr "제목 3"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Heading changed"
@@ -2746,6 +2814,10 @@ msgstr "사진 숨기기"
 msgid "High"
 msgstr "높은"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Highlight"
+msgstr "형광펜"
+
 #: src/libs/locale.ts
 msgid "Hindi"
 msgstr "힌디어"
@@ -2758,6 +2830,10 @@ msgstr "역사"
 #: src/features/command-palette/pages/navigation.tsx
 msgid "Home"
 msgstr "홈"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Horizontal line"
+msgstr "가로줄"
 
 #: src/libs/locale.ts
 msgid "Hungarian"
@@ -2864,6 +2940,10 @@ msgstr "개선 중…"
 #: src/features/ats-checker/messages.ts
 msgid "Increase line spacing so two lines are not merged into one."
 msgstr "두 줄이 하나로 합쳐지지 않도록 줄 간격을 늘리세요."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Indent"
+msgstr "들여쓰기"
 
 #: src/libs/locale.ts
 msgid "Indonesian"
@@ -2994,6 +3074,10 @@ msgstr "john.doe"
 #: src/features/resume/import/read-file.ts
 msgid "JSON read"
 msgstr "JSON 읽기"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Justify"
+msgstr "양쪽 정렬"
 
 #: src/libs/locale.ts
 msgid "Kannada"
@@ -3201,6 +3285,7 @@ msgstr ""
 
 #: src/features/resume/editor/design/style-groups.tsx
 #: src/routes/builder/$resumeId/-components/page-canvas.tsx
+msgctxt "US Letter paper size (8.5 × 11 in), shown beside A4"
 msgid "Letter"
 msgstr "레터"
 
@@ -3343,7 +3428,12 @@ msgstr "이력서 로딩 중…"
 msgid "Location"
 msgstr "위치"
 
+#: src/features/documents/documents-page.tsx
+msgid "Lock"
+msgstr ""
+
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Lock editing"
 msgstr "편집 잠금"
@@ -3499,6 +3589,10 @@ msgstr "모델: {label}"
 msgid "More download formats"
 msgstr "더 많은 다운로드 형식"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "More formatting"
+msgstr "추가 서식"
+
 #: src/features/resume/editor/write/fields.tsx
 msgid "More options"
 msgstr "추가 옵션"
@@ -3564,6 +3658,7 @@ msgid "Move to"
 msgstr "이동"
 
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/document-menu.tsx
 msgid "Move to Trash"
 msgstr "휴지통으로 이동"
@@ -3579,6 +3674,12 @@ msgstr "위로 이동"
 #: src/features/ats-checker/messages.ts
 msgid "Move your email and phone number to the top of page one."
 msgstr "이메일과 전화번호를 첫 페이지 상단으로 옮기세요."
+
+#. placeholder {0}: done.length
+#. placeholder {1}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Moved {0} of {1} to Trash. Locked documents were skipped."
+msgstr "{1}개 중 {0}개를 휴지통으로 이동했습니다. 잠긴 서류는 건너뛰었습니다."
 
 #. Label for full name input on registration form
 #: src/dialogs/resume/index.tsx
@@ -4031,6 +4132,10 @@ msgstr "또는 다음으로 계속"
 msgid "Or in your own words…"
 msgstr "아니면 자신의 말로…"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Orange"
+msgstr "주황색"
+
 #: src/features/resume/editor/write/entries.tsx
 msgid "Organization"
 msgstr "기관"
@@ -4055,6 +4160,10 @@ msgstr "100점 만점"
 #: src/features/resume/editor/proposals/proposal-list.tsx
 msgid "Out of date: the text has changed since."
 msgstr "오래됨: 이후 텍스트가 변경되었습니다."
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Outdent"
+msgstr "내어쓰기"
 
 #: src/libs/resume/section.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
@@ -4095,6 +4204,10 @@ msgstr "페이지 조회수"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Paper"
 msgstr "종이"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Paragraph"
+msgstr "단락"
 
 #: src/features/assistant/document.ts
 #: src/features/resume/editor/check/writing-tab.tsx
@@ -4254,6 +4367,7 @@ msgstr "단일 열을 사용하거나, 사이드 열은 짧고 독립적인 목�
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/command-palette/pages/preferences/index.tsx
+#: src/features/settings/preferences.tsx
 #: src/features/settings/root.tsx
 #: src/routes/dashboard/settings/route.tsx
 msgid "Preferences"
@@ -4390,6 +4504,10 @@ msgstr "출판물"
 #: src/features/resume/editor/write/entries.tsx
 msgid "Publisher"
 msgstr "발행인"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Purple"
+msgstr "보라색"
 
 #: src/features/ats-checker/messages.ts
 msgid "Put a plain email address near the top of the first page. It is what most systems file you under."
@@ -4534,6 +4652,10 @@ msgstr "사각형"
 #: src/components/level/combobox.tsx
 msgid "Rectangle (Full Width)"
 msgstr "사각형(전체 너비)"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Red"
+msgstr "빨간색"
 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Redo resume change"
@@ -4970,6 +5092,16 @@ msgstr "섹션 · 인쇄 주문"
 msgid "Sections use headings systems recognise, and work experience shows."
 msgstr "섹션에서는 시스템이 인식하고 업무 경험이 표시되는 제목을 사용합니다."
 
+#: src/features/documents/document-actions.tsx
+msgid "Select"
+msgstr "선택"
+
+#. placeholder {0}: document.name
+#: src/features/documents/document-card.tsx
+msgid "Select {0}"
+msgstr "{0} 선택"
+
+#: src/features/documents/documents-page.tsx
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Select all"
 msgstr "모두 선택"
@@ -4985,6 +5117,10 @@ msgstr ""
 #: src/components/ui/combobox.tsx
 msgid "Select..."
 msgstr "선택..."
+
+#: src/features/documents/documents-page.tsx
+msgid "Selected documents"
+msgstr "선택한 서류"
 
 #: src/features/resume/stylesheet/editor.tsx
 msgid "Semantic CSS stylesheet"
@@ -5139,6 +5275,10 @@ msgstr "템플릿 표시"
 msgid "Show them again"
 msgstr "다시 보여주세요"
 
+#: src/features/documents/document-actions.tsx
+msgid "Shows the tags they all share. Tags you add go on every document; tags you remove come off every one. Locked documents are left as they are."
+msgstr "모든 서류에 공통된 태그를 보여 줍니다. 추가한 태그는 모든 서류에 적용되고, 삭제한 태그는 모든 서류에서 제거됩니다. 잠긴 서류는 그대로 유지됩니다."
+
 #. Layout editor column label for the secondary sidebar area
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/write/outline.tsx
@@ -5234,8 +5374,8 @@ msgid "Single-column ruled form inspired by the Japanese rirekisho: a bordered h
 msgstr "일본의 rirekisho 이력서에서 영감을 받은 단일 열 형식: 테두리가 있는 필드로 구성된 헤더와 단단한 제목 표시줄이 있는 테이블로 표시되는 모든 섹션. 작고 스캔하기 쉬우며 일본의 엔지니어링 작업, 운영 작업 또는 작업 응용 프로그램에 적합합니다."
 
 #: src/dialogs/resume/template/data.ts
-msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker, the summary as an italic standfirst and italic section headings; refined for writers, designers, and communications roles."
-msgstr "잡지 기사에서 영감을 받은 단일 열 레이아웃입니다. 대문자로 된 짧은 제목 아래에 큰 글자로 된 이름, 이탤릭체로 된 요약, 이탤릭체로 된 섹션 제목이 있습니다. 작가, 디자이너, 커뮤니케이션 전문가를 위한 세련된 디자인입니다."
+msgid "Single-column set like a magazine feature: a large display name under an uppercase kicker and the summary as a larger standfirst; refined for writers, designers, and communications roles."
+msgstr "잡지 특집 기사처럼 구성한 단일 열 레이아웃: 대문자 키커 아래에 큰 이름을 배치하고 요약을 더 큰 리드문으로 보여 줍니다. 작가, 디자이너, 커뮤니케이션 직무에 맞게 다듬었습니다."
 
 #: src/dialogs/resume/template/data.ts
 msgid "Single-column Wall Street style with a centered header and ruled section headings."
@@ -5318,10 +5458,6 @@ msgstr "일부 글리프는 이 파일 밖에서는 의미가 없습니다."
 #: src/features/ats-checker/messages.ts
 msgid "Some lines are stored out of reading order."
 msgstr "일부 줄이 읽는 순서와 다르게 저장되어 있습니다."
-
-#: src/libs/error-message.ts
-msgid "Some PDF text could not be rendered. Choose a font containing these characters, then retry the export."
-msgstr "일부 PDF 텍스트를 렌더링할 수 없습니다. 이러한 문자가 포함된 글꼴을 선택한 다음 내보내기를 다시 시도하세요."
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Some selected updates overlap changes made in this child resume. Applying them keeps the parent's version."
@@ -5457,6 +5593,10 @@ msgstr "멈추다"
 msgid "Stopped. No edits were proposed."
 msgstr "중지되었습니다. 제안된 수정사항이 없습니다."
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Strikethrough"
+msgstr "취소선"
+
 #: src/features/resume/editor/write/improve.tsx
 msgid "Stronger verb"
 msgstr "더 강한 동사"
@@ -5531,12 +5671,18 @@ msgstr "시스템은 체험 섹션을 찾습니다. 프로젝트나 자원봉사
 
 #: src/dialogs/resume/index.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 msgid "Tags"
 msgstr "태그"
 
 #: src/dialogs/resume/index.tsx
 msgid "Tags can be used to categorize your resume by keywords."
 msgstr "태그는 키워드로 이력서를 분류하는 데 사용할 수 있습니다."
+
+#. placeholder {0}: documents.length
+#: src/features/documents/document-actions.tsx
+msgid "Tags for {0} documents"
+msgstr "서류 {0}개의 태그"
 
 #: src/features/ats-checker/messages.ts
 msgid "Tags give software an explicit reading order. Enable them when exporting, if your tool offers it."
@@ -5602,8 +5748,16 @@ msgstr "테스트…"
 msgid "Text"
 msgstr "텍스트"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text alignment"
+msgstr "텍스트 정렬"
+
 #: src/routes/builder/$resumeId/-sidebar/right/sections/design.tsx
 msgid "Text Color"
+msgstr "텍스트 색상"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text colour"
 msgstr "텍스트 색상"
 
 #: src/features/resume/editor/check/issues.ts
@@ -5633,6 +5787,10 @@ msgstr "텍스트가 머리글 또는 바닥글 영역에 있습니다."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Text size"
 msgstr "텍스트 크기"
+
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Text style"
+msgstr "텍스트 스타일"
 
 #: src/features/resume/editor/check/issues.ts
 msgid "Text this close to the edge can be cut off. Use at least {minimum} pt."
@@ -6172,6 +6330,10 @@ msgstr "타이포그래피"
 msgid "Ukrainian"
 msgstr "우크라이나어"
 
+#: src/features/resume/editor/write/rich-text-editor.tsx
+msgid "Underline"
+msgstr "밑줄"
+
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Underline links"
 msgstr "링크에 밑줄을 긋습니다"
@@ -6181,6 +6343,7 @@ msgstr "링크에 밑줄을 긋습니다"
 #: src/features/resume/editor/design/fit.ts
 #: src/features/resume/editor/design/template-group.tsx
 #: src/features/resume/editor/proposals/proposals.ts
+#: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
@@ -6200,6 +6363,7 @@ msgstr "{providerName} 계정 연결을 해제하는 중입니다..."
 #. Primary action button label to unlock a password-protected resume
 #: src/features/auth/pages/resume-password.tsx
 #: src/features/documents/document-actions.tsx
+#: src/features/documents/documents-page.tsx
 #: src/features/resume/editor/write/write-panel.tsx
 msgid "Unlock"
 msgstr "잠금 해제"
@@ -6238,6 +6402,10 @@ msgstr "이력서 업데이트"
 #: src/dialogs/auth/change-password.tsx
 msgid "Update your password"
 msgstr "비밀번호 업데이트"
+
+#: src/features/documents/document-actions.tsx
+msgid "Updated {done} of {total}. Locked documents were skipped."
+msgstr ""
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Updates marked as conflicts overlap edits made in this resume. Selecting one replaces your version."
@@ -6572,10 +6740,6 @@ msgstr "넓은 여백"
 msgid "Width"
 msgstr "너비"
 
-#: src/features/resume/share/download-tab.tsx
-msgid "Word"
-msgstr "Word"
-
 #: src/features/ats-checker/messages.ts
 msgid "Words run together when the text is extracted."
 msgstr "텍스트를 추출하면 단어들이 서로 붙어버립니다."
@@ -6665,6 +6829,10 @@ msgstr "귀하의 계정이 삭제되었습니다."
 msgid "Your body text is very small."
 msgstr "본문 텍스트가 매우 작습니다."
 
+#: src/features/resume/editor/webmcp.ts
+msgid "Your browser's AI agent edited this resume."
+msgstr "브라우저의 AI 에이전트가 이 이력서를 편집했습니다."
+
 #: src/features/ats-checker/messages.ts
 msgid "Your bullets are drawn with unusual characters."
 msgstr "항목이 특이한 문자로 표시되어 있습니다."
@@ -6744,6 +6912,10 @@ msgstr "이력서가 업데이트되었습니다."
 #: src/features/ats-checker/messages.ts
 msgid "Your resume uses \"I\" and \"my\"."
 msgstr "이력서에서 \"I\"와 \"my\"를 사용하고 있습니다."
+
+#: src/libs/error-message.ts
+msgid "Your selected font can't display some characters. They show as “?”. In Design, choose a font that has them."
+msgstr "선택한 글꼴로는 일부 문자를 표시할 수 없어 “?”로 표시됩니다. 디자인에서 이 문자들이 포함된 글꼴을 선택하세요."
 
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Zoom"
