@@ -3,6 +3,7 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { t } from "@lingui/core/macro";
 import { useCallback, useState } from "react";
 import { buildDocx } from "@reactive-resume/docx";
+import { buildOdt } from "@reactive-resume/odt";
 import { getResumeSectionTitle } from "@reactive-resume/pdf/section-title";
 import { getResumeExportData } from "@reactive-resume/resume/export-sections";
 import { buildMarkdown } from "@reactive-resume/resume/markdown";
@@ -16,8 +17,8 @@ import { createSectionTitleResolverForLocale } from "@/libs/resume/section-title
 
 /**
  * Section titles are stored empty by default and resolved (locale-aware) at render time. PDF does
- * this via an injected resolver; DOCX and Markdown reuse the same resolution here so their section
- * headings aren't blank. Returns a `(sectionId) => title` function.
+ * this via an injected resolver; DOCX, ODT and Markdown reuse the same resolution here so their
+ * section headings aren't blank. Returns a `(sectionId) => title` function.
  */
 const createSectionTitleResolver = async (data: ResumeData) => {
 	const resolveSectionTitle = await createSectionTitleResolverForLocale(data.metadata.page.locale);
@@ -37,7 +38,7 @@ type UseResumeExportOptions = {
 	publicResumePdf?: PublicResumePdfOptions;
 };
 
-export type ExportFormat = "pdf" | "docx" | "md" | "json";
+export type ExportFormat = "pdf" | "docx" | "odt" | "md" | "json";
 
 // Characters Windows and macOS won't take in a file name.
 const UNSAFE_FILE_NAME_CHARACTERS = /[\\/:*?"<>|]/g;
@@ -71,6 +72,7 @@ export async function createExportFile(resume: ExportableResume, format: ExportF
 
 	const resolveTitle = await createSectionTitleResolver(data);
 	if (format === "md") return new Blob([buildMarkdown(data, resolveTitle)], { type: "text/markdown" });
+	if (format === "odt") return buildOdt(data, resolveTitle);
 	return buildDocx(data, resolveTitle);
 }
 
