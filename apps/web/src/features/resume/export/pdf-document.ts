@@ -6,17 +6,19 @@ import { createSectionTitleResolverForLocale } from "@/libs/resume/section-title
 type CreateResumePdfBlobExtras = {
 	/** Receives the page map (header, section and item boxes) of this render; used by the editor canvas. */
 	onPageMap?: (pageMap: PageMap) => void;
+	/** Receives the characters no font could draw (they print as "?"); not called when every character rendered. */
+	onLostCharacters?: (characters: string[]) => void;
 };
 
 type RenderInput = { data: ResumeData; template?: Template | undefined };
 
 export type PdfWorkerRequest = RenderInput & { id: number };
 export type PdfWorkerResponse =
-	| { id: number; blob: Blob; pageMap: PageMap | undefined }
+	| { id: number; blob: Blob; pageMap: PageMap | undefined; lostCharacters: string[] | undefined }
 	// `cause` survives the worker boundary so callers can still tell text loss apart (see `getReadableErrorMessage`).
 	| { id: number; error: string; cause: string | undefined };
 
-type Rendered = { blob: Blob; pageMap: PageMap | undefined };
+type Rendered = { blob: Blob; pageMap: PageMap | undefined; lostCharacters: string[] | undefined };
 
 /** The same render on the main thread: where workers aren't available, or the worker failed to start. */
 async function renderHere({ data, template }: RenderInput): Promise<Rendered> {
@@ -25,6 +27,7 @@ async function renderHere({ data, template }: RenderInput): Promise<Rendered> {
 		createSectionTitleResolverForLocale(data.metadata.page.locale),
 	]);
 	let pageMap: PageMap | undefined;
+	let lostCharacters: string[] | undefined;
 	const blob = await createResumePdfBlob({
 		data,
 		template,
@@ -32,8 +35,11 @@ async function renderHere({ data, template }: RenderInput): Promise<Rendered> {
 		onPageMap: (map) => {
 			pageMap = map;
 		},
+		onLostCharacters: (characters) => {
+			lostCharacters = characters;
+		},
 	});
-	return { blob, pageMap };
+	return { blob, pageMap, lostCharacters };
 }
 
 type Pending = { input: RenderInput; resolve(value: Rendered): void; reject(error: Error): void };
@@ -58,7 +64,7 @@ function getWorker(): Worker | null {
 		if (!request) return;
 		pending.delete(response.id);
 		if ("error" in response) request.reject(new Error(response.error, { cause: response.cause }));
-		else request.resolve({ blob: response.blob, pageMap: response.pageMap });
+		else request.resolve({ blob: response.blob, pageMap: response.pageMap, lostCharacters: response.lostCharacters });
 	});
 	// Every render is caught inside the worker, so an error here means it couldn't start: render here instead.
 	worker.addEventListener("error", () => {
@@ -83,9 +89,10 @@ function render(input: RenderInput): Promise<Rendered> {
 export const createResumePdfBlob = async (
 	data: ResumeData,
 	template?: Template,
-	{ onPageMap }: CreateResumePdfBlobExtras = {},
+	{ onPageMap, onLostCharacters }: CreateResumePdfBlobExtras = {},
 ) => {
-	const { blob, pageMap } = await render({ data, template });
+	const { blob, pageMap, lostCharacters } = await render({ data, template });
 	if (pageMap) onPageMap?.(pageMap);
+	if (lostCharacters) onLostCharacters?.(lostCharacters);
 	return blob;
 };

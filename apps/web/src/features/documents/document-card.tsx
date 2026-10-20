@@ -4,6 +4,7 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Checkbox } from "@reactive-resume/ui/components/checkbox";
 import { ContextMenu, ContextMenuTrigger } from "@reactive-resume/ui/components/context-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@reactive-resume/ui/components/dropdown-menu";
 import { Icon } from "@reactive-resume/ui/components/icon";
@@ -22,6 +23,11 @@ export type DocumentItemProps = {
 	onTags: (document: DocumentSummary) => void;
 	/** Position in the library's first appearance, which staggers in; undefined afterwards and in Trash. */
 	introIndex?: number | undefined;
+	/** Whether the document is in the selection; Trash has no selection. */
+	selected?: boolean | undefined;
+	onSelectedChange?: ((selected: boolean) => void) | undefined;
+	/** Something is selected, so clicking a card toggles it instead of opening it. */
+	selecting?: boolean | undefined;
 };
 
 /** "Resume · Edited 2h ago", or the days left for a document in Trash. */
@@ -36,12 +42,19 @@ type OpenLinkProps = Pick<DocumentItemProps, "document"> & {
 	className?: string;
 	children: React.ReactNode;
 	label?: string;
+	/** While selecting, a click toggles the document instead of opening it. */
+	onSelect?: (() => void) | undefined;
 };
 
 /** Opens the resume in its editor. */
-function OpenLink({ document, className, children, label }: OpenLinkProps) {
+function OpenLink({ document, className, children, label, onSelect }: OpenLinkProps) {
 	const markOpened = useNewDocumentsStore((state) => state.markOpened);
 	if (document.trashedAt) return <span className={className}>{children}</span>;
+	const onClick = (event: React.MouseEvent) => {
+		if (!onSelect) return markOpened(document.id);
+		event.preventDefault();
+		onSelect();
+	};
 
 	return (
 		<Link
@@ -49,7 +62,7 @@ function OpenLink({ document, className, children, label }: OpenLinkProps) {
 			params={{ resumeId: document.id }}
 			aria-label={label}
 			className={className}
-			onClick={() => markOpened(document.id)}
+			onClick={onClick}
 		>
 			{children}
 		</Link>
@@ -88,8 +101,27 @@ function RenameInput({ document, onDone }: { document: DocumentSummary; onDone: 
 	);
 }
 
+type PaperBadgeProps = { icon: "lock"; label: string };
+
+/** A status chip on the page thumbnail. The page is white in both themes, so the chip doesn't follow the theme. */
+function PaperBadge({ icon, label }: PaperBadgeProps) {
+	return (
+		<span className="grid size-[22px] place-items-center rounded bg-black/75 text-white" title={label}>
+			<Icon name={icon} size={14} />
+			<span className="sr-only">{label}</span>
+		</span>
+	);
+}
+
 /** A 204px card: the real first page, title with ⋯ and "Resume · Edited 2h ago". */
-export function DocumentCard({ document, onTags, introIndex }: DocumentItemProps) {
+export function DocumentCard({
+	document,
+	onTags,
+	introIndex,
+	selected = false,
+	onSelectedChange,
+	selecting = false,
+}: DocumentItemProps) {
 	const openDocument = useOpenDocument();
 	const [renaming, setRenaming] = useState(false);
 	const isNew = useNewDocumentsStore((state) => state.ids.includes(document.id)) && !document.trashedAt;
@@ -99,6 +131,7 @@ export function DocumentCard({ document, onTags, introIndex }: DocumentItemProps
 		onOpen: () => openDocument(document),
 		onRename: () => setRenaming(true),
 		onTags: () => onTags(document),
+		onSelect: onSelectedChange && !selected ? () => onSelectedChange(true) : undefined,
 	};
 
 	return (
@@ -116,33 +149,40 @@ export function DocumentCard({ document, onTags, introIndex }: DocumentItemProps
 					/>
 				}
 			>
-				<OpenLink
-					document={document}
-					label={document.name}
-					className={cn(
-						"relative block aspect-page overflow-hidden rounded-[6px] shadow-[0_0_0_1px_var(--line),var(--shadow-1)] transition-[translate,scale,box-shadow] duration-quick ease-enter hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--line),var(--shadow-2)] active:scale-[0.98]",
-						isNew &&
-							"shadow-[0_0_0_2px_var(--accent),var(--shadow-1)] hover:shadow-[0_0_0_2px_var(--accent),var(--shadow-2)] starting:shadow-[0_0_0_2px_transparent,var(--shadow-1)]",
-						document.trashedAt && "pointer-events-none",
-					)}
-				>
-					<ResumeThumbnail resume={document} />
-					<span className="absolute start-2 top-2 flex gap-1">
-						{isNew && (
-							<span className="rounded bg-accent px-1.5 text-[11px] leading-[18px] font-semibold text-on-accent">
-								<Trans>New</Trans>
-							</span>
+				<div className="relative">
+					<OpenLink
+						document={document}
+						label={document.name}
+						onSelect={selecting && onSelectedChange ? () => onSelectedChange(!selected) : undefined}
+						className={cn(
+							"relative block aspect-page overflow-hidden rounded-[6px] shadow-[0_0_0_1px_var(--line),var(--shadow-1)] transition-[translate,scale,box-shadow] duration-quick ease-enter hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--line),var(--shadow-2)] active:scale-[0.98]",
+							(isNew || selected) &&
+								"shadow-[0_0_0_2px_var(--accent),var(--shadow-1)] hover:shadow-[0_0_0_2px_var(--accent),var(--shadow-2)] starting:shadow-[0_0_0_2px_transparent,var(--shadow-1)]",
+							document.trashedAt && "pointer-events-none",
 						)}
-						{document.isLocked && (
-							<span className="grid size-[22px] place-items-center rounded bg-ink/80 text-bg" title={t`Locked`}>
-								<Icon name="lock" size={14} />
-								<span className="sr-only">
-									<Trans>Locked</Trans>
+					>
+						<ResumeThumbnail resume={document} />
+						<span className="absolute start-2 top-2 flex gap-1">
+							{isNew && (
+								<span className="rounded bg-accent px-1.5 text-[11px] leading-[18px] font-semibold text-on-accent">
+									<Trans>New</Trans>
 								</span>
-							</span>
-						)}
-					</span>
-				</OpenLink>
+							)}
+							{document.isLocked && <PaperBadge icon="lock" label={t`Locked`} />}
+						</span>
+					</OpenLink>
+					{onSelectedChange && (
+						<Checkbox
+							checked={selected}
+							onCheckedChange={onSelectedChange}
+							aria-label={t`Select ${document.name}`}
+							className={cn(
+								"absolute end-2 top-2 shadow-e1 transition-[opacity,background-color,border-color] duration-quick",
+								!selecting && "opacity-0 group-hover/card:opacity-100 focus-visible:opacity-100",
+							)}
+						/>
+					)}
+				</div>
 
 				<div className="flex items-start gap-1">
 					<div className="grid min-w-0 flex-1 gap-0.5">
@@ -174,7 +214,7 @@ export function DocumentCard({ document, onTags, introIndex }: DocumentItemProps
 }
 
 /** The list view's row: Name, Edited, ⋯. */
-export function DocumentRow({ document, onTags, introIndex }: DocumentItemProps) {
+export function DocumentRow({ document, onTags, introIndex, selected = false, onSelectedChange }: DocumentItemProps) {
 	const { i18n } = useLingui();
 	const openDocument = useOpenDocument();
 	const [renaming, setRenaming] = useState(false);
@@ -194,12 +234,18 @@ export function DocumentRow({ document, onTags, introIndex }: DocumentItemProps)
 						style={introIndex === undefined ? undefined : stagger(introIndex)}
 						className={cn(
 							"border-b border-line transition-colors duration-quick hover:bg-hover",
+							selected && "bg-accent-soft hover:bg-accent-soft",
 							introIndex !== undefined && ENTER_CLASS,
 							document.trashedAt && "opacity-70",
 						)}
 					/>
 				}
 			>
+				{onSelectedChange && (
+					<td className="w-10 ps-3">
+						<Checkbox checked={selected} onCheckedChange={onSelectedChange} aria-label={t`Select ${document.name}`} />
+					</td>
+				)}
 				<td className="py-3 ps-3 pe-2">
 					<span className="flex min-w-0 items-center gap-2.5">
 						<Icon name="description" className="shrink-0 text-ink-2" />

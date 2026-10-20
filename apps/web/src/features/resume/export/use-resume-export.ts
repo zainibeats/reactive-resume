@@ -10,7 +10,7 @@ import { toast } from "@reactive-resume/ui/components/toast";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
 import { createResumePdfBlob } from "./pdf-document";
 import { resolvePublicResumePdfBlob } from "@/features/resume/public/public-pdf";
-import { getReadableErrorMessage } from "@/libs/error-message";
+import { getLostCharactersMessage, getReadableErrorMessage } from "@/libs/error-message";
 import { client } from "@/libs/orpc/client";
 import { createSectionTitleResolverForLocale } from "@/libs/resume/section-title-locale";
 
@@ -55,6 +55,10 @@ export function getDefaultFileName(resume: ExportableResume) {
 	return words(resume.name || resume.slug).join("-") || "Resume";
 }
 
+// The file still downloads, with "?" for each character no font can draw.
+const warnLostCharacters = (characters: string[]) =>
+	toast.add({ type: "warning", id: "pdf-lost-characters", description: getLostCharactersMessage(characters) });
+
 /** Builds one export file. It throws when the file can't be made, so each caller decides how to say so. */
 export async function createExportFile(resume: ExportableResume, format: ExportFormat): Promise<Blob> {
 	if (format === "json") {
@@ -63,7 +67,7 @@ export async function createExportFile(resume: ExportableResume, format: ExportF
 
 	// Resume files leave out any embedded cover-letter section.
 	const data = getResumeExportData(resume.data, "resume");
-	if (format === "pdf") return createResumePdfBlob(data);
+	if (format === "pdf") return createResumePdfBlob(data, undefined, { onLostCharacters: warnLostCharacters });
 
 	const resolveTitle = await createSectionTitleResolver(data);
 	if (format === "md") return new Blob([buildMarkdown(data, resolveTitle)], { type: "text/markdown" });
@@ -161,7 +165,7 @@ export function useResumeExport(resume: ExportableResume | undefined, exportOpti
 		const makeBlob = () =>
 			exportOptions.publicResumePdf
 				? resolvePublicResumePdfBlob({ data: resume.data, ...exportOptions.publicResumePdf })
-				: createResumePdfBlob(resume.data);
+				: createResumePdfBlob(resume.data, undefined, { onLostCharacters: warnLostCharacters });
 		try {
 			printPdf(await makeBlob());
 		} catch (error) {
