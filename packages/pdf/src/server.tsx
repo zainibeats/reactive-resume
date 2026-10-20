@@ -17,6 +17,7 @@ export type CreateResumePdfFileOptions = {
 	uploadOrigin?: string | undefined;
 };
 
+/** Creates a server PDF using deployment font mirroring and the server image reader. */
 export const createResumePdfFile = async ({
 	filename,
 	uploadOrigin,
@@ -26,6 +27,7 @@ export const createResumePdfFile = async ({
 		...input,
 		data: parseResumeData(input.data),
 		readImage: (source) => readServerImage(source, uploadOrigin),
+		webFontBaseUrl: process.env.WEB_FONT_BASE_URL,
 	});
 	// Characters no font can draw print as "?" rather than failing the file; the editor names them.
 	assertPdfFonts(result);
