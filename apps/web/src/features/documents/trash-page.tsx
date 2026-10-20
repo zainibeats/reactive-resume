@@ -5,6 +5,7 @@ import { buttonVariants } from "@reactive-resume/ui/components/button";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { DocumentRow } from "./document-card";
 import { LibraryError } from "./library-error";
+import { PageHeader } from "@/components/layout/page-header";
 import { orpc } from "@/libs/orpc/client";
 
 const noop = () => undefined;
@@ -21,21 +22,19 @@ export function TrashPage() {
 
 	return (
 		<div className="mx-auto grid w-full max-w-[1180px] content-start gap-5 px-8 py-8 max-sm:px-4 max-sm:py-5">
-			<Link
-				to="/dashboard"
-				className={buttonVariants({ variant: "ghost", size: "sm", className: "-ms-2.5 w-fit gap-1.5 text-ink-2" })}
-			>
-				<Icon name="arrow_back" size={18} />
-				<Trans>Back to documents</Trans>
-			</Link>
-			<div className="grid gap-1">
-				<h1 className="font-display text-[30px] leading-9 font-medium">
-					<Trans>Trash</Trans>
-				</h1>
-				<p className="text-sm text-ink-2">
-					<Trans>Items are deleted permanently after 30 days.</Trans>
-				</p>
-			</div>
+			<PageHeader
+				back={
+					<Link
+						to="/dashboard"
+						className={buttonVariants({ variant: "ghost", size: "sm", className: "-ms-2.5 w-fit gap-1.5 text-ink-2" })}
+					>
+						<Icon name="arrow_back" size={18} />
+						<Trans>Back to documents</Trans>
+					</Link>
+				}
+				title={<Trans>Trash</Trans>}
+				description={<Trans>Items are deleted permanently after 30 days.</Trans>}
+			/>
 
 			{isError && <LibraryError retrying={isFetching} onRetry={() => void refetch()} />}
 

@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@reactive-resume/ui/compone
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { getInitials } from "@reactive-resume/utils/string";
 import { SignOutButton } from "./account/page";
+import { PageHeader } from "@/components/layout/page-header";
 import { useTheme } from "@/features/theme/provider";
 import { orpc } from "@/libs/orpc/client";
 import { themeMap } from "@/libs/theme";
@@ -45,9 +46,7 @@ export function SettingsRoot() {
 
 	return (
 		<div className="grid gap-4">
-			<h1 className="font-display text-[30px] leading-9 font-medium lg:hidden">
-				<Trans>Settings</Trans>
-			</h1>
+			<PageHeader title={<Trans>Settings</Trans>} />
 			<div className="flex items-center gap-3">
 				<Avatar className="size-12">
 					<AvatarImage src={session.user.image ?? undefined} alt="" />

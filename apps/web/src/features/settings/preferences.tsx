@@ -7,6 +7,7 @@ import { useId } from "react";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { cn } from "@reactive-resume/utils/style";
 import { SettingsSection } from "./section";
+import { PageHeader } from "@/components/layout/page-header";
 import { LocaleCombobox } from "@/features/locale/combobox";
 import { useTheme } from "@/features/theme/provider";
 import { themeMap } from "@/libs/theme";
@@ -22,6 +23,7 @@ export function PreferencesSettings() {
 
 	return (
 		<>
+			<PageHeader title={<Trans>Preferences</Trans>} />
 			<SettingsSection title={<Trans>Appearance</Trans>}>
 				<ThemeTiles />
 				<p className="text-xs text-ink-3">

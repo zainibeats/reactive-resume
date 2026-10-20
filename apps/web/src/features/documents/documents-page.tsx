@@ -25,6 +25,7 @@ import { DocumentCard, DocumentRow } from "./document-card";
 import { collectTags, filterDocuments } from "./filter";
 import { LibraryError } from "./library-error";
 import { useStartDocument } from "./new-document-dialog";
+import { PageHeader } from "@/components/layout/page-header";
 import { useDialogStore } from "@/dialogs/store";
 import { isEditableElementFocused } from "@/features/resume/builder/draft";
 import { orpc } from "@/libs/orpc/client";
@@ -82,6 +83,8 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 	});
 
 	const all = documents ?? [];
+	const failed = isError && !documents;
+	const firstRun = !isPending && all.length === 0;
 	const shown = filterDocuments(all, search);
 	const tags = collectTags(all);
 	const filtered = search.q.trim() !== "" || search.tags.length > 0;
@@ -111,17 +114,9 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 
 	return (
 		<div className="mx-auto grid w-full max-w-[1180px] content-start gap-5 px-8 py-8 max-sm:px-4 max-sm:py-5">
-			<h1 className="font-display text-[30px] leading-9 font-medium">
-				<Trans>Documents</Trans>
-			</h1>
-
-			{isError && <LibraryError retrying={isFetching} onRetry={() => void refetch()} />}
-
-			{isError && !documents ? null : !isPending && all.length === 0 ? (
-				<FirstRun onChooseFile={() => openDialog("document.new", undefined)} />
-			) : (
-				<>
-					<div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+			<PageHeader title={<Trans>Documents</Trans>}>
+				{!failed && !firstRun && (
+					<>
 						<div className="ms-auto flex flex-wrap items-center gap-2 max-sm:ms-0 max-sm:w-full">
 							<InputGroup className="w-60 max-sm:w-full">
 								<InputGroupAddon>
@@ -163,8 +158,16 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 								</SegmentedControlItem>
 							</SegmentedControl>
 						</div>
-					</div>
+					</>
+				)}
+			</PageHeader>
 
+			{isError && <LibraryError retrying={isFetching} onRetry={() => void refetch()} />}
+
+			{failed ? null : firstRun ? (
+				<FirstRun onChooseFile={() => openDialog("document.new", undefined)} />
+			) : (
+				<>
 					{tags.length > 0 && (
 						<TagFilter tags={tags} active={search.tags} onChange={(next) => onSearchChange({ tags: next })} />
 					)}

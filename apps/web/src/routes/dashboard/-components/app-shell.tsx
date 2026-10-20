@@ -175,7 +175,7 @@ function NavLink({ item, current }: { item: NavItem; current: boolean }) {
 		>
 			<Icon name={item.icon} filled={current} />
 			<span className="flex-1">{item.label}</span>
-			{item.count !== undefined && <span className="font-mono text-xs text-ink-3">{item.count}</span>}
+			{item.count ? <span className="font-mono text-xs text-ink-3">{item.count}</span> : null}
 		</Link>
 	);
 }
