@@ -83,7 +83,7 @@ describe("optional experience and education header fields (#3338)", () => {
 	});
 });
 
-describe.each(["onyx"] as const)("%s section heading direction", (template) => {
+describe.each(["persian", "onyx"] as const)("%s section heading direction", (template) => {
 	it.each(["en-US", "ar-SA"])("keeps headings at the reading edge with and without icons in %s", async (locale) => {
 		for (const hideSectionIcons of [false, true]) {
 			const data = fixture();
