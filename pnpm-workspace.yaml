@@ -35,6 +35,11 @@ allowBuilds:
   sharp: true
 minimumReleaseAge: 0
 overrides:
+  # One React copy across the workspace: transitive ^19 ranges would otherwise pull in a newer react-dom.
+  react: 19.3.0
+  react-dom: 19.3.0
+  # Plugins take @better-auth/core as a peer; keep it on better-auth's own version so their types line up.
+  "@better-auth/core": 1.7.10
   next@<16.3.8: 16.3.8
   "@modelcontextprotocol/client@>=2.0.0 <2.2.0": ^2.2.0
   postcss-selector-parser@<7.1.6: ^7.1.6
