@@ -2,7 +2,7 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import type { WritableDraft } from "immer";
 import { t } from "@lingui/core/macro";
-import { consumeEventIterator } from "@orpc/client";
+import { consumeEventIterator, ORPCError } from "@orpc/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useBlocker, useParams } from "@tanstack/react-router";
 import { debounce, isEqual } from "es-toolkit";
@@ -723,6 +723,8 @@ export function useResumeUpdateSubscription({ resumeId, onUpdate, onError }: Res
 			},
 			onError: (error) => {
 				if (didCancel) return;
+				// A signed-out session stays signed out; retrying would only repeat the 401.
+				if (error instanceof ORPCError && error.code === "UNAUTHORIZED") return;
 				onError?.(error);
 				retryTimer = window.setTimeout(() => setRetryNonce((value) => value + 1), 2500);
 			},

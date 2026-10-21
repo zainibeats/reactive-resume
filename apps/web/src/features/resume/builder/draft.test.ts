@@ -5,6 +5,7 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "@lingui/core";
+import { ORPCError } from "@orpc/client";
 import { sortSectionItemsByPeriod } from "@reactive-resume/resume/section-sort";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import {
@@ -40,7 +41,8 @@ const toastMocks = vi.hoisted(() => ({
 	close: vi.fn(),
 }));
 
-vi.mock("@orpc/client", () => ({
+vi.mock("@orpc/client", async (importOriginal) => ({
+	ORPCError: (await importOriginal<typeof import("@orpc/client")>()).ORPCError,
 	consumeEventIterator: consumeEventIteratorMock,
 }));
 
@@ -681,7 +683,11 @@ describe("resume update stream subscription", () => {
 		useResumeStore.getState().reset();
 	});
 
-	it("resubscribes after the stream errors", () => {
+	it.each([
+		{ name: "resubscribes after the stream drops", error: new Error("stream dropped"), subscribes: 2, reported: 1 },
+		// A signed-out tab would otherwise send a 401 every 2.5 s until it closes.
+		{ name: "stops once the session is signed out", error: new ORPCError("UNAUTHORIZED"), subscribes: 1, reported: 0 },
+	])("$name", ({ error, subscribes, reported }) => {
 		const onUpdate = vi.fn().mockResolvedValue(undefined);
 		const onError = vi.fn();
 		consumeEventIteratorMock.mockReturnValue(vi.fn().mockResolvedValue(undefined));
@@ -690,13 +696,12 @@ describe("resume update stream subscription", () => {
 		expect(orpcMocks.streamSubscribe).toHaveBeenCalledTimes(1);
 
 		const handlers = consumeEventIteratorMock.mock.calls[0]?.[1] as { onError: (error: unknown) => void };
-		act(() => handlers.onError(new Error("stream dropped")));
-		expect(onError).toHaveBeenCalledTimes(1);
-
+		act(() => handlers.onError(error));
+		expect(onError).toHaveBeenCalledTimes(reported);
 		act(() => {
 			vi.advanceTimersByTime(2500);
 		});
-		expect(orpcMocks.streamSubscribe).toHaveBeenCalledTimes(2);
+		expect(orpcMocks.streamSubscribe).toHaveBeenCalledTimes(subscribes);
 	});
 
 	it("replaces the builder draft from the server when there are no pending local edits", async () => {
