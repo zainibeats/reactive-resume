@@ -58,8 +58,9 @@ test("proposes edits that change nothing until accepted, asks before assuming, a
 	const edits = page.getByRole("list", { name: "Proposed edits" });
 	await expect(edits).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByText("1 proposed", { exact: true })).toBeVisible();
-	// The page caption appears once the in-browser preview has fetched its fonts and rendered.
-	await expect(page.getByText(/proposed edit on this page/)).toBeVisible({ timeout: 30_000 });
+	// The page caption appears once the in-browser preview has fetched its fonts and rendered. While a new render
+	// cross-fades in, the outgoing and incoming page layers both carry the caption, so match the first.
+	await expect(page.getByText(/proposed edit on this page/).first()).toBeVisible({ timeout: 30_000 });
 	expect(await resumeJson(page, resumeId)).not.toContain("(tightened by the stub)");
 
 	await edits.getByRole("button", { name: "Accept" }).click();
