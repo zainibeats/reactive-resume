@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { flattenAlpha, parseColor, toColor, toFormeStyle, WHITE } from "./style";
 
 const convert = (style: Record<string, unknown>) =>

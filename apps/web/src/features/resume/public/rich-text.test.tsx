@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { RichText } from "./rich-text";
 
 describe("RichText", () => {

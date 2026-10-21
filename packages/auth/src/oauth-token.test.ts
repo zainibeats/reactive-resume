@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vite-plus/test";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 
 const mocks = vi.hoisted(() => ({ getJwks: vi.fn(), select: vi.fn() }));

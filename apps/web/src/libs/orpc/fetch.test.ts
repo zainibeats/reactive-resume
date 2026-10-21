@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 
 const fetchMock = vi.fn<typeof fetch>();
 const rpcUrl = "https://resume.test/api/rpc/storage/uploadFile?batch=1";

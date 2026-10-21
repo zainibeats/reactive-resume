@@ -3,7 +3,7 @@ import type { SectionTitleResolver } from "./section-title";
 import type { ElementInfo, LayoutInfo } from "@formepdf/core";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import * as forme from "@formepdf/core";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
 import { renderResume } from "./forme/render";

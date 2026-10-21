@@ -1,4 +1,4 @@
-import { expect, it, vi } from "vitest";
+import { expect, it, vi } from "vite-plus/test";
 import { createProcedureClient } from "@orpc/server";
 
 const deleteAccount = vi.hoisted(() => vi.fn());

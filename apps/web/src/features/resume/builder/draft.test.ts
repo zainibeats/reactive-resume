@@ -3,7 +3,7 @@
 import type { Resume } from "./draft";
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { i18n } from "@lingui/core";
 import { ORPCError } from "@orpc/client";
 import { sortSectionItemsByPeriod } from "@reactive-resume/resume/section-sort";

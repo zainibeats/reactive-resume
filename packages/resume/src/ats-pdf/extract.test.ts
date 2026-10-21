@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import fc from "fast-check";
 import { buildExtractedDocument } from "./extract";
 import { healthyResume, healthyResumeLines, makeRawExtraction } from "./test-fixtures";

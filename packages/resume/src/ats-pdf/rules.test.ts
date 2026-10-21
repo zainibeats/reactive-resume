@@ -1,7 +1,7 @@
 import type { PdfRuleCode } from "./catalog";
 import type { FixtureOptions } from "./test-fixtures";
 import type { PdfAtsReport, RawExtraction } from "./types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { analyzePdfResume } from "./index";
 import { healthyResume, healthyResumeLines, makeRawExtraction, scannedResume, twoColumnResume } from "./test-fixtures";
 

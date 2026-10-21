@@ -1,5 +1,5 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { createElement } from "react";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
 import { ResumeDocument } from "../../document";

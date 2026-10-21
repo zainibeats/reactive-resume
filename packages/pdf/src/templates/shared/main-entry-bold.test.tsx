@@ -1,6 +1,6 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { StylesheetMode } from "@reactive-resume/schema/resume/stylesheet";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { createElement } from "react";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { ResumeDocument } from "../../document";

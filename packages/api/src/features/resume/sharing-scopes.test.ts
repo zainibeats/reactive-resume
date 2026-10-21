@@ -1,5 +1,5 @@
 import type { RequestPermission } from "../../context";
-import { expect, it, vi } from "vitest";
+import { expect, it, vi } from "vite-plus/test";
 import { createProcedureClient } from "@orpc/server";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 

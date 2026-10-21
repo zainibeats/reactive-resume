@@ -1,4 +1,4 @@
-import type { ProxyOptions } from "vite";
+import type { ProxyOptions } from "vite-plus";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { lingui } from "@lingui/vite-plugin";
@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vite-plus";
 
 const rootPackageJsonPath = new URL("../../package.json", import.meta.url);
 const rootPackageJson = JSON.parse(readFileSync(rootPackageJsonPath, "utf-8")) as { version: string | undefined };

@@ -173,7 +173,7 @@ sudo docker compose -f compose.dev.yml up -d postgres                           
 sudo docker compose -f compose.dev.yml up -d postgres redis seaweedfs seaweedfs_create_bucket   # full infra
 pnpm dev                                          # port 3000 (dev:web for web only)
 pnpm db:generate                                  # db:migrate to apply
-pnpm check                                       # Oxlint fix + Oxfmt — WRITE-CAPABLE; pnpm lint / pnpm format:check are read-only
+pnpm check                                       # vp lint --fix + vp fmt — WRITE-CAPABLE; pnpm lint / pnpm format:check are read-only
 pnpm test | pnpm typecheck | pnpm build | pnpm exec turbo boundaries
 ```
 
@@ -182,11 +182,11 @@ Prefer package filters over repo-wide runs, e.g. `pnpm --filter web typecheck`, 
 ## Gotchas
 
 - Email sending requires SMTP config; without it, emails are logged to console. This is fine for dev — the app still functions, but email verification links appear in server logs.
-- The `lefthook.yml` pre-commit hook checks conflict markers, applies safe Oxlint fixes and Oxfmt to staged files, then fails on remaining diagnostics; the commit-message hook enforces Conventional Commits. Run `pnpm lint` and `pnpm format:check` before committing.
-- `pnpm check` is write-capable (PDF translations, `oxlint --fix`, `oxfmt --write`). Call that out when using it, and use `pnpm lint` / `pnpm format:check` for a non-mutating inspection.
-- Oxfmt uses tabs, double quotes, line width 120, separated type import groups, and sorted Tailwind classes for `clsx`, `cva`, and `cn`. Lint rules live in `.oxlintrc.json`.
+- The `lefthook.yml` pre-commit hook checks conflict markers, applies safe `vp lint` fixes and `vp fmt` to staged files, then fails on remaining diagnostics; the commit-message hook enforces Conventional Commits. Run `pnpm lint` and `pnpm format:check` before committing.
+- `pnpm check` is write-capable (PDF translations, `vp lint --fix`, `vp fmt --write`). Call that out when using it, and use `pnpm lint` / `pnpm format:check` for a non-mutating inspection.
+- Tooling runs through Vite+ (`vp`, which wraps Oxlint, Oxfmt and Vitest). Formatting uses tabs, double quotes, line width 120, separated type import groups, and sorted Tailwind classes for `clsx`, `cva`, and `cn`. Lint and format rules live in the root `vite.config.ts`.
 - v6 uses design tokens (`bg-bg`, `bg-surface`, `text-ink`, `text-ink-2`, `border-line`, `bg-accent`, `text-danger-text`, …) and Material Symbols through `@reactive-resume/ui/components/icon` (only names listed in `packages/ui/src/icons/names.ts` render). The shadcn-era `bg-background`/`text-muted-foreground`/`bg-primary` classes no longer exist.
-- Most packages use `tsgo --noEmit` for typechecking and `vitest run --passWithNoTests` for tests.
+- Most packages use `tsrs --noEmit` for typechecking and `vp test run --passWithNoTests` for tests. Tests import from `vite-plus/test`, not `vitest`.
 - There may be unrelated local edits in the worktree. Inspect `git status --short` first and avoid reverting files you did not touch.
 
 ## Rules for Agent

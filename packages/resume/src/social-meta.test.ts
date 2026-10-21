@@ -1,5 +1,5 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { getResumeSocialMeta } from "./social-meta";
 
 const buildData = (overrides: { name?: string; headline?: string; summary?: string; template?: string }): ResumeData =>

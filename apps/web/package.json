@@ -4,15 +4,15 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"build": "vite build",
-		"dev": "vite dev",
-		"serve": "vite preview",
-		"start": "vite preview",
-		"typecheck": "tsgo --noEmit",
-		"test": "vitest run --passWithNoTests",
-		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
-		"test:agent": "vitest run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests",
+		"build": "vp build",
+		"dev": "vp dev",
+		"serve": "vp preview",
+		"start": "vp preview",
+		"typecheck": "tsrs --noEmit",
+		"test": "vp test run --passWithNoTests",
+		"test:coverage": "vp test run --coverage --passWithNoTests",
+		"test:ci": "vp test run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:agent": "vp test run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests",
 		"lingui:extract": "lingui extract --clean --overwrite"
 	},
 	"dependencies": {
@@ -106,11 +106,11 @@
 		"@types/babel__core": "^7.20.5",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"@typescript/native-preview": "catalog:",
 		"@vitejs/plugin-react": "^6.1.2",
 		"babel-plugin-macros": "^3.1.0",
 		"babel-plugin-react-compiler": "^1.0.0",
+		"tsrs": "catalog:",
 		"typescript": "catalog:",
-		"vite": "^8.3.4"
+		"vite-plus": "catalog:"
 	}
 }

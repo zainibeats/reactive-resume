@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 
 const mocks = vi.hoisted(() => ({ select: vi.fn(), predicates: [] as unknown[] }));

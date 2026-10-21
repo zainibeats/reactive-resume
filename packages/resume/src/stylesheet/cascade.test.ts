@@ -1,5 +1,5 @@
 import type { BaseSettingsSnapshot, ResolvedNodeStyle, ResolveStylesheetContext, SemanticNode } from "./types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import fc from "fast-check";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { resolveStylesheet } from "./cascade";

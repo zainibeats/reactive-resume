@@ -1,8 +1,8 @@
-import type { ViteUserConfig } from "vitest/config";
-import type { VitestEnvironment } from "vitest/node";
+import type { ViteUserConfig } from "vite-plus/test/config";
+import type { VitestEnvironment } from "vite-plus/test/node";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "vite-plus";
 
 const workspaceRoot = fileURLToPath(new URL(".", import.meta.url));
 const setupFile = fileURLToPath(new URL("./vitest.setup.ts", import.meta.url));

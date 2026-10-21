@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 const envMock = vi.hoisted(() => ({ APP_URL: "https://example.com", AUTH_SECRET: "test-resume-access-secret" }));
 

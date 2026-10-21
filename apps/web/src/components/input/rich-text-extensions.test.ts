@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { expect, it } from "vitest";
+import { expect, it } from "vite-plus/test";
 import { Editor } from "@tiptap/react";
 import { richTextExtensions } from "./rich-text-extensions";
 

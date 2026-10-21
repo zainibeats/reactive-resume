@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { ORPCError } from "@orpc/client";
 import { getReadableErrorMessage } from "./error-message";
 

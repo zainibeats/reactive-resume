@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vite-plus/test";
 import { call } from "@orpc/server";
 import { unzipSync, strFromU8 } from "fflate";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { AI_PROVIDER_DEFAULT_BASE_URLS, aiProviderSchema, isApiKeyOptional } from "./types";
 
 const popularProviderDefaults = {

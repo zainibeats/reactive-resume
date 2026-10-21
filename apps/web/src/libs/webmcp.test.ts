@@ -2,7 +2,7 @@
 
 import type { WebMcpTool } from "./webmcp";
 import { renderHook } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import z from "zod";
 import { defineWebMcpTool, getModelContext, useWebMcpTools } from "./webmcp";
 

@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vite-plus/test";
 import { i18n } from "@lingui/core";
 import { strFromU8, unzipSync } from "fflate";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";

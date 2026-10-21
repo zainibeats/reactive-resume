@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 const envMock = vi.hoisted(() => ({
 	SMTP_HOST: undefined as string | undefined,

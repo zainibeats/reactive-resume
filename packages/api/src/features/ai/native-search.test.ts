@@ -1,5 +1,5 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { generateText } from "ai";
 import { buildAgentTools } from "../agent/tools";
 import { getAgentModel } from "./service";

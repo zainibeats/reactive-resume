@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { expect, it } from "vitest";
+import { expect, it } from "vite-plus/test";
 import { agentWebSources } from "./agent-tool-contracts";
 
 it("preserves deduplicated retrieved sources after serialization and ignores failed tools and invented links", () => {

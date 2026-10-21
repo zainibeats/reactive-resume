@@ -6,7 +6,7 @@
  * AES-GCM credential encryption. Only the database and the outbound HTTP call are substituted —
  * the database with an in-memory row store, the provider with a stubbed `fetch`.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { createRouterClient } from "@orpc/server";
 
 const { dbMock, dbState } = vi.hoisted(() => {

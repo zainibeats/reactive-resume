@@ -1,5 +1,5 @@
 import type { HostElement } from "../../forme/reconciler";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { HOST } from "../../forme/primitives";
 import { renderHostTree } from "../../forme/reconciler";
 import { Html } from "../../text";

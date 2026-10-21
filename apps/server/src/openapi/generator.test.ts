@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { createResumeDataJsonSchema } from "@reactive-resume/schema/resume/json-schema";
 
 // Spec generation reads procedure contracts without executing authentication. Keep the

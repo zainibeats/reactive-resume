@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 
 const mocks = vi.hoisted(() => ({ eval: vi.fn(), redis: null as { eval: ReturnType<typeof vi.fn> } | null }));
 vi.mock("@reactive-resume/db/redis", () => ({

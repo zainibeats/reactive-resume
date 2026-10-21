@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import {
 	fetchPublic,
 	fetchWorkerPublicUrl,

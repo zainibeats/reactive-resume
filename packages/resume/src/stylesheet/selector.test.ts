@@ -1,5 +1,5 @@
 import type { SemanticNode } from "./types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { compileStylesheet } from "./compile";
 import { compileSelector, createSelectorMatcher } from "./selector";
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { resumeDataSchema } from "./data";
 import { defaultResumeData } from "./default";
 import { sampleResumeData } from "./sample";

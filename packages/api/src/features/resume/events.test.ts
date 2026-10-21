@@ -1,5 +1,5 @@
 import { EventEmitter, getEventListeners } from "node:events";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { Pool } from "pg";
 
 const pool = vi.hoisted(() => ({

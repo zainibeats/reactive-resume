@@ -6,9 +6,9 @@
 	"scripts": {
 		"db:reset": "tsx database/reset.ts",
 		"docs:gen": "tsx semantic-css/generate-reference.ts",
-		"test": "vitest run --passWithNoTests",
-		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
-		"typecheck": "tsgo --noEmit",
+		"test": "vp test run --passWithNoTests",
+		"test:ci": "vp test run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"typecheck": "tsrs --noEmit",
 		"pdf:translations": "tsx locales/generate.ts",
 		"icons:build": "tsx icons/material-symbols.ts",
 		"icons:pdf": "tsx icons/phosphor-pdf.ts"
@@ -25,12 +25,12 @@
 		"@types/pg": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"@typescript/native-preview": "catalog:",
 		"drizzle-orm": "catalog:",
 		"pg": "catalog:",
 		"react": "19.3.0",
 		"react-dom": "19.3.0",
+		"tsrs": "catalog:",
 		"tsx": "^4.23.15",
-		"vitest": "catalog:"
+		"vite-plus": "catalog:"
 	}
 }

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { render, screen } from "@testing-library/react";
-import { assert, beforeAll, expect, it, vi } from "vitest";
+import { assert, beforeAll, expect, it, vi } from "vite-plus/test";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";

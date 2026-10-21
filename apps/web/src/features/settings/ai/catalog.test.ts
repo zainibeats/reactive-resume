@@ -1,4 +1,4 @@
-import { expect, it, vi } from "vitest";
+import { expect, it, vi } from "vite-plus/test";
 import { loadModelSuggestions } from "./catalog";
 
 it("suggests current text models with provider-specific IDs and tolerates incomplete catalog entries", async () => {

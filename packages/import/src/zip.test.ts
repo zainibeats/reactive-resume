@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { Zip, ZipDeflate, strToU8, zipSync } from "fflate";
 import { ZipEntryTooLargeError, unzipEntries } from "./zip";
 

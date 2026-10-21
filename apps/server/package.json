@@ -7,11 +7,11 @@
 		"dev": "tsx watch --tsconfig ../../tsconfig.json src/index.ts",
 		"build": "tsdown",
 		"start": "node dist/index.mjs",
-		"typecheck": "tsgo --noEmit",
-		"test": "vitest run --passWithNoTests",
-		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
-		"test:agent": "vitest run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
+		"typecheck": "tsrs --noEmit",
+		"test": "vp test run --passWithNoTests",
+		"test:coverage": "vp test run --coverage --passWithNoTests",
+		"test:ci": "vp test run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:agent": "vp test run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^4.0.88",
@@ -94,10 +94,10 @@
 		"@types/node": "catalog:",
 		"@types/pg": "catalog:",
 		"@types/react": "catalog:",
-		"@typescript/native-preview": "catalog:",
 		"tsdown": "^0.23.2",
+		"tsrs": "catalog:",
 		"tsx": "^4.23.15",
 		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"vite-plus": "catalog:"
 	}
 }

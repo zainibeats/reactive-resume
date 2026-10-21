@@ -1,5 +1,5 @@
 import type { PdfWorkerRequest } from "./pdf-document";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
 
 const mocks = vi.hoisted(() => ({ renderHere: vi.fn() }));

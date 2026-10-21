@@ -11,11 +11,11 @@
 	},
 	"scripts": {
 		"shadcn": "shadcn",
-		"typecheck": "tsgo --noEmit",
-		"test": "vitest run --passWithNoTests",
-		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
-		"test:agent": "vitest run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
+		"typecheck": "tsrs --noEmit",
+		"test": "vp test run --passWithNoTests",
+		"test:coverage": "vp test run --coverage --passWithNoTests",
+		"test:ci": "vp test run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:agent": "vp test run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.9.0",
@@ -36,9 +36,10 @@
 		"@tailwindcss/typography": "^0.5.20",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"@typescript/native-preview": "catalog:",
 		"postcss": "^8.5.31",
 		"tailwindcss": "^4.3.3",
-		"typescript": "catalog:"
+		"tsrs": "catalog:",
+		"typescript": "catalog:",
+		"vite-plus": "catalog:"
 	}
 }

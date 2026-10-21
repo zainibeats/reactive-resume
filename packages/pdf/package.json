@@ -18,11 +18,11 @@
 		"#react-pdf-renderer": "./src/forme/primitives.tsx"
 	},
 	"scripts": {
-		"typecheck": "tsgo --noEmit",
-		"test": "vitest run --passWithNoTests",
-		"test:coverage": "vitest run --coverage --passWithNoTests",
-		"test:ci": "vitest run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
-		"test:agent": "vitest run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
+		"typecheck": "tsrs --noEmit",
+		"test": "vp test run --passWithNoTests",
+		"test:coverage": "vp test run --coverage --passWithNoTests",
+		"test:ci": "vp test run --reporter=default --reporter=github-actions --reporter=json --reporter=junit --outputFile.json=reports/vitest-results.json --outputFile.junit=reports/vitest-junit.xml --passWithNoTests",
+		"test:agent": "vp test run --reporter=agent --reporter=json --outputFile.json=reports/vitest-results.json --passWithNoTests"
 	},
 	"dependencies": {
 		"@formepdf/core": "0.29.0",
@@ -44,8 +44,9 @@
 		"@reactive-resume/config": "workspace:*",
 		"@types/react": "catalog:",
 		"@types/react-reconciler": "^0.34.1",
-		"@typescript/native-preview": "catalog:",
 		"pdfjs-dist": "6.4.299",
-		"typescript": "catalog:"
+		"tsrs": "catalog:",
+		"typescript": "catalog:",
+		"vite-plus": "catalog:"
 	}
 }

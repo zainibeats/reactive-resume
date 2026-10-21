@@ -1,6 +1,6 @@
 import type { IncomingHttpHeaders } from "node:http";
 import { createServer } from "node:http";
-import { afterAll, beforeAll, beforeEach, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, expect, it, vi } from "vite-plus/test";
 
 const envMock = vi.hoisted(() => ({
 	APP_URL: "https://resume.example.com",

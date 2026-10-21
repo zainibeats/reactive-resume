@@ -3,10 +3,21 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, it } from "vitest";
+import { expect, it } from "vite-plus/test";
+
+const root = fileURLToPath(new URL("..", import.meta.url));
+
+function lint(directory: string) {
+	const result = spawnSync(
+		process.execPath,
+		[join(root, "node_modules/vite-plus/bin/vp"), "lint", "--format=json", directory],
+		{ cwd: root, encoding: "utf8" },
+	);
+	const diagnostics = JSON.parse(result.stdout).diagnostics as { code: string; filename: string }[];
+	return { status: result.status, diagnostics };
+}
 
 it("blocks private workspace paths in imports, re-exports, and dynamic imports", () => {
-	const root = fileURLToPath(new URL("..", import.meta.url));
 	const directory = mkdtempSync(join(tmpdir(), "reactive-resume-lint-"));
 	try {
 		const sources = [
@@ -30,20 +41,9 @@ it("blocks private workspace paths in imports, re-exports, and dynamic imports",
 			join(directory, "public.ts"),
 			'export { resumeDataSchema } from "@reactive-resume/schema/resume/data";',
 		);
-		const result = spawnSync(
-			process.execPath,
-			[
-				join(root, "node_modules/oxlint/bin/oxlint"),
-				"--config",
-				join(root, ".oxlintrc.json"),
-				"--format=json",
-				directory,
-			],
-			{ cwd: root, encoding: "utf8" },
-		);
-		const diagnostics = JSON.parse(result.stdout).diagnostics as { code: string; filename: string }[];
+		const { status, diagnostics } = lint(directory);
 		const restricted = diagnostics.filter((diagnostic) => diagnostic.code === "eslint(no-restricted-imports)");
-		expect(result.status).toBe(1);
+		expect(status).toBe(1);
 		expect(new Set(restricted.map((diagnostic) => diagnostic.filename)).size).toBe(index);
 		expect(diagnostics.some((diagnostic) => diagnostic.filename.endsWith("public.ts"))).toBe(false);
 	} finally {
