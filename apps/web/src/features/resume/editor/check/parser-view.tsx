@@ -129,12 +129,13 @@ function ParsedText({ parsed, issues }: { parsed: Parsed; issues: readonly Check
 		},
 	];
 
-	// Lines grouped under the headings a parser recognised, in the order it reads them.
+	// Only standalone headings replace a text line; fused columns must retain the full line in reading order.
 	const headingAt = new Map(semantics.headings.map((heading) => [heading.lineIndex, heading.text]));
 	const groups: { heading: string | null; lines: string[] }[] = [{ heading: null, lines: [] }];
 	doc.lines.forEach((line, index) => {
 		const heading = headingAt.get(index);
-		if (heading !== undefined) groups.push({ heading, lines: [] });
+		if (heading === line.text.trim()) groups.push({ heading, lines: [] });
+		else if (heading !== undefined) groups.push({ heading: null, lines: [line.text] });
 		else groups.at(-1)?.lines.push(line.text);
 	});
 
