@@ -1,4 +1,4 @@
-import { onError } from "@orpc/server";
+import { onError, ORPCError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { BatchHandlerPlugin, RequestHeadersPlugin, StrictGetMethodPlugin } from "@orpc/server/plugins";
 import router from "@reactive-resume/api/routers";
@@ -9,6 +9,8 @@ const rpcHandler = new RPCHandler(router, {
 	plugins: [new BatchHandlerPlugin(), new RequestHeadersPlugin(), new StrictGetMethodPlugin()],
 	interceptors: [
 		onError((error) => {
+			// Signed-out or expired callers are routine; their 401 still reaches the client.
+			if (error instanceof ORPCError && error.code === "UNAUTHORIZED") return;
 			console.error("[oRPC Server]", error);
 		}),
 	],
