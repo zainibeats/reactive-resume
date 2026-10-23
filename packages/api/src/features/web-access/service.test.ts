@@ -14,13 +14,15 @@ const fixtures = vi.hoisted(() => ({
 	directLocation: "",
 	directDelay: 0,
 	directContentType: "text/html",
+	env: { FLAG_DISABLE_API_RATE_LIMIT: false } as {
+		FLAG_DISABLE_API_RATE_LIMIT: boolean;
+		WEB_SEARCH_SEARXNG_URL?: string;
+	},
 }));
 vi.mock("../../redis", () => ({
 	createRateLimiter: () => ({ limit: fixtures.limit }),
 }));
-vi.mock("@reactive-resume/env/server", () => ({
-	env: { FLAG_DISABLE_API_RATE_LIMIT: false },
-}));
+vi.mock("@reactive-resume/env/server", () => ({ env: fixtures.env }));
 vi.mock("node:dns/promises", () => ({ lookup: vi.fn() }));
 vi.mock("node:dns", () => ({ lookup: vi.fn() }));
 vi.mock("node:https", async (original) => ({
@@ -77,9 +79,14 @@ let responseOverride: unknown;
 let delay = 0;
 let searchStatus: number | undefined;
 let onRequest: (() => void) | undefined;
+let respond:
+	| ((request: { provider: string; body: Record<string, unknown> }) => { status?: number; body?: unknown } | undefined)
+	| undefined;
 const requests: {
 	provider: string;
 	operation: string;
+	method: string | undefined;
+	url: string;
 	body: Record<string, unknown>;
 	auth: string | undefined;
 }[] = [];
@@ -124,23 +131,30 @@ const readResponse = (provider: WebAccessProvider, content = "# Designer\nAccess
 const server = createServer(async (request, result) => {
 	const chunks: Buffer[] = [];
 	for await (const chunk of request) chunks.push(chunk);
-	const parts = (request.url ?? "").split("/");
+	const parts = (request.url ?? "").split("?", 1)[0]?.split("/") ?? [];
 	const provider = (parts[1] === "v2" ? "firecrawl" : parts[1]) as WebAccessProvider;
 	const operation = parts[2] === "search" ? "search" : "read";
+	const raw = Buffer.concat(chunks).toString();
+	const body = (raw ? JSON.parse(raw) : {}) as Record<string, unknown>;
 	requests.push({
 		provider,
 		operation,
-		body: JSON.parse(Buffer.concat(chunks).toString()),
+		method: request.method,
+		url: request.url ?? "",
+		body,
 		auth: request.headers.authorization ?? (request.headers["x-api-key"] as string | undefined),
 	});
 	onRequest?.();
 	if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
 	if (result.destroyed) return;
-	result.writeHead(operation === "search" && searchStatus !== undefined ? searchStatus : status, {
+	const custom = respond?.({ provider, body });
+	result.writeHead(custom?.status ?? (operation === "search" && searchStatus !== undefined ? searchStatus : status), {
 		"content-type": "application/json",
 	});
 	result.end(
-		JSON.stringify(responseOverride ?? (operation === "search" ? searchResponse(provider) : readResponse(provider))),
+		JSON.stringify(
+			custom?.body ?? responseOverride ?? (operation === "search" ? searchResponse(provider) : readResponse(provider)),
+		),
 	);
 });
 
@@ -184,6 +198,7 @@ beforeEach(() => {
 	searchStatus = undefined;
 	onRequest = undefined;
 	responseOverride = undefined;
+	respond = undefined;
 	delay = 0;
 	fixtures.limit.mockClear();
 	fixtures.limit.mockResolvedValue({ success: true });
@@ -192,6 +207,7 @@ beforeEach(() => {
 	fixtures.directLocation = "";
 	fixtures.directDelay = 0;
 	fixtures.directContentType = "text/html";
+	delete fixtures.env.WEB_SEARCH_SEARXNG_URL;
 });
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -372,6 +388,94 @@ describe.each(PROVIDERS)("%s adapter at shared boundary", (provider) => {
 			search: { success: false, error: "quota" },
 			read: { success: true },
 		});
+		expect(fixtures.direct).not.toHaveBeenCalled();
+	});
+});
+
+describe("search through a self-hosted SearXNG", () => {
+	const searxngResults = { results: [{ url: `${URL}#apply`, title: "Designer", content: "Berlin" }], answers: [] };
+	const searxng = () => requests.filter((request) => request.provider === ("searxng" as WebAccessProvider));
+	beforeEach(() => {
+		fixtures.env.WEB_SEARCH_SEARXNG_URL = `${endpoint}/searxng`;
+		respond = ({ provider }) => (provider === ("searxng" as WebAccessProvider) ? { body: searxngResults } : undefined);
+	});
+
+	it("searches SearXNG without a web connection", async () => {
+		expect(await searchWeb("designer", { userId: "user", connection: null })).toEqual([
+			{ url: URL, title: "Designer", snippet: "Berlin" },
+		]);
+		expect(requests).toHaveLength(1);
+		expect(requests[0]).toMatchObject({ provider: "searxng", operation: "search", method: "GET" });
+		expect(requests[0]?.url).toBe("/searxng/search?q=designer&format=json");
+	});
+
+	it.each(PROVIDERS)("searches SearXNG instead of a saved %s connection", async (provider) => {
+		await searchWeb("designer", context(provider));
+		expect(requests.map((request) => request.provider)).toEqual(["searxng"]);
+		expect(requests[0]?.auth).toBeUndefined();
+	});
+
+	it("reports a failed search probe when SearXNG's engines all fail", async () => {
+		respond = () => ({ body: { results: [], unresponsive_engines: [["google", "timeout"]] } });
+		expect(await probeWebAccess(null, { userId: "user" })).toEqual({
+			search: { success: false, error: "unreachable" },
+			read: { success: false, error: "unavailable" },
+		});
+	});
+
+	it("reports an unreachable SearXNG safely", async () => {
+		respond = () => ({ status: 502 });
+		await expect(searchWeb("designer", { userId: "user", connection: null })).rejects.toMatchObject({
+			reason: "unreachable",
+		});
+	});
+
+	it("rate-limits a SearXNG search", async () => {
+		vi.stubEnv("NODE_ENV", "production");
+		await searchWeb("designer", { userId: "user", connection: null });
+		expect(searxng()).toHaveLength(1);
+		expect(fixtures.limit).toHaveBeenCalledTimes(1);
+	});
+
+	it("still reads through the saved connection, then the built-in reader", async () => {
+		expect(await readPage(URL, context("exa"))).toMatchObject({ method: "exa" });
+		expect(requests.map((request) => [request.provider, request.operation])).toEqual([["exa", "read"]]);
+		expect(fixtures.direct).not.toHaveBeenCalled();
+
+		requests.length = 0;
+		respond = () => ({ status: 500 });
+		expect(await readPage(URL, context("exa"))).toMatchObject({ method: "builtin", fallbackReason: "unreachable" });
+		expect(requests.map((request) => request.provider)).toEqual(["exa"]);
+		expect(fixtures.direct).toHaveBeenCalledTimes(1);
+	});
+
+	it("reads with the built-in reader when there is no connection", async () => {
+		expect(await readPage(URL, { userId: "user", connection: null })).toMatchObject({ method: "builtin" });
+		expect(requests).toHaveLength(0);
+	});
+
+	it("tests search against SearXNG and reading against the connection", async () => {
+		respond = ({ provider }) => (provider === ("searxng" as WebAccessProvider) ? { status: 503 } : undefined);
+		const result = await probeWebAccess(connection("exa"), { userId: "user" });
+		expect(result).toEqual({ search: { success: false, error: "unreachable" }, read: { success: true } });
+		expect(requests.map((request) => [request.provider, request.operation]).sort()).toEqual([
+			["exa", "read"],
+			["searxng", "search"],
+		]);
+		expect(console.info).toHaveBeenCalledWith(
+			"[web-access]",
+			expect.objectContaining({ provider: "searxng", operation: "search", outcome: "unreachable" }),
+		);
+		expect(console.info).toHaveBeenCalledWith(
+			"[web-access]",
+			expect.objectContaining({ provider: "exa", operation: "read", outcome: "success" }),
+		);
+	});
+
+	it("tests SearXNG search and reports reading as built-in only without a connection", async () => {
+		const result = await probeWebAccess(null, { userId: "user" });
+		expect(result).toEqual({ search: { success: true }, read: { success: false, error: "unavailable" } });
+		expect(requests.map((request) => [request.provider, request.operation])).toEqual([["searxng", "search"]]);
 		expect(fixtures.direct).not.toHaveBeenCalled();
 	});
 });

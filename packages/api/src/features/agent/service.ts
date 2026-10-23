@@ -756,6 +756,8 @@ function createAgent(input: {
 	};
 	model: ReturnType<typeof getModel>;
 	connection: WebAccessConnection | null;
+	/** Whether web search is available: through the connection, or the server's SearXNG without one. */
+	search: boolean;
 	signal: AbortSignal;
 }) {
 	// One greppable JSON line per tool execution.
@@ -792,7 +794,7 @@ function createAgent(input: {
 	const tools = buildAgentTools({
 		provider: input.provider,
 		document: document !== null,
-		externalSearch: input.connection !== null,
+		externalSearch: input.search,
 		signal: input.signal,
 		handlers: {
 			searchWeb: timedToolHandler("search_web", async (query: string, signal: AbortSignal) => {
@@ -1268,8 +1270,9 @@ export const agentService = {
 				const messages = messageRows.map(toMessage);
 				const replay = freshContext ? [withAttachmentUiParts(input.message, attachmentsForModel)] : messages;
 				const connection = await webAccessService.resolve(input.userId);
+				const search = webAccessService.canSearch(connection !== null);
 				const modelMessages = await convertToModelMessages(
-					replay.map((message) => toModelInputMessage(message, runnableProvider, connection !== null)),
+					replay.map((message) => toModelInputMessage(message, runnableProvider, search)),
 				);
 				const attachmentModelParts = buildAttachmentModelParts(await readAttachmentModelInputs(attachmentsForModel));
 
@@ -1296,6 +1299,7 @@ export const agentService = {
 						),
 					],
 					connection,
+					search,
 					signal: controller.signal,
 					provider: {
 						provider: runnableProvider.provider,

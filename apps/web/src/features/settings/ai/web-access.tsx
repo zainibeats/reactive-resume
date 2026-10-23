@@ -45,6 +45,8 @@ export function WebAccessSection() {
 	const pending = save.isPending || remove.isPending || test.isPending;
 	const failure = error || save.error || remove.error || test.error;
 	const connectedProvider = status?.provider ? PROVIDERS[status.provider] : null;
+	// Older servers leave `searxng` out.
+	const serverSearch = status?.searxng === true;
 	const openEditor = () => {
 		setProvider(status?.provider ?? "firecrawl");
 		setApiKey("");
@@ -113,7 +115,14 @@ export function WebAccessSection() {
 							)}
 						</div>
 						<p className="max-w-[58ch] text-[13px] leading-5 text-ink-3">
-							<Trans>Lets the assistant search the web and read pages the built-in reader can't.</Trans>
+							{serverSearch ? (
+								<Trans>
+									Your server provides search for the assistant. Connect a service to read pages the built-in reader
+									can't.
+								</Trans>
+							) : (
+								<Trans>Lets the assistant search the web and read pages the built-in reader can't.</Trans>
+							)}
 						</p>
 					</div>
 				</div>
@@ -203,19 +212,42 @@ export function WebAccessSection() {
 								</div>
 							</div>
 						)}
+						{serverSearch && !status.configured && (
+							<Button
+								variant="secondary"
+								size="sm"
+								className="ms-8 w-fit max-sm:ms-0"
+								disabled={pending}
+								loading={test.isPending}
+								onClick={() => test.mutate()}
+							>
+								<Trans>Test search</Trans>
+							</Button>
+						)}
 						{test.isPending && (
 							<p role="status" className="text-[13px] text-ink-2">
-								<Trans>Testing search and reading with {connectedProvider}…</Trans>
+								{!serverSearch ? (
+									<Trans>Testing search and reading with {connectedProvider}…</Trans>
+								) : connectedProvider ? (
+									<Trans>Testing your server's search, and reading with {connectedProvider}…</Trans>
+								) : (
+									<Trans>Testing your server's search…</Trans>
+								)}
 							</p>
 						)}
 						{test.data && (
 							<div role="status" className="grid gap-2 text-[13px] leading-5">
 								{[
 									{ result: test.data.search, label: test.data.search.success ? t`Search works` : t`Search failed` },
-									{
-										result: test.data.read,
-										label: test.data.read.success ? t`Reading works` : t`Enhanced reading failed`,
-									},
+									// Without a connection only the built-in reader reads, and the test doesn't cover it.
+									...(connectedProvider
+										? [
+												{
+													result: test.data.read,
+													label: test.data.read.success ? t`Reading works` : t`Enhanced reading failed`,
+												},
+											]
+										: []),
 								].map(({ result, label }, index) => (
 									<p
 										key={index}
@@ -228,13 +260,19 @@ export function WebAccessSection() {
 										</span>
 									</p>
 								))}
-								{!test.data.read.success && (
+								{connectedProvider && !test.data.read.success && (
 									<p className="text-ink-3">
 										<Trans>The built-in reader remains active.</Trans>
 									</p>
 								)}
 								<p className="text-xs text-ink-3">
-									<Trans>Tested with {connectedProvider}. Only this service was tested.</Trans>
+									{!serverSearch ? (
+										<Trans>Tested with {connectedProvider}. Only this service was tested.</Trans>
+									) : connectedProvider ? (
+										<Trans>Search was tested with your server's search, and reading with {connectedProvider}.</Trans>
+									) : (
+										<Trans>Search was tested with your server's search. Links are read with the built-in reader.</Trans>
+									)}
 								</p>
 							</div>
 						)}
@@ -357,6 +395,16 @@ export function WebAccessSection() {
 						<Trans>AI is optional. Everything else works without it.</Trans>
 					) : !hasUsableProvider ? (
 						<Trans>Connect an AI provider above to use the assistant.</Trans>
+					) : serverSearch && connectedProvider ? (
+						<Trans>
+							Searches with your server's search and reads pages with {connectedProvider}, whichever AI provider you
+							use.
+						</Trans>
+					) : serverSearch ? (
+						<Trans>
+							Searches with your server's search and reads links with the built-in reader, whichever AI provider you
+							use.
+						</Trans>
 					) : connectedProvider ? (
 						<Trans>Searches and reads pages with {connectedProvider}, whichever AI provider you use.</Trans>
 					) : (

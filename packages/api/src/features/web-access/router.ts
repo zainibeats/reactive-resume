@@ -64,7 +64,8 @@ export const webAccessRouter = {
 		.output(webAccessDto.test.output)
 		.handler(async ({ context, signal }) => {
 			const connection = await webAccessService.resolve(context.user.id);
-			if (!connection)
+			// The server's SearXNG can be tested without a connection; reading then reports the built-in reader only.
+			if (!webAccessService.canSearch(connection !== null))
 				throw new ORPCError("PRECONDITION_FAILED", { message: "No external web connection is configured." });
 			try {
 				return await probeWebAccess(connection, { userId: context.user.id, ...(signal ? { signal } : {}) });
