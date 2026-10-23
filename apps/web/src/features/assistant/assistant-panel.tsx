@@ -54,6 +54,8 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 	const setSelected = useEditorStore((state) => state.setAssistantThread);
 	const prompt = useEditorStore((state) => state.assistantPrompt);
 	const setPrompt = useEditorStore((state) => state.setAssistantPrompt);
+	const draft = useEditorStore((state) => state.assistantDraft);
+	const setDraft = useEditorStore((state) => state.setAssistantDraft);
 	const [view, setView] = useState<"thread" | "history">("thread");
 	const [providerId, setProviderId] = useState<string | null>(null);
 	const [modelMenuOpen, setModelMenuOpen] = useState(false);
@@ -99,6 +101,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 		try {
 			const id = await ensureThread();
 			setPrompt(text);
+			setDraft(null);
 			setPromptAttachments(attachments);
 			setSelected(id);
 			draftThread.current = null;
@@ -165,6 +168,7 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 						setDraftKey((key) => key + 1);
 						setContext({ document: true });
 						setPromptAttachments([]);
+						setDraft(null);
 						setSelected("new");
 						setView("thread");
 					}}
@@ -229,7 +233,9 @@ export function AssistantPanel({ document, onClose }: AssistantPanelProps) {
 				<>
 					<EmptyState document={document} disabled={document.locked || starting} onPick={(text) => void start(text)} />
 					<Composer
-						key={draftKey}
+						// A draft arriving while the box is open replaces what's in it.
+						key={`${draftKey}:${draft ?? ""}`}
+						initialText={draft ?? undefined}
 						document={document}
 						context={context}
 						onContextChange={setContext}

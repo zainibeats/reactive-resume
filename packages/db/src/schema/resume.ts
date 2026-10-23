@@ -62,6 +62,11 @@ export const resume = pg.pgTable(
 				name: "resume_parent_id_resume_id_fk",
 			})
 			.onDelete("set null"),
+		// Finds documents past Trash retention without scanning every resume.
+		pg
+			.index()
+			.on(t.trashedAt)
+			.where(sql`${t.trashedAt} is not null`),
 	],
 );
 

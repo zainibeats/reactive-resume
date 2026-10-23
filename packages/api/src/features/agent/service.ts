@@ -57,6 +57,7 @@ const AGENT_TIMEOUT_MESSAGE = "Time limit reached. Your progress is saved. Ask m
 const MAX_ATTACHMENTS_PER_MESSAGE = 10;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const MAX_THREAD_ATTACHMENT_BYTES = 100 * 1024 * 1024;
+const MAX_ACCOUNT_ATTACHMENT_BYTES = 1024 * 1024 * 1024;
 const READABLE_ATTACHMENT_TYPES = new Set(["text/plain", "text/markdown", "application/json"]);
 const DIRECT_MODEL_FILE_ATTACHMENT_TYPES = new Set([
 	"application/pdf",
@@ -174,10 +175,21 @@ function withAttachmentUiParts(message: UIMessage, attachments: AgentAttachmentR
 	};
 }
 
+/**
+ * Drops file parts the model mustn't see as sent: attachment references (the server adds what it read) and, from
+ * user messages, any other URL, which the AI SDK would download on the server for every turn.
+ */
 function withoutAgentAttachmentUiParts(message: UIMessage): UIMessage {
 	return {
 		...message,
-		parts: message.parts.filter((part) => !(part.type === "file" && part.url.startsWith(AGENT_ATTACHMENT_URL_PREFIX))),
+		parts: message.parts.filter(
+			(part) =>
+				!(
+					part.type === "file" &&
+					(part.url.startsWith(AGENT_ATTACHMENT_URL_PREFIX) ||
+						(message.role === "user" && !part.url.startsWith("data:")))
+				),
+		),
 	};
 }
 
@@ -634,6 +646,19 @@ async function cleanupActiveRun(input: {
 	}
 }
 
+/**
+ * Compares links the way people write them: a fragment, a trailing slash or the punctuation ending a sentence
+ * ("read https://example.com/job.") doesn't make it a different page. Host case is normalized by URL.
+ */
+function sourceKey(value: string): string | null {
+	try {
+		const url = new URL(value.trim().replace(/[.,;:!?'"*)\]]+$/, ""));
+		return `${url.protocol}//${url.host}${url.pathname.replace(/\/+$/, "")}${url.search}`;
+	} catch {
+		return null;
+	}
+}
+
 function messageText(message: UIMessage) {
 	const textParts: string[] = [];
 
@@ -717,6 +742,8 @@ async function proposeEdits(input: {
 }
 
 function createAgent(input: {
+	/** Pages the model may read: links the user wrote or sources found earlier; search results join them. */
+	allowedSources: Iterable<string>;
 	userId: string;
 	threadId: string;
 	/** Null when the message leaves the document out. */
@@ -756,25 +783,39 @@ function createAgent(input: {
 		};
 
 	const { document } = input;
+	const allowedSources = new Set<string>();
+	const allow = (url: string | null | undefined) => {
+		const key = url ? sourceKey(url) : null;
+		if (key) allowedSources.add(key);
+	};
+	for (const url of input.allowedSources) allow(url);
 	const tools = buildAgentTools({
 		provider: input.provider,
 		document: document !== null,
 		externalSearch: input.connection !== null,
 		signal: input.signal,
 		handlers: {
-			searchWeb: timedToolHandler("search_web", (query: string, signal: AbortSignal) =>
-				searchWeb(query, {
+			searchWeb: timedToolHandler("search_web", async (query: string, signal: AbortSignal) => {
+				const result = await searchWeb(query, {
 					connection: input.connection,
 					userId: input.userId,
 					signal,
-				}),
-			),
+				});
+				for (const resultSource of result) allow(resultSource.url);
+				return result;
+			}),
 			readPage: timedToolHandler("read_page", async (url: string, signal: AbortSignal) => {
+				// Text the model reads (pages, attachments, postings) can ask it to put data in a URL; an allowlist keeps
+				// every request to a page the user or a search chose.
+				const key = sourceKey(url);
+				if (!key || !allowedSources.has(key))
+					throw new Error("Read only retrieved URLs or public links supplied by the user.");
 				const { html: _html, ...page } = await readPage(url, {
 					connection: input.connection,
 					userId: input.userId,
 					signal,
 				});
+				allow(page.resolvedUrl ?? page.requestedUrl);
 				return page;
 			}),
 			readDocument: timedToolHandler("read_document", async () => {
@@ -1021,6 +1062,10 @@ export const agentService = {
 			try {
 				if (thread.activeRunId) await requestRunCancellation(thread.activeRunId, "USER_DELETED");
 			} finally {
+				// Deleting a conversation deletes what was said in it; the thread row stays only as a tombstone.
+				await db
+					.delete(schema.agentMessage)
+					.where(and(eq(schema.agentMessage.threadId, input.id), eq(schema.agentMessage.userId, input.userId)));
 				await db.delete(schema.agentAttachment).where(eq(schema.agentAttachment.threadId, input.id));
 				try {
 					await getStorageService().delete(`uploads/${input.userId}/agent/${input.id}`);
@@ -1090,6 +1135,12 @@ export const agentService = {
 					message: "Invalid UI message parts.",
 				});
 			}
+			// Files reach the model only as uploaded attachments: a URL here would make the server download it.
+			if (
+				input.message.role === "user" &&
+				input.message.parts.some((part) => part.type === "file" && !part.url.startsWith(AGENT_ATTACHMENT_URL_PREFIX))
+			)
+				throw new ORPCError("BAD_REQUEST", { message: "Attach files by uploading them." });
 
 			const loaded = await loadDocument(input.userId, document);
 			if (loaded.locked)
@@ -1238,6 +1289,12 @@ export const agentService = {
 					userId: input.userId,
 					threadId: input.threadId,
 					document: input.context?.document === false ? null : { ...document, name: loaded.name },
+					allowedSources: [
+						...messages.flatMap((message) => agentWebSources(message).map((source) => source.url)),
+						...[...messages.filter((message) => message.role === "user"), input.message].flatMap(
+							(message) => messageText(message).match(/https?:\/\/[^\s<>")]+/g) ?? [],
+						),
+					],
 					connection,
 					signal: controller.signal,
 					provider: {
@@ -1516,6 +1573,16 @@ export const agentService = {
 					if (Number(stats?.totalBytes ?? 0) + input.data.byteLength > MAX_THREAD_ATTACHMENT_BYTES) {
 						throw new ORPCError("BAD_REQUEST");
 					}
+					// New threads would otherwise each bring a fresh 100 MiB.
+					// ponytail: uploads to two threads at once can pass this together; lock the user row if that matters.
+					const [account] = await tx
+						.select({ totalBytes: sql<number>`coalesce(sum(${schema.agentAttachment.size}), 0)` })
+						.from(schema.agentAttachment)
+						.where(eq(schema.agentAttachment.userId, input.userId));
+					if (Number(account?.totalBytes ?? 0) + input.data.byteLength > MAX_ACCOUNT_ATTACHMENT_BYTES)
+						throw new ORPCError("BAD_REQUEST", {
+							message: "Your assistant attachments use all their storage. Delete conversations you no longer need.",
+						});
 
 					// ponytail: hold the thread lock during storage I/O; reserve quota first if uploads contend.
 					storageAttempted = true;

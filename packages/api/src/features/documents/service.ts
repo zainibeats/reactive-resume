@@ -35,8 +35,12 @@ async function assertUnlocked(ref: DocumentRef) {
 	return state;
 }
 
-/** Deletes for good through the resume's own path, so its stored files go too. */
-const deleteForGood = (ref: DocumentRef) => resumeService.delete({ id: ref.id, userId: ref.userId });
+/**
+ * Deletes for good through the resume's own path, so its stored files go too. With `trashedBefore` (Trash expiry),
+ * only a resume still in Trash since then goes, whether or not it's locked.
+ */
+const deleteForGood = (ref: DocumentRef, trashedBefore?: Date) =>
+	resumeService.delete({ id: ref.id, userId: ref.userId, ...(trashedBefore ? { trashedBefore } : {}) });
 
 const byTrash = (userId: string, trashed: boolean) =>
 	and(eq(schema.resume.userId, userId), trashed ? isNotNull(schema.resume.trashedAt) : isNull(schema.resume.trashedAt));
@@ -50,7 +54,7 @@ export const documentsService = {
 			.from(schema.resume)
 			.where(and(eq(schema.resume.userId, userId), lt(schema.resume.trashedAt, cutoff)));
 
-		await Promise.allSettled(resumes.map(({ id }) => deleteForGood({ userId, id })));
+		await Promise.allSettled(resumes.map(({ id }) => deleteForGood({ userId, id }, cutoff)));
 	},
 
 	/** Every live resume (or everything in Trash), newest edit first. The app filters and sorts them. */

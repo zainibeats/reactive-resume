@@ -4,6 +4,12 @@ import { generateText } from "ai";
 import { buildAgentTools } from "../agent/tools";
 import { getAgentModel } from "./service";
 
+// The stubbed global fetch stands in for the provider; the public-only transport would bypass it.
+vi.mock("./url-policy", async (original) => ({
+	...(await original<typeof import("./url-policy")>()),
+	aiTransport: () => ({}),
+}));
+
 afterEach(() => vi.unstubAllGlobals());
 const source = "https://company.example/job";
 const cases = [

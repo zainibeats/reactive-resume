@@ -28,6 +28,17 @@ async function requestConsent(accept: boolean, oauthQuery: string) {
 	}
 }
 
+function redirectDestination(redirectUri: string | null) {
+	if (!redirectUri) return null;
+	try {
+		const url = new URL(redirectUri);
+		// Native apps return through their own scheme, which has no host.
+		return url.host || url.protocol.replace(/:$/, "");
+	} catch {
+		return null;
+	}
+}
+
 export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string>();
@@ -35,6 +46,8 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 	const clientId = query.get("client_id") ?? "";
 	const scopes = new Set(query.get("scope")?.split(" ") ?? []);
 	const validRequest = !!clientId && query.has("sig");
+	// Anyone can register a client under any name, so show where the grant actually goes.
+	const destination = redirectDestination(query.get("redirect_uri"));
 	const {
 		data: client,
 		isPending,
@@ -86,6 +99,11 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 						<p className="text-xs text-ink-3">
 							<Trans>Client ID</Trans>: {clientId}
 						</p>
+						{destination && (
+							<p className="text-xs text-ink-3">
+								<Trans>Access is sent to</Trans>: <span className="font-medium text-ink">{destination}</span>
+							</p>
+						)}
 					</div>
 					<p className="text-sm">
 						<Trans>Only allow applications you trust. This application will be able to:</Trans>

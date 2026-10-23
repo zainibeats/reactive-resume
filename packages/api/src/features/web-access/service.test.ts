@@ -23,10 +23,11 @@ vi.mock("@reactive-resume/env/server", () => ({
 }));
 vi.mock("node:dns/promises", () => ({ lookup: vi.fn() }));
 vi.mock("node:dns", () => ({ lookup: vi.fn() }));
-vi.mock("node:https", () => ({
+vi.mock("node:https", async (original) => ({
+	...(await original<typeof import("node:https")>()),
 	request: (
 		url: URL,
-		options: { signal: AbortSignal; lookup: LookupFunction },
+		options: { signal: AbortSignal; agent: { options: { lookup: LookupFunction } } },
 		callback: (response: EventEmitter) => void,
 	) => {
 		fixtures.direct(url.toString());
@@ -37,7 +38,7 @@ vi.mock("node:https", () => ({
 			destroy: (error: Error) => request.emit("error", error),
 			end: () => {
 				options.signal.addEventListener("abort", aborted, { once: true });
-				options.lookup(url.hostname, { all: true }, (error) => {
+				options.agent.options.lookup(url.hostname, { all: true }, (error) => {
 					if (error) return req.destroy(error);
 					const send = () => {
 						const response = Object.assign(new EventEmitter(), {

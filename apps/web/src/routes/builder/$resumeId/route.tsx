@@ -13,8 +13,9 @@ const searchSchema = z.object({
 	mode: z.enum(EDITOR_MODES).optional().catch(undefined),
 	// Opens History on this version, read-only.
 	version: z.string().optional().catch(undefined),
-	// Opens the assistant on a conversation ("new" for a fresh one), or on a question to send (⌘K Ask).
+	// Opens the assistant on a conversation ("new" for a fresh one).
 	assistant: z.string().optional().catch(undefined),
+	// Fills the assistant's composer. Never sent without the user pressing Send: anyone can make a link.
 	ask: z.string().max(2_000).optional().catch(undefined),
 	// The file a resume was just imported from; Write says what came in until it's dismissed.
 	imported: z.string().max(255).optional().catch(undefined),
