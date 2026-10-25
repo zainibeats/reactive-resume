@@ -16,7 +16,7 @@ The fork was fully merged up to upstream `11571ae` (v6.0.0 + fixes). **From then
 
 ## Ledger
 
-**Reviewed through upstream `44929ad1` (2026-10-20). The next sync starts after it.**
+**Reviewed through upstream `e4b4817a` (2026-10-25). The next sync starts after it, but first re-check the `pending` lines below.**
 
 Upstream commits after `11571ae` that were reviewed. Add one line per commit (or per group of commits sharing one decision) on every sync, and move the "reviewed through" marker above. Decisions: `taken`, `partial` (some hunks dropped; say which), `skipped` (say why).
 
@@ -44,6 +44,23 @@ Upstream commits after `11571ae` that were reviewed. Add one line per commit (or
 - **skipped** `30ded0c5`, `c2de7252`, `7d272a0d`, `62f054ba`: Cloudron packaging. Owner's decision, 2026-10-20.
 - **skipped** `d3ae545b`, `b242aadc`, `b4987aa7`, `f097a50b`, `2cbfda98`, `756c6fbe`, `8a16c3e9`, `82f7fc6a`, `83bd2b98`: Native mobile apps and every `fix|feat|test(mobile)` commit. Owner's decision, 2026-10-20.
 - **skipped** `ba067068`: Crowdin workflow change; the fork has no Crowdin workflow.
+- **pending** `ed3abe35`, `a988406e`, `381dd7bc`: Waiting on the owner (2026-10-25 sync). `ed3abe35` is upstream's 824-file visual refresh (fonts, palette, landing page, copy rewrite); `a988406e` moves tooling to Vite+ and mixes in native-mobile work; `381dd7bc` adds optional server SearXNG search.
+- **pending** `2c7f4176`: MCP tool annotations matching real behavior. Wanted, but its parity table is built around Career, Applications and cover-letter procedures; needs a hand port onto the resume-only MCP.
+- **pending** AUTH_SECRET length check from `c080f6c0` (production refuses to start under 32 characters). Left out until the owner confirms the live instance's secret is long enough.
+- **taken** `12cf57e5`, `17b01399`, `4e6c0f9f`, `c3d67add`, `34589657`, `e6b5695a`, `21f0b9cc`, `d07d0727`: Server log noise, resume-update resubscribe after sign-out, PDF parser fused columns, social unlink by account id, e2e font fetch, Docker workflow token permissions, multiplexed resume-update subscriptions with per-user limits, dsh-plugin declarations (2026-10-25 sync).
+- **skipped** `287332ba`: Duplicate of `34589657`.
+- **partial** `a87faec9`: PWA manifest for store packaging; without the Applications/Career shortcuts, and the fork's own categories stay.
+- **partial** `2559c42c`: Renamed slugs resolve for public PDFs and download stats; `social-meta.ts` hunks dropped (removed in the fork).
+- **partial** `c080f6c0`: Security hardening. Taken: enforced CSP with hashed inline scripts, `?ask=` links only fill the assistant composer, read_page allowlist against prompt-injection exfiltration, AI request deadline and public-only AI transport, re-entering the key on provider/base URL change, provider test races, recent sign-in for API keys and account deletion, passkey re-auth, password-reset credential cleanup, change-email approval by the current address, verified-email-only account linking, encrypted OAuth tokens, JSON Patch copy-size cap, resume write size caps, zip/import limits, refusing `.env.example` secrets in production, Trash expiry only deleting still-trashed resumes. Dropped: guest/anonymous account-link hooks, username reservation (`released_username` table and trigger; single owner), Apple token revocation, Career/Applications/cover-letter hunks, public-resume social SEO, the seaweedfs compose service, the AUTH_SECRET length check (see pending). Its migrations were regenerated on the fork's chain as `20261025122313_fluffy_harrier` (resume Trash index plus the deleted-thread message purge). The public-only AI transport skips local providers (fork).
+- **partial** `ae2783b3`: Mutations, reads and metrics reject resumes in Trash; keeps the fork's revision bumps, drops the `expectedUpdatedAt` test (the fork guards with revisions).
+- **partial** `933b4f0f`, `b194a277`, `06f50450`, `27318041`: Dependency bumps as a version sync (better-auth 1.7.12 with `@better-auth/core` and the drizzle adapter on it, oRPC 1.16, AI SDK, Forme 0.29 and its page-background removal in `to-forme.tsx`, pnpm 12.15). Vite+, the translation skill and `forme-native` are not adopted.
+- **partial** `8ac04cdd`, `affd7fdb`, `5a758050`: Web translations, taken by filling the fork's empty catalog entries from upstream's `.po` files where the source text matches; mobile catalogs dropped.
+- **skipped** `79196e97`, `7de4e5c5`, `6843e346`, `af027fa8`, `a74b0a61`, `03a834e9`, `a0825b83`: Guest upload migration on account linking; the fork has no guest sessions.
+- **skipped** `6ddc027a`, `5d75e81b`, `10e45253`, `91b4e23a`, `58285afa`, `01ea38cc`, `cbd88c4f`, `a8b2211d`, `00751846`, `feeb13e8`, `130fe48f`, `85a98054`, `e6127219`, `67ebcc6c`, `fa8014e9`: Native mobile apps, their CI and store handoffs.
+- **skipped** `f389c8fd`, `0bfb2a26`, `62658f36`: Career and Applications, cover-letter docs.
+- **skipped** `a3ee192d`, `f89b86c0`: CI consolidation around Vercel smoke tests and the issue bots; the fork keeps its workflows.
+- **skipped** `205939cf`, `d34e6cab`, `5c9f0e98`, `52d454b1`, `547c044e`, `677b1878`: Homepage SEO, template discovery, store buttons, Context7 discovery and SEO docs.
+- **skipped** `e4b4817a`, `e98fbb4a`, `565b1fd1`, `87f80bb0`, `2f9f6e8b`, `28c98051`, `968dad20`, `3bdc7bf9`: Releases, Cloudron catalog, docs-site guides and an old merge commit.
 
 ## Removed entirely
 
@@ -84,7 +101,7 @@ Do not silently reintroduce these from upstream. This list is the record of comp
 ## Added beyond upstream
 
 - **Linked parent/child resumes with selective parent-update sync.** "Create child resume" is intentionally different from an ordinary duplicate: the child records `parentId`, the last reviewed `parentRevision`, and a `parentData` snapshot (`packages/db/src/schema/resume.ts`). When the parent changes, the resume service computes JSON Patch operations from that snapshot to the current parent, rebases item paths onto the independently edited child, reports human-readable diffs and overlapping child-edit conflicts, and can apply only the caller-selected operation paths, force selected conflicts, or dismiss the current parent updates without changing child content (`packages/resume/src/patch.ts`, `packages/api/src/features/resume/{service,crud}.ts`, `packages/api/src/dto/resume.ts`). Preserve the creation flow (`DeriveResumeDialog` in `apps/web/src/dialogs/resume/index.tsx`, dialog type `resume.derive`); do not reduce this to plain duplication or all-or-nothing parent replacement. The web UI exposes **Create child resume** from both the Documents library card menu (`apps/web/src/features/documents/document-actions.tsx`) and the editor's document menu, and the review surface is a badge button in the editor bar (`-components/editor-bar.tsx` → `-components/parent-updates.tsx`) — it consumes `getSyncStatus`, `applyParentUpdates`, and `dismissParentUpdates`, renders each pending operation as a selectable row via the pure formatters in `apps/web/src/features/resume/sync/diff.ts`, and only sends `force: true` for conflicting rows the author explicitly confirms. Before applying it saves pending edits (`savePendingChanges`) and then loads the returned resume with `replaceResumeFromServer`, so a stale autosave can never write over the applied updates. Every content write bumps `resume.revision`; resume responses expose `revision`/`parentId`/`parentRevision` but never `parentData`, and account exports omit the lineage.
-- **`lmstudio` AI provider** (LM Studio), on top of upstream's provider list — see `AI_PROVIDERS` in `packages/ai/src/types.ts`, `getModel` in `packages/api/src/features/ai/service.ts`, and the v6 settings UI (`apps/web/src/features/settings/ai/{catalog,providers}.tsx`). Ollama defaults to the local endpoint; Ollama, LM Studio and OpenAI-compatible providers accept an empty API key (`isApiKeyOptional`, `packages/api/src/features/ai-providers/inputs.ts`), local providers may use private/http base URLs (`url-policy.ts`), and malformed local-model JSON maps to a 400 (`rethrowAiError` in `packages/api/src/features/ai/router.ts`).
+- **`lmstudio` AI provider** (LM Studio), on top of upstream's provider list — see `AI_PROVIDERS` in `packages/ai/src/types.ts`, `getModel` in `packages/api/src/features/ai/service.ts`, and the v6 settings UI (`apps/web/src/features/settings/ai/{catalog,providers}.tsx`). Ollama defaults to the local endpoint; Ollama, LM Studio and OpenAI-compatible providers accept an empty API key (`isApiKeyOptional`, `packages/api/src/features/ai-providers/inputs.ts`), local providers may use private/http base URLs and skip the public-only `aiTransport` (`url-policy.ts`), and malformed local-model JSON maps to a 400 (`rethrowAiError` in `packages/api/src/features/ai/router.ts`).
 
 ## Re-check after every sync
 
@@ -102,7 +119,7 @@ Explicitly re-check these areas rather than trusting a clean apply:
 - `packages/mcp/src/{mcp-tool-names,tool-meta,tools,parity}.ts` (resume-only MCP)
 - `packages/api/src/routers/index.ts` (no statistics router)
 - `apps/web/src/routes/agent/*`
-- `packages/ai/src/types.ts` and `apps/web/src/features/settings/ai/*` (provider enum/UI)
+- `packages/ai/src/types.ts`, `apps/web/src/features/settings/ai/*` and `packages/api/src/features/ai/url-policy.ts` (provider enum/UI, local providers skip `aiTransport`)
 - `packages/auth/src/config.ts` and `single-owner.ts`
 - `apps/web/src/routes/{__root,_home/*}.tsx`, `apps/web/src/features/homepage/*`
 - `apps/web/vite.config.ts` and `Dockerfile` (prerender)
