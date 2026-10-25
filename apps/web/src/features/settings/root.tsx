@@ -28,7 +28,7 @@ function Row({ icon, label, value }: RowProps) {
 			<Icon name={icon} size={22} className="text-ink-2" />
 			<span className="flex-1">{label}</span>
 			{value && <span className="truncate text-sm text-ink-3">{value}</span>}
-			<Icon name="chevron_right" size={22} className="text-ink-3" />
+			<Icon name="caret-right" size={22} className="text-ink-3" />
 		</>
 	);
 }
@@ -62,16 +62,20 @@ export function SettingsRoot() {
 
 			<nav
 				aria-label={t`Settings`}
-				className="divide-y divide-line overflow-hidden rounded-[14px] border border-line bg-surface"
+				className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface"
 			>
 				<Link to="/dashboard/settings/account" viewTransition={pushTransition} className={rowClass}>
-					<Row icon="account_circle" label={<Trans>Account</Trans>} />
+					<Row icon="user-circle" label={<Trans>Account</Trans>} />
 				</Link>
 				<Link to="/dashboard/settings/preferences" viewTransition={pushTransition} className={rowClass}>
-					<Row icon="tune" label={<Trans>Preferences</Trans>} value={i18n.t(themeMap[theme])} />
+					<Row icon="sliders-horizontal" label={<Trans>Preferences</Trans>} value={i18n.t(themeMap[theme])} />
 				</Link>
 				<Link to="/dashboard/settings/ai" viewTransition={pushTransition} className={rowClass}>
-					<Row icon="hub" label={<Trans>AI & developer</Trans>} value={provider?.label ?? <Trans>Not set up</Trans>} />
+					<Row
+						icon="graph"
+						label={<Trans>AI & developer</Trans>}
+						value={provider?.label ?? <Trans>Not set up</Trans>}
+					/>
 				</Link>
 			</nav>
 

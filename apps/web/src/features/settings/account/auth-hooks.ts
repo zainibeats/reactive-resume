@@ -88,7 +88,7 @@ export function useAuthProviderActions() {
 		const providerName = getProviderName(provider);
 		const toastId = toast.add({
 			type: "loading",
-			description: t`Linking your ${providerName} account...`,
+			description: t`Connecting your ${providerName} account…`,
 		});
 
 		const { error } = await authClient.linkSocial({
@@ -103,7 +103,7 @@ export function useAuthProviderActions() {
 					error,
 					t({
 						comment: "Fallback toast when linking a social authentication provider fails",
-						message: "Failed to link provider. Please try again.",
+						message: `Couldn't connect your ${providerName} account. Try again.`,
 					}),
 				),
 				id: toastId,
@@ -123,7 +123,7 @@ export function useAuthProviderActions() {
 			const providerName = getProviderName(provider);
 			const toastId = toast.add({
 				type: "loading",
-				description: t`Unlinking your ${providerName} account...`,
+				description: t`Disconnecting your ${providerName} account…`,
 			});
 
 			const { error } = await authClient.unlinkAccount({ accountId });
@@ -135,7 +135,7 @@ export function useAuthProviderActions() {
 						error,
 						t({
 							comment: "Fallback toast when unlinking a social authentication provider fails",
-							message: "Failed to unlink provider. Please try again.",
+							message: `Couldn't disconnect your ${providerName} account. Try again.`,
 						}),
 					),
 					id: toastId,

@@ -32,11 +32,11 @@ function useNavItems() {
 	const { data: counts } = useQuery(orpc.documents.counts.queryOptions());
 
 	const items: NavItem[] = [
-		{ to: "/dashboard", icon: "description", label: t`Documents`, ...(counts ? { count: counts.resume } : {}) },
+		{ to: "/dashboard", icon: "file-text", label: t`Documents`, ...(counts ? { count: counts.resume } : {}) },
 	];
-	const settings: NavItem = { to: "/dashboard/settings", icon: "settings", label: t`Settings` };
+	const settings: NavItem = { to: "/dashboard/settings", icon: "gear-six", label: t`Settings` };
 	const trash: NavItem | null = counts?.trash
-		? { to: "/dashboard/trash", icon: "delete", label: t`Trash`, count: counts.trash }
+		? { to: "/dashboard/trash", icon: "trash", label: t`Trash`, count: counts.trash }
 		: null;
 
 	return { items, settings, trash };
@@ -109,7 +109,7 @@ function Sidebar() {
 				onClick={() => openPalette(true)}
 				className="flex h-[34px] items-center gap-2 rounded-lg border border-line bg-bg px-2.5 text-sm text-ink-3 transition-colors duration-quick hover:text-ink-2"
 			>
-				<Icon name="search" size={18} />
+				<Icon name="magnifying-glass" size={18} />
 				<span className="flex-1 text-start">
 					<Trans>Search or run…</Trans>
 				</span>
@@ -134,7 +134,7 @@ function Sidebar() {
 					onClick={() => openDialog("document.new", undefined)}
 				>
 					<span className="flex items-center gap-1.5">
-						<Icon name="add" />
+						<Icon name="plus" />
 						<Trans>New</Trans>
 					</span>
 					<Kbd className="bg-on-accent/15 text-on-accent">N</Kbd>
@@ -192,7 +192,7 @@ function Rail() {
 			<Link to="/" aria-label="Reactive Resume" className="mb-1 grid size-8 place-items-center rounded-md">
 				<BrandIcon variant="icon" alt="" className="size-6" />
 			</Link>
-			<RailTip label={t`Search`} icon="search">
+			<RailTip label={t`Search`} icon="magnifying-glass">
 				<button
 					type="button"
 					aria-label={t`Search or run…`}
@@ -225,12 +225,12 @@ function Rail() {
 						/>
 					</RailTip>
 				)}
-				<RailTip label={t`New`} icon="add">
+				<RailTip label={t`New`} icon="plus">
 					<Button size="icon" aria-label={t`New`} onClick={() => openDialog("document.new", undefined)} />
 				</RailTip>
 				<UserDropdownMenu>
 					{({ session }) => (
-						<button type="button" aria-label={t`Account`} className="rounded-full">
+						<button type="button" aria-label={t`Account`} className="rounded-sm">
 							<Avatar className="size-8">
 								<AvatarImage src={session.user.image ?? undefined} />
 								<AvatarFallback className="text-[11px]">{getInitials(session.user.name)}</AvatarFallback>
@@ -269,48 +269,48 @@ function RailTip({
 function MobileTabs() {
 	const isCurrent = useIsCurrent();
 	const openDialog = useDialogStore((state) => state.openDialog);
+	const tabs: Pick<NavItem, "to" | "icon" | "label">[] = [
+		{ to: "/dashboard", icon: "file-text", label: t`Documents` },
+		{ to: "/dashboard/settings", icon: "gear-six", label: t`Settings` },
+	];
 
-	const tab = (icon: IconName, label: string, current: boolean) => (
-		<>
-			{current && <MobileTabIndicator />}
-			<Icon name={icon} size={24} filled={current} />
-			<span className={cn("text-[11px]", current ? "font-semibold text-ink" : "text-ink-2")}>{label}</span>
-		</>
-	);
+	const link = ({ to, icon, label }: (typeof tabs)[number]) => {
+		const current = isCurrent(to);
+
+		return (
+			<Link
+				key={to}
+				to={to}
+				aria-current={current ? "page" : undefined}
+				viewTransition={false}
+				className="relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 transition-[scale] duration-quick ease-enter active:scale-[0.97]"
+			>
+				{current && <MobileTabIndicator />}
+				<Icon name={icon} size={24} filled={current} />
+				<span className={cn("text-[11px]", current ? "font-semibold text-ink" : "text-ink-2")}>{label}</span>
+			</Link>
+		);
+	};
 
 	return (
 		<nav
 			aria-label={t`App`}
 			className="sticky bottom-0 z-30 grid grid-cols-3 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] [view-transition-name:app-nav]"
 		>
-			<Link
-				to="/dashboard"
-				aria-current={isCurrent("/dashboard") ? "page" : undefined}
-				viewTransition={false}
-				className="relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 transition-[scale] duration-quick ease-enter active:scale-[0.97]"
-			>
-				{tab("description", t`Documents`, isCurrent("/dashboard"))}
-			</Link>
+			{tabs.slice(0, 1).map(link)}
 			<button
 				type="button"
 				onClick={() => openDialog("document.new", undefined)}
 				className="flex min-h-[52px] flex-col items-center justify-center gap-0.5 transition-[scale] duration-quick ease-enter active:scale-[0.97]"
 			>
-				<span className="grid h-[26px] w-[34px] place-items-center rounded-full bg-accent text-on-accent">
-					<Icon name="add" size={20} />
+				<span className="grid h-[26px] w-[34px] place-items-center rounded-sm bg-accent text-on-accent">
+					<Icon name="plus" size={20} />
 				</span>
 				<span className="text-[11px] text-ink-2">
 					<Trans>New</Trans>
 				</span>
 			</button>
-			<Link
-				to="/dashboard/settings"
-				aria-current={isCurrent("/dashboard/settings") ? "page" : undefined}
-				viewTransition={false}
-				className="relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 transition-[scale] duration-quick ease-enter active:scale-[0.97]"
-			>
-				{tab("settings", t`Settings`, isCurrent("/dashboard/settings"))}
-			</Link>
+			{tabs.slice(1).map(link)}
 		</nav>
 	);
 }

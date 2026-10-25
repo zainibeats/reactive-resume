@@ -20,7 +20,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/features/resume/builder/draft", () => ({ isEditableElementFocused: () => false }));
 vi.mock("./document-actions", () => ({ TagsDialog: () => null, useBatchActions: () => ({}) }));
 vi.mock("./document-card", () => ({ DocumentCard: () => null, DocumentRow: () => null }));
-vi.mock("./new-document-dialog", () => ({
+vi.mock("./use-start-document", () => ({
 	useStartDocument: () => ({ startBlank: vi.fn(), trySample: vi.fn(), creating: false }),
 }));
 

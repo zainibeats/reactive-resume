@@ -97,7 +97,6 @@ function useResumeHistory(): HistorySource {
 function HistoryTimeline({ source }: { source: HistorySource }) {
 	const { i18n } = useLingui();
 	const selectedId = useEditorStore((state) => state.historyVersionId);
-	const setVersion = useEditorStore((state) => state.setHistoryVersion);
 	const [name, setName] = useState("");
 	const [busy, setBusy] = useState(false);
 	const { versions, loading } = source;
@@ -128,7 +127,7 @@ function HistoryTimeline({ source }: { source: HistorySource }) {
 	const restore = (version: HistoryVersion) =>
 		void run(async () => {
 			await source.restore(version.id);
-			setVersion(null);
+			useEditorStore.setState({ historyVersionId: null });
 			toast.add({
 				description: t`Restored the version from ${formatVersionMoment(version.createdAt, i18n.locale)}. Your previous state is saved as “Before restore”.`,
 			});
@@ -147,7 +146,7 @@ function HistoryTimeline({ source }: { source: HistorySource }) {
 					value={name}
 					maxLength={80}
 					aria-label={t`Name this version`}
-					placeholder={t`Name this version, e.g. Sent to Lumen`}
+					placeholder={t`Sent to Lumen`}
 					onChange={(event) => setName(event.target.value)}
 					className="h-9"
 				/>
@@ -157,9 +156,9 @@ function HistoryTimeline({ source }: { source: HistorySource }) {
 			</form>
 
 			{selected && (
-				<div role="status" className="grid gap-2.5 rounded-[10px] bg-ink p-3 text-[13px] text-bg">
+				<div role="status" className="grid gap-2.5 rounded-lg bg-ink p-3 text-[13px] text-bg">
 					<span className="flex items-center gap-2 font-medium">
-						<Icon name="history" size={18} />
+						<Icon name="clock-counter-clockwise" size={18} />
 						<Trans>
 							Viewing {when(selected)} · {getVersionTitle(selected)} · read-only
 						</Trans>
@@ -172,7 +171,7 @@ function HistoryTimeline({ source }: { source: HistorySource }) {
 							size="sm"
 							variant="ghost"
 							className="text-bg underline underline-offset-[3px] hover:bg-transparent hover:text-bg"
-							onClick={() => setVersion(null)}
+							onClick={() => useEditorStore.setState({ historyVersionId: null })}
 						>
 							<Trans>Back to now</Trans>
 						</Button>
@@ -187,7 +186,7 @@ function HistoryTimeline({ source }: { source: HistorySource }) {
 					selected={!selected}
 					current
 					last={!versions?.length}
-					onSelect={() => setVersion(null)}
+					onSelect={() => useEditorStore.setState({ historyVersionId: null })}
 				/>
 				{versions?.map((version, index) => (
 					<TimelineItem
@@ -197,7 +196,7 @@ function HistoryTimeline({ source }: { source: HistorySource }) {
 						named={version.kind === "named"}
 						selected={version.id === selectedId}
 						last={index === versions.length - 1}
-						onSelect={() => setVersion(version.id)}
+						onSelect={() => useEditorStore.setState({ historyVersionId: version.id })}
 						menu={version.kind === "named" ? <NamedVersionMenu version={version} source={source} /> : null}
 					/>
 				))}
@@ -236,7 +235,7 @@ function TimelineItem({ title, detail, selected, last, onSelect, current, named,
 			<span aria-hidden="true" className="flex flex-col items-center">
 				<span
 					className={cn(
-						"mt-[15px] size-2.5 shrink-0 rounded-full shadow-[0_0_0_3px_var(--raised)]",
+						"mt-[15px] size-2.5 shrink-0 rounded-sm shadow-[0_0_0_3px_var(--raised)]",
 						current ? "bg-accent" : selected ? "bg-ink" : "bg-line-2",
 					)}
 				/>
@@ -244,7 +243,7 @@ function TimelineItem({ title, detail, selected, last, onSelect, current, named,
 			</span>
 			<span
 				className={cn(
-					"group/version my-0.5 flex items-start rounded-[10px] border transition-colors duration-quick",
+					"group/version my-0.5 flex items-start rounded-lg border transition-colors duration-quick",
 					selected ? "border-line-2 bg-sunken" : "border-transparent hover:bg-hover",
 				)}
 			>
@@ -256,7 +255,7 @@ function TimelineItem({ title, detail, selected, last, onSelect, current, named,
 				>
 					<span className="flex max-w-full items-center gap-2">
 						<span className="truncate text-[13px] font-semibold">{title}</span>
-						{named && <Icon name="bookmark" size={14} className="text-accent-text" />}
+						{named && <Icon name="bookmark-simple" size={14} className="text-accent-text" />}
 					</span>
 					<span className="text-xs text-ink-3">{detail}</span>
 				</button>
@@ -271,7 +270,6 @@ function NamedVersionMenu({ version, source }: { version: HistoryVersion; source
 	const prompt = usePrompt();
 	const confirm = useConfirm();
 	const selectedId = useEditorStore((state) => state.historyVersionId);
-	const setVersion = useEditorStore((state) => state.setHistoryVersion);
 	const title = getVersionTitle(version);
 	const failed = (error: unknown) => toast.add({ type: "error", description: source.errorMessage(error) });
 
@@ -284,12 +282,12 @@ function NamedVersionMenu({ version, source }: { version: HistoryVersion; source
 	const remove = async () => {
 		const confirmed = await confirm(t`Delete “${title}”?`, {
 			description: t`Named versions are kept until you delete them. This can't be undone.`,
-			confirmText: t`Delete`,
+			confirmText: t`Delete version`,
 		});
 		if (!confirmed) return;
 		try {
 			await source.remove(version.id);
-			if (selectedId === version.id) setVersion(null);
+			if (selectedId === version.id) useEditorStore.setState({ historyVersionId: null });
 			toast.add({ description: t`Deleted “${title}”` });
 		} catch (error) {
 			failed(error);
@@ -301,7 +299,7 @@ function NamedVersionMenu({ version, source }: { version: HistoryVersion; source
 			<DropdownMenuTrigger
 				render={
 					<IconButton
-						icon="more_horiz"
+						icon="dots-three"
 						label={t`Options for ${title}`}
 						size="icon-sm"
 						className="text-ink-2 opacity-0 group-hover/version:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100"
@@ -310,11 +308,11 @@ function NamedVersionMenu({ version, source }: { version: HistoryVersion; source
 			/>
 			<DropdownMenuContent align="end" className="w-44">
 				<DropdownMenuItem onClick={() => void rename()}>
-					<Icon name="edit" />
+					<Icon name="pencil-simple" />
 					<Trans>Rename…</Trans>
 				</DropdownMenuItem>
 				<DropdownMenuItem variant="destructive" onClick={() => void remove()}>
-					<Icon name="delete" />
+					<Icon name="trash" />
 					<Trans>Delete</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

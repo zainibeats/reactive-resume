@@ -69,7 +69,7 @@ export function ProvidersSection() {
 			<div className="grid gap-4 p-5">
 				{managed ? (
 					<div className="flex items-center gap-3">
-						<ProviderLogo provider={managed.provider} className="size-10 rounded-[10px] bg-sunken" />
+						<ProviderLogo provider={managed.provider} className="size-10 rounded-lg bg-sunken" />
 						<div className="grid min-w-0 gap-1">
 							<p className="text-sm font-medium">{providerLabel(managed.provider)}</p>
 							<p className="text-xs break-all text-ink-3">{managed.model}</p>
@@ -99,9 +99,9 @@ export function ProvidersSection() {
 						<button
 							type="button"
 							onClick={() => setAdding(true)}
-							className="flex min-h-14 items-center gap-3 rounded-[10px] border border-dashed border-line-2 px-3 py-2.5 text-start text-sm transition-colors duration-quick hover:bg-hover"
+							className="flex min-h-14 items-center gap-3 rounded-lg border border-dashed border-line-2 px-3 py-2.5 text-start text-sm transition-colors duration-quick hover:bg-hover"
 						>
-							<Icon name="add" size={20} />
+							<Icon name="plus" size={20} />
 							<span className="grid gap-0.5">
 								<span className="font-medium">
 									<Trans>Add AI provider</Trans>
@@ -139,7 +139,7 @@ function ProviderLogo({ provider, className }: ProviderLogoProps) {
 					onError={() => setFailed(true)}
 				/>
 			) : (
-				<Icon name="auto_awesome" size={20} />
+				<Icon name="sparkle" size={20} />
 			)}
 		</span>
 	);
@@ -170,7 +170,7 @@ function useProviderTest() {
 			const next = {
 				ok: false,
 				label: t`Failed`,
-				error: getOrpcErrorMessage(error, { fallback: t`The test didn't run.` }),
+				error: getOrpcErrorMessage(error, { fallback: t`The test didn't run. Try again.` }),
 			};
 			setResult(next);
 			return next;
@@ -187,7 +187,7 @@ function ProviderRow({ provider, onEdit }: ProviderRowProps) {
 	const error = test.result ? test.result.error : provider.testStatus === "failure" ? provider.testError : null;
 
 	return (
-		<div className="grid gap-2 rounded-[10px] border border-line p-3">
+		<div className="grid gap-2 rounded-lg border border-line p-3">
 			<div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:flex sm:items-center">
 				<ProviderLogo provider={provider.provider} className="size-10 rounded-lg bg-sunken" />
 				<span className="grid min-w-0 flex-1 gap-0.5">
@@ -195,7 +195,7 @@ function ProviderRow({ provider, onEdit }: ProviderRowProps) {
 						<span className="break-words">{provider.label}</span>
 						<span
 							className={cn(
-								"rounded-full px-2 py-0.5 text-xs font-medium",
+								"rounded-sm px-2 py-0.5 text-xs font-medium",
 								provider.testStatus === "failure"
 									? "bg-danger-soft text-danger-text"
 									: provider.enabled
@@ -424,7 +424,7 @@ function AddProviderDialog({ open, onOpenChange }: AddProviderDialogProps) {
 						PRECONDITION_FAILED: t`AI providers aren't available on this server until ENCRYPTION_SECRET is set.`,
 						BAD_REQUEST: t`That provider setup isn't valid. Check the base URL.`,
 					},
-					fallback: t`Couldn't save the provider.`,
+					fallback: t`Couldn't save the provider. Try again.`,
 				}),
 			);
 		}
@@ -453,7 +453,7 @@ function AddProviderDialog({ open, onOpenChange }: AddProviderDialogProps) {
 			// The fields clear once the dialog has faded out, not while it does.
 			onOpenChangeComplete={(next) => !next && reset()}
 		>
-			<DialogContent>
+			<DialogContent closeLabel={t`Close`}>
 				<DialogHeader>
 					<DialogTitle>
 						<Trans>Add provider</Trans>
@@ -526,7 +526,9 @@ function EditProviderDialog({ provider, onClose }: EditProviderDialogProps) {
 			onOpenChange={(open) => !open && onClose()}
 			onOpenChangeComplete={onOpenChangeComplete}
 		>
-			<DialogContent>{shown && <EditProviderForm key={shown.id} provider={shown} onClose={onClose} />}</DialogContent>
+			<DialogContent closeLabel={t`Close`}>
+				{shown && <EditProviderForm key={shown.id} provider={shown} onClose={onClose} />}
+			</DialogContent>
 		</Dialog>
 	);
 }
@@ -571,12 +573,12 @@ function EditProviderForm({ provider, onClose }: EditProviderFormProps) {
 			// A new model, key or address needs a fresh test before the app uses it.
 			result = await test.run(provider.id);
 		} catch (error) {
-			setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't save the provider.` }));
+			setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't save the provider. Try again.` }));
 		}
 		void invalidate();
 		if (!result) return;
 		if (result.ok) onClose();
-		else setFailure(result.error ?? t`The provider didn't answer.`);
+		else setFailure(result.error ?? t`The provider didn't answer. Check the key, the model and the base URL.`);
 	};
 
 	const setEnabled = (enabled: boolean) =>
@@ -584,7 +586,8 @@ function EditProviderForm({ provider, onClose }: EditProviderFormProps) {
 			{ id: provider.id, enabled },
 			{
 				onSuccess: () => void invalidate(),
-				onError: (error) => setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't change it.` })),
+				onError: (error) =>
+					setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't turn the provider on or off. Try again.` })),
 			},
 		);
 
@@ -638,9 +641,9 @@ function EditProviderForm({ provider, onClose }: EditProviderFormProps) {
 						loading={remove.isPending}
 						onClick={async () => {
 							if (
-								!(await confirm(t`Delete this provider?`, {
+								!(await confirm(t`Delete “${provider.label}”?`, {
 									description: t`Its saved key is deleted. Conversations using it need another provider.`,
-									confirmText: t`Delete`,
+									confirmText: t`Delete provider`,
 								}))
 							)
 								return;
@@ -652,7 +655,7 @@ function EditProviderForm({ provider, onClose }: EditProviderFormProps) {
 										onClose();
 									},
 									onError: (error) =>
-										setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't delete the provider.` })),
+										setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't delete the provider. Try again.` })),
 								},
 							);
 						}}

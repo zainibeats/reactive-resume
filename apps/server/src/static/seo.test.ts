@@ -55,12 +55,4 @@ describe("SEO static endpoints", () => {
 		expect(text).toContain("- OpenAPI specification: https://app.example.com/api/openapi/spec.json");
 		expect(text).not.toContain("docs.rxresu.me");
 	});
-
-	it("returns headers without a body for HEAD responses", async () => {
-		const response = handleLlms({ head: true });
-
-		expect(response.status).toBe(200);
-		expect(response.headers.get("Content-Type")).toBe("text/plain; charset=UTF-8");
-		expect(await response.text()).toBe("");
-	});
 });

@@ -22,12 +22,6 @@ export type ResumePreviewProps = {
 	onRender?: (render: { pageCount: number; pageMap: PageMap | undefined; file: Blob }) => void;
 };
 
-export type ResolvedResumePreviewProps = ResumePreviewProps & {
-	pageLayout: "horizontal" | "vertical";
-	pageScale: number;
-	showPageNumbers: boolean;
-};
-
 type ResumePreviewLoaderProps = Pick<ResumePreviewProps, "pageClassName" | "showPageNumbers"> & {
 	pageCount?: number;
 	pageGap?: CSSProperties["gap"];
@@ -36,8 +30,6 @@ type ResumePreviewLoaderProps = Pick<ResumePreviewProps, "pageClassName" | "show
 	/** Shown on the first page in place of the spinner when the render failed. */
 	failure?: ReactNode;
 };
-
-// ponytail: normalizeResumePreviewProps deleted — defaults now live in ResumePreview destructuring
 
 export function ResumePreviewLoader({
 	pageCount = 1,

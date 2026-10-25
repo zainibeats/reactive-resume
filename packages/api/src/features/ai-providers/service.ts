@@ -95,7 +95,10 @@ async function getOwnedProvider(input: { id: string; userId: string }) {
 const serverProviderId = (userId: string) => `server-ai:${userId}`;
 
 function assertPersonalProvidersAllowed() {
-	if (env.AI_PROVIDER) throw new ORPCError("FORBIDDEN", { message: "AI is managed by the server." });
+	if (env.AI_PROVIDER)
+		throw new ORPCError("FORBIDDEN", {
+			message: "AI is set up by the server administrator and can't be changed here.",
+		});
 }
 
 /** A persisted reference keeps Assistant thread foreign keys valid; server credentials stay in the environment. */
@@ -151,7 +154,7 @@ export const aiProvidersService = {
 
 		const provider = await getOwnedProvider(input);
 		if (!provider.enabled || provider.testStatus !== "success") {
-			throw new ORPCError("BAD_REQUEST", { message: "AI provider must be tested and enabled before use." });
+			throw new ORPCError("BAD_REQUEST", { message: "Test and turn on this AI provider before using it." });
 		}
 
 		return {
@@ -241,7 +244,7 @@ export const aiProvidersService = {
 		const runtimeChanged = credentialChanged || providerChanged || modelChanged || baseUrlChanged;
 
 		if (input.enabled === true && existing.testStatus !== "success" && !runtimeChanged) {
-			throw new ORPCError("BAD_REQUEST", { message: "AI provider must be tested successfully before enabling." });
+			throw new ORPCError("BAD_REQUEST", { message: "Test this AI provider before turning it on." });
 		}
 
 		const [updated] = await db
@@ -289,7 +292,7 @@ export const aiProvidersService = {
 			eq(schema.aiProvider.encryptedApiKey, provider.encryptedApiKey),
 		);
 		const changed = () =>
-			new ORPCError("CONFLICT", { message: "The connection changed during the test. Test it again." });
+			new ORPCError("CONFLICT", { message: "The provider changed during the test. Test it again." });
 
 		try {
 			const result = await testConnection({

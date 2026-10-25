@@ -12,10 +12,9 @@ type OpenAssistant = {
 /** Opens the assistant on a conversation, a question to send, or a draft to review. */
 export function openAssistantFrom(search: OpenAssistant) {
 	if (!search.assistant && !search.ask && !search.draft) return false;
-	const editor = useEditorStore.getState();
-	editor.setAssistantOpen(true);
-	editor.setAssistantThread(search.ask || search.draft ? "new" : (search.assistant ?? null));
-	if (search.ask) editor.setAssistantPrompt(search.ask);
-	if (search.draft) editor.setAssistantDraft(search.draft);
+	useEditorStore.getState().setAssistantOpen(true);
+	useEditorStore.setState({ assistantThread: search.ask || search.draft ? "new" : (search.assistant ?? null) });
+	if (search.ask) useEditorStore.setState({ assistantPrompt: search.ask });
+	if (search.draft) useEditorStore.setState({ assistantDraft: search.draft });
 	return true;
 }

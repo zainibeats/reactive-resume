@@ -1,4 +1,5 @@
-import { generateId, generateRandomName } from "@reactive-resume/utils/string";
+import { generateRandomName } from "@reactive-resume/utils/slug";
+import { generateId } from "@reactive-resume/utils/string";
 import { protectedProcedure } from "../../context";
 import { resumeDto } from "../../dto/resume";
 import { resumeMutationRateLimit } from "../../middleware/rate-limit";
@@ -65,7 +66,7 @@ export const crudRouter = {
 		.output(resumeDto.create.output)
 		.errors({
 			RESUME_SLUG_ALREADY_EXISTS: {
-				message: "A resume with this slug already exists.",
+				message: "A resume with this slug already exists. Choose another slug.",
 				status: 400,
 			},
 		})
@@ -101,7 +102,7 @@ export const crudRouter = {
 		.output(resumeDto.import.output)
 		.errors({
 			RESUME_SLUG_ALREADY_EXISTS: {
-				message: "A resume with this slug already exists.",
+				message: "A resume with this slug already exists. Choose another slug.",
 				status: 400,
 			},
 		})
@@ -140,7 +141,7 @@ export const crudRouter = {
 		.errors({
 			RESUME_LOCKED: { status: 403, message: "Unlock the resume first." },
 			RESUME_SLUG_ALREADY_EXISTS: {
-				message: "A resume with this slug already exists.",
+				message: "A resume with this slug already exists. Choose another slug.",
 				status: 400,
 			},
 		})
@@ -175,11 +176,12 @@ export const crudRouter = {
 		.errors({
 			RESUME_LOCKED: { status: 403, message: "Unlock the resume first." },
 			INVALID_PATCH_OPERATIONS: {
-				message: "The patch operations are invalid or produced an invalid resume.",
+				message:
+					"The patch operations are invalid or would produce an invalid resume. Fix the operations and try again.",
 				status: 400,
 			},
 			RESUME_VERSION_CONFLICT: {
-				message: "The resume changed after this patch was generated.",
+				message: "The resume changed after this patch was generated. Read the resume again and regenerate the patch.",
 				status: 409,
 			},
 		})

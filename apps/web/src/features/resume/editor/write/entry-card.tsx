@@ -68,7 +68,6 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 	const write = useEntryWriter(section.id, entryId);
 	const open = useEditorStore((state) => state.selection?.kind === "item" && state.selection.itemId === entryId);
 	const autoFocus = useEditorStore((state) => state.focusEntryId === entryId);
-	const select = useEditorStore((state) => state.select);
 	const { setNodeRef, transform, transition, isDragging, attributes, listeners } = useSortable({
 		id: entryId,
 		disabled: locked,
@@ -78,7 +77,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 
 	// The first field took focus as it mounted; later openings shouldn't steal focus again.
 	useEffect(() => {
-		if (autoFocus) useEditorStore.getState().setFocusEntry(null);
+		if (autoFocus) useEditorStore.setState({ focusEntryId: null });
 	}, [autoFocus]);
 
 	if (!entry) return null;
@@ -89,7 +88,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 	const hint = draft && primaryField ? DRAFT_HINTS[primaryField] : undefined;
 
 	const toggle = () => {
-		select(open ? null : { kind: "item", sectionId: section.id, itemId: entryId });
+		useEditorStore.setState({ selection: open ? null : { kind: "item", sectionId: section.id, itemId: entryId } });
 		if (!open) keepOpenedEntryInView(entryId);
 	};
 	const fields = (
@@ -112,7 +111,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 			data-entry-id={entryId}
 			style={{ transform: CSS.Translate.toString(transform), transition: transition }}
 			className={cn(
-				"group/entry relative scroll-mt-[60px] rounded-[10px] border border-line bg-surface transition-[border-color,box-shadow] duration-quick ease-enter",
+				"group/entry relative scroll-mt-[60px] rounded-lg border border-line bg-surface transition-[border-color,box-shadow] duration-quick ease-enter",
 				open && "border-accent shadow-e1",
 				isDragging && "z-10 bg-raised shadow-e2",
 			)}
@@ -126,7 +125,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 						{...attributes}
 						{...listeners}
 					>
-						<Icon name="drag_indicator" size={16} />
+						<Icon name="dots-six-vertical" size={16} />
 					</button>
 				)}
 				<button
@@ -136,7 +135,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 					onClick={toggle}
 					onKeyDown={onTitleKeyDown}
 					className={cn(
-						"flex min-w-0 flex-1 flex-col items-start gap-0.5 rounded-[9px] py-2.5 pe-2 text-start",
+						"flex min-w-0 flex-1 flex-col items-start gap-0.5 rounded-lg py-2.5 pe-2 text-start",
 						locked ? "ps-3" : "ps-0.5",
 					)}
 				>
@@ -160,7 +159,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 
 				{open && !locked && (
 					<IconButton
-						icon="delete"
+						icon="trash"
 						label={t`Delete entry`}
 						size="icon-sm"
 						className="text-ink-2 hover:bg-danger-soft hover:text-danger-text"
@@ -191,7 +190,7 @@ export function EntryCard({ section, entryId, index, count, page, locked, onMove
 						title={title}
 						locked={locked}
 						onDelete={() => deleteEntry(section, entryId)}
-						onBack={() => select(null)}
+						onBack={() => useEditorStore.setState({ selection: null })}
 					>
 						{fields}
 					</PhoneEntryScreen>
@@ -231,13 +230,11 @@ function PhoneEntryScreen({ section, title, locked, onBack, onDelete, children }
 					onClick={onBack}
 					className="flex h-11 items-center gap-0.5 rounded-lg px-2 text-[15px] font-medium text-accent-text"
 				>
-					<Icon name="chevron_left" size={24} />
+					<Icon name="caret-left" size={24} />
 					{sectionTitle}
 				</button>
 				<span className="min-w-0 flex-1" />
-				{!locked && (
-					<IconButton icon="delete" label={t`Delete entry`} className="text-danger-text" onClick={onDelete} />
-				)}
+				{!locked && <IconButton icon="trash" label={t`Delete entry`} className="text-danger-text" onClick={onDelete} />}
 			</div>
 			<fieldset
 				disabled={locked}
@@ -259,7 +256,7 @@ function deleteEntry(section: WriteSection, entryId: string) {
 		},
 		{ newStep: true },
 	);
-	useEditorStore.getState().select(null);
+	useEditorStore.setState({ selection: null });
 	toast.add({ description: t`Entry deleted`, actionProps: { children: t`Undo`, onClick: undo } });
 }
 
@@ -293,7 +290,7 @@ function EntryMenu({ section, entry }: EntryMenuProps) {
 			},
 			{ newStep: true },
 		);
-		useEditorStore.getState().select({ kind: "item", sectionId: section.id, itemId: copy.id });
+		useEditorStore.setState({ selection: { kind: "item", sectionId: section.id, itemId: copy.id } });
 	};
 
 	const toggleHidden = () =>
@@ -308,27 +305,27 @@ function EntryMenu({ section, entry }: EntryMenuProps) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger
-				render={<IconButton icon="more_horiz" label={t`Entry options`} size="icon-sm" className="text-ink-2" />}
+				render={<IconButton icon="dots-three" label={t`Entry options`} size="icon-sm" className="text-ink-2" />}
 			/>
 			<DropdownMenuContent align="end" className="w-56">
 				<DropdownMenuItem onClick={toggleHidden}>
-					<Icon name={entry.hidden ? "visibility" : "visibility_off"} />
+					<Icon name={entry.hidden ? "eye" : "eye-slash"} />
 					{entry.hidden ? <Trans>Show on page</Trans> : <Trans>Hide from page</Trans>}
 				</DropdownMenuItem>
 				<DropdownMenuItem onClick={duplicate}>
-					<Icon name="content_copy" />
+					<Icon name="copy" />
 					<Trans>Duplicate</Trans>
 				</DropdownMenuItem>
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger>
-						<Icon name="arrow_forward" />
+						<Icon name="arrow-right" />
 						<Trans>Move to…</Trans>
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent className="w-56">
 						{moveTargets.map(({ pageIndex, sections }) => (
 							<DropdownMenuSub key={pageIndex}>
 								<DropdownMenuSubTrigger>
-									<Icon name="description" />
+									<Icon name="file-text" />
 									<Trans>Page {pageIndex + 1}</Trans>
 								</DropdownMenuSubTrigger>
 								<DropdownMenuSubContent>
@@ -339,7 +336,7 @@ function EntryMenu({ section, entry }: EntryMenuProps) {
 									))}
 									{sections.length > 0 && <DropdownMenuSeparator />}
 									<DropdownMenuItem onClick={() => move({ type: "new-section", title: sourceTitle, pageIndex })}>
-										<Icon name="add" />
+										<Icon name="plus" />
 										<Trans>New section</Trans>
 									</DropdownMenuItem>
 								</DropdownMenuSubContent>
@@ -347,14 +344,14 @@ function EntryMenu({ section, entry }: EntryMenuProps) {
 						))}
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={() => move({ type: "new-page", title: sourceTitle })}>
-							<Icon name="note_add" />
+							<Icon name="file-plus" />
 							<Trans>New page</Trans>
 						</DropdownMenuItem>
 					</DropdownMenuSubContent>
 				</DropdownMenuSub>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem variant="destructive" onClick={() => deleteEntry(section, entry.id)}>
-					<Icon name="delete" />
+					<Icon name="trash" />
 					<Trans>Delete</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

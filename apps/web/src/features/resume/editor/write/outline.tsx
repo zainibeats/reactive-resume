@@ -126,13 +126,7 @@ export function Outline({ locked, page }: OutlineProps) {
 function Divider({ label, subtle = false }: { label: React.ReactNode; subtle?: boolean }) {
 	return (
 		<div className="flex items-center gap-2 px-1 pt-2 pb-1">
-			<span
-				className={
-					subtle ? "text-[11px] text-ink-3" : "text-[11px] font-semibold tracking-[0.08em] text-ink-2 uppercase"
-				}
-			>
-				{label}
-			</span>
+			<span className={subtle ? "text-xs text-ink-3" : "text-xs font-semibold text-ink-2"}>{label}</span>
 			<span className="h-px flex-1 bg-line" />
 		</div>
 	);
@@ -168,7 +162,7 @@ function OutlineSection({ sectionId, locked, page, onMove }: OutlineSectionProps
 							onClick={() => addEntryTo(stableSection)}
 							className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-accent-text hover:bg-hover"
 						>
-							<Icon name="add" size={18} />
+							<Icon name="plus" size={18} />
 							{i18n._(ADD_LABELS[stableSection.type])}
 						</button>
 					)}

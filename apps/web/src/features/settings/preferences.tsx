@@ -13,9 +13,9 @@ import { useTheme } from "@/features/theme/provider";
 import { themeMap } from "@/libs/theme";
 
 const THEMES: Array<{ value: Theme; icon: IconName }> = [
-	{ value: "light", icon: "light_mode" },
-	{ value: "dark", icon: "dark_mode" },
-	{ value: "system", icon: "contrast" },
+	{ value: "light", icon: "sun" },
+	{ value: "dark", icon: "moon" },
+	{ value: "system", icon: "circle-half" },
 ];
 
 export function PreferencesSettings() {

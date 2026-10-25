@@ -90,7 +90,7 @@ export function DocumentMenuTrigger({ name, isLocked, ...props }: DocumentMenuTr
 			<span className="flex max-w-full min-w-0 items-center gap-1.5">
 				<span className="truncate text-sm leading-[18px] font-semibold text-ink">{name}</span>
 				{isLocked && <Icon name="lock" size={16} className="text-ink-3" />}
-				<Icon name="expand_more" size={16} className="text-ink-3" />
+				<Icon name="caret-down" size={16} className="text-ink-3" />
 			</span>
 		</button>
 	);
@@ -111,7 +111,7 @@ export function BackLink() {
 					/>
 				}
 			>
-				<Icon name="arrow_back" />
+				<Icon name="arrow-left" />
 			</TooltipTrigger>
 			<TooltipContent side="bottom">{label}</TooltipContent>
 		</Tooltip>
@@ -122,30 +122,27 @@ export function BackLink() {
 export function DrawerControls({ pinnable }: { pinnable: boolean }) {
 	const open = useEditorStore((state) => state.drawerOpen);
 	const pinned = useEditorStore((state) => state.drawerPinned) && pinnable;
-	const setOpen = useEditorStore((state) => state.setDrawerOpen);
-	const setPinned = useEditorStore((state) => state.setDrawerPinned);
 
 	return (
 		<>
 			{!pinned && (
 				<IconButton
-					icon={open ? "left_panel_close" : "left_panel_open"}
+					icon={open ? "sidebar-simple" : "sidebar-simple"}
 					label={open ? t`Hide panel` : t`Show panel`}
 					aria-expanded={open}
 					className="text-ink-2"
-					onClick={() => setOpen(!open)}
+					onClick={() => useEditorStore.setState({ drawerOpen: !open })}
 				/>
 			)}
 			{pinnable && (open || pinned) && (
 				<IconButton
-					icon="vertical_split"
+					icon="square-split-horizontal"
 					label={t`Keep the panel beside the page`}
 					aria-pressed={pinned}
 					className={cn("text-ink-2", pinned && "bg-accent-soft text-accent-text")}
 					onClick={() => {
 						// Unpinning leaves the drawer open over the page.
-						setPinned(!pinned);
-						setOpen(true);
+						useEditorStore.setState({ drawerPinned: !pinned, drawerOpen: true });
 					}}
 				/>
 			)}
@@ -167,7 +164,7 @@ export function ZoomBar({ fitScale, pageCount }: ZoomBarProps) {
 	useHotkey("Mod+0", () => setZoom("fit"));
 
 	const buttonClassName =
-		"flex size-8 items-center justify-center rounded-[7px] text-ink-2 transition-colors duration-quick hover:bg-hover disabled:text-ink-3 disabled:hover:bg-transparent";
+		"flex size-8 items-center justify-center rounded-lg text-ink-2 transition-colors duration-quick hover:bg-hover disabled:text-ink-3 disabled:hover:bg-transparent";
 
 	return (
 		<div className="absolute bottom-[18px] left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-line bg-raised p-1 shadow-e2">
@@ -178,12 +175,12 @@ export function ZoomBar({ fitScale, pageCount }: ZoomBarProps) {
 				className={buttonClassName}
 				onClick={() => setZoom(current - ZOOM_STEP)}
 			>
-				<Icon name="remove" />
+				<Icon name="minus" />
 			</button>
 			<button
 				type="button"
 				aria-label={t`Fit page to width`}
-				className="h-8 min-w-[52px] rounded-[7px] px-1.5 font-mono text-xs font-medium text-ink transition-colors duration-quick hover:bg-hover"
+				className="h-8 min-w-[52px] rounded-lg px-1.5 font-mono text-xs font-medium text-ink transition-colors duration-quick hover:bg-hover"
 				onClick={() => setZoom("fit")}
 			>
 				{zoom === "fit" ? <Trans>Fit</Trans> : `${Math.round(current * 100)}%`}
@@ -195,7 +192,7 @@ export function ZoomBar({ fitScale, pageCount }: ZoomBarProps) {
 				className={buttonClassName}
 				onClick={() => setZoom(current + ZOOM_STEP)}
 			>
-				<Icon name="add" />
+				<Icon name="plus" />
 			</button>
 			<span className="px-2 font-mono text-xs whitespace-nowrap text-ink-3">
 				<Plural value={pageCount} one="# page" other="# pages" />

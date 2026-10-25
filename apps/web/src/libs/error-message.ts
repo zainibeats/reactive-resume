@@ -1,5 +1,6 @@
 import { plural, t } from "@lingui/core/macro";
 import { ORPCError } from "@orpc/client";
+import { toast } from "@reactive-resume/ui/components/toast";
 
 export function getReadableErrorMessage(error: unknown, fallback: string): string {
 	// A font download failed (see `assertPdfFonts`).
@@ -49,16 +50,25 @@ export function getOrpcErrorMessage(
 	return options.fallback;
 }
 
+/** An error toast naming what failed; a mapped server message wins over the fallback. */
+export function toastError(
+	error: unknown,
+	fallback: string,
+	options: Omit<Parameters<typeof getOrpcErrorMessage>[1], "fallback"> = {},
+) {
+	toast.add({ type: "error", description: getOrpcErrorMessage(error, { ...options, fallback }) });
+}
+
 export function getResumeErrorMessage(error: unknown): string {
 	return getOrpcErrorMessage(error, {
 		byCode: {
-			RESUME_SLUG_ALREADY_EXISTS: "A resume with this slug already exists.",
-			RESUME_LOCKED: "This resume is locked. Unlock it first to make changes.",
-			RESUME_HAS_NO_PARENT: "This resume is not linked to a parent resume.",
-			RESUME_PARENT_NOT_FOUND: "The parent resume no longer exists.",
-			RESUME_SYNC_CONFLICT: "Some updates overlap your own edits. Select them again to replace your version.",
+			RESUME_SLUG_ALREADY_EXISTS: t`Another resume already uses this address. Choose a different one.`,
+			RESUME_LOCKED: t`This resume is locked. Unlock it to make changes.`,
+			RESUME_HAS_NO_PARENT: t`This resume isn't linked to a parent resume.`,
+			RESUME_PARENT_NOT_FOUND: t`The parent resume no longer exists.`,
+			RESUME_SYNC_CONFLICT: t`Some updates overlap your own edits. Select them again to replace your version.`,
 		},
-		fallback: "Something went wrong. Please try again.",
+		fallback: t`Couldn't update the resume. Try again.`,
 	});
 }
 

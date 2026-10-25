@@ -83,7 +83,7 @@ export function DesignPanel() {
 						key={group.id}
 						type="button"
 						onClick={() => jumpTo(`design-${group.id}`, advanced)}
-						className="h-8 shrink-0 rounded-full px-3 text-[13px] text-ink-2 transition-colors duration-quick hover:bg-hover hover:text-ink"
+						className="h-8 shrink-0 rounded-sm px-3 text-[13px] text-ink-2 transition-colors duration-quick hover:bg-hover hover:text-ink"
 					>
 						{group.label()}
 					</button>
@@ -137,7 +137,7 @@ export function DesignSheet() {
 				onClick={() => setExpanded(!expanded)}
 				className="flex h-6 shrink-0 items-center justify-center"
 			>
-				<span className="h-1 w-9 rounded-full bg-line-2" />
+				<span className="h-1 w-9 rounded-sm bg-line-2" />
 			</button>
 
 			<Tabs value={tab} onValueChange={(value) => setTab(value as SheetTab)} className="min-h-0 flex-1 gap-0">
@@ -234,7 +234,7 @@ function AdvancedGroup({ open, onOpenChange }: AdvancedGroupProps) {
 			<CollapsibleTrigger className="group/advanced flex w-full cursor-pointer items-center justify-between text-start text-[15px] font-semibold">
 				<Trans>Advanced</Trans>
 				<Icon
-					name="expand_more"
+					name="caret-down"
 					className="text-ink-2 transition-transform duration-standard ease-enter group-data-panel-open/advanced:rotate-180"
 				/>
 			</CollapsibleTrigger>
@@ -280,7 +280,7 @@ function AdvancedGroup({ open, onOpenChange }: AdvancedGroupProps) {
 					))}
 
 					<Button variant="secondary" className="w-fit" onClick={reset}>
-						<Icon name="restart_alt" size={18} />
+						<Icon name="arrow-counter-clockwise" size={18} />
 						<Trans>Reset design defaults</Trans>
 					</Button>
 				</div>

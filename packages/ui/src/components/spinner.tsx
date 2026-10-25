@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { Icon } from "@reactive-resume/ui/components/icon";
 import { cn } from "@reactive-resume/utils/style";
 
 type SpinnerProps = React.ComponentProps<"span"> & {
@@ -6,22 +7,20 @@ type SpinnerProps = React.ComponentProps<"span"> & {
 	decorative?: boolean;
 };
 
-/** A 14px ring with one transparent side. Pair it with text that says what's happening. */
+/**
+ * The app's one loader: a 14px circle-notch turning once a second. Size it with `size-*`; it takes the text color.
+ * It keeps turning under reduced motion (globals.css exempts it), because a frozen loader looks like a hung app.
+ * Pair it with text that says what's happening.
+ */
 function Spinner({ className, decorative = false, ...props }: SpinnerProps) {
 	const semantics = decorative
 		? ({ "aria-hidden": true } as const)
 		: ({ role: "status", "aria-label": "Loading" } as const);
 
 	return (
-		<span
-			{...semantics}
-			data-slot="spinner"
-			className={cn(
-				"inline-block size-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-e-transparent [animation-duration:0.8s]",
-				className,
-			)}
-			{...props}
-		/>
+		<span {...semantics} data-slot="spinner" className={cn("inline-flex size-3.5 shrink-0", className)} {...props}>
+			<Icon name="circle-notch" className="size-full animate-spin" />
+		</span>
 	);
 }
 

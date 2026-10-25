@@ -65,6 +65,7 @@ function EntryView({ type, entry }: { type: string; entry: Entry }) {
 	const keywords = Array.isArray(entry.keywords) ? (entry.keywords as string[]).filter(Boolean) : [];
 	const html = text(entry, "content") || text(entry, "description");
 	const phone = type === "references" ? text(entry, "phone") : "";
+	const recipient = type === "cover-letter" ? text(entry, "recipient") : "";
 
 	return (
 		<article className="grid gap-0.5">
@@ -83,6 +84,7 @@ function EntryView({ type, entry }: { type: string; entry: Entry }) {
 					{phone}
 				</a>
 			)}
+			{recipient && <RichText html={recipient} className={RICH} />}
 			{html && <RichText html={html} className={cn(RICH, "mt-1")} />}
 			{roles.map((role) => (
 				<div key={role.id} className="mt-1.5 grid gap-0.5">
@@ -101,18 +103,18 @@ const SAFE_HREF = /^(https?:|mailto:|tel:)/i;
 
 function contactPills(basics: ResumeData["basics"]): ContactPill[] {
 	const pills: ContactPill[] = [];
-	if (basics.email) pills.push({ icon: "mail", label: basics.email, href: `mailto:${basics.email}` });
-	if (basics.phone) pills.push({ icon: "call", label: basics.phone, href: `tel:${basics.phone.replace(/\s+/g, "")}` });
+	if (basics.email) pills.push({ icon: "envelope-simple", label: basics.email, href: `mailto:${basics.email}` });
+	if (basics.phone) pills.push({ icon: "phone", label: basics.phone, href: `tel:${basics.phone.replace(/\s+/g, "")}` });
 	if (basics.website.url)
 		pills.push({
-			icon: "language",
+			icon: "globe",
 			label: basics.website.label || basics.website.url.replace(/^https?:\/\//, ""),
 			...(SAFE_HREF.test(basics.website.url) ? { href: basics.website.url } : {}),
 		});
 	for (const field of basics.customFields)
 		if (field.text)
 			pills.push({
-				icon: "link",
+				icon: "link-simple-horizontal",
 				label: field.text,
 				...(SAFE_HREF.test(field.link) ? { href: field.link } : {}),
 			});
@@ -152,7 +154,7 @@ export function ResumeReflow({ data }: ResumeReflowProps) {
 							<li key={`${index}:${pill.label}`}>
 								<Tag
 									href={pill.href}
-									className="flex h-9 items-center gap-1.5 rounded-full border border-[#ddd] px-3 text-[14px]"
+									className="flex h-9 items-center gap-1.5 rounded-sm border border-[#ddd] px-3 text-[14px]"
 									{...(pill.href?.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer nofollow" } : {})}
 								>
 									<Icon name={pill.icon} size={18} />

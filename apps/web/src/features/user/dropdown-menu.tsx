@@ -20,6 +20,7 @@ import {
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { useTheme } from "@/features/theme/provider";
+import { clearAccountData } from "@/libs/auth/clear-account-data";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { changeLocale, localeMap } from "@/libs/locale";
@@ -48,7 +49,7 @@ export function UserDropdownMenu({ children }: Props) {
 			fetchOptions: {
 				onSuccess: () => {
 					toast.close(toastId);
-					queryClient.clear();
+					clearAccountData(queryClient);
 					void router.invalidate();
 				},
 				onError: ({ error }) => {
@@ -58,7 +59,7 @@ export function UserDropdownMenu({ children }: Props) {
 							error,
 							t({
 								comment: "Fallback toast when signing out fails",
-								message: "Failed to sign out. Please try again.",
+								message: "Couldn't sign out. Try again.",
 							}),
 						),
 						id: toastId,
@@ -76,7 +77,7 @@ export function UserDropdownMenu({ children }: Props) {
 
 			<DropdownMenuContent align="start" side="top">
 				<DropdownMenuItem onClick={() => void router.navigate({ to: "/dashboard/settings" })}>
-					<Icon name="settings" />
+					<Icon name="gear-six" />
 					<Trans>Settings</Trans>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -121,7 +122,7 @@ export function UserDropdownMenu({ children }: Props) {
 				<DropdownMenuSeparator />
 
 				<DropdownMenuItem onClick={handleLogout}>
-					<Icon name="logout" size={16} />
+					<Icon name="sign-out" size={16} />
 					<Trans comment="User menu action to sign out of current account">Sign out</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

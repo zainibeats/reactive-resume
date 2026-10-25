@@ -37,7 +37,7 @@ export function ResumesCommandGroup() {
 		<>
 			<BaseCommandGroup heading={<Trans>Search for…</Trans>}>
 				<CommandItem keywords={[t`Resumes`]} value="search.resumes" onSelect={() => pushPage("resumes")}>
-					<Icon name="description" size={16} />
+					<Icon name="file-text" size={16} />
 					<Trans>Resumes</Trans>
 				</CommandItem>
 
@@ -46,7 +46,7 @@ export function ResumesCommandGroup() {
 					value="search.threads"
 					onSelect={() => pushPage("threads")}
 				>
-					<Icon name="chat" size={16} />
+					<Icon name="chat-text" size={16} />
 					<Trans>Assistant conversations</Trans>
 				</CommandItem>
 			</BaseCommandGroup>
@@ -80,7 +80,7 @@ function ResumesPage({ page }: SearchPageProps) {
 	return (
 		<BaseCommandGroup page={page} heading={<Trans>Resumes</Trans>}>
 			<CommandItem value="resumes.create" onSelect={onCreate}>
-				<Icon name="add" size={16} />
+				<Icon name="plus" size={16} />
 				<Trans>Create a new resume</Trans>
 			</CommandItem>
 
@@ -96,7 +96,7 @@ function ResumesPage({ page }: SearchPageProps) {
 						keywords={[resume.name, resume.slug]}
 						onSelect={() => onNavigate(`/builder/${resume.id}`)}
 					>
-						<Icon name="description" size={16} />
+						<Icon name="file-text" size={16} />
 						{resume.name}
 
 						<CommandShortcut className="opacity-0 group-data-[selected=true]/command-item:opacity-100">
@@ -146,7 +146,7 @@ function ThreadsPage({ page }: SearchPageProps) {
 							keywords={[thread.title, documentName]}
 							onSelect={() => onOpenThread(thread)}
 						>
-							<Icon name="chat" size={16} />
+							<Icon name="chat-text" size={16} />
 							<span className="min-w-0 truncate">{thread.title}</span>
 							<span className="truncate text-xs text-ink-3">{documentName}</span>
 						</CommandItem>

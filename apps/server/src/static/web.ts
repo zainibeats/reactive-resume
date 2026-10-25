@@ -156,31 +156,30 @@ function getFallbackResponseHeaders(pathname: string) {
 	return null;
 }
 
-function notFoundResponse(options: { head?: boolean; noindex?: boolean } = {}) {
-	const headers = new Headers({ "Content-Type": "text/plain; charset=UTF-8" });
-	if (options.noindex) headers.set("X-Robots-Tag", "noindex, nofollow");
-
-	return new Response(options.head ? null : "Not Found", {
-		status: 404,
-		headers,
-	});
-}
+const withMeta = (html: string, meta: { title: string; description: string }) =>
+	html
+		.replace(/<title>[^<]*<\/title>/, () => `<title>${meta.title}</title>`)
+		.replace(/<meta\s+name="description"[^>]*>/, () => `<meta name="description" content="${meta.description}">`);
 
 // ponytail: GET and HEAD share the same routing logic; method determines body presence
 export type ReadWebFile = (path: string) => Promise<string>;
 
 export async function handleWebApp(request: Request, readFile: ReadWebFile = (path) => fs.readFile(path, "utf-8")) {
-	const isHead = request.method === "HEAD";
 	const pathname = new URL(request.url).pathname;
 
 	if (!isNoindexShellPath(pathname) && isAssetPath(pathname)) {
-		return new Response(isHead ? null : "Not Found", { status: 404 });
+		return new Response("Not Found", { status: 404 });
 	}
 
 	const headers = getFallbackResponseHeaders(pathname);
-	if (!headers) return notFoundResponse({ head: isHead, noindex: true });
+	if (!headers)
+		return new Response("Not Found", {
+			status: 404,
+			headers: { "Content-Type": "text/plain; charset=UTF-8", "X-Robots-Tag": "noindex, nofollow" },
+		});
 
-	if (isHead) return new Response(null, { status: 200, headers });
+	// Hono drops HEAD bodies itself; returning early skips reading the shell and a public resume's DB lookup.
+	if (request.method === "HEAD") return new Response(null, { status: 200, headers });
 
 	const html = await readFile(indexHtmlPath);
 
@@ -188,9 +187,7 @@ export async function handleWebApp(request: Request, readFile: ReadWebFile = (pa
 		const canonicalUrl = new URL("/", env.APP_URL).toString();
 		// Root configuration never discloses a target in the HTML shell. The public API
 		// gates data and browser metadata; shell requests must not count extra views.
-		const shell = html
-			.replace(/<title>[^<]*<\/title>/, "<title>Reactive Resume</title>")
-			.replace(/<meta\s+name="description"[^>]*>/, '<meta name="description" content="">');
+		const shell = withMeta(html, { title: "Reactive Resume", description: "" });
 		const markup = `<link rel="canonical" href="${escapeAttribute(canonicalUrl)}" data-root-resume-shell><meta name="robots" content="noindex, follow" data-root-resume-shell>`;
 		return htmlResponse(
 			shell.replace("</head>", () => `${markup}</head>`),

@@ -72,7 +72,7 @@ export async function verifyOAuthToken(token: string): Promise<JWTPayload> {
 				),
 			)
 			.limit(1);
-		if (!session) throw new APIError("UNAUTHORIZED", { message: "OAuth session has ended." });
+		if (!session) throw new APIError("UNAUTHORIZED", { message: "OAuth session has ended. Sign in again." });
 	}
 	const [consent] = await db
 		.select()

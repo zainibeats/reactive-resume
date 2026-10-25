@@ -1,7 +1,7 @@
 import type { DocumentSummary } from "./filter";
-import { t } from "@lingui/core/macro";
+import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
-import { Trans } from "@lingui/react/macro";
+import { Plural, Trans } from "@lingui/react/macro";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Checkbox } from "@reactive-resume/ui/components/checkbox";
@@ -34,7 +34,8 @@ export type DocumentItemProps = {
 function useDocumentMeta(document: DocumentSummary) {
 	const { i18n } = useLingui();
 	const type = t`Resume`;
-	if (document.trashedAt) return t`${type} · ${daysLeftInTrash(document.trashedAt)} days left`;
+	if (document.trashedAt)
+		return plural(daysLeftInTrash(document.trashedAt), { one: `${type} · # day left`, other: `${type} · # days left` });
 	return t`${type} · Edited ${formatRelativeTime(document.updatedAt, i18n.locale)}`;
 }
 
@@ -155,7 +156,7 @@ export function DocumentCard({
 						label={document.name}
 						onSelect={selecting && onSelectedChange ? () => onSelectedChange(!selected) : undefined}
 						className={cn(
-							"relative block aspect-page overflow-hidden rounded-[6px] shadow-[0_0_0_1px_var(--line),var(--shadow-1)] transition-[translate,scale,box-shadow] duration-quick ease-enter hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--line),var(--shadow-2)] active:scale-[0.98]",
+							"relative block aspect-page overflow-hidden rounded-md shadow-[0_0_0_1px_var(--line),var(--shadow-1)] transition-[translate,scale,box-shadow] duration-quick ease-enter hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--line),var(--shadow-2)] active:scale-[0.98]",
 							(isNew || selected) &&
 								"shadow-[0_0_0_2px_var(--accent),var(--shadow-1)] hover:shadow-[0_0_0_2px_var(--accent),var(--shadow-2)] starting:shadow-[0_0_0_2px_transparent,var(--shadow-1)]",
 							document.trashedAt && "pointer-events-none",
@@ -197,7 +198,7 @@ export function DocumentCard({
 						<DropdownMenuTrigger
 							render={
 								<IconButton
-									icon="more_horiz"
+									icon="dots-three"
 									size="icon-sm"
 									label={t`Options for ${document.name}`}
 									className="text-ink-2"
@@ -248,7 +249,7 @@ export function DocumentRow({ document, onTags, introIndex, selected = false, on
 				)}
 				<td className="py-3 ps-3 pe-2">
 					<span className="flex min-w-0 items-center gap-2.5">
-						<Icon name="description" className="shrink-0 text-ink-2" />
+						<Icon name="file-text" className="shrink-0 text-ink-2" />
 						{renaming ? (
 							<RenameInput document={document} onDone={() => setRenaming(false)} />
 						) : (
@@ -269,7 +270,7 @@ export function DocumentRow({ document, onTags, introIndex, selected = false, on
 				</td>
 				<td className="px-2 text-sm whitespace-nowrap text-ink-3">
 					{document.trashedAt ? (
-						<Trans>{daysLeftInTrash(document.trashedAt)} days left</Trans>
+						<Plural value={daysLeftInTrash(document.trashedAt)} one="# day left" other="# days left" />
 					) : (
 						formatRelativeTime(document.updatedAt, i18n.locale)
 					)}
@@ -279,7 +280,7 @@ export function DocumentRow({ document, onTags, introIndex, selected = false, on
 						<DropdownMenuTrigger
 							render={
 								<IconButton
-									icon="more_horiz"
+									icon="dots-three"
 									size="icon-sm"
 									label={t`Options for ${document.name}`}
 									className="text-ink-2"

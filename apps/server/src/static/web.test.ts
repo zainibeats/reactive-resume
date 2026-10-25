@@ -197,7 +197,7 @@ describe("web app fallback classification", () => {
 		expect(unknownResponse.status).toBe(404);
 		expect(unknownResponse.headers.get("Content-Type")).toBe("text/plain; charset=UTF-8");
 		expect(unknownResponse.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
-		expect(await unknownResponse.text()).toBe("");
+		// Hono drops HEAD bodies itself, so the 404's body never reaches the client.
 	});
 });
 

@@ -202,7 +202,7 @@ export function BuilderParentUpdates({ resumeId }: BuilderParentUpdatesProps) {
 				className="relative"
 				onClick={() => setOpen(true)}
 			>
-				<Icon name="sync" />
+				<Icon name="arrows-clockwise" />
 				<span className="absolute -end-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-accent text-[10px] font-medium text-on-accent">
 					{status.operationCount}
 				</span>
@@ -212,7 +212,7 @@ export function BuilderParentUpdates({ resumeId }: BuilderParentUpdatesProps) {
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-x-2">
-							<Icon name="sync" size={16} />
+							<Icon name="arrows-clockwise" size={16} />
 							<Trans>Parent updates</Trans>
 						</DialogTitle>
 						<DialogDescription>

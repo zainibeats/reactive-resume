@@ -13,7 +13,7 @@ export function NotFoundScreen() {
 			<Alert>
 				<Icon name="warning" size={16} />
 				<AlertTitle>
-					<Trans>We couldn't find that page</Trans>
+					<Trans>Page not found</Trans>
 				</AlertTitle>
 				<AlertDescription>
 					<Trans>The page you're looking for may have been moved or no longer exists.</Trans>
@@ -22,12 +22,12 @@ export function NotFoundScreen() {
 
 			<div className="flex items-center gap-x-2">
 				<Link to="/dashboard" className={buttonVariants()}>
-					<Icon name="search" size={16} />
+					<Icon name="magnifying-glass" size={16} />
 					<Trans>Go to dashboard</Trans>
 				</Link>
 
 				<Link to="/" className={buttonVariants({ variant: "secondary" })}>
-					<Icon name="home" size={16} />
+					<Icon name="house" size={16} />
 					<Trans>Go home</Trans>
 				</Link>
 			</div>

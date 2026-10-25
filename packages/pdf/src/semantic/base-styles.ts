@@ -2,7 +2,9 @@ import type { ResolvedNodeStyle, SemanticNode } from "@reactive-resume/resume/st
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import { resolveBoldFontWeight } from "@reactive-resume/fonts";
+import { findSection } from "../section-title";
 import { resolveMainEntryBoldWeight } from "../templates/shared/base-template-styles";
+import { getTemplatePageSize } from "../templates/shared/page-size";
 
 export type BuildPdfBaseStylesInput = {
 	data: ResumeData;
@@ -42,12 +44,8 @@ type SectionWithItems = SectionBreaks & {
 	items?: readonly { id: string; mainEntryBold?: boolean | undefined }[] | undefined;
 };
 
-const resolveSection = (data: ResumeData, id: string | undefined): SectionWithItems | undefined => {
-	if (!id) return undefined;
-	if (id === "summary") return data.summary;
-	if (id in data.sections) return data.sections[id as keyof typeof data.sections];
-	return data.customSections.find((section) => section.id === id);
-};
+const resolveSection = (data: ResumeData, id: string | undefined): SectionWithItems | undefined =>
+	id ? findSection(data, id) : undefined;
 
 /**
  * Heading fields that carry the per-item "Bold" toggle (`mainEntryBold`), by section type.
@@ -77,12 +75,6 @@ const isMainEntryBoldField = (node: SemanticNode, context: ItemContext): boolean
 const isMainEntryBold = (data: ResumeData, context: ItemContext): boolean => {
 	const items = resolveSection(data, context.sectionId)?.items;
 	return items?.find((item) => item.id === context.itemId)?.mainEntryBold ?? false;
-};
-
-const pageSize = (format: ResumeData["metadata"]["page"]["format"]) => {
-	if (format === "letter") return "LETTER" as const;
-	if (format === "free-form") return { width: 595.28 };
-	return "A4" as const;
 };
 
 export function buildPdfBaseStyles({
@@ -119,7 +111,7 @@ export function buildPdfBaseStyles({
 			style["font-size"] = body.fontSize;
 			style["font-weight"] = bodyWeight;
 			style["line-height"] = body.lineHeight;
-			structural.pageSize = pageSize(data.metadata.page.format);
+			structural.pageSize = getTemplatePageSize(data.metadata.page.format);
 		}
 
 		if (textKinds.has(node.kind)) {

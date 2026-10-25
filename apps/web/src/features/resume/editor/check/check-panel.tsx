@@ -28,6 +28,7 @@ import { getCategoryDescription, getCategoryName } from "./issues";
 import { JobMatchTab, useJobMatch } from "./job-match";
 import { useCheck } from "./use-check";
 import { WritingTab } from "./writing-tab";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { AtsPdfReportView } from "@/features/ats-checker/report/report-view";
 import { blobToPdfFile, runAtsCheck } from "@/features/ats-checker/run-ats-check";
 import { useIsResumeLocked } from "@/features/resume/builder/draft";
@@ -40,7 +41,6 @@ import { createResumePdfBlob } from "@/features/resume/export/pdf-document";
 export function CheckPanel() {
 	const check = useCheck();
 	const tab = useEditorStore((state) => state.checkTab);
-	const setTab = useEditorStore((state) => state.setCheckTab);
 	const match = useJobMatch(check?.data);
 
 	if (!check) return null;
@@ -49,7 +49,11 @@ export function CheckPanel() {
 		<div className="grid content-start gap-3.5 p-4 pb-12">
 			<ScoreSummary report={check.report} />
 
-			<Tabs value={tab} onValueChange={(value) => setTab(value as CheckTab)} className="gap-3.5">
+			<Tabs
+				value={tab}
+				onValueChange={(value) => useEditorStore.setState({ checkTab: value as CheckTab })}
+				className="gap-3.5"
+			>
 				<TabsList aria-label={t`Check views`} className="h-[38px] w-full">
 					<TabsTrigger value="issues" className="gap-1.5">
 						<Trans>Issues</Trans>
@@ -104,7 +108,7 @@ function ScoreSummary({ report }: { report: AtsReport }) {
 				}
 			>
 				<span className="grid size-[70px] place-items-center rounded-full bg-surface font-display text-[26px] font-medium">
-					{score}
+					<RollingNumber value={score} />
 				</span>
 			</div>
 
@@ -121,7 +125,7 @@ function ScoreSummary({ report }: { report: AtsReport }) {
 					)}
 				</span>
 				<span className="flex items-center gap-1 text-xs text-ink-3">
-					<Icon name="bolt" size={14} />
+					<Icon name="lightning" size={14} />
 					<Trans>Live · updates as you edit</Trans>
 				</span>
 			</div>
@@ -139,7 +143,7 @@ function IssuesTab({ check }: { check: CheckResult }) {
 		<div className="grid gap-2.5">
 			{issues.length === 0 ? (
 				<div className="flex gap-2.5 rounded-xl bg-accent-soft p-3 text-[13px] leading-[19px] text-accent-text">
-					<Icon name="check_circle" />
+					<Icon name="check-circle" />
 					<p>
 						<Trans>
 							<strong>Nothing to fix.</strong> Every check passes.
@@ -185,7 +189,6 @@ type IssueCardProps = { issue: CheckIssue; selected: boolean; locked: boolean };
 /** A numbered card: category, title, a plain explanation, the fix, Show on page and Ignore (or Keep). */
 function IssueCard({ issue, selected, locked }: IssueCardProps) {
 	const { fix, ignore, showOnPage } = useCheckActions();
-	const setCheckIssue = useEditorStore((state) => state.setCheckIssue);
 	const titleId = `issue-${issue.number}-title`;
 	const applies = issue.fix.kind === "apply";
 
@@ -195,7 +198,7 @@ function IssueCard({ issue, selected, locked }: IssueCardProps) {
 		<li
 			data-issue-card={issue.key}
 			aria-labelledby={titleId}
-			onClick={() => setCheckIssue(issue.key)}
+			onClick={() => useEditorStore.setState({ checkIssue: issue.key })}
 			className={cn(
 				"grid cursor-pointer gap-2.5 rounded-xl border bg-surface p-3.5 transition-[border-color,box-shadow] duration-standard",
 				selected ? "border-warn shadow-e2" : "border-line",
@@ -204,12 +207,12 @@ function IssueCard({ issue, selected, locked }: IssueCardProps) {
 			<div className="flex items-start gap-2.5">
 				<span
 					aria-hidden="true"
-					className="grid size-[22px] shrink-0 place-items-center rounded-full bg-warn text-[12px] font-bold text-[oklch(0.22_0.03_80)]"
+					className="grid size-[22px] shrink-0 place-items-center rounded-sm bg-warn text-[12px] font-bold text-[oklch(0.22_0.03_80)]"
 				>
 					{issue.number}
 				</span>
 				<div className="grid min-w-0 gap-[3px]">
-					<span className="font-mono text-[11px] text-ink-3 uppercase">{getCategoryName(issue.category)}</span>
+					<span className="font-mono text-xs text-ink-3">{getCategoryName(issue.category)}</span>
 					<h3 id={titleId} className="text-sm leading-5 font-semibold">
 						<span className="sr-only">
 							<Trans>Issue {issue.number}:</Trans>{" "}
@@ -231,7 +234,11 @@ function IssueCard({ issue, selected, locked }: IssueCardProps) {
 						fix(issue);
 					}}
 				>
-					{issue.fix.kind === "apply" ? <Icon name={issue.fix.icon} size={16} /> : <Icon name="edit" size={16} />}
+					{issue.fix.kind === "apply" ? (
+						<Icon name={issue.fix.icon} size={16} />
+					) : (
+						<Icon name="pencil-simple" size={16} />
+					)}
 					{issue.fix.label}
 				</Button>
 				{issue.target && (
@@ -289,7 +296,7 @@ function CategoryRows({ report }: { report: AtsReport }) {
 								className="flex h-12 w-full items-center gap-2.5 px-3 text-start text-sm font-medium transition-colors duration-quick hover:bg-hover"
 							>
 								<Icon
-									name={failing > 0 ? "error" : "check_circle"}
+									name={failing > 0 ? "warning-circle" : "check-circle"}
 									className={failing > 0 ? "text-warn-text" : "text-accent-text"}
 								/>
 								{getCategoryName(category)}
@@ -303,7 +310,7 @@ function CategoryRows({ report }: { report: AtsReport }) {
 									)}
 								</span>
 								<Icon
-									name="expand_more"
+									name="caret-down"
 									className={cn(
 										"ms-auto text-ink-3 transition-transform duration-standard ease-enter",
 										open && "rotate-180",
@@ -343,8 +350,6 @@ function DeepCheck({ data }: { data: ResumeData }) {
 	const [running, setRunning] = useState(false);
 	const report = useEditorStore((state) => state.exportCheck?.report ?? null);
 	const reportOpen = useEditorStore((state) => state.exportReportOpen);
-	const setExportCheck = useEditorStore((state) => state.setExportCheck);
-	const setReportOpen = useEditorStore((state) => state.setExportReportOpen);
 
 	const run = async () => {
 		setRunning(true);
@@ -356,14 +361,14 @@ function DeepCheck({ data }: { data: ResumeData }) {
 		}
 
 		const problems = result.report.findings.length;
-		setExportCheck({ report: result.report, data });
+		useEditorStore.setState({ exportCheck: { report: result.report, data } });
 
 		toast.add(
 			problems === 0
 				? { description: t`Exported PDF checked: it reads cleanly too.` }
 				: {
 						description: t`Exported PDF checked: ${problems} more to look at.`,
-						actionProps: { children: t`Show`, onClick: () => setReportOpen(true) },
+						actionProps: { children: t`Show`, onClick: () => useEditorStore.setState({ exportReportOpen: true }) },
 					},
 		);
 	};
@@ -371,11 +376,14 @@ function DeepCheck({ data }: { data: ResumeData }) {
 	return (
 		<>
 			<Button variant="ghost" size="sm" className="w-fit text-ink-2" disabled={running} onClick={() => void run()}>
-				{running ? <Spinner /> : <Icon name="picture_as_pdf" size={18} />}
+				{running ? <Spinner /> : <Icon name="file-pdf" size={18} />}
 				{running ? <Trans>Checking the exported PDF…</Trans> : <Trans>Also check the exported PDF</Trans>}
 			</Button>
 
-			<Dialog open={reportOpen && report !== null} onOpenChange={setReportOpen}>
+			<Dialog
+				open={reportOpen && report !== null}
+				onOpenChange={(open) => useEditorStore.setState({ exportReportOpen: open })}
+			>
 				<DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-2xl">
 					<DialogHeader>
 						<DialogTitle>

@@ -1,19 +1,20 @@
 import type { ImportKind } from "@/features/resume/import/read-file";
 import type { IconName } from "@reactive-resume/ui/components/icon";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
-import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { plural, t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
+import { Plural, Trans } from "@lingui/react/macro";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { DialogContent, DialogHeader, DialogTitle } from "@reactive-resume/ui/components/dialog";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { Spinner } from "@reactive-resume/ui/components/spinner";
-import { toast } from "@reactive-resume/ui/components/toast";
-import { generateRandomName } from "@reactive-resume/utils/string";
+import { formatFileSize } from "@reactive-resume/utils/file";
 import { cn } from "@reactive-resume/utils/style";
 import { useNewDocumentsStore } from "./new-documents";
+import { useStartDocument } from "./use-start-document";
 import { useDialogStore } from "@/dialogs/store";
 import { detectImportKind, ImportError, readResumeFile, summarizeImport } from "@/features/resume/import/read-file";
 import { useHasUsableAiProvider } from "@/features/settings/integrations/hooks/use-has-usable-ai-provider";
@@ -33,9 +34,6 @@ type Step =
 	| { name: "failed"; file: File; message: string };
 
 const ACCEPT = ".pdf,.docx,.json,.zip,application/pdf,application/json,application/zip";
-
-const formatSize = (bytes: number) =>
-	bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
 function requireImportKind(kind: ImportKind | null): ImportKind {
 	if (!kind) {
@@ -76,7 +74,7 @@ function useResumeImport(setStep: Dispatch<SetStateAction<Step>>) {
 			if (!current()) return;
 			const summary = summarizeImport(resume);
 			advance(1, t`file read`);
-			advance(2, t`${summary.sections} sections`);
+			advance(2, plural(summary.sections, { one: "# section", other: "# sections" }));
 
 			const resumeId = await client.resume.import({ data: resume });
 			if (!current()) return;
@@ -93,7 +91,7 @@ function useResumeImport(setStep: Dispatch<SetStateAction<Step>>) {
 								BAD_REQUEST: t`The file couldn't be read as a resume.`,
 								BAD_GATEWAY: t`Couldn't reach the AI provider. Try again in a moment.`,
 							},
-							fallback: t`Something went wrong while importing. Try again, or start blank.`,
+							fallback: t`Couldn't import the file. Try again, or start blank.`,
 						});
 			setStep({ name: "failed", file, message });
 		}
@@ -140,7 +138,7 @@ export function NewDocumentDialog({ data }: NewDocumentDialogProps) {
 	const chooseFile = () => inputRef.current?.click();
 
 	return (
-		<DialogContent className="sm:max-w-[640px]">
+		<DialogContent closeLabel={t`Close`} className="sm:max-w-[640px]">
 			<input
 				ref={inputRef}
 				type="file"
@@ -184,8 +182,8 @@ export function NewDocumentDialog({ data }: NewDocumentDialogProps) {
 						}}
 						className="flex items-start gap-4 rounded-xl border-[1.5px] border-dashed border-line-2 p-5 text-start transition-[background-color,border-color,scale] duration-quick ease-enter hover:border-accent hover:bg-accent-soft active:scale-[0.98]"
 					>
-						<span className="grid size-11 shrink-0 place-items-center rounded-[10px] bg-sunken text-ink-2">
-							<Icon name="upload_file" size={24} />
+						<span className="grid size-11 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2">
+							<Icon name="file-arrow-up" size={24} />
 						</span>
 						<span className="grid gap-1">
 							<span className="text-[15px] font-semibold">
@@ -201,7 +199,7 @@ export function NewDocumentDialog({ data }: NewDocumentDialogProps) {
 					</button>
 
 					<ChoiceTile
-						icon="note_add"
+						icon="file-plus"
 						title={t`Start blank`}
 						description={t`Opens the editor on your name. Nothing else to fill in first.`}
 						disabled={creating}
@@ -236,6 +234,7 @@ type ImportStepProps = {
 
 /** The import's progress, then its outcome: found counts with Open in editor, or the error with a way forward. */
 function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onClose, onOpen }: ImportStepProps) {
+	const { i18n } = useLingui();
 	return (
 		<div className={cn(ENTER_CLASS, "grid gap-4")}>
 			<DialogHeader>
@@ -249,14 +248,11 @@ function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onCl
 					)}
 				</DialogTitle>
 			</DialogHeader>
-			<div className="flex items-center gap-3 rounded-[10px] border border-line p-3">
-				<Icon
-					name={step.file.name.toLowerCase().endsWith(".pdf") ? "picture_as_pdf" : "description"}
-					className="text-ink-2"
-				/>
+			<div className="flex items-center gap-3 rounded-lg border border-line p-3">
+				<Icon name={step.file.name.toLowerCase().endsWith(".pdf") ? "file-pdf" : "file-text"} className="text-ink-2" />
 				<span className="grid min-w-0 flex-1">
 					<span className="truncate text-sm font-medium">{step.file.name}</span>
-					<span className="text-xs text-ink-3">{formatSize(step.file.size)}</span>
+					<span className="text-xs text-ink-3">{formatFileSize(step.file.size, i18n.locale)}</span>
 				</span>
 				{step.name === "importing" && (
 					<Button variant="ghost" size="sm" onClick={onCancel}>
@@ -271,7 +267,11 @@ function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onCl
 					stage={step.name === "imported" ? 3 : step.stage}
 					notes={
 						step.name === "imported"
-							? [t`file read`, t`${step.sections} sections`, t`${step.entries} entries`]
+							? [
+									t`file read`,
+									plural(step.sections, { one: "# section", other: "# sections" }),
+									plural(step.entries, { one: "# entry", other: "# entries" }),
+								]
 							: step.notes
 					}
 				/>
@@ -283,10 +283,10 @@ function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onCl
 						role="alert"
 						className={cn(
 							ENTER_CLASS,
-							"flex gap-2.5 rounded-[10px] bg-danger-soft p-3 text-[13px] leading-[19px] text-danger-text",
+							"flex gap-2.5 rounded-lg bg-danger-soft p-3 text-[13px] leading-[19px] text-danger-text",
 						)}
 					>
-						<Icon name="error" size={20} />
+						<Icon name="warning-circle" size={20} />
 						<span>{step.message}</span>
 					</div>
 					<div className={cn(ENTER_CLASS, "flex flex-wrap justify-end gap-2")}>
@@ -304,15 +304,22 @@ function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onCl
 				<>
 					<p role="status" className={cn(ENTER_CLASS, "flex gap-2 text-[13px] leading-[19px]")}>
 						<Icon
-							name="check_circle"
+							name="check-circle"
 							size={20}
 							className="text-accent-text transition-[opacity,scale] duration-standard ease-enter starting:scale-80 starting:opacity-0"
 						/>
 						<span>
 							<Trans>
-								{step.sections} sections and {step.entries} entries found.
+								Found <Plural value={step.sections} one="# section" other="# sections" /> and{" "}
+								<Plural value={step.entries} one="# entry" other="# entries" />.
 							</Trans>{" "}
-							{step.flagged > 0 && <Trans>{step.flagged} fields are flagged for a quick look in the editor.</Trans>}
+							{step.flagged > 0 && (
+								<Plural
+									value={step.flagged}
+									one="# field is flagged for a quick look in the editor."
+									other="# fields are flagged for a quick look in the editor."
+								/>
+							)}
 						</span>
 					</p>
 					<div className={cn(ENTER_CLASS, "flex flex-wrap justify-end gap-2")}>
@@ -327,54 +334,6 @@ function ImportStep({ step, creating, onCancel, onStartBlank, onChooseFile, onCl
 			)}
 		</div>
 	);
-}
-
-/** Start blank or try a sample: each creates the resume at once and opens it. */
-export function useStartDocument() {
-	const navigate = useNavigate();
-	const queryClient = useQueryClient();
-	const closeDialog = useDialogStore((state) => state.closeDialog);
-	const markNew = useNewDocumentsStore((state) => state.markNew);
-	const { mutateAsync: createResume, isPending: creating } = useMutation(orpc.resume.create.mutationOptions());
-
-	const created = (id: string) => {
-		markNew(id);
-		void queryClient.invalidateQueries({ queryKey: orpc.documents.key() });
-		closeDialog();
-	};
-	const failed = (error: unknown) =>
-		toast.add({
-			type: "error",
-			description: getOrpcErrorMessage(error, { fallback: t`Couldn't create the document.` }),
-		});
-
-	return {
-		creating,
-		startBlank: async () => {
-			try {
-				const resumeId = await createResume({
-					name: t`Untitled resume`,
-					tags: [],
-					autoName: true,
-					withSampleData: false,
-				});
-				created(resumeId);
-				void navigate({ to: "/builder/$resumeId", params: { resumeId } });
-			} catch (error) {
-				failed(error);
-			}
-		},
-		trySample: async () => {
-			try {
-				const resumeId = await createResume({ name: generateRandomName(), tags: [], withSampleData: true });
-				created(resumeId);
-				toast.add({ description: t`Sample resume added. Delete it anytime.` });
-				void navigate({ to: "/builder/$resumeId", params: { resumeId } });
-			} catch (error) {
-				failed(error);
-			}
-		},
-	};
 }
 
 type ChoiceTileProps = {
@@ -418,7 +377,7 @@ function ImportProgress({ stage, notes }: { stage: number; notes: string[] }) {
 							className={cn("flex items-center gap-2.5 text-sm", done || current ? "text-ink" : "text-ink-3")}
 						>
 							{done ? (
-								<Icon name="check_circle" size={18} className={cn(POP_CLASS, "text-accent-text")} />
+								<Icon name="check-circle" size={18} className={cn(POP_CLASS, "text-accent-text")} />
 							) : current ? (
 								<Spinner decorative className={cn(POP_CLASS, "size-[18px]")} />
 							) : (
@@ -436,7 +395,7 @@ function ImportProgress({ stage, notes }: { stage: number; notes: string[] }) {
 				aria-valuemin={0}
 				aria-valuemax={3}
 				aria-valuenow={stage}
-				className="h-1 overflow-hidden rounded-full bg-sunken"
+				className="h-1 overflow-hidden rounded-sm bg-sunken"
 			>
 				<div
 					className="h-full translate-x-(--fill) bg-accent transition-[translate] duration-standard ease-enter rtl:-translate-x-(--fill)"

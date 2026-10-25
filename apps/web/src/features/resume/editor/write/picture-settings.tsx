@@ -60,7 +60,7 @@ function PicturePreviewControls({
 				ref={fileInputRef}
 				type="file"
 				accept="image/*"
-				aria-label={t`Upload picture`}
+				aria-label={t`Upload photo`}
 				className="hidden"
 				onChange={onUploadPicture}
 			/>
@@ -68,7 +68,7 @@ function PicturePreviewControls({
 			<button
 				type="button"
 				onClick={picture.url ? onDeletePicture : onSelectPicture}
-				aria-label={picture.url ? t`Delete picture` : t`Upload picture`}
+				aria-label={picture.url ? t`Remove photo` : t`Upload photo`}
 				className="group/picture relative size-18 cursor-pointer overflow-hidden rounded-md bg-sunken transition-colors hover:bg-sunken/50"
 			>
 				{normalizedPictureUrl && (
@@ -81,7 +81,7 @@ function PicturePreviewControls({
 				)}
 
 				<div className="absolute inset-0 z-0 flex size-full items-center justify-center">
-					{picture.url ? <Icon name="delete" size={24} /> : <Icon name="upload" size={24} />}
+					{picture.url ? <Icon name="trash" size={24} /> : <Icon name="upload-simple" size={24} />}
 				</div>
 			</button>
 
@@ -109,13 +109,13 @@ function PicturePreviewControls({
 							<Button
 								size="icon"
 								variant="ghost"
-								aria-label={picture.hidden ? t`Show picture` : t`Hide picture`}
+								aria-label={picture.hidden ? t`Show photo` : t`Hide photo`}
 								onClick={() => {
 									form.setFieldValue("hidden", !picture.hidden);
 									onAutoSave();
 								}}
 							>
-								{picture.hidden ? <Icon name="visibility_off" size={16} /> : <Icon name="visibility" size={16} />}
+								{picture.hidden ? <Icon name="eye-slash" size={16} /> : <Icon name="eye" size={16} />}
 							</Button>
 						</div>
 					</FormItem>
@@ -245,7 +245,7 @@ function PictureGeometryFields({ form, onAutoSave }: PictureFieldProps) {
 				{(field) => (
 					<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
 						<FormLabel>
-							<Trans>Aspect Ratio</Trans>
+							<Trans>Aspect ratio</Trans>
 						</FormLabel>
 						<div className="flex items-center gap-x-2">
 							<InputGroup>
@@ -320,7 +320,7 @@ function PictureGeometryFields({ form, onAutoSave }: PictureFieldProps) {
 				{(field) => (
 					<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
 						<FormLabel>
-							<Trans>Border Radius</Trans>
+							<Trans>Border radius</Trans>
 						</FormLabel>
 						<div className="flex items-center gap-x-2">
 							<InputGroup>
@@ -364,7 +364,7 @@ function PictureGeometryFields({ form, onAutoSave }: PictureFieldProps) {
 										onAutoSave();
 									}}
 								>
-									<div className="size-3 rounded-[10%] border border-accent" />
+									<div className="size-3 rounded-sm border border-accent" />
 								</Button>
 								<Button
 									size="icon"
@@ -375,7 +375,7 @@ function PictureGeometryFields({ form, onAutoSave }: PictureFieldProps) {
 										onAutoSave();
 									}}
 								>
-									<div className="size-3 rounded-full border border-accent" />
+									<div className="size-3 rounded-sm border border-accent" />
 								</Button>
 							</ButtonGroup>
 						</div>
@@ -530,7 +530,7 @@ function PictureCropDialog({ cropState, aspect, onClose, onUpload }: PictureCrop
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						<Trans>Crop picture</Trans>
+						<Trans>Crop photo</Trans>
 					</DialogTitle>
 					<DialogDescription>
 						<Trans>Drag to reposition and use the slider to zoom before uploading.</Trans>
@@ -561,7 +561,7 @@ function PictureCropDialog({ cropState, aspect, onClose, onUpload }: PictureCrop
 						<span className="text-xs text-ink-3 tabular-nums">{zoom.toFixed(1)}×</span>
 					</div>
 					<div className="flex items-center gap-x-3">
-						<Icon name="zoom_out" size={16} className="shrink-0 text-ink-3" />
+						<Icon name="magnifying-glass-minus" size={16} className="shrink-0 text-ink-3" />
 						<Slider
 							min={1}
 							max={3}
@@ -573,7 +573,7 @@ function PictureCropDialog({ cropState, aspect, onClose, onUpload }: PictureCrop
 								setZoom(Array.isArray(value) ? value[0] : value);
 							}}
 						/>
-						<Icon name="zoom_in" size={16} className="shrink-0 text-ink-3" />
+						<Icon name="magnifying-glass-plus" size={16} className="shrink-0 text-ink-3" />
 					</div>
 				</div>
 
@@ -590,14 +590,14 @@ function PictureCropDialog({ cropState, aspect, onClose, onUpload }: PictureCrop
 								onClose();
 							}}
 						>
-							<Trans>Skip and Upload</Trans>
+							<Trans>Skip and upload</Trans>
 						</Button>
 						<Button
 							onClick={() => {
 								void onConfirmCrop();
 							}}
 						>
-							<Trans>Crop and Upload</Trans>
+							<Trans>Crop and upload</Trans>
 						</Button>
 					</div>
 				</DialogFooter>
@@ -706,7 +706,7 @@ export function PictureSettings() {
 
 	const onDeletePicture = async () => {
 		if (!picture.url) return;
-		if (!(await confirm(t`Remove this photo?`, { confirmText: t`Remove` }))) return;
+		if (!(await confirm(t`Remove this photo?`, { confirmText: t`Remove photo` }))) return;
 
 		const appOrigin = window.location.origin;
 		const pictureUrl = new URL(picture.url, appOrigin);
@@ -724,7 +724,7 @@ export function PictureSettings() {
 	};
 
 	const uploadPictureFile = (file: File) => {
-		const toastId = toast.add({ type: "loading", description: t`Uploading picture…` });
+		const toastId = toast.add({ type: "loading", description: t`Uploading photo…` });
 
 		uploadFile(file, {
 			onSuccess: ({ url }) => {
@@ -739,7 +739,7 @@ export function PictureSettings() {
 						error,
 						t({
 							comment: "Fallback toast when uploading profile picture for resume fails",
-							message: "Failed to upload picture. Please try again.",
+							message: "Couldn't upload the photo. Try again.",
 						}),
 					),
 					id: toastId,
@@ -805,8 +805,8 @@ export function PictureSettings() {
 						form={form}
 						colorName="borderColor"
 						widthName="borderWidth"
-						colorLabel={t`Border Color`}
-						widthLabel={t`Border Width`}
+						colorLabel={t`Border color`}
+						widthLabel={t`Border width`}
 						step={1}
 						onAutoSave={handleAutoSave}
 					/>
@@ -814,8 +814,8 @@ export function PictureSettings() {
 						form={form}
 						colorName="shadowColor"
 						widthName="shadowWidth"
-						colorLabel={t`Shadow Color`}
-						widthLabel={t`Shadow Width`}
+						colorLabel={t`Shadow color`}
+						widthLabel={t`Shadow width`}
 						step={0.5}
 						onAutoSave={handleAutoSave}
 					/>

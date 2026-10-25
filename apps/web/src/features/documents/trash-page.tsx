@@ -28,24 +28,24 @@ export function TrashPage() {
 						to="/dashboard"
 						className={buttonVariants({ variant: "ghost", size: "sm", className: "-ms-2.5 w-fit gap-1.5 text-ink-2" })}
 					>
-						<Icon name="arrow_back" size={18} />
+						<Icon name="arrow-left" size={18} />
 						<Trans>Back to documents</Trans>
 					</Link>
 				}
 				title={<Trans>Trash</Trans>}
-				description={<Trans>Items are deleted permanently after 30 days.</Trans>}
+				description={<Trans>Documents are deleted permanently after 30 days.</Trans>}
 			/>
 
 			{isError && <LibraryError retrying={isFetching} onRetry={() => void refetch()} />}
 
 			{isError && !documents ? null : !isPending && documents?.length === 0 ? (
 				<div className="grid justify-items-center gap-2 py-16 text-center">
-					<Icon name="delete" size={28} className="text-ink-3" />
+					<Icon name="trash" size={28} className="text-ink-3" />
 					<p className="font-semibold">
 						<Trans>Trash is empty</Trans>
 					</p>
 					<p className="text-sm text-ink-2">
-						<Trans>Items you move here stay for 30 days.</Trans>
+						<Trans>Documents you move here stay for 30 days.</Trans>
 					</p>
 				</div>
 			) : (

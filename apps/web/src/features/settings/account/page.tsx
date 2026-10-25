@@ -7,6 +7,7 @@ import { DataSection } from "./data";
 import { ProfileSection } from "./profile";
 import { SecuritySection } from "./security";
 import { PageHeader } from "@/components/layout/page-header";
+import { clearAccountData } from "@/libs/auth/clear-account-data";
 import { authClient } from "@/libs/auth/client";
 
 export function AccountSettings() {
@@ -35,12 +36,12 @@ export function SignOutButton() {
 			variant="secondary"
 			onClick={async () => {
 				await authClient.signOut();
-				queryClient.clear();
+				clearAccountData(queryClient);
 				await navigate({ to: "/" });
 				void router.invalidate();
 			}}
 		>
-			<Icon name="logout" size={18} />
+			<Icon name="sign-out" size={18} />
 			<Trans>Sign out</Trans>
 		</Button>
 	);

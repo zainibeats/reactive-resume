@@ -19,7 +19,11 @@ export const messagesRouter = {
 			z.object({
 				threadId: z.string(),
 				message: uiMessageSchema,
-				attachmentIds: z.array(z.string().trim().min(1)).max(10).optional(),
+				attachmentIds: z
+					.array(z.string().trim().min(1))
+					.max(10)
+					.refine((ids) => new Set(ids).size === ids.length, { message: "Attachment IDs must be unique." })
+					.optional(),
 				// The context chip: leaving the resume out keeps it out of what's sent.
 				context: z
 					.object({ document: z.boolean().optional().describe("Share the open resume (on by default).") })

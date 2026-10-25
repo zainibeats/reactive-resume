@@ -2,8 +2,10 @@ import type { PageMapTarget } from "@reactive-resume/pdf/page-map";
 import type { AtsCategory, AtsFinding, AtsReport } from "@reactive-resume/resume/ats";
 import type { ResumeData, SectionType } from "@reactive-resume/schema/resume/data";
 import type { IconName } from "@reactive-resume/ui/components/icon";
+import { i18n } from "@lingui/core";
 import { t } from "@lingui/core/macro";
 import { atsRuleCategory } from "@reactive-resume/resume/ats";
+import { formatList } from "@reactive-resume/utils/locale";
 import { describeEntry, findEntry, getSectionObject, resolveSection } from "../write/model";
 import { getSectionTitle } from "@/libs/resume/section";
 
@@ -41,7 +43,7 @@ export const getCategoryDescription = (category: AtsCategory) =>
 		contact: t`Name, email, phone and location are found, and links are full addresses.`,
 		dates: t`Every entry has dates in a form systems read, in order, and none in the future.`,
 		layout: t`Text comes out in the order a person reads it, at a size and spacing that survive.`,
-		headings: t`Sections use headings systems recognise, and work experience shows.`,
+		headings: t`Sections use headings systems recognize, and work experience shows.`,
 		writing: t`Every role says what you did. Opinions on wording live in the Writing tab.`,
 	})[category];
 
@@ -134,7 +136,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 			};
 		case "MALFORMED_EMAIL":
 			return {
-				title: t`Email address won't be recognised`,
+				title: t`Email address won't be recognized`,
 				body: t`“${value}” isn't a plain address like name@example.com.`,
 				fix: write(t`Edit the email`),
 			};
@@ -154,13 +156,13 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 			const url = `https://${value}`;
 			return {
 				title: t`A link isn't a full address`,
-				body: t`Some systems only recognise links that start with https://. This one reads as plain text: “${value}”.`,
+				body: t`Some systems only recognize links that start with https://. This one reads as plain text: “${value}”.`,
 				fix: HAS_SCHEME.test(value)
 					? write(t`Edit the link`)
 					: {
 							kind: "apply",
 							label: t`Use ${url}`,
-							icon: "link",
+							icon: "link-simple-horizontal",
 							done: t`Link updated`,
 							apply: (draft) => setAt(draft, finding.pointer, url),
 						},
@@ -173,7 +175,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Hide the photo`,
-					icon: "visibility_off",
+					icon: "eye-slash",
 					done: t`Photo hidden`,
 					apply: (draft) => {
 						draft.picture.hidden = true;
@@ -189,13 +191,13 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 		case "UNPARSEABLE_PERIOD":
 			return {
 				title: t`Dates won't be read`,
-				body: t`“${value}” isn't a form systems recognise, such as Mar 2020 – Present.`,
+				body: t`“${value}” isn't a form systems recognize, such as Mar 2020 – Present.`,
 				fix: write(t`Fix the dates`),
 			};
 		case "UNPARSEABLE_DATE":
 			return {
 				title: t`A date won't be read`,
-				body: t`“${value}” isn't a form systems recognise, such as March 2022.`,
+				body: t`“${value}” isn't a form systems recognize, such as March 2022.`,
 				fix: write(t`Fix the date`),
 			};
 		case "REVERSED_PERIOD":
@@ -218,7 +220,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Add it to page 1`,
-					icon: "add",
+					icon: "plus",
 					done: t`${name} added to page 1`,
 					apply: (draft) => {
 						const [page] = draft.metadata.layout.pages;
@@ -248,7 +250,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Use the standard heading`,
-					icon: "title",
+					icon: "text-t",
 					done: t`Heading changed`,
 					// An empty title prints the section type's name in the resume's language.
 					apply: (draft) => setAt(draft, finding.pointer, ""),
@@ -264,7 +266,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Use one column`,
-					icon: "view_list",
+					icon: "list-dashes",
 					done: t`${name} uses one column`,
 					apply: (draft) => setAt(draft, finding.pointer, 1),
 				},
@@ -278,7 +280,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Move it to the main column`,
-					icon: "arrow_forward",
+					icon: "arrow-right",
 					done: t`${name} moved to the main column`,
 					apply: (draft) => {
 						for (const page of draft.metadata.layout.pages) {
@@ -291,11 +293,11 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 			};
 		}
 		case "TWO_COLUMN_LAYOUT": {
-			const names = String(finding.params?.sections ?? "")
+			const sectionNames = String(finding.params?.sections ?? "")
 				.split(",")
 				.filter(Boolean)
-				.map((id) => getSectionName(data, id))
-				.join(", ");
+				.map((id) => getSectionName(data, id));
+			const names = formatList(i18n.locale, sectionNames);
 			return {
 				title: t`Sidebar is read after the main column`,
 				body: t`${names} come last in the text. Most systems still find them; some don't.`,
@@ -303,7 +305,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Switch to one column`,
-					icon: "view_list",
+					icon: "list-dashes",
 					done: t`Switched to one column`,
 					// Full-width pages print no sidebar, so its sections move into the main column first.
 					apply: (draft) => {
@@ -324,7 +326,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Use ${minimum} pt`,
-					icon: "format_size",
+					icon: "text-aa",
 					done: t`Body text set to ${minimum} pt`,
 					apply: (draft) => setAt(draft, finding.pointer, minimum),
 				},
@@ -336,7 +338,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Use ${minimum}`,
-					icon: "tune",
+					icon: "sliders-horizontal",
 					done: t`Line height set to ${minimum}`,
 					apply: (draft) => setAt(draft, finding.pointer, minimum),
 				},
@@ -348,7 +350,7 @@ function describeFinding(finding: AtsFinding, data: ResumeData, target: PageMapT
 				fix: {
 					kind: "apply",
 					label: t`Use ${minimum} pt margins`,
-					icon: "tune",
+					icon: "sliders-horizontal",
 					done: t`Margins set to ${minimum} pt`,
 					apply: (draft) => setAt(draft, finding.pointer, minimum),
 				},

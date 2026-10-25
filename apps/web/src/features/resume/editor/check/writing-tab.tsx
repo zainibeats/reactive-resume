@@ -41,8 +41,6 @@ export function WritingTab({ data, issues }: WritingTabProps) {
 	const [choosing, setChoosing] = useState(false);
 	const review = useEditorStore((state) => state.writingReview);
 	const proposals = useEditorStore((state) => state.proposals);
-	const setWritingReview = useEditorStore((state) => state.setWritingReview);
-	const setProposals = useEditorStore((state) => state.setProposals);
 
 	const provider = usableProviders.find((entry) => entry.id === providerOverride) ?? usableProviders[0];
 	const passages = collectPassages(data, {
@@ -57,8 +55,10 @@ export function WritingTab({ data, issues }: WritingTabProps) {
 		...orpc.ai.atsReview.mutationOptions(),
 		onSuccess: (result) => {
 			const { proposals: next, notes } = mapWritingReview(result.suggestions, passages);
-			setProposals(next);
-			setWritingReview({ summary: result.summary, strengths: result.strengths, notes });
+			useEditorStore.setState({
+				proposals: next,
+				writingReview: { summary: result.summary, strengths: result.strengths, notes },
+			});
 		},
 	});
 
@@ -124,7 +124,7 @@ export function WritingTab({ data, issues }: WritingTabProps) {
 					role="alert"
 					className="flex gap-2.5 rounded-xl bg-danger-soft p-3 text-[13px] leading-[19px] text-danger-text"
 				>
-					<Icon name="error" />
+					<Icon name="warning-circle" />
 					<span>
 						{getOrpcErrorMessage(error, {
 							byCode: {
@@ -190,7 +190,7 @@ export function WritingTab({ data, issues }: WritingTabProps) {
 					/>
 				)}
 				<Button size="sm" variant="secondary" className="w-fit" disabled={passages.length === 0} onClick={run}>
-					<Icon name="auto_awesome" size={16} />
+					<Icon name="sparkle" size={16} />
 					<Trans>Review writing</Trans>
 				</Button>
 				{passages.length === 0 && (
@@ -214,7 +214,7 @@ export function WritingTab({ data, issues }: WritingTabProps) {
 
 			{review.strengths.length > 0 && (
 				<section aria-labelledby="writing-strengths" className="grid gap-1.5">
-					<h3 id="writing-strengths" className="pt-1.5 text-xs font-semibold text-ink-3 uppercase">
+					<h3 id="writing-strengths" className="pt-1.5 text-xs font-semibold text-ink-3">
 						<Trans>What's working</Trans>
 					</h3>
 					<ul className="grid list-disc gap-1 ps-[18px] text-[13px] leading-[19px] text-ink-2">
@@ -242,17 +242,15 @@ function WritingNoteCard({ note }: { note: WritingNote }) {
 
 	const showOnPage = () => {
 		if (!note.target) return;
-		const editor = useEditorStore.getState();
-		editor.select(note.target);
-		editor.setPageView("page");
-		if (breakpoint === "tablet") editor.setDrawerOpen(false);
-		if (breakpoint === "mobile") editor.setMobileView("page");
+		useEditorStore.setState({ selection: note.target, pageView: "page" });
+		if (breakpoint === "tablet") useEditorStore.setState({ drawerOpen: false });
+		if (breakpoint === "mobile") useEditorStore.setState({ mobileView: "page" });
 	};
 
 	return (
-		<article className="grid gap-1.5 rounded-[10px] border border-line p-3">
+		<article className="grid gap-1.5 rounded-lg border border-line p-3">
 			<div className="flex justify-between gap-2">
-				<span className="font-mono text-[11px] text-ink-3 uppercase">{note.location}</span>
+				<span className="font-mono text-xs text-ink-3">{note.location}</span>
 				<span
 					className={cn(
 						"h-[18px] rounded px-1.5 text-[11px] leading-[18px] font-semibold",

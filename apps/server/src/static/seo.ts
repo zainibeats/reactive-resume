@@ -1,20 +1,16 @@
 import { env } from "@reactive-resume/env/server";
 
-type StaticSeoOptions = {
-	head?: boolean;
-};
-
 function appUrl() {
 	return env.APP_URL.replace(/\/+$/, "");
 }
 
-function textResponse(body: string, options: StaticSeoOptions = {}) {
-	return new Response(options.head ? null : body, {
+function textResponse(body: string) {
+	return new Response(body, {
 		headers: { "Content-Type": "text/plain; charset=UTF-8" },
 	});
 }
 
-export function handleRobots(options?: StaticSeoOptions) {
+export function handleRobots() {
 	const baseUrl = appUrl();
 	const body = [
 		"User-agent: *",
@@ -28,10 +24,10 @@ export function handleRobots(options?: StaticSeoOptions) {
 		"",
 	].join("\n");
 
-	return textResponse(body, options);
+	return textResponse(body);
 }
 
-export function handleSitemap(options?: StaticSeoOptions) {
+export function handleSitemap() {
 	const baseUrl = appUrl();
 	// The instance root is the only indexable page; the signed-in app and public resumes are served noindex.
 	const body = [
@@ -44,12 +40,12 @@ export function handleSitemap(options?: StaticSeoOptions) {
 		"",
 	].join("\n");
 
-	return new Response(options?.head ? null : body, {
+	return new Response(body, {
 		headers: { "Content-Type": "application/xml; charset=UTF-8" },
 	});
 }
 
-export function handleLlms(options?: StaticSeoOptions) {
+export function handleLlms() {
 	const baseUrl = appUrl();
 	const body = [
 		"# Reactive Resume",
@@ -64,5 +60,5 @@ export function handleLlms(options?: StaticSeoOptions) {
 		"",
 	].join("\n");
 
-	return textResponse(body, options);
+	return textResponse(body);
 }

@@ -19,6 +19,7 @@ import { toast } from "@reactive-resume/ui/components/toast";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
 import { SettingsRow, SettingsSection } from "../section";
 import { buildAccountZip } from "./export";
+import { clearAccountData } from "@/libs/auth/clear-account-data";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
 import { client, orpc } from "@/libs/orpc/client";
@@ -35,7 +36,10 @@ export function DataSection() {
 			downloadWithAnchor(new Blob([zip as BlobPart], { type: "application/zip" }), `reactive-resume-${date}.zip`);
 		},
 		onError: (error) =>
-			toast.add({ type: "error", description: getReadableErrorMessage(error, t`Couldn't export. Try again.`) }),
+			toast.add({
+				type: "error",
+				description: getReadableErrorMessage(error, t`Couldn't export your data. Try again.`),
+			}),
 	});
 
 	return (
@@ -86,12 +90,15 @@ function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogProps) {
 		mutationFn: () => client.auth.deleteAccount(),
 		onSuccess: async () => {
 			await authClient.signOut();
-			queryClient.clear();
+			clearAccountData(queryClient);
 			toast.add({ description: t`Your account was deleted.` });
 			void navigate({ to: "/" });
 		},
 		onError: (error) =>
-			toast.add({ type: "error", description: getReadableErrorMessage(error, t`Couldn't delete the account.`) }),
+			toast.add({
+				type: "error",
+				description: getReadableErrorMessage(error, t`Couldn't delete your account. Try again.`),
+			}),
 	});
 
 	const documents = (counts?.resume ?? 0) + (counts?.trash ?? 0);
@@ -139,7 +146,7 @@ function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogProps) {
 						loading={remove.isPending}
 						onClick={() => remove.mutate()}
 					>
-						<Trans>Delete</Trans>
+						<Trans>Delete account</Trans>
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

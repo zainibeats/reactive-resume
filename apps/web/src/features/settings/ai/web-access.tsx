@@ -18,11 +18,12 @@ const PROVIDER_SITES = { firecrawl: "firecrawl.dev", tavily: "tavily.com", exa: 
 type Provider = keyof typeof PROVIDERS;
 
 function testFailureMessage(error: string | undefined) {
-	if (error === "auth") return t`The service rejected the credentials.`;
-	if (error === "quota") return t`The service quota is exhausted.`;
-	if (error === "timeout") return t`The service did not respond in time.`;
+	if (error === "auth") return t`The service rejected the API key. Check the key and save it again.`;
+	if (error === "quota")
+		return t`The service's quota is used up. Check your plan with the service, or try again later.`;
+	if (error === "timeout") return t`The service didn't respond in time. Try again.`;
 	if (error === "rate-limit") return t`Too many requests. Try again later.`;
-	return t`The service is unavailable or does not support this operation.`;
+	return t`The service is unavailable or doesn't support this. Try again later.`;
 }
 
 export function WebAccessSection() {
@@ -68,13 +69,13 @@ export function WebAccessSection() {
 			</header>
 
 			<div className="mx-5 flex items-start gap-3 border-b border-line py-4 max-sm:mx-4">
-				<Icon name="description" size={20} className="mt-0.5 shrink-0 text-ink-2" />
+				<Icon name="file-text" size={20} className="mt-0.5 shrink-0 text-ink-2" />
 				<div className="grid flex-1 gap-1">
 					<div className="flex flex-wrap items-center justify-between gap-2">
 						<h3 className="text-sm font-medium">
 							<Trans>Built-in reader</Trans>
 						</h3>
-						<span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-text">
+						<span className="inline-flex items-center gap-1 rounded-sm bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-text">
 							<Icon name="check" size={14} />
 							<Trans>Active</Trans>
 						</span>
@@ -91,7 +92,7 @@ export function WebAccessSection() {
 
 			<div className="grid gap-4 px-5 py-4 max-sm:px-4">
 				<div className="flex items-start gap-3">
-					<Icon name="search" size={20} className="mt-0.5 shrink-0 text-ink-2" />
+					<Icon name="magnifying-glass" size={20} className="mt-0.5 shrink-0 text-ink-2" />
 					<div className="grid flex-1 gap-1.5">
 						<div className="flex flex-wrap items-center justify-between gap-2">
 							<h3 className="text-sm font-medium">
@@ -100,7 +101,7 @@ export function WebAccessSection() {
 							{status && (
 								<span
 									className={cn(
-										"rounded-full px-2 py-0.5 text-xs font-medium",
+										"rounded-sm px-2 py-0.5 text-xs font-medium",
 										status.configured ? "bg-accent-soft text-accent-text" : "bg-sunken text-ink-2",
 									)}
 								>
@@ -132,8 +133,8 @@ export function WebAccessSection() {
 						role="alert"
 						className="flex items-start gap-2 rounded-lg bg-danger-soft px-3 py-2.5 text-[13px] leading-5 text-danger-text"
 					>
-						<Icon name="error" size={18} className="mt-0.5 shrink-0" />
-						{getOrpcErrorMessage(failure, { fallback: t`Web access settings couldn't be saved or loaded.` })}
+						<Icon name="warning-circle" size={18} className="mt-0.5 shrink-0" />
+						{getOrpcErrorMessage(failure, { fallback: t`Couldn't load or save web access settings. Try again.` })}
 					</p>
 				)}
 				{isLoading ? (
@@ -253,7 +254,7 @@ export function WebAccessSection() {
 										key={index}
 										className={cn("flex items-start gap-2", result.success ? "text-accent-text" : "text-warn-text")}
 									>
-										<Icon name={result.success ? "check_circle" : "info"} size={16} className="mt-0.5 shrink-0" />
+										<Icon name={result.success ? "check-circle" : "info"} size={16} className="mt-0.5 shrink-0" />
 										<span>
 											<span className="font-medium">{label}.</span>
 											{!result.success && <> {testFailureMessage(result.error)}</>}
@@ -285,7 +286,7 @@ export function WebAccessSection() {
 						)}
 						{status.canSave && !status.configured && !editing && (
 							<Button variant="secondary" className="ms-8 w-fit max-sm:ms-0" onClick={openEditor}>
-								<Icon name="link" size={18} />
+								<Icon name="link-simple-horizontal" size={18} />
 								<Trans>Connect a service</Trans>
 							</Button>
 						)}
@@ -386,7 +387,7 @@ export function WebAccessSection() {
 			</div>
 
 			<footer className="flex items-start gap-2 border-t border-line bg-bg px-5 py-3 text-xs leading-5 text-ink-2 max-sm:px-4">
-				<Icon name="auto_awesome" size={16} className="mt-0.5 shrink-0 text-ink-3" />
+				<Icon name="sparkle" size={16} className="mt-0.5 shrink-0 text-ink-3" />
 				<p>
 					<span className="font-medium">
 						<Trans>Assistant.</Trans>

@@ -22,7 +22,7 @@ export function NavigationCommandGroup() {
 		<>
 			<BaseCommandGroup heading={<Trans>Go to…</Trans>}>
 				<CommandItem keywords={[t`Home`]} value="navigation.home" onSelect={() => onNavigate("/")}>
-					<Icon name="home" size={16} />
+					<Icon name="house" size={16} />
 					<Trans>Home</Trans>
 				</CommandItem>
 
@@ -32,7 +32,7 @@ export function NavigationCommandGroup() {
 					value="navigation.documents"
 					onSelect={() => onNavigate("/dashboard")}
 				>
-					<Icon name="description" size={16} />
+					<Icon name="file-text" size={16} />
 					<Trans>Documents</Trans>
 				</CommandItem>
 
@@ -45,7 +45,7 @@ export function NavigationCommandGroup() {
 						useDialogStore.getState().openDialog("document.new", undefined);
 					}}
 				>
-					<Icon name="add" size={16} />
+					<Icon name="plus" size={16} />
 					<Trans>New document</Trans>
 				</CommandItem>
 
@@ -55,7 +55,7 @@ export function NavigationCommandGroup() {
 					value="navigation.trash"
 					onSelect={() => onNavigate("/dashboard/trash")}
 				>
-					<Icon name="delete" size={16} />
+					<Icon name="trash" size={16} />
 					<Trans>Trash</Trans>
 				</CommandItem>
 
@@ -65,7 +65,7 @@ export function NavigationCommandGroup() {
 					value="navigation.settings"
 					onSelect={() => pushPage("settings")}
 				>
-					<Icon name="settings" size={16} />
+					<Icon name="gear-six" size={16} />
 					<Trans>Settings</Trans>
 				</CommandItem>
 			</BaseCommandGroup>
@@ -78,13 +78,13 @@ export function NavigationCommandGroup() {
 						t`Password`,
 						t`Two-step verification`,
 						t`Passkeys`,
-						t`Export Data`,
-						t`Delete Account`,
+						t`Export data`,
+						t`Delete account`,
 					]}
 					value="navigation.settings.account"
 					onSelect={() => onNavigate("/dashboard/settings/account")}
 				>
-					<Icon name="account_circle" size={16} />
+					<Icon name="user-circle" size={16} />
 					<Trans>Account</Trans>
 				</CommandItem>
 
@@ -93,12 +93,12 @@ export function NavigationCommandGroup() {
 					value="navigation.settings.preferences"
 					onSelect={() => onNavigate("/dashboard/settings/preferences")}
 				>
-					<Icon name="settings" size={16} />
+					<Icon name="gear-six" size={16} />
 					<Trans>Preferences</Trans>
 				</CommandItem>
 
 				<CommandItem
-					keywords={[t`AI & developer`, t`AI providers`, t`API Keys`, t`MCP`, t`Integrations`]}
+					keywords={[t`AI & developer`, t`AI providers`, t`API keys`, t`MCP`, t`Integrations`]}
 					value="navigation.settings.ai"
 					onSelect={() => onNavigate("/dashboard/settings/ai")}
 				>

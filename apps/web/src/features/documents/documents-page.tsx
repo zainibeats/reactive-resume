@@ -24,7 +24,7 @@ import { TagsDialog, useBatchActions } from "./document-actions";
 import { DocumentCard, DocumentRow } from "./document-card";
 import { collectTags, filterDocuments } from "./filter";
 import { LibraryError } from "./library-error";
-import { useStartDocument } from "./new-document-dialog";
+import { useStartDocument } from "./use-start-document";
 import { PageHeader } from "@/components/layout/page-header";
 import { useDialogStore } from "@/dialogs/store";
 import { isEditableElementFocused } from "@/features/resume/builder/draft";
@@ -120,7 +120,7 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 						<div className="ms-auto flex flex-wrap items-center gap-2 max-sm:ms-0 max-sm:w-full">
 							<InputGroup className="w-60 max-sm:w-full">
 								<InputGroupAddon>
-									<Icon name="search" size={18} />
+									<Icon name="magnifying-glass" size={18} />
 								</InputGroupAddon>
 								<InputGroupInput
 									ref={searchRef}
@@ -151,10 +151,10 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 								onValueChange={(next) => setView(next as "grid" | "list")}
 							>
 								<SegmentedControlItem value="grid" aria-label={t`Grid`}>
-									<Icon name="grid_view" size={18} />
+									<Icon name="squares-four" size={18} />
 								</SegmentedControlItem>
 								<SegmentedControlItem value="list" aria-label={t`List`}>
-									<Icon name="view_list" size={18} />
+									<Icon name="list-dashes" size={18} />
 								</SegmentedControlItem>
 							</SegmentedControl>
 						</div>
@@ -176,7 +176,7 @@ export function DocumentsPage({ search, onSearchChange }: DocumentsPageProps) {
 						<LibrarySkeleton view={view} />
 					) : shown.length === 0 ? (
 						<div className="grid justify-items-center gap-2 py-16 text-center">
-							<Icon name="search_off" size={28} className="text-ink-3" />
+							<Icon name="magnifying-glass" size={28} className="text-ink-3" />
 							<p className="font-semibold">
 								{search.q.trim() ? (
 									<Trans>Nothing matches “{search.q.trim()}”</Trans>
@@ -301,7 +301,7 @@ function FirstRun({ onChooseFile }: { onChooseFile: () => void }) {
 				</Trans>
 			</p>
 			<div className="flex flex-wrap items-center gap-3 rounded-xl border-[1.5px] border-dashed border-line-2 p-5">
-				<Icon name="upload_file" size={24} className="text-ink-2" />
+				<Icon name="file-arrow-up" size={24} className="text-ink-2" />
 				<span className="flex-1 text-sm text-ink-2">
 					<Trans>Drop a PDF, Word or JSON file</Trans>
 				</span>
@@ -348,7 +348,7 @@ function TagFilter({ tags, active, onChange }: TagFilterProps) {
 						aria-pressed={isActive}
 						onClick={() => onChange(isActive ? active.filter((known) => known !== tag) : [...active, tag])}
 						className={cn(
-							"min-h-7 rounded-full border px-3 text-[13px] transition-[background-color,border-color,color,scale] duration-quick ease-enter active:scale-[0.97] pointer-coarse:min-h-11",
+							"min-h-7 rounded-sm border px-3 text-[13px] transition-[background-color,border-color,color,scale] duration-quick ease-enter active:scale-[0.97] pointer-coarse:min-h-11",
 							isActive ? "border-accent bg-accent-soft text-accent-text" : "border-line-2 text-ink-2 hover:bg-hover",
 						)}
 					>
@@ -403,7 +403,7 @@ function SelectionBar({ selection, allSelected, onSelectAll, onClear, onTags }: 
 				</Button>
 			)}
 			<Button variant="ghost" size="sm" disabled={busy} onClick={onTags}>
-				<Icon name="sell" />
+				<Icon name="tag" />
 				<span className="max-sm:sr-only">
 					<Trans>Tags</Trans>
 				</span>
@@ -416,7 +416,7 @@ function SelectionBar({ selection, allSelected, onSelectAll, onClear, onTags }: 
 							<span className="max-sm:sr-only">
 								<Trans>Lock</Trans>
 							</span>
-							<Icon name="expand_more" size={14} />
+							<Icon name="caret-down" size={14} />
 						</Button>
 					}
 				/>
@@ -426,7 +426,7 @@ function SelectionBar({ selection, allSelected, onSelectAll, onClear, onTags }: 
 						<Trans>Lock editing</Trans>
 					</DropdownMenuItem>
 					<DropdownMenuItem onClick={() => void run(() => batch.setLocked(selection, false))}>
-						<Icon name="lock_open" />
+						<Icon name="lock-open" />
 						<Trans>Unlock</Trans>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
@@ -438,12 +438,12 @@ function SelectionBar({ selection, allSelected, onSelectAll, onClear, onTags }: 
 				className="text-danger-text hover:bg-danger-soft"
 				onClick={() => void run(() => batch.trash(selection), { clear: true })}
 			>
-				<Icon name="delete" />
+				<Icon name="trash" />
 				<span className="max-sm:sr-only">
 					<Trans>Move to Trash</Trans>
 				</span>
 			</Button>
-			<IconButton icon="close" size="icon-sm" label={t`Clear selection`} className="text-ink-2" onClick={onClear} />
+			<IconButton icon="x" size="icon-sm" label={t`Clear selection`} className="text-ink-2" onClick={onClear} />
 		</div>
 	);
 }
@@ -465,7 +465,7 @@ function LibrarySkeleton({ view }: { view: "grid" | "list" }) {
 		<div className="grid grid-cols-[repeat(auto-fill,minmax(180px,204px))] gap-x-7 gap-y-[22px] max-sm:grid-cols-2 max-sm:gap-4">
 			{Array.from({ length: 6 }, (_, index) => (
 				<div key={index} className="grid gap-2">
-					<Skeleton className="aspect-page rounded-[6px]" />
+					<Skeleton className="aspect-page rounded-md" />
 					<Skeleton className="h-4 w-3/4 rounded" />
 				</div>
 			))}
@@ -525,7 +525,7 @@ function DropToImport() {
 			)}
 		>
 			<div className="grid justify-items-center gap-2 text-center">
-				<Icon name="download" size={32} className="text-accent-text" />
+				<Icon name="download-simple" size={32} className="text-accent-text" />
 				<p className="text-lg font-semibold">
 					<Trans>Drop to import</Trans>
 				</p>

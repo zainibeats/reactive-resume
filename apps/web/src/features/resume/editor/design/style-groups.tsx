@@ -108,7 +108,7 @@ export function TypeGroup({ onCustomFonts }: TypeGroupProps) {
 						<span className="truncate text-xs text-ink-3">
 							{pairing ? <Trans>Any font, in Advanced</Trans> : familiesLabel(heading.fontFamily, body.fontFamily)}
 						</span>
-						<Icon name="arrow_downward" size={18} className="ms-auto text-ink-3" />
+						<Icon name="arrow-down" size={18} className="ms-auto text-ink-3" />
 					</button>
 				)}
 			</div>
@@ -185,7 +185,7 @@ export function ColorGroup() {
 	return (
 		<div className="grid gap-3">
 			<RadioGroup
-				aria-label={t`Accent colour`}
+				aria-label={t`Accent color`}
 				value={ACCENTS.some((accent) => accent.hex === current) ? current : null}
 				onValueChange={(value) => {
 					setTyped(null);
@@ -200,7 +200,7 @@ export function ColorGroup() {
 						value={accent.hex}
 						aria-label={accent.label}
 						title={accent.label}
-						className="aspect-square cursor-pointer rounded-full transition-[box-shadow,scale] duration-quick ease-enter active:scale-[0.97] data-checked:shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--swatch)]"
+						className="aspect-square cursor-pointer rounded-sm transition-[box-shadow,scale] duration-quick ease-enter active:scale-[0.97] data-checked:shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--swatch)]"
 						style={{ backgroundColor: accent.hex, "--swatch": accent.hex } as CSSProperties}
 					/>
 				))}
@@ -209,10 +209,10 @@ export function ColorGroup() {
 			<div className="flex items-center gap-2">
 				<span className="size-9 shrink-0 rounded-lg border border-line-2" style={{ backgroundColor: normalized }} />
 				<Input
-					aria-label={t`Custom colour (hex)`}
+					aria-label={t`Custom color (hex)`}
 					value={hex}
 					spellCheck={false}
-					className="font-mono uppercase"
+					className="font-mono"
 					onChange={(event) => {
 						setTyped(event.target.value);
 						if (isValidHex(event.target.value)) setAccent(`#${event.target.value.replace("#", "")}`, false);
@@ -227,7 +227,7 @@ export function ColorGroup() {
 			{tooLight && (
 				<div className="grid gap-2 rounded-lg bg-warn-soft p-3 text-[13px] leading-[19px] text-warn-text" role="status">
 					<span className="flex gap-2">
-						<Icon name="contrast" size={20} />
+						<Icon name="circle-half" size={20} />
 						<Trans>Too light for headings on white. It may be hard to read and print faintly.</Trans>
 					</span>
 					<Button

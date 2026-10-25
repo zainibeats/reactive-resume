@@ -13,7 +13,12 @@ import { toast } from "@reactive-resume/ui/components/toast";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
 import { useCurrentResume } from "@/features/resume/builder/draft";
 import { useOpenIssueCount } from "@/features/resume/editor/check/use-check";
-import { createExportFile, getDefaultFileName, sanitizeFileName } from "@/features/resume/export/use-resume-export";
+import {
+	createExportFile,
+	getDefaultFileName,
+	preloadDocumentExport,
+	sanitizeFileName,
+} from "@/features/resume/export/use-resume-export";
 import { getReadableErrorMessage } from "@/libs/error-message";
 
 export type DownloadFormat<Id extends string = ExportFormat> = {
@@ -31,35 +36,35 @@ const getExportFormats = (): DownloadFormat[] => [
 		id: "pdf",
 		label: "PDF",
 		extension: ".pdf",
-		icon: "picture_as_pdf",
+		icon: "file-pdf",
 		description: t`Looks exactly like the page. Use it for applications and email.`,
 	},
 	{
 		id: "docx",
 		label: "Word",
 		extension: ".docx",
-		icon: "description",
+		icon: "file-text",
 		description: t`For portals or recruiters who ask for Word. Layout is simplified.`,
 	},
 	{
 		id: "odt",
 		label: "OpenDocument",
 		extension: ".odt",
-		icon: "draft",
+		icon: "file-doc",
 		description: t`For LibreOffice and other open-source editors. Layout is simplified.`,
 	},
 	{
 		id: "md",
 		label: "Markdown",
 		extension: ".md",
-		icon: "notes",
+		icon: "text-align-left",
 		description: t`Plain text with headings. Paste into application forms and notes.`,
 	},
 	{
 		id: "json",
 		label: "JSON",
 		extension: ".json",
-		icon: "data_object",
+		icon: "brackets-curly",
 		description: t`Complete data backup. Imports back into Reactive Resume or JSON Resume tools.`,
 	},
 ];
@@ -77,6 +82,9 @@ function FormatRadioGroup<Id extends string>({ formats, value, onChange }: Forma
 			aria-label={t`Format`}
 			value={value}
 			onValueChange={(next) => onChange(next as Id)}
+			// Picking a format usually comes next: start loading the DOCX and ODT builders.
+			onPointerEnter={preloadDocumentExport}
+			onFocus={preloadDocumentExport}
 			className="grid gap-1.5"
 		>
 			{formats.map((option) => (
@@ -84,7 +92,7 @@ function FormatRadioGroup<Id extends string>({ formats, value, onChange }: Forma
 					key={option.id}
 					value={option.id}
 					disabled={option.disabled}
-					className="group/format flex cursor-pointer items-start gap-3 rounded-[10px] border border-line p-3 text-start transition-colors duration-quick hover:border-line-2 data-checked:border-accent data-checked:bg-accent-soft data-disabled:cursor-not-allowed data-disabled:opacity-45"
+					className="group/format flex cursor-pointer items-start gap-3 rounded-lg border border-line p-3 text-start transition-colors duration-quick hover:border-line-2 data-checked:border-accent data-checked:bg-accent-soft data-disabled:cursor-not-allowed data-disabled:opacity-45"
 				>
 					<span className="grid size-9 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2">
 						<Icon name={option.icon} size={22} />
@@ -158,9 +166,9 @@ function DownloadActions({ state, label, onDownload, onDownloadPdf }: DownloadAc
 			{state === "error" && (
 				<div
 					role="alert"
-					className="flex flex-wrap items-start gap-2.5 rounded-[10px] bg-danger-soft px-3 py-2.5 text-[13px] leading-[19px] text-danger-text"
+					className="flex flex-wrap items-start gap-2.5 rounded-lg bg-danger-soft px-3 py-2.5 text-[13px] leading-[19px] text-danger-text"
 				>
-					<Icon name="error" size={20} />
+					<Icon name="warning-circle" size={20} />
 					<span className="min-w-0 flex-1">
 						<Trans>The {label} file couldn't be generated. Try again, or download PDF instead.</Trans>
 					</span>
@@ -185,12 +193,12 @@ function DownloadActions({ state, label, onDownload, onDownloadPdf }: DownloadAc
 					</>
 				) : state === "error" ? (
 					<>
-						<Icon name="refresh" />
+						<Icon name="arrow-clockwise" />
 						<Trans>Try again</Trans>
 					</>
 				) : (
 					<>
-						<Icon name="download" />
+						<Icon name="download-simple" />
 						<Trans>Download {label}</Trans>
 					</>
 				)}
@@ -230,7 +238,7 @@ export function DownloadTab({ onReview }: DownloadTabProps) {
 			setState("idle");
 		} catch (error) {
 			setState("error");
-			toast.add({ type: "error", description: getReadableErrorMessage(error, t`Download failed.`) });
+			toast.add({ type: "error", description: getReadableErrorMessage(error, t`Download failed. Try again.`) });
 		}
 	};
 
@@ -253,8 +261,8 @@ export function DownloadTab({ onReview }: DownloadTabProps) {
 			/>
 
 			{issues > 0 && (
-				<div className="flex gap-2.5 rounded-[10px] bg-warn-soft px-3 py-2.5 text-[13px] leading-[19px] text-warn-text">
-					<Icon name="fact_check" size={20} />
+				<div className="flex gap-2.5 rounded-lg bg-warn-soft px-3 py-2.5 text-[13px] leading-[19px] text-warn-text">
+					<Icon name="list-checks" size={20} />
 					<span>
 						<Plural
 							value={issues}

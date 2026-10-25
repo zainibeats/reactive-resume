@@ -4,7 +4,6 @@ import { sampleResumeData } from "@reactive-resume/schema/resume/sample";
 
 const mocks = vi.hoisted(() => ({ renderHere: vi.fn() }));
 vi.mock("@reactive-resume/pdf/browser", () => ({ createResumePdfBlob: mocks.renderHere }));
-vi.mock("@/libs/resume/section-title-locale", () => ({ createSectionTitleResolverForLocale: async () => () => "" }));
 
 const pageMap = { pages: [{ width: 595, height: 842 }], nodes: [] };
 

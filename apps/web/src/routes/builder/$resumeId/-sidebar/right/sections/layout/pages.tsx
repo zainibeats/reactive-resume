@@ -17,6 +17,7 @@ import { Trans } from "@lingui/react/macro";
 import { useReducedMotion } from "motion/react";
 import { useCallback, useId, useState } from "react";
 import { match } from "ts-pattern";
+import { filterSections } from "@reactive-resume/pdf/filtering";
 import { templateLayouts } from "@reactive-resume/schema/templates";
 import { Button } from "@reactive-resume/ui/components/button";
 import {
@@ -34,7 +35,6 @@ import { Icon } from "@reactive-resume/ui/components/icon";
 import { Switch } from "@reactive-resume/ui/components/switch";
 import { cn } from "@reactive-resume/utils/style";
 import { resolveLayoutSectionTitle } from "./title";
-import { filterVisibleLayoutSectionIds } from "./visibility";
 import { useCurrentResume, useUpdateResumeData } from "@/features/resume/builder/draft";
 import { DRAG_SETTLE } from "@/libs/motion";
 
@@ -250,8 +250,8 @@ export function LayoutPages() {
 						pageIndex={pageIndex}
 						page={{
 							...page,
-							main: filterVisibleLayoutSectionIds(page.main, resume.data),
-							sidebar: filterVisibleLayoutSectionIds(page.sidebar, resume.data),
+							main: filterSections(page.main, resume.data),
+							sidebar: filterSections(page.sidebar, resume.data),
 						}}
 						canDelete={layout.pages.length > 1}
 						sidebarPosition={templateSidebarPosition}
@@ -261,8 +261,8 @@ export function LayoutPages() {
 				))}
 
 				<Button variant="secondary" className="self-end" onClick={handleAddPage}>
-					<Icon name="add" size={16} />
-					<Trans>Add Page</Trans>
+					<Icon name="plus" size={16} />
+					<Trans>Add page</Trans>
 				</Button>
 			</div>
 
@@ -310,7 +310,7 @@ function PageContainer({
 							/>
 
 							<span className="text-xs font-medium text-ink-3">
-								<Trans comment="Layout editor toggle label that makes a page single-column">Full Width</Trans>
+								<Trans comment="Layout editor toggle label that makes a page single-column">Full width</Trans>
 							</span>
 						</label>
 					</div>
@@ -321,8 +321,8 @@ function PageContainer({
 							onClick={() => onDelete(pageIndex)}
 							className="size-auto gap-x-2.5 justify-self-end p-0!"
 						>
-							<Icon name="delete" size={16} />
-							<Trans>Delete Page</Trans>
+							<Icon name="trash" size={16} />
+							<Trans>Delete page</Trans>
 						</Button>
 					)}
 				</div>
@@ -476,7 +476,7 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 	return (
 		<DropdownMenuSub>
 			<DropdownMenuSubTrigger>
-				<Icon name="redo" size={16} />
+				<Icon name="arrow-u-up-right" size={16} />
 				<Trans>Move to</Trans>
 			</DropdownMenuSubTrigger>
 
@@ -488,7 +488,7 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 					return (
 						<DropdownMenuSub key={`page-${targetPageIndex}`}>
 							<DropdownMenuSubTrigger>
-								<Icon name="draft" size={16} />
+								<Icon name="file-doc" size={16} />
 								<Trans>Page {targetPageIndex + 1}</Trans>
 							</DropdownMenuSubTrigger>
 
@@ -516,8 +516,8 @@ function MoveToSubmenu({ id, pageIndex, columnId }: MoveToSubmenuProps) {
 				<DropdownMenuSeparator />
 
 				<DropdownMenuItem onClick={moveToNewPage}>
-					<Icon name="add_circle" size={16} />
-					<Trans>New Page</Trans>
+					<Icon name="plus-circle" size={16} />
+					<Trans>New page</Trans>
 				</DropdownMenuItem>
 			</DropdownMenuSubContent>
 		</DropdownMenuSub>
@@ -629,7 +629,7 @@ function LayoutItemContent({
 			)}
 			{...rest}
 		>
-			<Icon name="drag_indicator" size={16} className="opacity-40 transition-opacity group-hover/item:opacity-100" />
+			<Icon name="dots-six-vertical" size={16} className="opacity-40 transition-opacity group-hover/item:opacity-100" />
 			<span className="min-w-0 flex-1 truncate">{title}</span>
 
 			{/* The drag overlay renders without a location; only real rows get the menu. */}
@@ -640,7 +640,7 @@ function LayoutItemContent({
 						onPointerDown={(event) => event.stopPropagation()}
 						className="flex cursor-context-menu items-center rounded p-0.5 opacity-40 transition-opacity group-hover/item:opacity-100 hover:bg-sunken/40 focus:outline-none focus-visible:ring-1"
 					>
-						<Icon name="more_vert" size={16} />
+						<Icon name="dots-three-vertical" size={16} />
 					</DropdownMenuTrigger>
 
 					<DropdownMenuContent align="end">

@@ -2,6 +2,7 @@ import type { JdTermMatch } from "@reactive-resume/resume/ats-pdf";
 import type { ResumeData, SkillItem } from "@reactive-resume/schema/resume/data";
 import type { CSSProperties } from "react";
 import { t } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { Plural, Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -9,6 +10,7 @@ import { buildMarkdown } from "@reactive-resume/resume/markdown";
 import { Button } from "@reactive-resume/ui/components/button";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { Textarea } from "@reactive-resume/ui/components/textarea";
+import { formatList } from "@reactive-resume/utils/locale";
 import { generateId } from "@reactive-resume/utils/string";
 import { cn } from "@reactive-resume/utils/style";
 import { useEditorStore } from "../store";
@@ -85,8 +87,9 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 	const { posting, result, hiddenTerms } = match;
 	const [openTerm, setOpenTerm] = useState<string | null>(null);
 	const highlightTerm = useEditorStore((state) => state.highlightTerm);
-	const setHighlightTerm = useEditorStore((state) => state.setHighlightTerm);
 	const locked = useIsResumeLocked();
+	const { i18n } = useLingui();
+	const hiddenList = formatList(i18n.locale, hiddenTerms);
 
 	if (!posting) return <NoPosting />;
 
@@ -101,7 +104,7 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 			t`“${written}” added to Skills`,
 		);
 		setOpenTerm(null);
-		setHighlightTerm(term.term);
+		useEditorStore.setState({ highlightTerm: term.term });
 	};
 
 	const hideTerm = (term: MatchedTerm) => {
@@ -146,10 +149,10 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 							aria-valuemin={0}
 							aria-valuemax={result.total}
 							aria-valuenow={result.found.length}
-							className="h-1.5 overflow-hidden rounded-full bg-sunken"
+							className="h-1.5 overflow-hidden rounded-sm bg-sunken"
 						>
 							<div
-								className="h-full translate-x-(--fill) rounded-full bg-accent transition-[translate] duration-standard ease-enter rtl:-translate-x-(--fill)"
+								className="h-full translate-x-(--fill) rounded-sm bg-accent transition-[translate] duration-standard ease-enter rtl:-translate-x-(--fill)"
 								style={{ "--fill": `${(result.found.length / result.total) * 100 - 100}%` } as CSSProperties}
 							/>
 						</div>
@@ -157,7 +160,7 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 
 					{result.missing.length > 0 && (
 						<section aria-labelledby="match-missing" className="grid gap-2">
-							<h3 id="match-missing" className="text-xs font-semibold text-ink-3 uppercase">
+							<h3 id="match-missing" className="text-xs font-semibold text-ink-3">
 								<Trans>Not in your resume · add only if true</Trans>
 							</h3>
 							<div className="flex flex-wrap gap-1.5">
@@ -168,11 +171,11 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 										aria-expanded={openTerm === term.term}
 										onClick={() => setOpenTerm(openTerm === term.term ? null : term.term)}
 										className={cn(
-											"flex h-[30px] items-center gap-1 rounded-[7px] border border-dashed px-2.5 text-[13px] font-medium transition-colors duration-quick",
+											"flex h-[30px] items-center gap-1 rounded-lg border border-dashed px-2.5 text-[13px] font-medium transition-colors duration-quick",
 											openTerm === term.term ? "border-accent bg-accent-soft" : "border-line-2 hover:bg-hover",
 										)}
 									>
-										<Icon name="add" size={15} className="text-ink-3" />
+										<Icon name="plus" size={15} className="text-ink-3" />
 										{term.label}
 									</button>
 								))}
@@ -194,11 +197,11 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 									</p>
 									<div className="grid justify-items-start gap-1">
 										<Button size="sm" disabled={locked} onClick={() => addToSkills(open)}>
-											<Icon name="add" size={16} />
+											<Icon name="plus" size={16} />
 											<Trans>Add to Skills</Trans>
 										</Button>
 										<Button size="sm" variant="secondary" disabled={locked} onClick={() => askAssistant(open.label)}>
-											<Icon name="auto_awesome" size={16} />
+											<Icon name="sparkle" size={16} />
 											<Trans>Ask the assistant to work it in</Trans>
 										</Button>
 										<Button size="sm" variant="ghost" disabled={locked} onClick={() => hideTerm(open)}>
@@ -212,7 +215,7 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 
 					{result.found.length > 0 && (
 						<section aria-labelledby="match-found" className="grid gap-2">
-							<h3 id="match-found" className="text-xs font-semibold text-ink-3 uppercase">
+							<h3 id="match-found" className="text-xs font-semibold text-ink-3">
 								<Trans>Already covered · pick one to find it on the page</Trans>
 							</h3>
 							<div className="flex flex-wrap gap-1.5">
@@ -223,7 +226,7 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 											key={term.term}
 											type="button"
 											aria-pressed={on}
-											onClick={() => setHighlightTerm(on ? null : term.term)}
+											onClick={() => useEditorStore.setState({ highlightTerm: on ? null : term.term })}
 											className={cn(
 												"flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium transition-colors duration-quick",
 												on ? "bg-[#F2DE8C] text-[oklch(0.3_0.05_80)]" : "bg-accent-soft text-accent-text",
@@ -242,7 +245,7 @@ export function JobMatchTab({ match }: JobMatchTabProps) {
 
 			{hiddenTerms.length > 0 && (
 				<p className="text-xs text-ink-3">
-					<Trans>Hidden: {hiddenTerms.join(", ")}</Trans> ·{" "}
+					<Trans>Hidden: {hiddenList}</Trans> ·{" "}
 					<button
 						type="button"
 						disabled={locked}
@@ -277,12 +280,10 @@ const newSkill = (name: string): SkillItem => ({
 
 /** The pasted posting, with Clear to match against another one. */
 function PostingSource() {
-	const setPastedPosting = useEditorStore((state) => state.setPastedPosting);
-
 	return (
 		<div className="flex items-center gap-2.5 rounded-[10px] bg-bg p-3">
 			<span className="grid size-7 place-items-center rounded-[7px] bg-sunken text-ink-2">
-				<Icon name="content_copy" size={16} />
+				<Icon name="copy" size={16} />
 			</span>
 			<span className="grid min-w-0 flex-1">
 				<b className="text-[13px] font-semibold">
@@ -292,7 +293,7 @@ function PostingSource() {
 					<Trans>For this visit only</Trans>
 				</span>
 			</span>
-			<Button size="sm" variant="secondary" onClick={() => setPastedPosting("")}>
+			<Button size="sm" variant="secondary" onClick={() => useEditorStore.setState({ pastedPosting: "" })}>
 				<Trans>Clear</Trans>
 			</Button>
 		</div>
@@ -302,7 +303,6 @@ function PostingSource() {
 /** C2: nothing to match against yet. Paste a posting to match the resume against it. */
 function NoPosting() {
 	const pasted = useEditorStore((state) => state.pastedPosting);
-	const setPastedPosting = useEditorStore((state) => state.setPastedPosting);
 	const [draft, setDraft] = useState(pasted);
 
 	return (
@@ -318,7 +318,12 @@ function NoPosting() {
 				placeholder={t`Paste a job posting…`}
 				onChange={(event) => setDraft(event.target.value)}
 			/>
-			<Button size="sm" className="w-fit" disabled={!draft.trim()} onClick={() => setPastedPosting(draft)}>
+			<Button
+				size="sm"
+				className="w-fit"
+				disabled={!draft.trim()}
+				onClick={() => useEditorStore.setState({ pastedPosting: draft })}
+			>
 				<Trans>Match this posting</Trans>
 			</Button>
 		</div>

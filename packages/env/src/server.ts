@@ -23,6 +23,19 @@ if (workspaceRoot) {
 // --requirepass) need an empty username — "redis://:<pass>@<host>" — or the built-in ACL user,
 // "redis://default:<pass>@<host>". A named user with an explicitly empty password ("redis://user:@host") stays
 // valid: Redis accepts `AUTH <user> ""` for passwordless (`nopass`) ACL users.
+/** A comma-separated list, trimmed and without empty entries; each entry must match `item`. Empty when unset. */
+const commaList = (item: z.ZodType<string, string>) =>
+	z
+		.string()
+		.transform((value) =>
+			value
+				.split(",")
+				.map((entry) => entry.trim())
+				.filter(Boolean),
+		)
+		.pipe(z.array(item))
+		.default([]);
+
 const REDIS_URL_USERINFO_MESSAGE =
 	"REDIS_URL userinfo has no password field. For password-only auth (redis --requirepass) use " +
 	"redis://:<password>@<host>; for ACL users use redis://<user>:<password>@<host> (default is the built-in user; " +
@@ -66,28 +79,17 @@ export const env = createEnv({
 			.transform((value) => value || undefined)
 			.optional(),
 		SERVER_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
-		TRUSTED_PROXIES: z
-			.string()
-			.transform((value) =>
-				value
-					.split(",")
-					.map((range) => range.trim())
-					.filter(Boolean),
-			)
-			.pipe(
-				z.array(
-					z.string().refine((range) => {
-						const [address, prefix, ...rest] = range.split("/");
-						const family = isIP(address ?? "");
-						return (
-							family > 0 &&
-							rest.length === 0 &&
-							(prefix === undefined || (/^\d+$/.test(prefix) && Number(prefix) <= (family === 4 ? 32 : 128)))
-						);
-					}, "TRUSTED_PROXIES must contain comma-separated IP addresses or CIDRs"),
-				),
-			)
-			.default([]),
+		TRUSTED_PROXIES: commaList(
+			z.string().refine((range) => {
+				const [address, prefix, ...rest] = range.split("/");
+				const family = isIP(address ?? "");
+				return (
+					family > 0 &&
+					rest.length === 0 &&
+					(prefix === undefined || (/^\d+$/.test(prefix) && Number(prefix) <= (family === 4 ? 32 : 128)))
+				);
+			}, "TRUSTED_PROXIES must contain comma-separated IP addresses or CIDRs"),
+		),
 
 		// Database
 		DATABASE_URL: z.url({ protocol: /postgres(ql)?/ }),

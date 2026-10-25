@@ -25,12 +25,20 @@ describe("ItemTitle", () => {
 	});
 
 	it("wires the bold toggle into every section that exposes it", () => {
-		const sections = ["ExperienceSection", "EducationSection", "ProjectsSection", "CertificationsSection"];
-
-		for (const section of sections) {
+		for (const section of ["ExperienceSection", "EducationSection"]) {
 			const block = source.match(new RegExp(`const ${section} = [\\s\\S]*?\\n};`))?.[0];
 			expect(block).toContain("bold={item.mainEntryBold ?? false}");
 		}
+
+		// Projects and certifications share the dated-item layout with publications, which stay always bold.
+		const dated = source.match(/const DatedItemSection = [\s\S]*?\n};/)?.[0];
+		expect(dated).toContain("(item.mainEntryBold ?? false)");
+		for (const section of ["ProjectsSection", "CertificationsSection"]) {
+			const block = source.match(new RegExp(`const ${section} = [\\s\\S]*?\\n\\);`))?.[0];
+			expect(block).toContain("toggleBold");
+		}
+		const publications = source.match(/const PublicationsSection = [\s\S]*?\n\);/)?.[0];
+		expect(publications).not.toContain("toggleBold");
 	});
 
 	it("uses the skill bold toggle for the skill name", () => {
