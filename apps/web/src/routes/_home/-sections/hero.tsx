@@ -12,7 +12,7 @@ export function Hero() {
 				<div>
 					<div className="max-w-2xl space-y-6">
 						<div className="space-y-3">
-							<h1 className="text-4xl font-semibold tracking-tight md:text-5xl lg:text-6xl">
+							<h1 className="text-4xl font-medium md:text-5xl lg:text-6xl">
 								<Trans>A free and open-source resume builder</Trans>
 							</h1>
 
