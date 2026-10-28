@@ -29,6 +29,11 @@ jobs:
             exit 1
           fi
 
+      - name: Lint GitHub Actions workflows
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 "$RUNNER_TEMP"
+          "$RUNNER_TEMP/actionlint" -color
+
       - name: Install pnpm
         uses: pnpm/action-setup@v6
 
