@@ -124,6 +124,8 @@ export const serveWebDistStatic = env.CLOUDFLARE
 	? undefined
 	: serveStatic({
 			root: staticRoot,
+			// The Docker build writes brotli copies beside the text files and WASM (tooling/docker/precompress.mjs).
+			precompressed: true,
 			onFound: (_path, context) => {
 				// Vite fingerprints everything under /assets, so a file there never changes.
 				if (context.req.path.startsWith("/assets/") || /^\/videos\/.*-v\d+\.(?:mp4|webp)$/.test(context.req.path)) {

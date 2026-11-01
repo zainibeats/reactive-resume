@@ -29,6 +29,9 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
 
 COPY --from=pruner /app/out/full/ ./
 RUN rm -rf apps/web/dist apps/server/dist && pnpm turbo run build --filter=web --filter=server --force
+# Brotli copies of the web app's text files and WASM, which the server sends to browsers that accept brotli.
+COPY --from=pruner /app/tooling/docker/precompress.mjs ./tooling/docker/precompress.mjs
+RUN node tooling/docker/precompress.mjs apps/web/dist
 
 FROM base AS runtime-pruner
 COPY . .
