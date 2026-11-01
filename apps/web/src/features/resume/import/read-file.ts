@@ -4,7 +4,7 @@ import { parseJSONResume } from "@reactive-resume/import/json-resume";
 import { parseReactiveResumeJSON } from "@reactive-resume/import/reactive-resume-json";
 import { parseReactiveResumeV4JSON } from "@reactive-resume/import/reactive-resume-v4-json";
 import { convertLegacyStylesheet, needsLegacyStyleConversion } from "@reactive-resume/pdf/semantic-legacy";
-import { forEachDatedEntry } from "@reactive-resume/schema/resume/dates";
+import { forEachDatedEntry, hasUnreadableDateText } from "@reactive-resume/schema/resume/dates";
 import { client } from "@/libs/orpc/client";
 
 /** What a file holds, read from its bytes and shape rather than its extension or type. */
@@ -190,7 +190,7 @@ export function summarizeImport(data: ResumeData) {
 	);
 	let flagged = 0;
 	forEachDatedEntry(data, (entry) => {
-		if (entry.dates?.raw) flagged++;
+		if (hasUnreadableDateText(entry.dates)) flagged++;
 	});
 
 	return {
