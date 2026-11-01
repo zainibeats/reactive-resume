@@ -51,7 +51,7 @@ export const escapeHtml = (text: string) =>
 
 export function stripHtml(html: string | undefined): string {
 	if (!html) return "";
-	return html.replace(/<[^>]*>/g, "").trim();
+	return html.replace(/<[^<>]*>/g, "").trim();
 }
 
 /** FNV-1a over the text: a short, stable fingerprint. Not for security. */

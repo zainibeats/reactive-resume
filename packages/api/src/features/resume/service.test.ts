@@ -13,6 +13,10 @@ const compareMock = vi.hoisted(() => vi.fn());
 const publishResumeUpdatedMock = vi.hoisted(() => vi.fn());
 const grantResumeAccessMock = vi.hoisted(() => vi.fn());
 
+vi.mock("../../middleware/rate-limit", async (original) => ({
+	...(await original<typeof import("../../middleware/rate-limit")>()),
+	consumeResumePasswordLimit: vi.fn(async () => true),
+}));
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
 vi.mock("@reactive-resume/db/schema", () => ({
 	resume: {
@@ -391,6 +395,35 @@ describe("patch", () => {
 });
 
 describe("verifyPassword", () => {
+	it("charges aliases and username casing to the canonical resume before password work", async () => {
+		const { consumeResumePasswordLimit } = await import("../../middleware/rate-limit");
+		findResumeBySlugMock.mockResolvedValue({ id: "canonical", password: "hash" });
+		compareMock.mockResolvedValue(false);
+		for (const [username, slug] of [
+			["ada", "current"],
+			["ADA", "historical"],
+		]) {
+			await expect(
+				resumeService.verifyPassword({
+					username: username ?? "",
+					slug: slug ?? "",
+					password: "wrong",
+					trustedClient: "trusted-client",
+				}),
+			).rejects.toMatchObject({ code: "INVALID_PASSWORD" });
+			expect(consumeResumePasswordLimit).toHaveBeenLastCalledWith({
+				resumeId: "canonical",
+				trustedClient: "trusted-client",
+			});
+		}
+		vi.mocked(consumeResumePasswordLimit).mockResolvedValueOnce(false);
+		compareMock.mockClear();
+		await expect(
+			resumeService.verifyPassword({ username: "Ada", slug: "current", password: "wrong" }),
+		).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+		expect(compareMock).not.toHaveBeenCalled();
+	});
+
 	it("throws INVALID_PASSWORD when bcrypt.compare returns false", async () => {
 		findResumeBySlugMock.mockResolvedValueOnce({ id: "r1", password: "hash" });
 		compareMock.mockResolvedValueOnce(false);

@@ -64,13 +64,16 @@ const disabledLimiter = {
 
 const productionLimiter = (limiter: Ratelimiter) => (isRateLimitEnabled ? limiter : disabledLimiter);
 
-export const resumePasswordRateLimit = createRatelimitMiddleware<
-	ContextWithHeaders,
-	{ username: string; slug: string }
->({
-	limiter: productionLimiter(resumePasswordLimiter),
-	key: ({ context }, input) => `resume-password:${input.username}:${input.slug}:${getClientKey(context.trustedClient)}`,
-});
+type ResumePasswordAttempt = { resumeId: string; trustedClient?: string | undefined };
+
+// Keyed by resume rather than address, so renaming or guessing other slugs never resets the budget.
+const resumePasswordKey = (input: ResumePasswordAttempt) =>
+	`resume-password:${input.resumeId}:${getClientKey(input.trustedClient)}`;
+
+/** Spends one try from a resume's password budget; false once the budget for this client is used up. */
+export async function consumeResumePasswordLimit(input: ResumePasswordAttempt): Promise<boolean> {
+	return (await productionLimiter(resumePasswordLimiter).limit(resumePasswordKey(input))).success;
+}
 
 export const pdfExportRateLimit = createRatelimitMiddleware<ContextWithHeaders, { id: string }>({
 	limiter: productionLimiter(pdfLimiter),

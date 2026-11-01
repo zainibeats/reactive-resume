@@ -2,7 +2,7 @@ import type { RequestAuthentication } from "../../context";
 import z from "zod";
 import { protectedProcedure, publicProcedure } from "../../context";
 import { resumeDto } from "../../dto/resume";
-import { resumeMutationRateLimit, resumePasswordRateLimit } from "../../middleware/rate-limit";
+import { resumeMutationRateLimit } from "../../middleware/rate-limit";
 import { resumeService } from "./service";
 
 /** Only a credential that may read the owner's resumes sees the owner's view: private, unredacted, no password. */
@@ -91,13 +91,13 @@ export const sharingRouter = {
 				password: z.string().min(1).max(64).describe("The password to verify."),
 			}),
 		)
-		.use(resumePasswordRateLimit)
 		.output(z.boolean())
 		.handler(({ context, input }): Promise<boolean> =>
 			resumeService.verifyPassword({
 				username: input.username,
 				slug: input.slug,
 				password: input.password,
+				trustedClient: context.trustedClient,
 				...(context.resHeaders ? { responseHeaders: context.resHeaders } : {}),
 			}),
 		),

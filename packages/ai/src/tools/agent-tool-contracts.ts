@@ -36,6 +36,23 @@ export const readPageOutputSchema = z.object({
 export type SearchWebOutput = z.infer<typeof searchWebOutputSchema>;
 export type ReadPageOutput = z.infer<typeof readPageOutputSchema>;
 
+const approvalPartSchema = z.object({
+	type: z.literal("tool-search_web"),
+	state: z.literal("approval-requested"),
+	approval: z.object({ id: z.string() }),
+	input: z.unknown(),
+});
+
+/** Exact arguments awaiting a user decision; model prose cannot create an approval control. */
+export function agentApprovalRequests(message: UIMessage): Array<{ id: string; kind: "search"; text: string }> {
+	return message.parts.flatMap<{ id: string; kind: "search"; text: string }>((part) => {
+		const parsed = approvalPartSchema.safeParse(part);
+		if (!parsed.success) return [];
+		const query = searchWebInputSchema.safeParse(parsed.data.input);
+		return query.success ? [{ id: parsed.data.approval.id, kind: "search" as const, text: query.data.query }] : [];
+	});
+}
+
 export type AgentWebSource = {
 	url: string;
 	title: string;
