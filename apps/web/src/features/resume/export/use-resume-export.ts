@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { getResumeExportData } from "@reactive-resume/resume/export-sections";
 import { buildMarkdown } from "@reactive-resume/resume/markdown";
 import { toast } from "@reactive-resume/ui/components/toast";
-import { downloadWithAnchor } from "@reactive-resume/utils/file";
+import { downloadWithAnchor, getDefaultFileName, sanitizeFileName } from "@reactive-resume/utils/file";
 import { createResumePdfBlob } from "./pdf-document";
 import { resolvePublicResumePdfBlob } from "@/features/resume/public/public-pdf";
 import { getLostCharactersMessage, getReadableErrorMessage } from "@/libs/error-message";
@@ -36,21 +36,7 @@ type UseResumeExportOptions = {
 
 export type ExportFormat = "pdf" | "docx" | "odt" | "md" | "json";
 
-// Characters Windows and macOS won't take in a file name.
-const UNSAFE_FILE_NAME_CHARACTERS = /[\\/:*?"<>|]/g;
-
-/** A file name as the user typed it, minus the characters file systems reject. */
-export const sanitizeFileName = (value: string) => value.replace(UNSAFE_FILE_NAME_CHARACTERS, "").trim();
-
-/**
- * "First-Last-Resume": recruiters see this name. Without a name on the resume it falls back to the document's name.
- */
-export function getDefaultFileName(resume: ExportableResume) {
-	const words = (text: string) => sanitizeFileName(text).split(/\s+/).filter(Boolean);
-	const person = words(resume.data.basics.name);
-	if (person.length > 0) return [...person, "Resume"].join("-");
-	return words(resume.name || resume.slug).join("-") || "Resume";
-}
+export { getDefaultFileName, sanitizeFileName };
 
 // The file still downloads, with "?" for each character no font can draw.
 const warnLostCharacters = (characters: string[]) =>

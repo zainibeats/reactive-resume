@@ -3,7 +3,7 @@ import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import { createHash } from "node:crypto";
 import { ORPCError } from "@orpc/server";
 import { env } from "@reactive-resume/env/server";
-import { generateFilename } from "@reactive-resume/utils/file";
+import { getDefaultFileName } from "@reactive-resume/utils/file";
 import { matchesIfNoneMatch } from "@reactive-resume/utils/http";
 import { assertCanView, redactResumeForViewer, requiresPassword } from "./access-policy";
 import { publicRenderRateLimiter } from "./public-render-rate-limit";
@@ -66,7 +66,7 @@ export async function createPublicResumePdf(input: CreatePublicResumePdfInput): 
 
 	// Every visitor gets the anonymous view, so one cached file serves them all (hidden content never prints anyway).
 	const { data } = redactResumeForViewer({ name: "", data: parseStoredResumeData(resume.data) }, false);
-	const filename = generateFilename(data.basics.name || "Resume", "pdf");
+	const filename = `${getDefaultFileName({ name: "", slug: "", data })}.pdf`;
 	const hash = createHash("sha256").update(JSON.stringify(data)).digest("hex").slice(0, 32);
 	// Under the resume's pdfs/ folder: deleted with the resume or account, and /uploads serves it only to the owner.
 	const folder = `uploads/${resume.userId}/pdfs/${resume.id}`;

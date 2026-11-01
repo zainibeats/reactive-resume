@@ -4,7 +4,8 @@ import z from "zod";
 import { env } from "@reactive-resume/env/server";
 import { getResumeExportData } from "@reactive-resume/resume/export-sections";
 import { buildMarkdown } from "@reactive-resume/resume/markdown";
-import { generateFilename } from "@reactive-resume/utils/file";
+import { getDefaultFileName } from "@reactive-resume/utils/file";
+import { contentDisposition } from "@reactive-resume/utils/http";
 import { protectedProcedure } from "../../context";
 import { pdfExportRateLimit } from "../../middleware/rate-limit";
 import { resumeService } from "../resume/service";
@@ -22,7 +23,7 @@ async function fileResponse(
 	format: z.infer<typeof exportInput>["format"],
 	json: unknown,
 ) {
-	const filename = generateFilename(name, format);
+	const filename = `${getDefaultFileName({ name, slug: "", data })}.${format}`;
 	let body: File;
 	try {
 		if (format === "json") body = new File([JSON.stringify(json, null, 2)], filename, { type: "application/json" });
@@ -45,7 +46,7 @@ async function fileResponse(
 		console.error("[document export] Rendering failed", error);
 		throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Couldn't generate the document. Try again." });
 	}
-	return { headers: { "content-disposition": `attachment; filename="${filename}"` }, body };
+	return { headers: { "content-disposition": contentDisposition(filename) }, body };
 }
 
 export const documentExports = {
