@@ -5,7 +5,7 @@ import { ORPCError } from "@orpc/server";
 import { env } from "@reactive-resume/env/server";
 import { generateFilename } from "@reactive-resume/utils/file";
 import { matchesIfNoneMatch } from "@reactive-resume/utils/http";
-import { assertCanView, redactResumeForViewer } from "./access-policy";
+import { assertCanView, redactResumeForViewer, requiresPassword } from "./access-policy";
 import { publicRenderRateLimiter } from "./public-render-rate-limit";
 import { parseStoredResumeData } from "./resume-data-validation";
 
@@ -52,9 +52,10 @@ export async function createPublicResumePdf(input: CreatePublicResumePdfInput): 
 	if (!resume) throw new ORPCError("NOT_FOUND");
 
 	const currentUserId = await resolveCurrentUserId(input.requestHeaders);
-	assertCanView(resume, currentUserId ? { id: currentUserId } : null);
+	const viewer = currentUserId ? { id: currentUserId } : null;
+	assertCanView(resume, viewer);
 	if (
-		resume.passwordHash &&
+		requiresPassword(resume, viewer) &&
 		!(await import("./access")).hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)
 	) {
 		throw new ORPCError("NEED_PASSWORD", {

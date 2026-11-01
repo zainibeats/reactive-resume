@@ -17,12 +17,13 @@ vi.mock("@reactive-resume/db/client", async () => {
 
 const mocks = vi.hoisted(() => ({
 	hasResumeAccess: vi.fn(),
+	resolveAuthentication: vi.fn(),
 	consume: vi.fn(),
 	renderPdf: vi.fn(),
 	files: new Map<string, Uint8Array>(),
 }));
 vi.mock("./access", () => ({ hasResumeAccess: mocks.hasResumeAccess }));
-vi.mock("../../context", () => ({ resolveAuthenticationFromRequestHeaders: async () => undefined }));
+vi.mock("../../context", () => ({ resolveAuthenticationFromRequestHeaders: mocks.resolveAuthentication }));
 vi.mock("./public-render-rate-limit", () => ({ publicRenderRateLimiter: { consume: mocks.consume } }));
 vi.mock("@reactive-resume/pdf/server", () => ({ createResumePdfFile: mocks.renderPdf }));
 // Storage that keeps files in memory, so tests never write to the local data folder.
@@ -66,6 +67,7 @@ describe("createPublicResumePdf", () => {
 		pg.rows = [];
 		mocks.files.clear();
 		mocks.consume.mockReset();
+		mocks.resolveAuthentication.mockReset().mockResolvedValue(undefined);
 		mocks.hasResumeAccess.mockReset().mockReturnValue(false);
 		mocks.renderPdf.mockReset().mockResolvedValue(new File(["%PDF"], "resume.pdf", { type: "application/pdf" }));
 	});
@@ -77,6 +79,35 @@ describe("createPublicResumePdf", () => {
 		found(buildResume({ passwordHash: "hash" }));
 		await expect(createPublicResumePdf(input)).rejects.toMatchObject({ code: "NEED_PASSWORD" });
 		expect(mocks.consume).not.toHaveBeenCalled();
+		expect(mocks.renderPdf).not.toHaveBeenCalled();
+	});
+
+	it.each([true, false])("exempts the owner from the password gate (public: %s)", async (isPublic) => {
+		found(buildResume({ isPublic, passwordHash: "hash" }));
+		mocks.resolveAuthentication.mockResolvedValue({ user: { id: "owner-1" }, permissions: ["read"] });
+
+		await expect(createPublicResumePdf(input)).resolves.toMatchObject({ filename: "resume.pdf" });
+		expect(mocks.renderPdf).toHaveBeenCalledOnce();
+		expect(mocks.hasResumeAccess).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		{ isPublic: true, code: "NEED_PASSWORD" },
+		{ isPublic: false, code: "NOT_FOUND" },
+	])("rejects authenticated non-owners with $code", async ({ isPublic, code }) => {
+		found(buildResume({ isPublic, passwordHash: "hash" }));
+		mocks.resolveAuthentication.mockResolvedValue({ user: { id: "other-user" }, permissions: ["read"] });
+
+		await expect(createPublicResumePdf(input)).rejects.toMatchObject({ code });
+		expect(mocks.consume).not.toHaveBeenCalled();
+		expect(mocks.renderPdf).not.toHaveBeenCalled();
+	});
+
+	it("requires read permission before exempting the owner", async () => {
+		found(buildResume({ passwordHash: "hash" }));
+		mocks.resolveAuthentication.mockResolvedValue({ user: { id: "owner-1" }, permissions: ["write"] });
+
+		await expect(createPublicResumePdf(input)).rejects.toMatchObject({ code: "NEED_PASSWORD" });
 		expect(mocks.renderPdf).not.toHaveBeenCalled();
 	});
 

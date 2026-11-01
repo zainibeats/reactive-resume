@@ -20,7 +20,13 @@ import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
 import { getStorageService } from "../storage/service";
 import { grantResumeAccess, hasResumeAccess } from "./access";
-import { assertCanView, isOwner, redactResumeForViewer, shouldCountForStatistics } from "./access-policy";
+import {
+	assertCanView,
+	isOwner,
+	redactResumeForViewer,
+	requiresPassword,
+	shouldCountForStatistics,
+} from "./access-policy";
 import { publishResumeUpdated } from "./events";
 import { parseStoredResumeData, parseWritableResumeData } from "./resume-data-validation";
 import { checkSlug, findFreeSlug, findResumeBySlug, recordSlugChange, SLUG_PATTERN } from "./slugs";
@@ -227,11 +233,7 @@ const statistics = {
 		if (!resume) throw new ORPCError("NOT_FOUND");
 		const viewer = input.currentUserId ? { id: input.currentUserId } : null;
 		assertCanView(resume, viewer);
-		if (
-			resume.passwordHash &&
-			!isOwner(resume, viewer) &&
-			!hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)
-		) {
+		if (requiresPassword(resume, viewer) && !hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)) {
 			throw new ORPCError("NEED_PASSWORD", {
 				status: 401,
 				data: { username: input.username, slug: input.slug },
@@ -618,11 +620,7 @@ export const resumeService = {
 		const viewer = input.currentUserId ? { id: input.currentUserId } : null;
 		assertCanView(resume, viewer);
 
-		if (
-			resume.hasPassword &&
-			!isOwner(resume, viewer) &&
-			!hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)
-		) {
+		if (requiresPassword(resume, viewer) && !hasResumeAccess(input.requestHeaders, resume.id, resume.passwordHash)) {
 			throw new ORPCError("NEED_PASSWORD", {
 				status: 401,
 				data: { username: input.username, slug: input.slug },
