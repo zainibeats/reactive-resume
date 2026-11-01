@@ -4,6 +4,7 @@ import { Trans } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
+import { AI_PROVIDER_DEFAULT_MODELS } from "@reactive-resume/ai/defaults";
 import { Button, buttonVariants } from "@reactive-resume/ui/components/button";
 import { Collapsible, CollapsibleContent } from "@reactive-resume/ui/components/collapsible";
 import { Icon } from "@reactive-resume/ui/components/icon";
@@ -17,8 +18,8 @@ type Choice = { provider: AIProvider; label: string; model: string; needsBaseURL
 
 // Provider names are brands and stay untranslated.
 const CHOICES: Choice[] = [
-	{ provider: "openai", label: "OpenAI", model: "gpt-4.1" },
-	{ provider: "anthropic", label: "Anthropic", model: "claude-3-5-sonnet-latest" },
+	{ provider: "openai", label: "OpenAI", model: AI_PROVIDER_DEFAULT_MODELS.openai },
+	{ provider: "anthropic", label: "Anthropic", model: AI_PROVIDER_DEFAULT_MODELS.anthropic },
 	{ provider: "openai-compatible", label: "OpenAI-compatible", model: "", needsBaseURL: true },
 ];
 
