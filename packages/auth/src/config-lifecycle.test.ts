@@ -50,11 +50,12 @@ async function securityHooks() {
 }
 
 describe("credential enrollment and recovery", () => {
+	// The first case pays for the cold import of the auth config, which takes seconds under a parallel run.
 	it("blocks username password sign-in when password auth is disabled", async () => {
 		mocks.env.FLAG_DISABLE_EMAIL_AUTH = true;
 		const { options } = await securityHooks();
 		await expect(options.hooks.before({ path: "/sign-in/username" })).rejects.toMatchObject({ status: "FORBIDDEN" });
-	});
+	}, 15_000);
 	it.each(["/passkey/generate-register-options", "/passkey/verify-registration", "/api-key/create"])(
 		"requires a recent session for HTTP %s",
 		async (path) => {
