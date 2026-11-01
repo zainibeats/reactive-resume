@@ -1680,11 +1680,6 @@ msgstr "Није могуће доћи до добављача вештачке 
 msgid "Couldn't reach your AI provider. Its key may have expired."
 msgstr "Није могуће добити АИ провајдера. Његов кључ је можда истекао."
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Couldn't read “{0}”. Enter the dates so they sort and print consistently."
-msgstr "Није могуће прочитати „{0}“. Унесите датуме да би се доследно сортирали и штампали."
-
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Couldn't read the dates on {entries}, so they stay at the end. Fix their dates and sort again."
 msgstr "Није могуће прочитати датуме за {entries}, па остају на крају. Исправите њихове датуме и поново сортирајте."
@@ -1772,6 +1767,7 @@ msgid "Couldn't sign in. Try again."
 msgstr "Пријављивање није успело. Покушајте поново."
 
 #. Fallback toast when signing out fails
+#: src/features/settings/account/page.tsx
 #: src/features/user/dropdown-menu.tsx
 msgid "Couldn't sign out. Try again."
 msgstr "Одјављивање није успело. Покушајте поново."
@@ -1930,6 +1926,10 @@ msgstr "По мери"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Custom color (hex)"
 msgstr "Прилагођена боја (hex)"
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Custom date text"
+msgstr ""
 
 #. Authentication provider display name in account settings
 #: src/features/settings/account/auth-hooks.ts
@@ -2450,6 +2450,10 @@ msgstr "Унесите име, до 64 знака."
 #: src/features/auth/pages/reset-password.tsx
 msgid "Enter a new password for your account."
 msgstr "Унесите нову лозинку за свој налог."
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Enter a readable date or clear the text to use date fields."
+msgstr ""
 
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
@@ -4426,6 +4430,10 @@ msgstr "Фотографија је скривена са странице."
 msgid "Photo on the page."
 msgstr "Фотографија на страници."
 
+#: src/features/resume/editor/write/picture-settings.tsx
+msgid "Photo removed"
+msgstr ""
+
 #: src/components/input/icon-picker.tsx
 msgid "Pick an icon"
 msgstr "Изаберите икону"
@@ -4673,11 +4681,6 @@ msgstr "Reactive Resume {__APP_VERSION__} · MIT"
 msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
 msgstr ""
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Read as “{0}”. Pick a month so it sorts and prints consistently."
-msgstr "Прочитано као „{0}“. Изаберите месец да би се доследно сортирао и штампао."
-
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read only"
 msgstr "Приступ само за читање"
@@ -4838,10 +4841,6 @@ msgstr "Уклони улогу"
 #: src/features/resume/share/link-tab.tsx
 msgid "Remove the password?"
 msgstr "Уклоните лозинку?"
-
-#: src/features/resume/editor/write/picture-settings.tsx
-msgid "Remove this photo?"
-msgstr "Желите ли да уклоните ову слику?"
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Removed"
@@ -5123,6 +5122,10 @@ msgstr "Сачувано"
 msgid "Saved “{trimmed}”"
 msgstr "Сачувано “{trimmed}”"
 
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Saved as written. Automated date checks and sorting are unavailable for this text."
+msgstr ""
+
 #. placeholder {0}: window.location.host
 #: src/features/resume/share/link-tab.tsx
 msgid "Saving {0}/{username}/{slug}… Copy is available after saving."
@@ -5183,6 +5186,10 @@ msgstr "Претражи…"
 #: src/routes/dashboard/-components/app-shell.tsx
 msgid "Search or run…"
 msgstr "Претражите или покрените…"
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Search the web"
+msgstr "Претражи веб"
 
 #: src/features/settings/ai/web-access.tsx
 msgid "Search was tested with your server's search, and reading with {connectedProvider}."
@@ -5292,6 +5299,10 @@ msgstr "Пошаљи везу за ресетовање"
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
 msgstr "Пошаљите саму биографију, а не портфолио омот."
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Send this exact query to your web search provider?"
+msgstr "Послати баш овај упит добављачу веб-претраге?"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Sending password reset email..."
@@ -5579,6 +5590,10 @@ msgstr "Величина"
 msgid "Skills"
 msgstr "Вештине"
 
+#: src/features/assistant/tool-approvals.tsx
+msgid "Skip"
+msgstr "Прескочи"
+
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Skip and upload"
 msgstr "Прескочи и отпреми"
@@ -5591,6 +5606,10 @@ msgstr "Прескочи на главни садржај"
 #: src/features/resume/editor/chrome/shell.tsx
 msgid "Skip to the page"
 msgstr "Прескочи на страницу"
+
+#: src/features/assistant/conversation.tsx
+msgid "Skipped"
+msgstr "Прескочено"
 
 #: src/libs/locale.ts
 msgid "Slovak"
@@ -6160,8 +6179,8 @@ msgid "This conversation couldn't be opened. Refresh the page to try again."
 msgstr "Овај разговор није могуће отворити. Освежите страницу да бисте покушали поново."
 
 #: src/features/resume/editor/write/dates-field.tsx
-msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date."
-msgstr "Овај датум није сачуван. Користите месец и годину, на пример мар 2022, или само годину. У резимеу је последњи важећи датум."
+msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date. Turn on Custom date text to save other wording."
+msgstr ""
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "This document"
@@ -6513,6 +6532,7 @@ msgstr "Подвуци везе"
 #: src/features/resume/editor/proposals/proposals.ts
 #: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
+#: src/features/resume/editor/write/picture-settings.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx

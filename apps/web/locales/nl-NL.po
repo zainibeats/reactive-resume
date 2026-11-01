@@ -1680,11 +1680,6 @@ msgstr "Kan de AI-provider niet bereiken. Probeer het zo nog eens."
 msgid "Couldn't reach your AI provider. Its key may have expired."
 msgstr "Kan uw AI-provider niet bereiken. De sleutel is mogelijk verlopen."
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Couldn't read “{0}”. Enter the dates so they sort and print consistently."
-msgstr "Kan “{0}” niet lezen. Voer de datums in zodat ze consistent worden gesorteerd en afgedrukt."
-
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Couldn't read the dates on {entries}, so they stay at the end. Fix their dates and sort again."
 msgstr "Kan de datums van {entries} niet lezen, dus blijven ze onderaan. Corrigeer hun datums en sorteer opnieuw."
@@ -1772,6 +1767,7 @@ msgid "Couldn't sign in. Try again."
 msgstr "Kan niet inloggen. Probeer het opnieuw."
 
 #. Fallback toast when signing out fails
+#: src/features/settings/account/page.tsx
 #: src/features/user/dropdown-menu.tsx
 msgid "Couldn't sign out. Try again."
 msgstr "Kan niet uitloggen. Probeer het opnieuw."
@@ -1930,6 +1926,10 @@ msgstr "Aangepaste"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Custom color (hex)"
 msgstr "Aangepaste kleur (hexadecimaal)"
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Custom date text"
+msgstr ""
 
 #. Authentication provider display name in account settings
 #: src/features/settings/account/auth-hooks.ts
@@ -2450,6 +2450,10 @@ msgstr "Voer een naam in, maximaal 64 tekens."
 #: src/features/auth/pages/reset-password.tsx
 msgid "Enter a new password for your account."
 msgstr "Voer een nieuw wachtwoord in voor uw account."
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Enter a readable date or clear the text to use date fields."
+msgstr ""
 
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
@@ -4426,6 +4430,10 @@ msgstr "Foto verborgen op de pagina."
 msgid "Photo on the page."
 msgstr "Foto op de pagina."
 
+#: src/features/resume/editor/write/picture-settings.tsx
+msgid "Photo removed"
+msgstr ""
+
 #: src/components/input/icon-picker.tsx
 msgid "Pick an icon"
 msgstr "Kies een pictogram"
@@ -4673,11 +4681,6 @@ msgstr "Reactive Resume {__APP_VERSION__} · MIT"
 msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
 msgstr ""
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Read as “{0}”. Pick a month so it sorts and prints consistently."
-msgstr "Gelezen als “{0}”. Kies een maand zodat het consistent wordt gesorteerd en afgedrukt."
-
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read only"
 msgstr "Alleen-lezen toegang"
@@ -4838,10 +4841,6 @@ msgstr "Rol verwijderen"
 #: src/features/resume/share/link-tab.tsx
 msgid "Remove the password?"
 msgstr "Het wachtwoord verwijderen?"
-
-#: src/features/resume/editor/write/picture-settings.tsx
-msgid "Remove this photo?"
-msgstr "Deze foto verwijderen?"
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Removed"
@@ -5123,6 +5122,10 @@ msgstr "Opgeslagen"
 msgid "Saved “{trimmed}”"
 msgstr "Opgeslagen “{trimmed}”"
 
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Saved as written. Automated date checks and sorting are unavailable for this text."
+msgstr ""
+
 #. placeholder {0}: window.location.host
 #: src/features/resume/share/link-tab.tsx
 msgid "Saving {0}/{username}/{slug}… Copy is available after saving."
@@ -5183,6 +5186,10 @@ msgstr "Zoeken naar…"
 #: src/routes/dashboard/-components/app-shell.tsx
 msgid "Search or run…"
 msgstr "Zoek of voer…"
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Search the web"
+msgstr "Zoeken op internet"
 
 #: src/features/settings/ai/web-access.tsx
 msgid "Search was tested with your server's search, and reading with {connectedProvider}."
@@ -5292,6 +5299,10 @@ msgstr "Resetlink verzenden"
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
 msgstr "Verstuur het cv zelf in plaats van een portfolio-omslag."
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Send this exact query to your web search provider?"
+msgstr "Deze exacte zoekopdracht naar je zoekprovider sturen?"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Sending password reset email..."
@@ -5579,6 +5590,10 @@ msgstr "Grootte"
 msgid "Skills"
 msgstr "Vaardigheden"
 
+#: src/features/assistant/tool-approvals.tsx
+msgid "Skip"
+msgstr "Overslaan"
+
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Skip and upload"
 msgstr "Overslaan en uploaden"
@@ -5591,6 +5606,10 @@ msgstr "Ga naar hoofdinhoud"
 #: src/features/resume/editor/chrome/shell.tsx
 msgid "Skip to the page"
 msgstr "Ga naar de pagina"
+
+#: src/features/assistant/conversation.tsx
+msgid "Skipped"
+msgstr "Overgeslagen"
 
 #: src/libs/locale.ts
 msgid "Slovak"
@@ -6160,8 +6179,8 @@ msgid "This conversation couldn't be opened. Refresh the page to try again."
 msgstr "Dit gesprek kan niet worden geopend. Vernieuw de pagina om het opnieuw te proberen."
 
 #: src/features/resume/editor/write/dates-field.tsx
-msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date."
-msgstr "Deze datum is niet opgeslagen. Gebruik een maand en een jaar, zoals maart 2022, of gewoon een jaar. Het CV behoudt de laatste geldige datum."
+msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date. Turn on Custom date text to save other wording."
+msgstr ""
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "This document"
@@ -6513,6 +6532,7 @@ msgstr "Onderstreep koppelingen"
 #: src/features/resume/editor/proposals/proposals.ts
 #: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
+#: src/features/resume/editor/write/picture-settings.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx

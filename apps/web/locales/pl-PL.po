@@ -1680,11 +1680,6 @@ msgstr "Nie udało się połączyć z dostawcą AI. Spróbuj ponownie za chwilę
 msgid "Couldn't reach your AI provider. Its key may have expired."
 msgstr "Nie udało się połączyć z dostawcą AI. Jego klucz mógł wygasnąć."
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Couldn't read “{0}”. Enter the dates so they sort and print consistently."
-msgstr "Nie udało się odczytać „{0}”. Wprowadź daty, aby były spójnie sortowane i drukowane."
-
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Couldn't read the dates on {entries}, so they stay at the end. Fix their dates and sort again."
 msgstr "Nie udało się odczytać dat wpisów {entries}, więc pozostają na końcu. Popraw ich daty i posortuj ponownie."
@@ -1772,6 +1767,7 @@ msgid "Couldn't sign in. Try again."
 msgstr "Nie udało się zalogować. Spróbuj ponownie."
 
 #. Fallback toast when signing out fails
+#: src/features/settings/account/page.tsx
 #: src/features/user/dropdown-menu.tsx
 msgid "Couldn't sign out. Try again."
 msgstr "Nie można się wylogować. Spróbuj ponownie."
@@ -1930,6 +1926,10 @@ msgstr "Niestandardowe"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Custom color (hex)"
 msgstr "Kolor niestandardowy (szesnastkowy)"
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Custom date text"
+msgstr ""
 
 #. Authentication provider display name in account settings
 #: src/features/settings/account/auth-hooks.ts
@@ -2450,6 +2450,10 @@ msgstr "Wpisz nazwę, maksymalnie 64 znaki."
 #: src/features/auth/pages/reset-password.tsx
 msgid "Enter a new password for your account."
 msgstr "Wprowadź nowe hasło do swojego konta."
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Enter a readable date or clear the text to use date fields."
+msgstr ""
 
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
@@ -4426,6 +4430,10 @@ msgstr "Zdjęcie ukryte na stronie."
 msgid "Photo on the page."
 msgstr "Zdjęcie na stronie."
 
+#: src/features/resume/editor/write/picture-settings.tsx
+msgid "Photo removed"
+msgstr ""
+
 #: src/components/input/icon-picker.tsx
 msgid "Pick an icon"
 msgstr "Wybierz ikonę"
@@ -4673,11 +4681,6 @@ msgstr "Reactive Resume {__APP_VERSION__} · MIT"
 msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
 msgstr ""
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Read as “{0}”. Pick a month so it sorts and prints consistently."
-msgstr "Odczytano jako „{0}”. Wybierz miesiąc, aby był spójnie sortowany i drukowany."
-
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read only"
 msgstr "Dostęp tylko do odczytu"
@@ -4838,10 +4841,6 @@ msgstr "Usuń rolę"
 #: src/features/resume/share/link-tab.tsx
 msgid "Remove the password?"
 msgstr "Usunąć hasło?"
-
-#: src/features/resume/editor/write/picture-settings.tsx
-msgid "Remove this photo?"
-msgstr "Usunąć to zdjęcie?"
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Removed"
@@ -5123,6 +5122,10 @@ msgstr "Zapisano"
 msgid "Saved “{trimmed}”"
 msgstr "Zapisano „{trimmed}”"
 
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Saved as written. Automated date checks and sorting are unavailable for this text."
+msgstr ""
+
 #. placeholder {0}: window.location.host
 #: src/features/resume/share/link-tab.tsx
 msgid "Saving {0}/{username}/{slug}… Copy is available after saving."
@@ -5183,6 +5186,10 @@ msgstr "Wyszukaj…"
 #: src/routes/dashboard/-components/app-shell.tsx
 msgid "Search or run…"
 msgstr "Wyszukaj lub uruchom…"
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Search the web"
+msgstr "Szukaj w sieci"
 
 #: src/features/settings/ai/web-access.tsx
 msgid "Search was tested with your server's search, and reading with {connectedProvider}."
@@ -5292,6 +5299,10 @@ msgstr "Wyślij link resetujący"
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
 msgstr "Wyślij samo CV, a nie opakowanie w postaci portfolio."
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Send this exact query to your web search provider?"
+msgstr "Wysłać dokładnie to zapytanie do dostawcy wyszukiwania w sieci?"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Sending password reset email..."
@@ -5579,6 +5590,10 @@ msgstr "Rozmiar"
 msgid "Skills"
 msgstr "Umiejętności"
 
+#: src/features/assistant/tool-approvals.tsx
+msgid "Skip"
+msgstr "Pomiń"
+
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Skip and upload"
 msgstr "Pomiń i prześlij"
@@ -5591,6 +5606,10 @@ msgstr "Przejdź do głównej treści"
 #: src/features/resume/editor/chrome/shell.tsx
 msgid "Skip to the page"
 msgstr "Przejdź do strony"
+
+#: src/features/assistant/conversation.tsx
+msgid "Skipped"
+msgstr "Pominięto"
 
 #: src/libs/locale.ts
 msgid "Slovak"
@@ -6160,8 +6179,8 @@ msgid "This conversation couldn't be opened. Refresh the page to try again."
 msgstr "Nie udało się otworzyć tej rozmowy. Odśwież stronę, aby spróbować ponownie."
 
 #: src/features/resume/editor/write/dates-field.tsx
-msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date."
-msgstr "Ta data nie została zapisana. Użyj miesiąca i roku, na przykład marzec 2022 r., lub po prostu rok. W CV zachowana jest ostatnia ważna data."
+msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date. Turn on Custom date text to save other wording."
+msgstr ""
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "This document"
@@ -6513,6 +6532,7 @@ msgstr "Podkreśl linki"
 #: src/features/resume/editor/proposals/proposals.ts
 #: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
+#: src/features/resume/editor/write/picture-settings.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx

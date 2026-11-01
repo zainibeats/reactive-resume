@@ -1680,11 +1680,6 @@ msgstr "Impossibile contattare il fornitore di intelligenza artificiale. Riprova
 msgid "Couldn't reach your AI provider. Its key may have expired."
 msgstr "Impossibile contattare il tuo fornitore di intelligenza artificiale. La sua chiave potrebbe essere scaduta."
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Couldn't read “{0}”. Enter the dates so they sort and print consistently."
-msgstr "Impossibile leggere “{0}”. Inserisci le date in modo che vengano ordinate e stampate in modo coerente."
-
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Couldn't read the dates on {entries}, so they stay at the end. Fix their dates and sort again."
 msgstr "Impossibile leggere le date di {entries}, quindi restano in fondo. Correggi le date e ordina di nuovo."
@@ -1772,6 +1767,7 @@ msgid "Couldn't sign in. Try again."
 msgstr "Impossibile accedere. Riprova."
 
 #. Fallback toast when signing out fails
+#: src/features/settings/account/page.tsx
 #: src/features/user/dropdown-menu.tsx
 msgid "Couldn't sign out. Try again."
 msgstr "Impossibile disconnettersi. Riprova."
@@ -1930,6 +1926,10 @@ msgstr "Personalizzato"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Custom color (hex)"
 msgstr "Colore personalizzato (esadecimale)"
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Custom date text"
+msgstr ""
 
 #. Authentication provider display name in account settings
 #: src/features/settings/account/auth-hooks.ts
@@ -2450,6 +2450,10 @@ msgstr "Inserisci un nome, fino a 64 caratteri."
 #: src/features/auth/pages/reset-password.tsx
 msgid "Enter a new password for your account."
 msgstr "Inserisci una nuova password per il tuo account."
+
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Enter a readable date or clear the text to use date fields."
+msgstr ""
 
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
@@ -4426,6 +4430,10 @@ msgstr "Foto nascosta dalla pagina."
 msgid "Photo on the page."
 msgstr "Foto sulla pagina."
 
+#: src/features/resume/editor/write/picture-settings.tsx
+msgid "Photo removed"
+msgstr ""
+
 #: src/components/input/icon-picker.tsx
 msgid "Pick an icon"
 msgstr "Scegli un'icona"
@@ -4673,11 +4681,6 @@ msgstr "Reactive Resume {__APP_VERSION__} · MIT"
 msgid "Reactive Resume is a free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume."
 msgstr ""
 
-#. placeholder {0}: dates.raw
-#: src/features/resume/editor/write/dates-field.tsx
-msgid "Read as “{0}”. Pick a month so it sorts and prints consistently."
-msgstr "Letto come “{0}”. Scegli un mese in modo che venga ordinato e stampato in modo coerente."
-
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read only"
 msgstr "Accesso in sola lettura"
@@ -4838,10 +4841,6 @@ msgstr "Rimuovi ruolo"
 #: src/features/resume/share/link-tab.tsx
 msgid "Remove the password?"
 msgstr "Rimuovere la password?"
-
-#: src/features/resume/editor/write/picture-settings.tsx
-msgid "Remove this photo?"
-msgstr "Rimuovere questa foto?"
 
 #: src/routes/builder/$resumeId/-components/parent-updates.tsx
 msgid "Removed"
@@ -5123,6 +5122,10 @@ msgstr "Salvato"
 msgid "Saved “{trimmed}”"
 msgstr "Salvato “{trimmed}”"
 
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Saved as written. Automated date checks and sorting are unavailable for this text."
+msgstr ""
+
 #. placeholder {0}: window.location.host
 #: src/features/resume/share/link-tab.tsx
 msgid "Saving {0}/{username}/{slug}… Copy is available after saving."
@@ -5183,6 +5186,10 @@ msgstr "Cerca…"
 #: src/routes/dashboard/-components/app-shell.tsx
 msgid "Search or run…"
 msgstr "Cerca o esegui..."
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Search the web"
+msgstr "Cerca sul web"
 
 #: src/features/settings/ai/web-access.tsx
 msgid "Search was tested with your server's search, and reading with {connectedProvider}."
@@ -5292,6 +5299,10 @@ msgstr "Invia link di reimpostazione"
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
 msgstr "Invia il curriculum stesso anziché un contenitore portfolio."
+
+#: src/features/assistant/tool-approvals.tsx
+msgid "Send this exact query to your web search provider?"
+msgstr "Inviare questa esatta ricerca al tuo fornitore di ricerca web?"
 
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Sending password reset email..."
@@ -5579,6 +5590,10 @@ msgstr "Dimensione"
 msgid "Skills"
 msgstr "Competenze"
 
+#: src/features/assistant/tool-approvals.tsx
+msgid "Skip"
+msgstr "Salta"
+
 #: src/features/resume/editor/write/picture-settings.tsx
 msgid "Skip and upload"
 msgstr "Salta e carica"
@@ -5591,6 +5606,10 @@ msgstr "Salta al contenuto principale"
 #: src/features/resume/editor/chrome/shell.tsx
 msgid "Skip to the page"
 msgstr "Vai alla pagina"
+
+#: src/features/assistant/conversation.tsx
+msgid "Skipped"
+msgstr "Saltata"
 
 #: src/libs/locale.ts
 msgid "Slovak"
@@ -6160,8 +6179,8 @@ msgid "This conversation couldn't be opened. Refresh the page to try again."
 msgstr "Impossibile aprire questa conversazione. Aggiorna la pagina per riprovare."
 
 #: src/features/resume/editor/write/dates-field.tsx
-msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date."
-msgstr "Questa data non è stata salvata. Utilizza un mese e un anno, ad esempio marzo 2022, o solo un anno. Il curriculum mantiene l'ultima data valida."
+msgid "This date hasn't been saved. Use a month and year, like Mar 2022, or just a year. The resume keeps the last valid date. Turn on Custom date text to save other wording."
+msgstr ""
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "This document"
@@ -6513,6 +6532,7 @@ msgstr "Sottolinea i collegamenti"
 #: src/features/resume/editor/proposals/proposals.ts
 #: src/features/resume/editor/webmcp.ts
 #: src/features/resume/editor/write/entry-card.tsx
+#: src/features/resume/editor/write/picture-settings.tsx
 #: src/features/resume/editor/write/section-row.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/routes/builder/$resumeId/-components/design-panel.tsx
