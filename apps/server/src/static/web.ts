@@ -118,6 +118,8 @@ const escapeAttribute = (value: string) =>
 		.replaceAll('"', "&quot;")
 		.replaceAll("'", "&#39;");
 
+const mediaFile = /\.(?:avif|gif|ico|jpe?g|mp3|png|svg|ttf|webp|woff2?)$/i;
+
 export const serveWebDistStatic = env.CLOUDFLARE
 	? undefined
 	: serveStatic({
@@ -126,6 +128,11 @@ export const serveWebDistStatic = env.CLOUDFLARE
 				// Vite fingerprints everything under /assets, so a file there never changes.
 				if (context.req.path.startsWith("/assets/") || /^\/videos\/.*-v\d+\.(?:mp4|webp)$/.test(context.req.path)) {
 					context.header("Cache-Control", "public, max-age=31536000, immutable");
+				} else if (mediaFile.test(context.req.path)) {
+					// Other files keep their names when their content changes. Browsers keep pictures, fonts and sounds for
+					// 30 days, the shortest lifetime Lighthouse doesn't count as waste; one replaced under the same name
+					// reaches every visitor within that month.
+					context.header("Cache-Control", "public, max-age=2592000");
 				}
 				// `/index.html` is the app shell too; it must not be frameable either.
 				if (context.req.path.endsWith(".html"))
