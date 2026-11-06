@@ -10,6 +10,7 @@ import {
 	syncResumeDates,
 } from "./dates";
 import { defaultResumeData } from "./default";
+import presentLabels from "./present-labels.json";
 
 const range = (text: string, locale = "en-US") => readLegacyDates(text, { locale, single: false });
 const single = (text: string, locale = "en-US") => readLegacyDates(text, { locale, single: true });
@@ -138,6 +139,38 @@ describe("formatYearMonth", () => {
 		["short", "fr-FR", "mars 2022"],
 	] as const)("prints 2022-03 as %s in %s", (format, locale, expected) => {
 		expect(formatYearMonth("2022-03", { locale, format })).toBe(expected);
+	});
+
+	it.each([
+		["ar-SA", "short", "٢٠١٩"],
+		["ar-SA", "iso", "2019"],
+	] as const)("prints a year-only date in %s (%s) in its month dates' digits", (locale, format, expected) => {
+		expect(formatYearMonth("2019", { locale, format })).toBe(expected);
+	});
+
+	it("prints month dates in the Gregorian calendar the dates are stored in", () => {
+		expect(formatYearMonth("2024-03", { locale: "fa-IR", format: "short" })).toBe("مارس ۲۰۲۴");
+		expect(formatYearMonth("2024-03", { locale: "fa-IR", format: "long" })).toBe("مارس ۲۰۲۴");
+		expect(formatYearMonth("2024-03", { locale: "th-TH", format: "short" })).toBe("มี.ค. 2024");
+		expect(formatYearMonth("2024-03", { locale: "th-TH", format: "long" })).toBe("มีนาคม 2024");
+		expect(formatYearMonth("2024-03", { locale: "ar-SA", format: "short" })).toBe("مارس ٢٠٢٤");
+	});
+
+	it("prints every locale's month dates in the year they store", () => {
+		for (const locale of Object.keys(presentLabels)) {
+			for (const format of ["short", "long"] as const) {
+				const printed = formatYearMonth("2024-03", { locale, format });
+				expect(printed, `${locale} ${format}`).toContain(formatYearMonth("2024", { locale, format }));
+			}
+		}
+	});
+
+	it("keeps a year's leading zeros", () => {
+		expect(formatYearMonth("0019", { locale: "en-US", format: "short" })).toBe("0019");
+		expect(formatYearMonth("0019", { locale: "ar-SA", format: "long" })).toBe("٠٠١٩");
+		expect(formatYearMonth("0019-03", { locale: "en-US", format: "short" })).toBe("Mar 0019");
+		expect(formatYearMonth("0019-03", { locale: "ar-SA", format: "short" })).toBe("مارس ٠٠١٩");
+		expect(formatYearMonth("0999-03", { locale: "en-US", format: "long" })).toBe("March 0999");
 	});
 });
 

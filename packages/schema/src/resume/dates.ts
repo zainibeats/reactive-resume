@@ -192,30 +192,71 @@ export type DateFormatOptions = {
 
 const monthFormatters = new Map<string, Intl.DateTimeFormat>();
 
-function formatMonth(year: number, month: number, locale: string, style: "short" | "long") {
+function formatMonth(yearText: string, month: number, locale: string, style: "short" | "long") {
 	const key = `${locale}:${style}`;
 	let formatter = monthFormatters.get(key);
 	if (!formatter) {
 		try {
-			formatter = new Intl.DateTimeFormat(locale, { year: "numeric", month: style, timeZone: "UTC" });
+			formatter = new Intl.DateTimeFormat(locale, {
+				year: "numeric",
+				month: style,
+				timeZone: "UTC",
+				calendar: "gregory",
+			});
 		} catch {
-			formatter = new Intl.DateTimeFormat("en-US", { year: "numeric", month: style, timeZone: "UTC" });
+			formatter = new Intl.DateTimeFormat("en-US", {
+				year: "numeric",
+				month: style,
+				timeZone: "UTC",
+				calendar: "gregory",
+			});
 		}
 		monthFormatters.set(key, formatter);
 	}
-	return formatter.format(Date.UTC(year, month - 1, 1));
+	// The dates are stored as Gregorian year-months, so the month must print in the Gregorian calendar even
+	// where the locale defaults to another one (Persian, Buddhist). Formatting a fixed four-digit year also
+	// keeps years 0-99 out of Date.UTC's 1900+ mapping; the year is then swapped for the stored one, which
+	// keeps its leading zeros.
+	const formatted = formatter.format(Date.UTC(2000, month - 1, 1));
+	return formatted.replace(formatYear("2000", locale), formatYear(yearText, locale));
 }
 
-/** One date in the chosen format: Mar 2022, March 2022, 03/2022 or 2022-03. Year-only dates print the year. */
-export function formatYearMonth(value: YearMonth, { locale, format = DEFAULT_DATE_FORMAT }: DateFormatOptions) {
-	const [yearText, monthText] = value.split("-");
-	if (!monthText) return yearText ?? value;
+const yearFormatters = new Map<string, Intl.NumberFormat>();
 
-	const year = Number(yearText);
+// A year in the digits the locale's month dates use, so "2019" sits beside "أبريل ٢٠١٩" as "٢٠١٩". Only the digits
+// change, one by one: the year stays the one the user entered, leading zeros and all, in any calendar.
+function formatYear(yearText: string, locale: string) {
+	let formatter = yearFormatters.get(locale);
+	if (!formatter) {
+		let numberingSystem = "latn";
+		try {
+			numberingSystem = new Intl.DateTimeFormat(locale, { year: "numeric" }).resolvedOptions().numberingSystem;
+		} catch {
+			// An unknown locale prints Latin digits, as its month dates do.
+		}
+		formatter = new Intl.NumberFormat("en-US", { numberingSystem, useGrouping: false });
+		yearFormatters.set(locale, formatter);
+	}
+	const digits = formatter;
+	return yearText.replace(/\d/g, (digit) => digits.format(Number(digit)));
+}
+
+/**
+ * One date in the chosen format: Mar 2022, March 2022, 03/2022 or 2022-03. Year-only dates print the year, in the
+ * same digits as the month formats' years.
+ */
+export function formatYearMonth(value: YearMonth, { locale, format = DEFAULT_DATE_FORMAT }: DateFormatOptions) {
+	const [yearText = "", monthText] = value.split("-");
+	if (!monthText) {
+		const year = Number(yearText);
+		if (!yearText || !Number.isInteger(year) || format === "iso" || format === "numeric") return yearText ?? value;
+		return formatYear(yearText, locale);
+	}
+
 	const month = Number(monthText);
 	if (format === "iso") return value;
 	if (format === "numeric") return `${monthText}/${yearText}`;
-	return formatMonth(year, month, locale, format);
+	return formatMonth(yearText, month, locale, format);
 }
 
 /**
