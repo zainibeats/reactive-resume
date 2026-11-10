@@ -1,6 +1,7 @@
 import type { PdfFontRequest } from "../hooks/use-register-fonts";
 import type { FormeFont } from "@formepdf/react";
-import { prepareFontBytes } from "./font-bytes";
+import { isValidFontFile, prepareFontBytes } from "@reactive-resume/fonts/files";
+import { resolveFontSource } from "@reactive-resume/fonts/sources";
 
 // One download per font file for the life of the page or server process.
 const cache = new Map<string, Promise<Uint8Array>>();
@@ -13,15 +14,26 @@ const STALL_TIMEOUT_MS = 30_000;
 // within FALLBACK_AFTER_MS, the other host starts too and the first to answer wins.
 const GSTATIC_HOSTS = ["fonts.gstatic.com", "fonts.gstatic.cn"];
 const FALLBACK_AFTER_MS = 3000;
+// The largest catalog face is about 15 MB; a host that keeps streaming past this is refused, not buffered.
+const MAX_FONT_BYTES = 32 * 1024 * 1024;
 let preferredHost = GSTATIC_HOSTS[0] ?? "";
 
-function fetchFont(src: string, signal: AbortSignal): Promise<Response> {
+export type FontReadOptions = { mirror?: boolean | undefined };
+
+function fetchFont(
+	src: string,
+	signal: AbortSignal,
+	fetcher: typeof fetch,
+	options: FontReadOptions,
+): Promise<Response> {
 	const url = new URL(src);
 	const check = (response: Response) => {
 		if (!response.ok) throw new Error(`Font ${src}: HTTP ${response.status}`);
 		return response;
 	};
-	if (!GSTATIC_HOSTS.includes(url.hostname)) return fetch(src, { signal }).then(check);
+	// Redirects and the gstatic race must never escape an operator's explicit mirror.
+	if (options.mirror) return fetcher(src, { signal, redirect: "error" }).then(check);
+	if (!GSTATIC_HOSTS.includes(url.hostname)) return fetcher(src, { signal }).then(check);
 
 	const hosts = [preferredHost, ...GSTATIC_HOSTS.filter((host) => host !== preferredHost)];
 	const attempts = hosts.map(() => new AbortController());
@@ -39,7 +51,7 @@ function fetchFont(src: string, signal: AbortSignal): Promise<Response> {
 			const fallback = setTimeout(() => start(index + 1), FALLBACK_AFTER_MS);
 			const target = new URL(url);
 			target.hostname = host;
-			fetch(target, { signal: attempt.signal })
+			fetcher(target, { signal: attempt.signal })
 				.then(check)
 				.then((response) => {
 					clearTimeout(fallback);
@@ -63,7 +75,12 @@ function fetchFont(src: string, signal: AbortSignal): Promise<Response> {
 	});
 }
 
-async function download(src: string): Promise<Uint8Array> {
+/** Downloads a font file's bytes from its source, trying the gstatic mirror when Google's host fails. */
+export async function downloadFont(
+	src: string,
+	fetcher: typeof fetch = fetch,
+	options: FontReadOptions = {},
+): Promise<Uint8Array> {
 	const controller = new AbortController();
 	let stall: ReturnType<typeof setTimeout> | undefined;
 	const progress = () => {
@@ -72,26 +89,50 @@ async function download(src: string): Promise<Uint8Array> {
 	};
 	progress();
 	try {
-		const response = await fetchFont(src, controller.signal);
+		const response = await fetchFont(src, controller.signal, fetcher, options);
 		progress();
-		const body = response.body?.pipeThrough(
-			new TransformStream<Uint8Array, Uint8Array>({
-				transform: (chunk, stream) => {
-					progress();
-					stream.enqueue(chunk);
-				},
-			}),
-		);
-		return new Uint8Array(await new Response(body).arrayBuffer());
+		const reader = response.body?.getReader();
+		if (!reader) throw new Error(`Font ${src}: download has no streaming body`);
+		const chunks: Uint8Array[] = [];
+		let size = 0;
+		try {
+			for (;;) {
+				const { value, done } = await reader.read();
+				if (done) break;
+				progress();
+				size += value.byteLength;
+				if (size > MAX_FONT_BYTES) throw new Error(`Font ${src}: larger than ${MAX_FONT_BYTES} bytes`);
+				chunks.push(value);
+			}
+		} finally {
+			await reader.cancel();
+		}
+		const bytes = new Uint8Array(size);
+		let offset = 0;
+		for (const chunk of chunks) {
+			bytes.set(chunk, offset);
+			offset += chunk.byteLength;
+		}
+		// A misconfigured static host can answer 200 with HTML or a truncated file; the original hosts are trusted.
+		if (options.mirror && !isValidFontFile(bytes)) throw new Error(`Font ${src}: invalid font data`);
+		return bytes;
 	} finally {
 		clearTimeout(stall);
 	}
 }
 
-const load = (src: string) => {
+let readFont = (src: string, options: FontReadOptions) => downloadFont(src, fetch, options);
+
+/** Replaces how font files are read, e.g. with a persistent cache around `downloadFont` (the mobile app). */
+export function configureFontReader(reader: (src: string, options: FontReadOptions) => Promise<Uint8Array>) {
+	readFont = reader;
+	cache.clear();
+}
+
+const load = (src: string, options: FontReadOptions) => {
 	let bytes = cache.get(src);
 	if (!bytes) {
-		bytes = download(src).then(prepareFontBytes);
+		bytes = readFont(src, options).then(prepareFontBytes);
 		// A failed download may succeed next time.
 		bytes.catch(() => cache.delete(src));
 		cache.set(src, bytes);
@@ -102,11 +143,12 @@ const load = (src: string) => {
 /**
  * The font faces a document needs, as bytes Forme can embed. A face that fails to load is left out and listed in
  * `missing`; Forme falls back to its built-in fonts for that text.
- * An explicit mirror base rewrites only Computer Modern downloads, leaving catalog sources unchanged.
+ * The legacy base rewrites Computer Modern only. A full mirror takes precedence and never retries original hosts.
  */
 export async function loadFonts(
 	requests: readonly PdfFontRequest[],
 	webFontBaseUrl?: string,
+	fontMirrorUrl?: string,
 ): Promise<{ fonts: FormeFont[]; warnings: string[]; missing: string[] }> {
 	const mirrorBase = webFontBaseUrl?.trim().replace(/\/+$/, "");
 	const computerModernBase = "https://cdn.jsdelivr.net/gh/bitmaks/cm-web-fonts@latest";
@@ -115,11 +157,17 @@ export async function loadFonts(
 	const loaded = await Promise.all(
 		requests.map(async (request): Promise<FormeFont | null> => {
 			try {
-				const source =
+				const legacySource =
 					mirrorBase && request.src.startsWith(computerModernBase)
 						? mirrorBase + request.src.slice(computerModernBase.length)
 						: request.src;
-				return { family: request.family, weight: request.weight, italic: request.italic, src: await load(source) };
+				const source = fontMirrorUrl ? resolveFontSource(request.src, fontMirrorUrl) : legacySource;
+				return {
+					family: request.family,
+					weight: request.weight,
+					italic: request.italic,
+					src: await load(source, { mirror: Boolean(fontMirrorUrl) }),
+				};
 			} catch (error) {
 				warnings.push(error instanceof Error ? error.message : `Font ${request.src} could not be loaded.`);
 				missing.push(request.family);

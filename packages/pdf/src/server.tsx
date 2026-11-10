@@ -28,8 +28,9 @@ export const createResumePdfFile = async ({
 		data: parseResumeData(input.data),
 		readImage: (source) => readServerImage(source, uploadOrigin),
 		webFontBaseUrl: process.env.WEB_FONT_BASE_URL,
+		fontMirrorUrl: process.env.FONT_MIRROR_URL,
 	});
 	// Characters no font can draw print as "?" rather than failing the file; the editor names them.
-	assertPdfFonts(result);
+	assertPdfFonts(result, process.env.FONT_MIRROR_URL);
 	return new File([result.pdf as Uint8Array<ArrayBuffer>], filename, { type: "application/pdf" });
 };

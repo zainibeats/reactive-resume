@@ -62,11 +62,10 @@ function isPublicResumePath(pathname: string): boolean {
 
 /**
  * Scripts run only from the app's own files and the inline scripts of the page served, allowed by hash; `wasm-unsafe-eval`
- * lets the PDF engine (Forme, WebAssembly) start. Pictures, avatars and fonts can live on any https host (a resume's
- * picture URL, a sign-in provider's avatar) and the PDF engine fetches them, so images, fonts and connections stay open
- * to https. Recordings, previews and workers use blob: URLs.
+ * lets the PDF engine (Forme, WebAssembly) start. Images and connections allow HTTPS resources. Configured mirrors
+ * restrict CSS fonts to the app, data URLs and the mirror origin. Recordings, previews and workers use blob: URLs.
  */
-function contentSecurityPolicy(html = "") {
+export function contentSecurityPolicy(html = "") {
 	const inlineScripts = html.matchAll(
 		/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g,
 	);
@@ -81,8 +80,8 @@ function contentSecurityPolicy(html = "") {
 		["script-src 'self' 'wasm-unsafe-eval'", ...hashes].join(" "),
 		"style-src 'self' 'unsafe-inline'",
 		"img-src 'self' data: blob: https:",
-		"font-src 'self' data: https:",
-		"connect-src 'self' data: blob: https:",
+		`font-src 'self' data: ${env.FONT_MIRROR_URL ? new URL(env.FONT_MIRROR_URL).origin : "https:"}`,
+		`connect-src 'self' data: blob: https:${env.FONT_MIRROR_URL ? ` ${new URL(env.FONT_MIRROR_URL).origin}` : ""}`,
 		"media-src 'self' data: blob:",
 		"worker-src 'self' blob:",
 		"frame-src 'self' blob:",

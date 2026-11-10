@@ -1,6 +1,7 @@
 import type { AuthSession } from "@reactive-resume/auth/types";
 import type { QueryClient } from "@tanstack/react-query";
 import { getSession } from "./auth/session";
+import { configureFontMirror } from "./font-source";
 import { getLocale, loadLocale } from "./locale";
 import { client } from "./orpc/client";
 import { getTheme } from "./theme";
@@ -36,6 +37,7 @@ export async function loadRootContext(queryClient: QueryClient) {
 		queryClient.query({ queryKey: flagsQueryKey, queryFn: () => client.flags.get(), staleTime: 5 * 60_000 }),
 		loadLocale(locale),
 	]);
+	configureFontMirror(flags.fontMirrorUrl);
 
 	return { theme, locale, session, flags };
 }

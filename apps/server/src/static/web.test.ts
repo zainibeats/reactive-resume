@@ -3,7 +3,11 @@ import fs from "node:fs/promises";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 
 const mocks = vi.hoisted(() => ({
-	env: { APP_URL: "https://rxresu.me", ROOT_RESUME_ID: undefined as string | undefined },
+	env: {
+		APP_URL: "https://rxresu.me",
+		ROOT_RESUME_ID: undefined as string | undefined,
+		FONT_MIRROR_URL: undefined as string | undefined,
+	},
 	serveStatic: vi.fn((_options?: unknown) => vi.fn()),
 }));
 
@@ -35,7 +39,20 @@ type StaticOptions = {
 	) => void | Promise<void>;
 };
 
-const { handleWebApp } = await import("./web");
+const { contentSecurityPolicy, handleWebApp } = await import("./web");
+
+it("builds font-src with the application and configured mirror origins", () => {
+	mocks.env.FONT_MIRROR_URL = "http://fonts.example.test:8080/resume";
+	try {
+		const policy = contentSecurityPolicy();
+		expect(policy.split("; ").find((part) => part.startsWith("font-src"))).toBe(
+			"font-src 'self' data: http://fonts.example.test:8080",
+		);
+		expect(policy).toContain("connect-src 'self' data: blob: https: http://fonts.example.test:8080");
+	} finally {
+		mocks.env.FONT_MIRROR_URL = undefined;
+	}
+});
 const staticOptions = mocks.serveStatic.mock.calls[0]?.[0] as StaticOptions | undefined;
 
 describe("web app fallback classification", () => {
