@@ -546,6 +546,10 @@ msgstr "एक लिंक जोडा"
 msgid "Add a location"
 msgstr "एक स्थान जोडा"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "साइन इन करण्याचा दुसरा मार्ग म्हणून पासवर्ड जोडा. तुमच्या इतर साइन-इन पद्धती आणि डिव्हाइसेस जसे आहेत तसेच राहतात."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "एक फोन नंबर जोडा"
@@ -787,10 +791,6 @@ msgstr "उजवीकडे संरेखित करा"
 msgid "All"
 msgstr "सर्व"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "प्रवेशाची परवानगी द्या"
@@ -1031,6 +1031,7 @@ msgstr "आता परत"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "साइन इनवर परत जा"
@@ -1138,11 +1139,17 @@ msgstr "यादी प्रविष्टी {n}"
 msgid "Bulleted list"
 msgstr "बुलेट केलेली यादी"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "स्कॅन करता आले नाही? ही की अ‍ॅपमध्ये टाका:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "फोटो बदला"
 msgid "Change theme to…"
 msgstr "… वर थीम बदला"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "{pendingEmail} कडील बदलाला {0} कडून मंजुरीची वाट पाहत आहे. दुवा एक तास काम करतो."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "{pendingEmail} कडील बदलाची वाट पाहत आहे: तिथे पाठवलेला दुवा उघडा. दुवा एक तास काम करतो."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "तुमचा पासवर्ड बदला"
@@ -1206,6 +1222,10 @@ msgstr "मत बदलले आहे का? तुमच्या रेझ
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "केवळ विभाग शीर्षके आणि तारीख शब्द बदलते, तुमची सामग्री नाही."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "तुमचे कनेक्शन तपासा आणि पु�
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "तुमचा ईमेल तपासा"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "तुमचा पासवर्ड रिसेट करण्यासाठीच्या लिंकसाठी तुमचे ईमेल तपासा."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "एक फाइल निवडा"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "आयात करण्यासाठी फाइल निवडा"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "नवीन पासवर्ड निवडा. यामुळे तुम्ही सर्वत्रून साइन आउट होता आणि तुमच्या पासकीज, API कीज आणि कनेक्ट केलेल्या अ‍ॅप्स काढल्या जातात."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "क्लायंट आयडी"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "तुमच्या सूचीच्या एंट्री वा
 msgid "Connected"
 msgstr "जोडलेले"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "{0} कनेक्ट केले"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "कनेक्ट केलेले अनुप्रयोग"
@@ -1511,6 +1537,10 @@ msgstr "संभाषणे"
 msgid "Copied"
 msgstr "कॉपी केले"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "या कीसह MCP कॉन्फिग कॉपी केले."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "आता कॉपी करा. तुमच्या सुरक्�
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "लिंक कॉपी करा"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "MCP कॉन्फिग कॉपी करा"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "कनेक्ट करू शकलो नाही. की तपा
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "उतारा कॉपी करता आला नाही. पुन्हा प्रयत्न करा."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "क्लिपबोर्डवर कॉपी करता आले नाही. पुन्हा प्रयत्न करा."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "पासवर्ड सेट करता आला नाही. प
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "द्वि-चरण पडताळणी सेट करता आली नाही. पुन्हा प्रयत्न करा."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "तुमचा पासवर्ड सेट करता आला नाही. पुन्हा प्रयत्न करा."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "पूर्वावलोकन दाखवता आले नाही."
@@ -1876,6 +1918,18 @@ msgstr "नवीन रेझ्युमे बनवा"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "प्रथम एक रेझ्युमे तयार करा, नंतर त्याबद्दल विचारा."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "{name} जोडण्यासाठी खाते तयार करा."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "अ‍ॅप जोडण्यासाठी खाते तयार करा."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "खाते हटवा"
 msgid "Delete conversation"
 msgstr "संभाषण हटवा"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "कागदपत्रे आणि खात्याचा डेटा हटवा."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "एंट्री हटवा"
@@ -2157,6 +2215,10 @@ msgstr "तपशील"
 msgid "Details from the provider:"
 msgstr "प्रदात्याकडून तपशील:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "मिळाले नाही?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "बदल टाकून द्या"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "जतन न केलेले बदल टाकून द्यायचे?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "डिस्कनेक्ट"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "“{name}” डिस्कनेक्ट करायचे?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "{0} डिस्कनेक्ट करा"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "तुमच्या खात्यातून अ‍ॅप डिस्कनेक्ट करा."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "“{name}” डिस्कनेक्ट केले."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "ईमेल"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "ईमेल पत्ता"
@@ -2418,6 +2496,11 @@ msgstr "ईमेल पत्ता ओळखला जाणार नाह�
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "या सर्व्हरवर ईमेल वितरण सेट केलेले नाही, त्यामुळे पत्ता सत्यापित केलेला नाही."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "ईमेल किंवा वापरकर्तानाव"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "बॅकअप कोड टाका."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "64 वर्णांपर्यंत नाव एंटर करा."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "तुमच्या खात्यासाठी नवीन पासवर्ड टाका."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "प्रत्येक भूमिका सांगते की �
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "फोकस मोडमधून बाहेर पडा"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "अपेक्षित"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "LibreOffice आणि इतर ओपन-सोर्स संपा�
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "पोर्टल्स किंवा रिक्रूटर्ससाठी जे Word साठी विचारतात. लेआउट सरलीकृत आहे."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "स्क्रिप्ट, विस्तार आणि MCP क्लायंटसाठी. की तुमच्याप्रमाणे काम करतात आणि तुमचे दस्तऐवज वाचू आणि संपादित करू शकतात."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "फक्त या भेटीसाठी"
@@ -2748,6 +2828,10 @@ msgstr "सहाय्यक किंवा API कडून"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "तुमच्या अनुभवाच्या नोंदींवरून"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "संपूर्ण प्रवेश"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "घरी जा"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "डॅशबोर्डला जा"
@@ -2994,6 +3079,10 @@ msgstr "चिन्ह…"
 msgid "Icons in contact line"
 msgstr "संपर्क ओळीत चिन्ह"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "त्या पत्त्याचे खाते असेल, तर रीसेट दुवा वाटेत आहे."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "ते स्कॅनमधून आले असेल, तर ते अपेक्षित आहे. अन्यथा ते काढून टाका; भर्ती करणारे त्याला कीवर्ड स्टफिंग समजतात."
@@ -3009,6 +3098,10 @@ msgstr "जर कोणी तुम्हाला ही लिंक पा�
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "हा संवाद बंद केल्यास तुमचे बदल गमावले जातील."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "तुम्ही तुमचा ईमेल पत्ता कधीच सत्यापित केला नसेल, तर पासवर्ड रीसेटमुळे दोन-पायरी तपासणी बंद होते. नाहीतर रीसेटनंतरही ती चालू राहते, म्हणून हा Reactive Resume सर्व्हर चालवणाऱ्याला तुमच्या खात्यातून ती बंद करण्यास सांगा. मग पासवर्डने साइन इन करा आणि नवीन ऑथेंटिकेटरसह ती पुन्हा चालू करा."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "समस्या आणि जॉब मॅच अजूनही AI �
 msgid "It has entries but isn't placed on a page."
 msgstr "त्यात नोंदी आहेत पण पानावर ठेवलेल्या नाहीत."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "आता त्याचा प्रवेश जातो. पुन्हा वापरण्यासाठी ते अ‍ॅपमधून कनेक्ट करा. हे पूर्ववत करता येत नाही."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "ते चांगल्यासाठी हटवले जाईल आणि पुनर्संचयित केले जाऊ शकत नाही."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "एकच पत्ता ठेवा, म्हणजे कोणता वापरायचा याचा अंदाज सॉफ्टवेअरला बांधावा लागणार नाही."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "अॅप्लिकेशन वापरत नसतानाही प्रवेश ठेवा."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "की संग्रहित एनक्रिप्टेड"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "की तुमच्याप्रमाणे काम करतात आणि तुमचे दस्तऐवज वाचू आणि संपादित करू शकतात."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "तुम्ही निवडलेल्या प्रवेशाधिकारांसह की तुमच्या वतीने काम करतात. नवीन की सुरुवातीला केवळ वाचण्याची परवानगी देतात."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "लांबी"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "लांबी ही उणीव नाही, आणि सार्वत्रिक एक-पान नियम नाही. जी पाने त्यांचे स्थान पात्र आहेत ती ठेवा."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Claude किंवा Cursor सारख्या AI क्लायंटना वरील API की वापरून तुमचे रेझ्युमे वाचू आणि संपादित करू द्या."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "नवीन पृष्ठ"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "नवीन पासवर्ड"
@@ -3912,6 +4007,10 @@ msgstr "नवीन विभाग"
 msgid "Next issue"
 msgstr "पुढील अंक"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "बॅकअप कोड्सही नाहीत?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "बुलेट याद्या सापडल्या नाहीत."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "त्या शोधाशी जुळणारी कोणतीही कमांड नाही."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "अद्याप कोणतेही कनेक्ट केलेले अॅप्लिकेशन नाहीत. तुम्ही तुमच्या खात्यात प्रवेशाची परवानगी दिलेले अॅप्स येथे दिसतात."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "{title} उघडा"
 msgid "Open AI settings"
 msgstr "AI सेटिंग्ज उघडा"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "ईमेल अॅप उघडा"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "फोकस मोड उघडा"
@@ -4352,6 +4446,10 @@ msgstr "पासकी"
 msgid "Passkeys"
 msgstr "पासकीज"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "पासकीजना सत्यापित ईमेल लागतो, जो हा सर्व्हर पाठवू शकत नाही."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "पासवर्ड"
 msgid "Password changed"
 msgstr "पासवर्ड बदलला"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "पासवर्ड बदलला. तुम्ही सर्वत्रून साइन आउट झाला आहात; साइन इन करा, मग पासकीज किंवा API कीज पुन्हा जोडा."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "पासवर्ड काढला"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "पासवर्ड रीसेट झाला. तुमच्या नवीन पासवर्डने साइन इन करा."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "पासवर्ड सेट"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "पासवर्ड सेट झाला. आता तुम्ही त्यानेही साइन इन करू शकता."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "केवळ-वाचनीय प्रवेश"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "फक्त-वाचन प्रवेशात काहीही बदलता येत नाही किंवा हटवता येत नाही."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "संलग्नक वाचा"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "तुमचा ईमेल पत्ता वाचा."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "तुमची प्रोफाइल माहिती वाचा."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "पासवर्ड आवश्यक आहे"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "पुन्हा पाठवा"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "कॅपिटल्स फक्त लहान शीर्षकांसाठी राखून ठेवा. ते वाचन मंदावतात आणि केस-सेन्सिटिव्ह शोध निष्फळ करू शकतात."
@@ -4981,6 +5101,10 @@ msgstr "रेझ्युमे"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "रेझ्युमे नेहमी पांढऱ्या कागदावर रेंडर होतात, थीम काहीही असो."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "रद्द करा"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "{0} मागे घ्या"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "प्रवेश रद्द करा"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "तुमच्या खात्यावरील अनुप्रयोगाचा प्रवेश रद्द करा."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "सिमँटिक CSS स्टाईलशीट"
 msgid "Send"
 msgstr "पाठवा"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "पुन्हा पाठवा"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "ते <0>x-api-key</0> हेडरमध्ये पाठवा."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "रीसेट लिंक पाठवा"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "मंजुरीचा दुवा पुन्हा पाठवा"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "तुमच्या रेझ्युमेचा मजकूर त
 msgid "Sent"
 msgstr "पाठवले"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "पुन्हा पाठवले. पोहोचण्यास मिनिटभर लागू शकते."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Lumen ला पाठवले"
 msgid "Serbian"
 msgstr "सर्बियन"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "पासवर्ड सेट करा"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "पासवर्ड सेट करा"
@@ -5354,6 +5489,10 @@ msgstr "निर्यात करताना दस्तऐवजाची 
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "तुमचे ऑथेंटिकेटर अॅप सेट करा"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "तुमचा पासवर्ड सेट होत आहे…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "साइडबार अनेकदा शेवटचे वाचल
 msgid "Sign in"
 msgstr "साइन इन"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "तुमच्या AI क्लायंटमधून साइन इन करा किंवा API की वापरा."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "आता साइन इन करा"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "{name} जोडण्यासाठी साइन इन करा."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "अ‍ॅप जोडण्यासाठी साइन इन करा."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "काही अक्षरे प्रश्नचिन्ह म्
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "काही तपासण्यांना अशी माहिती लागते जी या फाइलमध्ये नाही: तपासता न आलेला पानांचा मजकूर, किंवा या तपासण्यांना न कळणाऱ्या भाषेतील मजकूर. त्या पास किंवा नापास दोन्हीही धरल्या जात नाहीत."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "या सर्व्हरच्या फॉन्ट मिररमध्ये काही फॉन्ट नाहीत. ते जोडण्यासाठी प्रशासकाला सांगा."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "काही ग्लिफ्सना या फाइलबाहेर अर्थ नाही."
@@ -5666,6 +5821,10 @@ msgstr "काही मजकूर फिरवलेला आहे."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "अपलोड केलेल्या काही फायली वगळल्या गेल्या. संग्रहातील upload-manifest.json तपासा."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "{minimum} pt अंतर्गत मजकूर जेव्हा �
 msgid "Thai"
 msgstr "थाई"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "त्या खात्याचा पासवर्ड बदलला आणि ते सर्वत्रून साइन आउट झाले आहे. हा ब्राउझर अजूनही {0} म्हणून साइन इन आहे."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "तो पासवर्ड बरोबर नाही. रेझ्युमेच्या मालकाकडून तपासा आणि पुन्हा प्रयत्न करा."
@@ -6170,6 +6334,10 @@ msgstr "ते अनुभव, शिक्षण आणि कौशल्य�
 msgid "Thinking…"
 msgstr "विचार करत आहे…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "ही कनेक्शन विनंती अवैध आहे किंवा कालबाह्य झाली आहे. तुमच्या क्लायंटमधून कनेक्शन पुन्हा सुरू करा."
@@ -6317,6 +6485,14 @@ msgstr "हा रिझ्युमे एका एआय एजंटद्�
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "या रिझ्युमेची शेअरिंग सेटिंग्ज इतरत्र बदलली आहेत."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "हा सर्व्हर ईमेल पाठवू शकत नाही, म्हणून पासवर्ड रीसेट उपलब्ध नाही. तो चालवणाऱ्याला तुमचा पासवर्ड रीसेट करण्यास सांगा."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "हा सर्व्हर ईमेल पाठवू शकत नाही, म्हणून पत्ता इथे बदलता येत नाही. तो चालवणाऱ्याला सांगा."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "3 ते 64 लोअरकेस अक्षरे, संख्या
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "किमान 3 अक्षरे वापरा."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "पडताळा"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "बॅकअप कोडने पडताळणी करा"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "पासकी जोडण्यासाठी तुमचा ईमेल सत्यापित करा. दुवा वरील खाते तपशीलांमध्ये आहे."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "तुम्ही हे आधीच “{0}” साठी वाप�
 msgid "You answered: {answer}"
 msgstr "तुम्ही उत्तर दिले: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "तुम्ही तुमच्या वापरकर्तानावानेही साइन इन करू शकता."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "तुम्ही ते कधीही सेटिंग्ज → AI आणि डेव्हलपरमध्ये डिस्कनेक्ट करू शकता."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "तुम्ही एक न करता साइन इन करा
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "तुम्ही ऑफलाइन आहात. जाण्यापूर्वी तुमचे बदल जतन करण्यासाठी पुन्हा कनेक्ट करा."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com किंवा तुमचे वापरकर्तानाव"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

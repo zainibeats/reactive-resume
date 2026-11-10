@@ -546,6 +546,10 @@ msgstr "添加链接"
 msgid "Add a location"
 msgstr "添加地点"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "添加密码作为另一种登录方式。您的其他登录方式和设备保持不变。"
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "添加电话号码"
@@ -787,10 +791,6 @@ msgstr "右对齐"
 msgid "All"
 msgstr "全部"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "允许访问"
@@ -1031,6 +1031,7 @@ msgstr "回到现在"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "返回登录"
@@ -1138,11 +1139,17 @@ msgstr "列表条目 {n}"
 msgid "Bulleted list"
 msgstr "项目符号列表"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "无法扫描？请在应用中输入此密钥："
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "更改照片"
 msgid "Change theme to…"
 msgstr "更改主题为…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "更改为 {pendingEmail} 正在等待 {0} 批准。链接一小时内有效。"
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "更改为 {pendingEmail} 正在等待中：请打开我们发送到该地址的链接。链接一小时内有效。"
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "更改你的密码"
@@ -1206,6 +1222,10 @@ msgstr "改变主意了？那就把简历重命名得更具体一些吧。"
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "仅更改部分标题和日期单词，而不更改您的内容。"
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "请检查网络连接后重试。"
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "查看你的邮箱"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "请检查你的电子邮件，点击邮件中的链接重置密码。"
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "选择一个文件"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "选择要导入的文件"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "设置新密码。这会让您在所有设备上退出登录，并移除您的通行密钥、API 密钥和已连接的应用。"
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "客户端 ID"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "连接您自己的 AI 提供商，让语言模型读取您的列表条�
 msgid "Connected"
 msgstr "已连接"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "连接于 {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "已连接的应用"
@@ -1511,6 +1537,10 @@ msgstr "对话"
 msgid "Copied"
 msgstr "已复制"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "已复制包含此密钥的 MCP 配置。"
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "现在复制它。为了您的安全，它不会再次显示。"
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "复制链接"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "复制 MCP 配置"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "无法连接。检查密钥并重试。"
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "无法复制文字记录。请重试。"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "无法复制到剪贴板。请重试。"
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "无法设置密码。请重试。"
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "无法设置两步验证。请重试。"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "无法设置您的密码。请重试。"
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "无法显示预览。"
@@ -1876,6 +1918,18 @@ msgstr "创建新简历"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "首先创建一份简历，然后询问。"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "创建账户以连接 {name}。"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "创建账户以连接应用。"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "删除账户"
 msgid "Delete conversation"
 msgstr "删除对话"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "删除文档和账户数据。"
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "删除条目"
@@ -2157,6 +2215,10 @@ msgstr "细节"
 msgid "Details from the provider:"
 msgstr "来自提供商的详细信息："
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "没有收到？"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "放弃更改"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "放弃未保存的更改？"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "断开连接"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "断开与“{name}”的连接？"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "断开 {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "从您的账户断开某个应用的连接。"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "已断开与“{name}”的连接。"
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "电子邮件"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "电子邮箱地址"
@@ -2418,6 +2496,11 @@ msgstr "电子邮件地址将无法被识别"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "此服务器上未设置电子邮件传送，因此该地址未经过验证。"
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "邮箱或用户名"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "请输入备份码。"
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "输入名称，最多 64 个字符。"
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "为你的账户输入新密码。"
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "每个角色都说明了你所做的事情。关于措辞的意见存在
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "退出对焦模式"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "预计"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "适用于 LibreOffice 及其他开源编辑器。布局已简化。"
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "对于要求 Word 的门户网站或招聘人员。布局被简化。"
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "适用于脚本、扩展和 MCP 客户端。键充当您的角色，可以读取和编辑您的文档。"
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "仅限本次访问"
@@ -2748,6 +2828,10 @@ msgstr "来自助理或 API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "根据您的经验条目"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "完全访问"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "回家"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "转到仪表板"
@@ -2994,6 +3079,10 @@ msgstr "图标…"
 msgid "Icons in contact line"
 msgstr "联系线中的图标"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "如果有账户使用该地址，重置链接正在发送中。"
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "如果是扫描件导致的，这属于正常情况。否则请删除它；招聘人员会把它当作关键词堆砌。"
@@ -3009,6 +3098,10 @@ msgstr "如果有人向您发送了此链接，请向他们索要一个新链接
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "如果关闭此对话框，你的更改将会丢失。"
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "如果您从未验证过邮箱地址，重置密码会关闭两步验证。否则重置后两步验证仍保持开启，请联系运行此 Reactive Resume 服务器的人为您的账户关闭它。然后用密码登录，并使用新的身份验证器重新开启。"
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "在没有人工智能的情况下，问题和工作匹配仍然有效。
 msgid "It has entries but isn't placed on a page."
 msgstr "它有条目但未放置在页面上。"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "它将立即失去访问权限。如需再次使用，请从该应用重新连接。此操作无法撤销。"
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "它将被永久删除且无法恢复。"
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "只保留一个地址，这样软件就不用猜该用哪一个。"
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "在你未使用该应用时保持访问权限。"
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "密钥加密存储"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "键充当您的角色，可以读取和编辑您的文档。"
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "密钥以你选择的访问权限代表你操作。新密钥默认为只读权限。"
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "长度"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "长度本身不是缺陷，也没有放之四海皆准的一页纸规则。保留那些真正有价值的内容页。"
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "使用上面的 API 键，让 Claude 或 Cursor 等 AI 客户端读取和编辑您的简历。"
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "新页面"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "新密码"
@@ -3912,6 +4007,10 @@ msgstr "新版块"
 msgid "Next issue"
 msgstr "下一期"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "也没有备用代码？"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "未找到项目符号列表。"
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "没有与搜索匹配的命令。"
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "还没有已连接的应用。你允许访问账户的应用会显示在这里。"
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "打开{title}"
 msgid "Open AI settings"
 msgstr "打开AI设置"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "打开邮件应用"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "打开对焦模式"
@@ -4352,6 +4446,10 @@ msgstr "通行密钥"
 msgid "Passkeys"
 msgstr "通行密钥"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "通行密钥需要已验证的邮箱，但此服务器无法发送邮件。"
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "密码"
 msgid "Password changed"
 msgstr "密码已更改"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "密码已更改。您已在所有设备上退出登录；请登录，然后重新添加通行密钥或 API 密钥。"
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "密码已删除"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "密码已重置。请使用新密码登录。"
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "密码设置"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "密码已设置。现在您也可以用它登录。"
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "只读"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "只读权限无法更改或删除任何内容。"
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "阅读附件"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "读取你的电子邮箱地址。"
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "读取你的个人资料信息。"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "需要密码"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "重新发送"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "全大写只用于简短的标题。它会拖慢阅读速度，还可能让区分大小写的搜索失效。"
@@ -4981,6 +5101,10 @@ msgstr "简历"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "无论主题是什么，简历总是呈现在白纸上。"
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "撤销"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "撤销{0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "撤销访问权限"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "撤销应用对您账户的访问权限。"
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "语义化 CSS 样式表"
 msgid "Send"
 msgstr "发送"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "再次发送"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "请在 <0>x-api-key</0> 请求头中发送。"
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "发送重置链接"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "再次发送批准链接"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "使用您的密钥将您的简历文本仅发送至 {0} · {1}。"
 msgid "Sent"
 msgstr "发送"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "已重新发送。可能需要一分钟才能收到。"
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "已发送给 Lumen"
 msgid "Serbian"
 msgstr "塞尔维亚语"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "设置密码"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "设置密码"
@@ -5354,6 +5489,10 @@ msgstr "导出时设置文档语言。"
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "设置你的验证器应用"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "正在设置您的密码…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "侧边栏通常是最后阅读的，或者混合到主栏中。"
 msgid "Sign in"
 msgstr "登录"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "从你的 AI 客户端登录，或使用 API 密钥。"
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "立即登录"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "登录以连接 {name}。"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "登录以连接应用。"
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "有些字符会变成问号。"
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "有些检查需要这个文件没有携带的信息：无法查看的页面内容，或者这些检查未覆盖的语言的文字。它们既不算通过，也不算失败。"
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "此服务器的字体镜像缺少部分字体。请联系管理员添加。"
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "有些字形脱离这份文件后就没有意义了。"
@@ -5666,6 +5821,10 @@ msgstr "有些文字被旋转了。"
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "部分上传的文件已跳过。请查看压缩包中的 upload-manifest.json。"
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "当系统重新渲染时，{minimum} pt 下的文本可能会被误读�
 msgid "Thai"
 msgstr "泰语"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "该账户的密码已更改，并已在所有设备上退出登录。此浏览器仍以 {0} 的身份登录。"
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "密码不正确。请向简历所有者确认后重试。"
@@ -6170,6 +6334,10 @@ msgstr "他们寻找诸如经验、教育和技能等标题。"
 msgid "Thinking…"
 msgstr "思维…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "此连接请求无效或已过期。请从你的客户端重新发起连接。"
@@ -6317,6 +6485,14 @@ msgstr "这份简历由人工智能代理更新。"
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "此简历的共享设置已在其他地方更改。"
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "此服务器无法发送邮件，因此无法重置密码。请联系服务器运行者为您重置密码。"
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "此服务器无法发送邮件，因此无法在此更改地址。请联系服务器运行者。"
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "使用 3 到 64 个小写字母、数字、点、连字符和下划线�
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "至少使用 3 个字符。"
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "验证"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "使用备份码验证"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "请先验证您的邮箱，然后再添加通行密钥。链接位于上方的“账户详情”中。"
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "您已将其用于“{0}”。"
 msgid "You answered: {answer}"
 msgstr "您回答：{answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "你也可以用用户名登录。"
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "您可以随时在“设置 → 人工智能与开发人员”中断开连接。"
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "您无需登录即可登录"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "你离线了。离开前重新连接以保存更改。"
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com 或您的用户名"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

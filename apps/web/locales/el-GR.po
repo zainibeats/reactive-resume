@@ -546,6 +546,10 @@ msgstr "Προσθέστε έναν σύνδεσμο"
 msgid "Add a location"
 msgstr "Προσθήκη τοποθεσίας"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Προσθέστε έναν κωδικό πρόσβασης ως επιπλέον τρόπο σύνδεσης. Οι άλλες μέθοδοι και συσκευές σύνδεσής σας παραμένουν ως έχουν."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Προσθέστε έναν αριθμό τηλεφώνου"
@@ -787,10 +791,6 @@ msgstr "Στοίχιση δεξιά"
 msgid "All"
 msgstr "Ολοι"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Επιτρέψτε την πρόσβαση"
@@ -1031,6 +1031,7 @@ msgstr "Επιστροφή στο τώρα"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Επιστροφή στη σύνδεση"
@@ -1138,11 +1139,17 @@ msgstr "καταχώρηση λίστας {n}"
 msgid "Bulleted list"
 msgstr "Λίστα με κουκκίδες"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "Δεν γίνεται σάρωση; Εισαγάγετε αυτό το κλειδί στην εφαρμογή:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Αλλαγή φωτογραφίας"
 msgid "Change theme to…"
 msgstr "Αλλαγή θέματος σε…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "Η αλλαγή σε {pendingEmail} περιμένει έγκριση από το {0}. Ο σύνδεσμος ισχύει για μία ώρα."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "Η αλλαγή σε {pendingEmail} περιμένει: ανοίξτε τον σύνδεσμο που στείλαμε εκεί. Ο σύνδεσμος ισχύει για μία ώρα."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Αλλάξτε τον κωδικό πρόσβασής σας"
@@ -1206,6 +1222,10 @@ msgstr "Αλλάξατε γνώμη; Μετονομάστε το βιογραφ�
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Αλλάζει μόνο τους τίτλους των ενοτήτων και τις λέξεις ημερομηνίας, όχι το περιεχόμενό σας."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξα
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Ελέγξτε το email σας"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Ελέγξτε το email σας για έναν σύνδεσμο επαναφοράς του κωδικού πρόσβασης."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Επιλέξτε ένα αρχείο"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Επιλέξτε ένα αρχείο για εισαγωγή"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Επιλέξτε νέο κωδικό πρόσβασης. Αυτό σας αποσυνδέει παντού και αφαιρεί τα κλειδιά πρόσβασής σας, τα κλειδιά API και τις συνδεδεμένες εφαρμογές."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "Αναγνωριστικό πελάτη"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Συνδέστε τον δικό σας πάροχο τεχνητής ν
 msgid "Connected"
 msgstr "Συνδεδεμένος"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Συνδέθηκε στις {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Συνδεδεμένες εφαρμογές"
@@ -1511,6 +1537,10 @@ msgstr "συνομιλίες"
 msgid "Copied"
 msgstr "Αντιγράφηκε"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "Αντιγράφηκε η παραμετροποίηση MCP με αυτό το κλειδί."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Αντιγράψτε το τώρα. Για την ασφάλειά σα�
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Αντιγραφή συνδέσμου"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Αντιγραφή παραμετροποίησης MCP"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "Δεν ήταν δυνατή η σύνδεση. Ελέγξτε το κλ
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "Δεν ήταν δυνατή η αντιγραφή της μεταγραφής. Προσπαθήστε ξανά."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "Δεν ήταν δυνατή η αντιγραφή στο πρόχειρο. Προσπαθήστε ξανά."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "Δεν ήταν δυνατός ο ορισμός του κωδικού �
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "Δεν ήταν δυνατή η ρύθμιση της επαλήθευσης δύο βημάτων. Προσπαθήστε ξανά."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "Δεν μπόρεσε να οριστεί ο κωδικός πρόσβασής σας. Δοκιμάστε ξανά."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "Δεν ήταν δυνατή η εμφάνιση της προεπισκόπησης."
@@ -1876,6 +1918,18 @@ msgstr "Δημιουργία νέου βιογραφικού σημειώματ�
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Δημιουργήστε πρώτα ένα βιογραφικό και μετά ρωτήστε το."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Δημιουργήστε λογαριασμό για να συνδέσετε το {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Δημιουργήστε λογαριασμό για να συνδέσετε μια αίτηση."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Διαγραφή λογαριασμού"
 msgid "Delete conversation"
 msgstr "Διαγραφή συνομιλίας"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Διαγραφή εγγράφων και δεδομένων λογαριασμού."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Διαγραφή καταχώρισης"
@@ -2157,6 +2215,10 @@ msgstr "Καθέκαστα"
 msgid "Details from the provider:"
 msgstr "Λεπτομέρειες από τον πάροχο:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "Δεν το λάβατε;"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Απόρριψη αλλαγών"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Απόρριψη μη αποθηκευμένων αλλαγών;"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Αποσύνδεση"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Αποσύνδεση του «{name}»;"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Αποσύνδεση {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Αποσύνδεση μιας αίτησης από τον λογαριασμό σας."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "Αποσυνδέθηκε το «{name}»."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "Ηλ. ταχυδρομείο"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "Διεύθυνση email"
@@ -2418,6 +2496,11 @@ msgstr "Η διεύθυνση email δεν θα αναγνωριστεί"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "Η παράδοση email δεν έχει ρυθμιστεί σε αυτόν τον διακομιστή, επομένως η διεύθυνση δεν έχει επαληθευτεί."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "Email ή όνομα χρήστη"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Εισαγάγετε έναν εφεδρικό κωδικό."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Εισαγάγετε ένα όνομα, έως 64 χαρακτήρες."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Εισαγάγετε έναν νέο κωδικό πρόσβασης για τον λογαριασμό σας."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Κάθε ρόλος λέει αυτό που έκανες. Οι απόψ
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Έξοδος από τη λειτουργία εστίασης"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Αναμένεται"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "Για το LibreOffice και άλλους επεξεργαστές α�
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Για πύλες ή υπαλλήλους προσλήψεων που ζητούν Word. Η διάταξη είναι απλοποιημένη."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Για σενάρια, επεκτάσεις και πελάτες MCP. Τα κλειδιά λειτουργούν όπως εσείς και μπορούν να διαβάσουν και να επεξεργαστούν τα έγγραφά σας."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Μόνο για αυτήν την επίσκεψη"
@@ -2748,6 +2828,10 @@ msgstr "από τον βοηθό ή API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "Από τις καταχωρίσεις της εμπειρίας σας"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Πλήρης πρόσβαση"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Πήγαινε σπίτι"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Μετάβαση στον πίνακα ελέγχου"
@@ -2994,6 +3079,10 @@ msgstr "Εικόνισμα…"
 msgid "Icons in contact line"
 msgstr "Εικονίδια στη γραμμή επαφής"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Αν κάποιος λογαριασμός χρησιμοποιεί αυτή τη διεύθυνση, ένας σύνδεσμος επαναφοράς είναι καθ' οδόν."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Αν προέρχεται από σάρωση, αυτό είναι αναμενόμενο. Διαφορετικά, αφαιρέστε το· οι υπεύθυνοι προσλήψεων το εκλαμβάνουν ως υπερφόρτωση λέξεων-κλειδιών."
@@ -3009,6 +3098,10 @@ msgstr "Εάν κάποιος σας έστειλε αυτόν τον σύνδε
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Αν κλείσετε αυτό το παράθυρο, οι αλλαγές σας θα χαθούν."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Αν δεν επαληθεύσατε ποτέ τη διεύθυνση email σας, μια επαναφορά κωδικού απενεργοποιεί την επαλήθευση σε δύο βήματα. Αλλιώς, η επαναφορά την κρατά ενεργή, οπότε ζητήστε από το άτομο που διαχειρίζεται αυτόν τον διακομιστή Reactive Resume να την απενεργοποιήσει για τον λογαριασμό σας. Στη συνέχεια συνδεθείτε με τον κωδικό πρόσβασής σας και ενεργοποιήστε την ξανά με νέο εφαρμογή ελέγχου ταυτότητας."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Τα ζητήματα και η αντιστοίχιση εργασία�
 msgid "It has entries but isn't placed on a page."
 msgstr "Έχει καταχωρήσεις αλλά δεν τοποθετείται σε σελίδα."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Χάνει την πρόσβαση τώρα. Για να το ξαναχρησιμοποιήσετε, συνδέστε το από την εφαρμογή. Αυτό δεν μπορεί να αναιρεθεί."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Θα διαγραφεί οριστικά και δεν μπορεί να αποκατασταθεί."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Κρατήστε μία μόνο διεύθυνση, ώστε το λογισμικό να μη χρειάζεται να μαντέψει ποια να χρησιμοποιήσει."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Διατηρήστε την πρόσβαση όταν δεν χρησιμοποιείτε την εφαρμογή."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Το κλειδί αποθηκεύεται κρυπτογραφημένο"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Τα κλειδιά λειτουργούν όπως εσείς και μπορούν να διαβάσουν και να επεξεργαστούν τα έγγραφά σας."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Τα κλειδιά ενεργούν εκ μέρους σας με την πρόσβαση που επιλέγετε. Τα νέα κλειδιά ξεκινούν με πρόσβαση μόνο για ανάγνωση."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Μήκος"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Το μήκος δεν είναι ελάττωμα και δεν υπάρχει καθολικός κανόνας μίας σελίδας. Κρατήστε τις σελίδες που αξίζουν τη θέση τους."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Επιτρέψτε σε πελάτες τεχνητής νοημοσύνης όπως το Claude ή το Cursor να διαβάσουν και να επεξεργαστούν τα βιογραφικά σας, χρησιμοποιώντας ένα κλειδί API παραπάνω."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Νέα σελίδα"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Νέος κωδικός πρόσβασης"
@@ -3912,6 +4007,10 @@ msgstr "Νέα ενότητα"
 msgid "Next issue"
 msgstr "Επόμενο τεύχος"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Ούτε κωδικοί εφεδρείας;"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "Δεν βρέθηκαν λίστες με κουκκίδες."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "Καμία εντολή δεν ταιριάζει με αυτήν την αναζήτηση."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Δεν υπάρχουν ακόμα συνδεδεμένες εφαρμογές. Οι εφαρμογές στις οποίες επιτρέπετε πρόσβαση στον λογαριασμό σας εμφανίζονται εδώ."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Ανοίξτε το {title}"
 msgid "Open AI settings"
 msgstr "Ανοίξτε τις ρυθμίσεις AI"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Άνοιγμα εφαρμογής email"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Άνοιγμα λειτουργίας εστίασης"
@@ -4352,6 +4446,10 @@ msgstr "Κλειδί πρόσβασης"
 msgid "Passkeys"
 msgstr "Passkeys"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Τα κλειδιά πρόσβασης χρειάζονται επαληθευμένο email, το οποίο αυτός ο διακομιστής δεν μπορεί να στείλει."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Κωδικός"
 msgid "Password changed"
 msgstr "Ο κωδικός πρόσβασης άλλαξε"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Ο κωδικός πρόσβασης άλλαξε. Έχετε αποσυνδεθεί παντού· συνδεθείτε και προσθέστε ξανά τυχόν κλειδιά πρόσβασης ή κλειδιά API."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "Καταργήθηκε ο κωδικός πρόσβασης"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "Ο κωδικός πρόσβασης επαναφέρθηκε. Συνδεθείτε με τον νέο σας κωδικό πρόσβασης."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Σύνολο κωδικών πρόσβασης"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Ο κωδικός πρόσβασης ορίστηκε. Μπορείτε πλέον να συνδεθείτε και με αυτόν."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Πρόσβαση μόνο για ανάγνωση"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "Η πρόσβαση μόνο ανάγνωσης δεν μπορεί να αλλάξει ή να διαγράψει τίποτα."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Διαβάστε το συνημμένο"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Διαβάστε τη διεύθυνση email σας."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Διαβάστε τις πληροφορίες του προφίλ σας."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Απαιτείται κωδικός πρόσβασης"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Επαναποστολή"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Χρησιμοποιήστε τα κεφαλαία μόνο για σύντομες επικεφαλίδες. Επιβραδύνουν την ανάγνωση και μπορούν να ματαιώσουν αναζητήσεις με διάκριση πεζών-κεφαλαίων."
@@ -4981,6 +5101,10 @@ msgstr "Βιογραφικά σημειώματα"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "τα βιογραφικά αποδίδονται πάντα σε λευκό χαρτί, ανεξάρτητα από το θέμα."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Ανακαλώ"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Ανάκληση {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Ανάκληση πρόσβασης"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Ανακαλέστε την πρόσβαση μιας εφαρμογής στον λογαριασμό σας."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Φύλλο στυλ σημασιολογικού CSS"
 msgid "Send"
 msgstr "Στέλνω"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Αποστολή ξανά"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Στείλτε το στην κεφαλίδα <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Αποστολή συνδέσμου επαναφοράς"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Επαναποστολή του συνδέσμου έγκρισης"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Στέλνει το κείμενο του βιογραφικού σας 
 msgid "Sent"
 msgstr "Στάλθηκε"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Στάλθηκε ξανά. Μπορεί να χρειαστεί ένα λεπτό για να φτάσει."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Στάλθηκε στο Lumen"
 msgid "Serbian"
 msgstr "Σερβικά"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Ορίστε έναν κωδικό πρόσβασης"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Ορισμός κωδικού πρόσβασης"
@@ -5354,6 +5489,10 @@ msgstr "Ορίστε τη γλώσσα του εγγράφου κατά την �
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Ρυθμίστε την εφαρμογή ελέγχου ταυτότητας"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Ορισμός κωδικού πρόσβασης…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Οι πλευρικές γραμμές συχνά διαβάζονται
 msgid "Sign in"
 msgstr "Σύνδεση"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Συνδεθείτε από την εφαρμογή τεχνητής νοημοσύνης σας ή χρησιμοποιήστε ένα κλειδί API."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Συνδεθείτε τώρα"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Συνδεθείτε για να συνδέσετε το {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Συνδεθείτε για να συνδέσετε μια αίτηση."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Ορισμένοι χαρακτήρες εμφανίζονται ως ε
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Κάποιοι έλεγχοι χρειάζονται πληροφορίες που δεν περιέχει αυτό το αρχείο: περιεχόμενο σελίδων που δεν ήταν δυνατό να εξεταστεί ή κείμενο σε γλώσσα που δεν καλύπτουν αυτοί οι έλεγχοι. Δεν μετρούν ούτε ως επιτυχία ούτε ως αποτυχία."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "Ορισμένες γραμματοσειρές λείπουν από το είδωλο γραμματοσειρών αυτού του διακομιστή. Ζητήστε από τον διαχειριστή να τις προσθέσει."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Ορισμένες γλυφές δεν έχουν νόημα εκτός αυτού του αρχείου."
@@ -5666,6 +5821,10 @@ msgstr "Ορισμένο κείμενο είναι περιστραμμένο."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "Ορισμένα μεταφορτωμένα αρχεία παραλείφθηκαν. Ελέγξτε το upload-manifest.json μέσα στο αρχείο."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "Το κείμενο κάτω από το {minimum} pt μπορεί να 
 msgid "Thai"
 msgstr "Ταϊλανδικά"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "Ο κωδικός πρόσβασης αυτού του λογαριασμού άλλαξε και έχει αποσυνδεθεί παντού. Αυτό το πρόγραμμα περιήγησης είναι ακόμα συνδεδεμένο ως {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Αυτός ο κωδικός πρόσβασης δεν είναι σωστός. Επιβεβαιώστε τον με τον κάτοχο του βιογραφικού και προσπαθήστε ξανά."
@@ -6170,6 +6334,10 @@ msgstr "Αναζητούν τίτλους όπως Εμπειρία, Εκπαί�
 msgid "Thinking…"
 msgstr "Σκέψη…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Αυτό το αίτημα σύνδεσης δεν είναι έγκυρο ή έχει λήξει. Ξεκινήστε ξανά τη σύνδεση από την εφαρμογή-πελάτη σας."
@@ -6317,6 +6485,14 @@ msgstr "Αυτό το βιογραφικό ενημερώθηκε από ένα�
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "Οι ρυθμίσεις κοινής χρήσης αυτού του βιογραφικού έχουν αλλάξει αλλού."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Αυτός ο διακομιστής δεν μπορεί να στείλει email, οπότε η επαναφορά κωδικού δεν είναι διαθέσιμη. Ζητήστε από το άτομο που τον διαχειρίζεται να επαναφέρει τον κωδικό σας."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Αυτός ο διακομιστής δεν μπορεί να στείλει email, οπότε η διεύθυνση δεν μπορεί να αλλάξει εδώ. Ρωτήστε το άτομο που τον διαχειρίζεται."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Χρησιμοποιήστε 3 έως 64 πεζά γράμματα, αρ
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Χρησιμοποιήστε τουλάχιστον 3 χαρακτήρες."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Επαλήθευση"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Επαλήθευση με εφεδρικό κωδικό"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Επαληθεύστε το email σας για να προσθέσετε κλειδί πρόσβασης. Ο σύνδεσμος είναι στα Στοιχεία λογαριασμού παραπάνω."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "Το χρησιμοποιείτε ήδη για το \"{0}\"."
 msgid "You answered: {answer}"
 msgstr "Απάντησες: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "Μπορείτε επίσης να συνδεθείτε με το όνομα χρήστη σας."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "Μπορείτε να την αποσυνδέσετε ανά πάσα στιγμή στις Ρυθμίσεις → AI και προγραμματιστές."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Συνδεθείτε χωρίς ένα"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Είστε εκτός σύνδεσης. Επανασυνδεθείτε για να αποθηκεύσετε τις αλλαγές σας πριν φύγετε."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com ή το όνομα χρήστη σας"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

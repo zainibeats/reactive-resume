@@ -546,6 +546,10 @@ msgstr "リンクを追加する"
 msgid "Add a location"
 msgstr "場所を追加する"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "サインイン方法としてパスワードを追加します。ほかのサインイン方法やデバイスはそのまま残ります。"
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "電話番号を追加する"
@@ -787,10 +791,6 @@ msgstr "右揃え"
 msgid "All"
 msgstr "全て"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "アクセスを許可"
@@ -1031,6 +1031,7 @@ msgstr "今に戻る"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "サインインに戻る"
@@ -1138,11 +1139,17 @@ msgstr "リストエントリ {n}"
 msgid "Bulleted list"
 msgstr "箇条書きリスト"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "スキャンできない場合は、アプリにこのキーを入力してください:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "写真を変更する"
 msgid "Change theme to…"
 msgstr "テーマを…に変更します"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "{pendingEmail} への変更は、{0} での承認待ちです。リンクの有効期限は 1 時間です。"
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "{pendingEmail} への変更を待機中です。そのアドレスに送ったリンクを開いてください。リンクの有効期限は 1 時間です。"
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "パスワードを変更"
@@ -1206,6 +1222,10 @@ msgstr "やっぱり変更しますか？レジュメに、よりわかりやす
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "セクションのタイトルと日付の単語のみが変更され、コンテンツは変更されません。"
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "接続を確認して、もう一度試してください。"
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "メールを確認してください"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "パスワードをリセットするリンクを記載したメールを確認してください。"
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "ファイルを選択してください"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "インポートするファイルを選択してください"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "新しいパスワードを選んでください。すべてのデバイスからサインアウトし、パスキー、API キー、接続済みのアプリが削除されます。"
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "クライアント ID"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "独自の AI プロバイダーに接続して、言語モデルにリ�
 msgid "Connected"
 msgstr "接続済み"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "{0} に接続"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "接続されたアプリケーション"
@@ -1511,6 +1537,10 @@ msgstr "会話"
 msgid "Copied"
 msgstr "コピーされました"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "このキーを含む MCP 設定をコピーしました。"
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "今すぐコピーしてください。セキュリティのため、再
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "リンクをコピー"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "MCP 設定をコピー"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "接続できませんでした。キーを確認して再試行してく
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "トランスクリプトをコピーできませんでした。もう一度お試しください。"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "クリップボードにコピーできませんでした。もう一度お試しください。"
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "パスワードを設定できませんでした。もう一度お試し
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "二段階認証を設定できませんでした。もう一度お試しください。"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "パスワードを設定できませんでした。もう一度お試しください。"
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "プレビューを表示できませんでした。"
@@ -1876,6 +1918,18 @@ msgstr "新しいレジュメを作成"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "まず履歴書を作成してから、それについて質問してください。"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "{name} を接続するには、アカウントを作成してください。"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "アプリを接続するには、アカウントを作成してください。"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "アカウントを削除する"
 msgid "Delete conversation"
 msgstr "会話を削除"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "書類とアカウントデータの削除。"
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "エントリの削除"
@@ -2157,6 +2215,10 @@ msgstr "詳細"
 msgid "Details from the provider:"
 msgstr "プロバイダーからの詳細:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "届きませんでしたか?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "変更を破棄"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "保存されていない変更を破棄しますか？"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "切断"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "「{name}」の接続を解除しますか?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "{0} の接続を解除"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "アカウントからアプリの接続を解除します。"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "「{name}」の接続を解除しました。"
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "メール"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "メールアドレス"
@@ -2418,6 +2496,11 @@ msgstr "メールアドレスが認識されません"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "このサーバーでは電子メール配信が設定されていないため、アドレスは検証されません。"
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "メールアドレスまたはユーザー名"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "バックアップコードを入力してください。"
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "名前を 64 文字以内で入力します。"
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "アカウントの新しいパスワードを入力してください。"
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "どの役割にも、あなたが何をしたかが表れます。言葉
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "フォーカスモードを終了する"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "見込み"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "LibreOffice などのオープンソースのエディター向け。レ
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Word を要求するポータルまたは採用担当者向け。レイアウトが簡素化されています。"
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "スクリプト、拡張機能、および MCP クライアント用。キーはユーザーとして機能し、ドキュメントを読み取ったり編集したりできます。"
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "今回の訪問に限り、"
@@ -2748,6 +2828,10 @@ msgstr "アシスタントまたは API から"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "体験エントリーから"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "フルアクセス"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "家に帰れ"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "ダッシュボードへ移動"
@@ -2994,6 +3079,10 @@ msgstr "アイコン…"
 msgid "Icons in contact line"
 msgstr "連絡線のアイコン"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "そのアドレスを使っているアカウントがあれば、リセット用のリンクを送信しました。"
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "スキャンによるものであれば想定内です。そうでなければ削除してください。採用担当者はキーワードの詰め込みとみなします。"
@@ -3009,6 +3098,10 @@ msgstr "誰かがこのリンクを送ってきた場合は、新しいリンク
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "このダイアログを閉じると、変更は失われます。"
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "メールアドレスを一度も確認していない場合、パスワードをリセットすると二段階認証はオフになります。確認済みの場合はリセットしてもオンのままなので、この Reactive Resume サーバーの管理者に、あなたのアカウントでオフにするよう依頼してください。その後、パスワードでサインインし、新しい認証アプリで再度オンにしてください。"
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "課題とジョブ マッチは AI なしでも機能します。"
 msgid "It has entries but isn't placed on a page."
 msgstr "エントリはありますが、ページには配置されていません。"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "直ちにアクセスできなくなります。再び使うには、アプリから接続してください。この操作は元に戻せません。"
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "永久に削除され、復元することはできません。"
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "アドレスは 1 つだけにして、ソフトウェアがどれを使うべきか迷わないようにしましょう。"
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "アプリケーションを使用していないときもアクセスを維持する。"
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "キーは暗号化されて保存されます"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "キーはユーザーとして機能し、ドキュメントを読み取ったり編集したりできます。"
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "キーは選択したアクセス権限であなたに代わって操作します。新しいキーは読み取り専用で作成されます。"
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "長さ"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "長さそのものは欠点ではなく、1ページに収めるべきという普遍的なルールもありません。価値のあるページだけを残してください。"
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "上の API キーを使用して、Claude や Cursor などの AI クライアントに履歴書を読み取って編集させます。"
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "新しいページ"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "新しいパスワード"
@@ -3912,6 +4007,10 @@ msgstr "新しいセクション"
 msgid "Next issue"
 msgstr "次号"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "バックアップコードもない場合は?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "箇条書きが見つかりませんでした。"
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "検索に一致するコマンドはありません。"
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "接続されたアプリケーションはまだありません。アカウントへのアクセスを許可したアプリがここに表示されます。"
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "{title} を開きます"
 msgid "Open AI settings"
 msgstr "AI設定を開く"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "メールアプリを開く"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "フォーカスモードを開く"
@@ -4352,6 +4446,10 @@ msgstr "パスキー"
 msgid "Passkeys"
 msgstr "パスキー"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "パスキーには確認済みのメールアドレスが必要ですが、このサーバーはメールを送信できません。"
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "パスワード"
 msgid "Password changed"
 msgstr "パスワードを変更しました"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "パスワードを変更しました。すべてのデバイスからサインアウトしました。サインインしてから、パスキーや API キーを再度追加してください。"
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "パスワードが削除されました"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "パスワードをリセットしました。新しいパスワードでサインインしてください。"
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "パスワード設定"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "パスワードを設定しました。今後はパスワードでもサインインできます。"
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "読み取り専用アクセス"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "読み取り専用では、何も変更・削除できません。"
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "添付ファイルを読む"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "メールアドレスを読み取ります。"
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "プロフィール情報を読み取ります。"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "パスワードを要求する"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "再送信"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "大文字は短い見出しにのみ使用してください。読む速度が落ち、大文字小文字を区別する検索が機能しなくなることがあります。"
@@ -4981,6 +5101,10 @@ msgstr "レジュメ"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "履歴書は、テーマが何であれ、常に白い紙にレンダリングされます。"
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "取り消す"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "{0}を取り消す"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "アクセスを取り消す"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "アプリケーションのアカウントへのアクセスを取り消します。"
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "セマンティックCSSスタイルシート"
 msgid "Send"
 msgstr "送信"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "再送信"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "<0>x-api-key</0> ヘッダーで送信してください。"
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "リセットリンクを送信"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "承認リンクを再送信"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "履歴書のテキストをキーとともに {0} · {1} にのみ送信
 msgid "Sent"
 msgstr "送信済み"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "再送信しました。届くまで 1 分ほどかかることがあります。"
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Lumen に送信済み"
 msgid "Serbian"
 msgstr "セルビア語"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "パスワードを設定する"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "パスワードを設定"
@@ -5354,6 +5489,10 @@ msgstr "エクスポート時に文書の言語を設定してください。"
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "認証アプリを設定"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "パスワードを設定しています…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "サイドバーは多くの場合、最後に読まれるか、メイン
 msgid "Sign in"
 msgstr "サインイン"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "AIクライアントからログインするか、APIキーを使用してください。"
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "今すぐサインイン"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "{name} を接続するには、サインインしてください。"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "アプリを接続するには、サインインしてください。"
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "一部の文字が疑問符として出力されます。"
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "一部のチェックには、このファイルに含まれていない情報が必要です。内容を確認できないページや、これらのチェックが対応していない言語のテキストなどです。これらは合格にも不合格にも数えません。"
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "このサーバーのフォントミラーに一部のフォントがありません。管理者に追加を依頼してください。"
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "一部のグリフは、このファイルの外では意味を持ちません。"
@@ -5666,6 +5821,10 @@ msgstr "一部のテキストが回転しています。"
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "一部のアップロードしたファイルが省略されました。アーカイブ内のupload-manifest.jsonを確認してください。"
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "{minimum} pt の下のテキストは、システムが再レンダリ�
 msgid "Thai"
 msgstr "タイ語"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "そのアカウントのパスワードが変更され、すべてのデバイスからサインアウトしました。このブラウザーは引き続き {0} としてサインインしています。"
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "パスワードが正しくありません。レジュメの所有者に確認して、もう一度お試しください。"
@@ -6170,6 +6334,10 @@ msgstr "経験、教育、スキルなどの見出しを探します。"
 msgid "Thinking…"
 msgstr "考え…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "この接続リクエストは無効か、有効期限が切れています。クライアントから接続をやり直してください。"
@@ -6317,6 +6485,14 @@ msgstr "この履歴書はAIエージェントによって更新されました�
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "この履歴書の共有設定が他の場所で変更されました。"
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "このサーバーはメールを送信できないため、パスワードのリセットは利用できません。サーバーの管理者にパスワードのリセットを依頼してください。"
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "このサーバーはメールを送信できないため、ここではアドレスを変更できません。サーバーの管理者に依頼してください。"
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "3 ～ 64 文字の小文字、数字、ドット、ハイフン、アン
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "3 文字以上で入力してください。"
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "確認"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "バックアップコードで確認"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "パスキーを追加するには、メールアドレスを確認してください。リンクは上の「アカウント情報」にあります。"
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "これはすでに「{0}」に使用されています。"
 msgid "You answered: {answer}"
 msgstr "あなたは答えました: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "ユーザー名でサインインすることもできます。"
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "設定 →「AIと開発者」でいつでも接続を解除できます。"
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "サインインせずにサインインする"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "オフラインです。終了する前に、再接続して変更を保存します。"
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com またはユーザー名"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

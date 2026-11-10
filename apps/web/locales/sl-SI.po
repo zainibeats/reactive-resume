@@ -546,6 +546,10 @@ msgstr "Dodajte povezavo"
 msgid "Add a location"
 msgstr "Dodajte lokacijo"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Dodajte geslo kot še en način prijave. Vaši drugi načini prijave in naprave ostanejo nespremenjeni."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Dodajte telefonsko številko"
@@ -787,10 +791,6 @@ msgstr "Poravnaj desno"
 msgid "All"
 msgstr "Vse"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Dovoli dostop"
@@ -1031,6 +1031,7 @@ msgstr "Nazaj na zdaj"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Nazaj na prijavo"
@@ -1138,11 +1139,17 @@ msgstr "vnos na seznam {n}"
 msgid "Bulleted list"
 msgstr "Seznam z oznakami"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "Ne morete skenirati? V aplikacijo vnesite ta ključ:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Spremeni fotografijo"
 msgid "Change theme to…"
 msgstr "Spremeni temo v…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "Sprememba na {pendingEmail} čaka na odobritev z naslova {0}. Povezava deluje eno uro."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "Sprememba na {pendingEmail} čaka: odprite povezavo, ki smo jo poslali tja. Povezava deluje eno uro."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Spremenite svoje geslo"
@@ -1206,6 +1222,10 @@ msgstr "Ste si premislili? Preimenujte svoj življenjepis v nekaj bolj opisa."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Spremeni samo naslove razdelkov in datumske besede, ne pa tudi vaše vsebine."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Preverite povezavo in poskusite znova."
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Preverite e-pošto"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Preverite svoj e-poštni naslov za povezavo za ponastavitev gesla."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Izberite datoteko"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Izberite datoteko za uvoz"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Izberite novo geslo. S tem se odjavite povsod ter odstranite svoje passkeys, ključe API in povezane aplikacije."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "ID stranke"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Povežite svojega ponudnika AI, da bo jezikovni model prebral vaše vnos
 msgid "Connected"
 msgstr "Povezan"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Povezano {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Povezane aplikacije"
@@ -1511,6 +1537,10 @@ msgstr "Pogovori"
 msgid "Copied"
 msgstr "Kopirano"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "Konfiguracija MCP s tem ključem je kopirana."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Kopiraj zdaj. Zaradi vaše varnosti ne bo več prikazan."
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Kopiraj povezavo"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Kopiraj konfiguracijo MCP"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "Ni bilo mogoče vzpostaviti povezave. Preverite ključ in poskusite znov
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "Prepisa ni bilo mogoče kopirati. Poskusite znova."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "Kopiranje v odložišče ni uspelo. Poskusite znova."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "Gesla ni bilo mogoče nastaviti. Poskusite znova."
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "Preverjanja v dveh korakih ni bilo mogoče nastaviti. Poskusite znova."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "Gesla ni bilo mogoče nastaviti. Poskusite znova."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "Predogleda ni bilo mogoče prikazati."
@@ -1876,6 +1918,18 @@ msgstr "Ustvari nov življenjepis"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Najprej ustvarite življenjepis, nato pa vprašajte o njem."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Ustvarite račun, da povežete {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Ustvarite račun, da povežete aplikacijo."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Izbriši račun"
 msgid "Delete conversation"
 msgstr "Izbriši pogovor"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Brisanje dokumentov in podatkov računa."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Izbriši vnos"
@@ -2157,6 +2215,10 @@ msgstr "Podrobnosti"
 msgid "Details from the provider:"
 msgstr "Podrobnosti ponudnika:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "Niste prejeli?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Zavrzi spremembe"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Zavržem neshranjene spremembe?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Prekini povezavo"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Želite prekiniti povezavo z »{name}«?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Prekini povezavo z {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Prekinite povezavo aplikacije z vašim računom."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "Povezava z »{name}« je prekinjena."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "E-pošta"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "E-poštni naslov"
@@ -2418,6 +2496,11 @@ msgstr "E-poštni naslov ne bo prepoznan"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "Dostava e-pošte na tem strežniku ni nastavljena, zato naslov ni preverjen."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "E-pošta ali uporabniško ime"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Vnesite rezervno kodo."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Vnesite ime do 64 znakov."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Vnesite novo geslo za svoj račun."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Vsaka vloga pove, kaj si naredil. Mnenja o besedilih živijo v zavihku P
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Izhod iz načina ostrenja"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Pričakovano"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "Za LibreOffice in druge odprtokodne urejevalnike. Postavitev je poenosta
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Za portale ali zaposlovalce, ki zahtevajo Word. Postavitev je poenostavljena."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Za skripte, razširitve in odjemalce MCP. Ključi delujejo kot vi in ​​lahko berejo ter urejajo vaše dokumente."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Samo za ta obisk"
@@ -2748,6 +2828,10 @@ msgstr "od pomočnika ali API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "Iz vaših vnosov izkušenj"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Polni dostop"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Pojdi domov"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Pojdi na nadzorno ploščo"
@@ -2994,6 +3079,10 @@ msgstr "Ikona ..."
 msgid "Icons in contact line"
 msgstr "Ikone v kontaktni vrstici"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Če račun uporablja ta naslov, je povezava za ponastavitev na poti."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Če izvira iz skena, je to pričakovano. V nasprotnem primeru ga odstranite; kadroviki to razumejo kot nabijanje s ključnimi besedami."
@@ -3009,6 +3098,10 @@ msgstr "Če vam je nekdo poslal to povezavo, ga prosite za novo."
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Če zaprete to pogovorno okno, se vaše spremembe izgubijo."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Če svojega e-poštnega naslova niste nikoli potrdili, ponastavitev gesla izklopi preverjanje v dveh korakih. Sicer ga ponastavitev ohrani vklopljenega, zato prosite osebo, ki upravlja ta strežnik Reactive Resume, naj ga izklopi za vaš račun. Nato se prijavite z geslom in ga znova vklopite z novo aplikacijo za preverjanje pristnosti."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Težave in Job match še vedno delujejo brez umetne inteligence."
 msgid "It has entries but isn't placed on a page."
 msgstr "Ima vnose, vendar ni postavljen na stran."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Zdaj izgubi dostop. Za ponovno uporabo jo povežite iz aplikacije. Tega ni mogoče razveljaviti."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Za vedno bo izbrisan in ga ne bo več mogoče obnoviti."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Uporabljajte en sam naslov, da programski opremi ni treba ugibati, katerega naj uporabi."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Ohranite dostop, ko aplikacije ne uporabljate."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Ključ shranjen šifriran"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Ključi delujejo kot vi in ​​lahko berejo ter urejajo vaše dokumente."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Ključi delujejo v vašem imenu z dostopom, ki ga izberete. Novi ključi imajo na začetku dostop samo za branje."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Dolžina"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Dolžina ni pomanjkljivost, univerzalnega pravila ene strani pa ni. Obdržite strani, ki si svoje mesto zaslužijo."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Naj odjemalci AI, kot sta Claude ali Cursor, berejo in urejajo vaše življenjepise z uporabo zgornje tipke API."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Nova stran"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Novo geslo"
@@ -3912,6 +4007,10 @@ msgstr "Nova rubrika"
 msgid "Next issue"
 msgstr "Naslednja številka"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Nimate niti rezervnih kod?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "Alinejnih seznamov ni bilo mogoče najti."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "Nobenega ukaza ni, ki bi ustrezal temu iskanju."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Ni še povezanih aplikacij. Tu so prikazane aplikacije, ki jim dovolite dostop do računa."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Odprite {title}"
 msgid "Open AI settings"
 msgstr "Odprite nastavitve AI"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Odpri e-poštno aplikacijo"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Odpri način ostrenja"
@@ -4352,6 +4446,10 @@ msgstr "Passkey"
 msgid "Passkeys"
 msgstr "Passkeys"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Passkeys potrebujejo potrjen e-poštni naslov, tega pa ta strežnik ne more poslati."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Geslo"
 msgid "Password changed"
 msgstr "Geslo spremenjeno"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Geslo spremenjeno. Odjavljeni ste povsod; prijavite se in nato znova dodajte passkeys ali ključe API."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "Geslo odstranjeno"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "Geslo je ponastavljeno. Prijavite se z novim geslom."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Geslo nastavljeno"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Geslo nastavljeno. Zdaj se lahko prijavite tudi z njim."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Dostop samo za branje"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "Samo za branje ne more ničesar spremeniti ali izbrisati."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Preberi priponko"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Preberite svoj e-poštni naslov."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Preberite podatke o svojem profilu."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Zahtevaj geslo"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Pošlji znova"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Velike črke pridržite za kratke naslove. Upočasnjujejo branje in lahko onemogočijo iskanje, občutljivo na velikost črk."
@@ -4981,6 +5101,10 @@ msgstr "Življenjepisi"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "življenjepisi so vedno prikazani na belem papirju, ne glede na temo."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Prekliči"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Prekliči {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Prekliči dostop"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Prekličite dostop aplikacije do vašega računa."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Semantični CSS slogovni predlog"
 msgid "Send"
 msgstr "Pošlji"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Pošlji znova"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Pošljite ga v glavi <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Pošlji povezavo za ponastavitev"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Znova pošlji povezavo za odobritev"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Pošlje besedilo vašega življenjepisa samo na {0} · {1}, z vašim klj
 msgid "Sent"
 msgstr "Poslano"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Znova poslano. Prispe lahko v minuti."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Poslano Lumnu"
 msgid "Serbian"
 msgstr "srbščina"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Nastavite geslo"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Nastavi geslo"
@@ -5354,6 +5489,10 @@ msgstr "Pri izvozu nastavite jezik dokumenta."
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Nastavite aplikacijo za preverjanje pristnosti"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Nastavljanje gesla …"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Stranske vrstice se pogosto preberejo nazadnje ali pomešajo v glavni st
 msgid "Sign in"
 msgstr "Prijava"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Prijavite se iz svojega odjemalca UI ali uporabite ključ API."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Prijavite se zdaj"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Prijavite se, da povežete {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Prijavite se, da povežete aplikacijo."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Nekateri znaki se prikažejo kot vprašaji."
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Nekatera preverjanja potrebujejo podatke, ki jih ta datoteka ne nosi: vsebino strani, ki je ni bilo mogoče pregledati, ali besedilo v jeziku, ki ga ta preverjanja ne pokrivajo. Ne štejejo niti kot uspeh niti kot neuspeh."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "Nekatere pisave manjkajo v zrcalu pisav tega strežnika. Prosite skrbnika, naj jih doda."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Nekateri znaki nimajo pomena zunaj te datoteke."
@@ -5666,6 +5821,10 @@ msgstr "Del besedila je zasukan."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "Nekatere naložene datoteke so bile izpuščene. Preverite upload-manifest.json v arhivu."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "Besedilo pod {minimum} pt je lahko napačno prebrano, ko ga sistem ponov
 msgid "Thai"
 msgstr "tajščina"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "Geslo tega računa je bilo spremenjeno in račun je odjavljen povsod. Ta brskalnik je še vedno prijavljen kot {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Geslo ni pravilno. Preverite ga pri lastniku življenjepisa in poskusite znova."
@@ -6170,6 +6334,10 @@ msgstr "Iščejo naslove, kot so izkušnje, izobrazba in spretnosti."
 msgid "Thinking…"
 msgstr "Razmišljam ..."
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Ta zahteva za povezavo je neveljavna ali je potekla. Povezavo znova zaženite iz odjemalca."
@@ -6317,6 +6485,14 @@ msgstr "Ta življenjepis je posodobil agent umetne inteligence."
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "Nastavitve deljenja tega življenjepisa so se spremenile drugje."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Ta strežnik ne more pošiljati e-pošte, zato ponastavitev gesla ni na voljo. Prosite osebo, ki ga upravlja, naj ponastavi vaše geslo."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Ta strežnik ne more pošiljati e-pošte, zato naslova tukaj ni mogoče spremeniti. Obrnite se na osebo, ki ga upravlja."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Uporabite od 3 do 64 malih črk, številk, pik, vezajev in podčrtajev."
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Uporabite vsaj 3 znake."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Preveri"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Preveri z rezervno kodo"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Za dodajanje passkey potrdite svojo e-pošto. Povezava je zgoraj v Podatkih o računu."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "To že uporabljate za »{0}«."
 msgid "You answered: {answer}"
 msgstr "Odgovorili ste: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "Prijavite se lahko tudi s svojim uporabniškim imenom."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "Povezavo lahko kadarkoli prekinete v Nastavitve → AI & razvijalec."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Prijavite se brez njega"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Nisi povezan. Pred odhodom se znova povežite, da shranite spremembe."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com ali vaše uporabniško ime"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

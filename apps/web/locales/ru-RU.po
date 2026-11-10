@@ -546,6 +546,10 @@ msgstr "Добавить ссылку"
 msgid "Add a location"
 msgstr "Добавить местоположение"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Добавьте пароль как ещё один способ входа. Другие способы входа и устройства останутся без изменений."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Добавить номер телефона"
@@ -787,10 +791,6 @@ msgstr "По правому краю"
 msgid "All"
 msgstr "Все"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Разрешить доступ"
@@ -1031,6 +1031,7 @@ msgstr "Назад в настоящее время"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Назад ко входу"
@@ -1138,11 +1139,17 @@ msgstr "запись в списке {n}"
 msgid "Bulleted list"
 msgstr "Маркированный список"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "Не удаётся отсканировать? Введите этот ключ в приложении:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Изменить фотографию"
 msgid "Change theme to…"
 msgstr "Изменить тему на…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "Изменение на {pendingEmail} ожидает подтверждения с адреса {0}. Ссылка действует один час."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "Изменение на {pendingEmail} ожидает: откройте ссылку, которую мы отправили на этот адрес. Ссылка действует один час."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Измените пароль"
@@ -1206,6 +1222,10 @@ msgstr "Передумали? Переименуйте резюме во что-
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Изменяет только названия разделов и слова даты, но не ваш контент."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Проверьте подключение и повторите попы
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Проверьте почту"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Проверьте свою электронную почту: в письме есть ссылка для сброса пароля."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Выберите файл"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Выберите файл для импорта"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Придумайте новый пароль. Вы выйдете со всех устройств, а ваши ключи доступа (passkeys), API-ключи и подключённые приложения будут удалены."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "Идентификатор клиента"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Подключите своего собственного постав�
 msgid "Connected"
 msgstr "Подключено"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Подключено {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Подключенные приложения"
@@ -1511,6 +1537,10 @@ msgstr "Разговоры"
 msgid "Copied"
 msgstr "Скопировано"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "Конфигурация MCP с этим ключом скопирована."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Скопируйте его сейчас. В целях вашей бе�
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Копировать ссылку"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Копировать конфигурацию MCP"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "Не удалось подключиться. Проверьте клю�
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "Не удалось скопировать стенограмму. Попробуйте еще раз."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "Не удалось скопировать в буфер обмена. Попробуйте еще раз."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "Не удалось установить пароль. Попробуй�
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "Не удалось настроить двухэтапную проверку. Попробуйте еще раз."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "Не удалось установить пароль. Попробуйте ещё раз."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "Не удалось показать предпросмотр."
@@ -1876,6 +1918,18 @@ msgstr "Создать новое резюме"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Сначала составьте резюме, а затем спрашивайте о нем."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Создайте аккаунт, чтобы подключить {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Создайте аккаунт, чтобы подключить приложение."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Удалить аккаунт"
 msgid "Delete conversation"
 msgstr "Удалить разговор"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Удаление документов и данных аккаунта."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Удалить запись"
@@ -2157,6 +2215,10 @@ msgstr "Подробности"
 msgid "Details from the provider:"
 msgstr "Сведения от провайдера:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "Не получили?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Отменить изменения"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Отменить несохраненные изменения?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Отключить"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Отключить «{name}»?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Отключить {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Отключение приложения от вашего аккаунта."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "«{name}» отключено."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "Эл. почта"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "Адрес электронной почты"
@@ -2418,6 +2496,11 @@ msgstr "Адрес электронной почты не будет распо�
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "На этом сервере не настроена доставка электронной почты, поэтому адрес не проверен."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "Email или имя пользователя"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Введите резервный код."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Введите имя длиной до 64 символов."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Введите новый пароль для своей учетной записи."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Каждая роль говорит о том, что ты сделал
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Выйти из режима фокусировки"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Ожидается"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "Для LibreOffice и других редакторов с открыт�
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Для порталов или рекрутеров, которые запрашивают Word. Компоновка упрощена."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Для скриптов, расширений и клиентов MCP. Ключи действуют от вашего имени и могут читать и редактировать ваши документы."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Только для этого визита"
@@ -2748,6 +2828,10 @@ msgstr "от ассистента или API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "Из записей вашего опыта"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Полный доступ"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Иди домой"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Перейти к панели управления"
@@ -2994,6 +3079,10 @@ msgstr "Икона…"
 msgid "Icons in contact line"
 msgstr "Значки на линии соприкосновения"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Если этот адрес используется в аккаунте, ссылка для сброса уже отправлена."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Если это результат сканирования, это ожидаемо. В остальных случаях уберите это — рекрутеры воспринимают это как переспам ключевыми словами."
@@ -3009,6 +3098,10 @@ msgstr "Если кто-то прислал вам эту ссылку, попр
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Если закрыть это окно, изменения будут потеряны."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Если вы ни разу не подтверждали свой адрес электронной почты, сброс пароля отключает двухэтапную проверку. Иначе после сброса она остаётся включённой, поэтому попросите администратора этого сервера Reactive Resume отключить её для вашего аккаунта. Затем войдите с паролем и снова включите её с новым приложением-аутентификатором."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Проблемы и сопоставление заданий по-пр�
 msgid "It has entries but isn't placed on a page."
 msgstr "В нем есть записи, но он не размещен на странице."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Доступ будет сразу отозван. Чтобы снова пользоваться им, подключите его из приложения. Это действие нельзя отменить."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Он будет удален навсегда и не подлежит восстановлению."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Оставьте один адрес, чтобы программе не приходилось гадать, какой использовать."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Сохраняйте доступ, когда вы не используете приложение."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Ключ хранится в зашифрованном виде"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Ключи действуют от вашего имени и могут читать и редактировать ваши документы."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Ключи действуют от вашего имени с выбранными вами правами доступа. Новые ключи изначально имеют доступ только для чтения."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Длина"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Длина — не недостаток, и универсального правила «одна страница» не существует. Оставляйте те страницы, которые оправданы содержанием."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Позвольте клиентам ИИ, таким как Claude или Cursor, читать и редактировать ваши резюме, используя ключ API, указанный выше."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Новая страница"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Новый пароль"
@@ -3912,6 +4007,10 @@ msgstr "Новый раздел"
 msgid "Next issue"
 msgstr "Следующий выпуск"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Резервных кодов тоже нет?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "Маркированные списки не найдены."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "По этому запросу команд не найдено."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Подключенных приложений пока нет. Здесь появятся приложения, которым вы разрешите доступ к учетной записи."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Откройте {title}."
 msgid "Open AI settings"
 msgstr "Откройте настройки ИИ"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Открыть почтовое приложение"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Открыть режим фокусировки"
@@ -4352,6 +4446,10 @@ msgstr "Passkey"
 msgid "Passkeys"
 msgstr "Passkeys"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Для ключей доступа (passkeys) нужен подтверждённый email, а этот сервер не может отправлять письма."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Пароль"
 msgid "Password changed"
 msgstr "Пароль изменен"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Пароль изменён. Вы вышли на всех устройствах; войдите, а затем снова добавьте ключи доступа (passkeys) или API-ключи."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "Пароль удален"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "Пароль сброшен. Войдите с новым паролем."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Пароль установлен"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Пароль установлен. Теперь вы можете входить и с ним."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Доступ только для чтения"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "Доступ только для чтения не позволяет ничего изменять или удалять."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Прочтите вложение"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Прочтите свой адрес электронной почты."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Прочтите информацию своего профиля."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Требовать пароль"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Отправить повторно"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Используйте заглавные буквы только для коротких заголовков. Они замедляют чтение и могут мешать поиску с учётом регистра."
@@ -4981,6 +5101,10 @@ msgstr "Резюме"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "Резюме всегда оформляются на белой бумаге, независимо от темы."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Отозвать"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Отозвать {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Отозвать доступ"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Отмените доступ приложения к вашей учетной записи."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Семантическая таблица стилей CSS"
 msgid "Send"
 msgstr "Отправлять"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Отправить снова"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Передавайте его в заголовке <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Отправить ссылку для сброса"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Отправить ссылку для подтверждения ещё раз"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Отправляет текст вашего резюме только �
 msgid "Sent"
 msgstr "Отправил"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Отправлено повторно. Доставка может занять минуту."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Отправлено в Lumen"
 msgid "Serbian"
 msgstr "Сербский"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Установить пароль"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Установить пароль"
@@ -5354,6 +5489,10 @@ msgstr "Указывайте язык документа при экспорте
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Настройте приложение-аутентификатор"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Установка пароля…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Боковые панели часто читаются последни
 msgid "Sign in"
 msgstr "Войти"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Войдите через свой ИИ-клиент или используйте ключ API."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Войдите сейчас"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Войдите, чтобы подключить {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Войдите, чтобы подключить приложение."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Некоторые символы отображаются как зна
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Некоторым проверкам нужны сведения, которых в этом файле нет: содержимое страниц, которое не удалось изучить, или текст на языке, не охваченном этими проверками. Такие проверки не считаются ни пройденными, ни проваленными."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "В зеркале шрифтов этого сервера нет некоторых шрифтов. Попросите администратора добавить их."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Некоторые глифы не имеют смысла вне этого файла."
@@ -5666,6 +5821,10 @@ msgstr "Часть текста повёрнута."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "Некоторые загруженные файлы пропущены. Проверьте upload-manifest.json в архиве."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "Текст под {minimum} pt может быть неправильн�
 msgid "Thai"
 msgstr "Тайский"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "Пароль этого аккаунта изменён, и выполнен выход на всех устройствах. В этом браузере всё ещё выполнен вход как {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Неверный пароль. Уточните его у владельца резюме и попробуйте еще раз."
@@ -6170,6 +6334,10 @@ msgstr "Они ищут такие заголовки, как «Опыт», «О
 msgid "Thinking…"
 msgstr "Думая…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Этот запрос на подключение недействителен или истек. Начните подключение заново в своем клиенте."
@@ -6317,6 +6485,14 @@ msgstr "Это резюме было обновлено с помощью ИИ-�
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "Настройки доступа к этому резюме были изменены в другом месте."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Этот сервер не может отправлять письма, поэтому сброс пароля недоступен. Попросите администратора сервера сбросить ваш пароль."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Этот сервер не может отправлять письма, поэтому адрес здесь изменить нельзя. Обратитесь к администратору сервера."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Используйте от 3 до 64 строчных букв, циф�
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Используйте не менее 3 символов."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Подтвердить"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Подтвердить с помощью резервного кода"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Подтвердите свой email, чтобы добавить ключ доступа (passkey). Ссылка находится в разделе «Данные аккаунта» выше."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "Вы уже используете это для «{0}»."
 msgid "You answered: {answer}"
 msgstr "Вы ответили: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "Войти можно и по имени пользователя."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "Отключить его можно в любое время в «Настройки» → «ИИ и разработчик»."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Вы входите в систему без него"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Вы оффлайн. Подключитесь повторно, чтобы сохранить изменения перед выходом."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com или ваше имя пользователя"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

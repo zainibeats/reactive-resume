@@ -546,6 +546,10 @@ msgstr "Adăugați un link"
 msgid "Add a location"
 msgstr "Adăugați o locație"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Adăugați o parolă ca altă modalitate de autentificare. Celelalte metode de autentificare și dispozitivele dvs. rămân neschimbate."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Adăugați un număr de telefon"
@@ -787,10 +791,6 @@ msgstr "Aliniere la dreapta"
 msgid "All"
 msgstr "Toate"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Permite accesul"
@@ -1031,6 +1031,7 @@ msgstr "Înapoi până acum"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Înapoi la conectare"
@@ -1138,11 +1139,17 @@ msgstr "intrare din listă {n}"
 msgid "Bulleted list"
 msgstr "Listă cu marcatori"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "Nu puteți scana? Introduceți această cheie în aplicație:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Schimbați fotografia"
 msgid "Change theme to…"
 msgstr "Schimbă tema la…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "Schimbarea la {pendingEmail} așteaptă aprobarea de la {0}. Linkul este valabil o oră."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "Schimbarea la {pendingEmail} este în așteptare: deschideți linkul pe care l-am trimis acolo. Linkul este valabil o oră."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Schimbă-ți parola"
@@ -1206,6 +1222,10 @@ msgstr "V-ați răzgândit? Redenumiți CV-ul cu ceva mai descriptiv."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Modifică numai titlurile secțiunilor și cuvintele date, nu conținutul dvs."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Verificați conexiunea și încercați din nou."
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Verifică-ți e-mailul"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Verificați-vă e-mailul pentru un link de resetare a parolei."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Alegeți un fișier"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Alegeți un fișier de importat"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Alegeți o parolă nouă. Aceasta vă deconectează peste tot și elimină cheile de acces, cheile API și aplicațiile conectate."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "ID client"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Conectați-vă propriul furnizor de AI pentru ca un model de limbă să 
 msgid "Connected"
 msgstr "Conectat"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Conectat {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Aplicații conectate"
@@ -1511,6 +1537,10 @@ msgstr "Conversații"
 msgid "Copied"
 msgstr "Copiat"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "Configurația MCP cu această cheie a fost copiată."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Copiați-l acum. Pentru securitatea dvs., nu va fi afișat din nou."
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Copiați linkul"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Copiați configurația MCP"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "Nu s-a putut conecta. Verificați cheia și încercați din nou."
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "Nu s-a putut copia transcrierea. Încearcă din nou."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "Nu s-a putut copia în clipboard. Încearcă din nou."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "Nu s-a putut seta parola. Încearcă din nou."
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "Nu s-a putut configura verificarea în doi pași. Încearcă din nou."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "Parola nu a putut fi setată. Încercați din nou."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "Nu s-a putut afișa previzualizarea."
@@ -1876,6 +1918,18 @@ msgstr "Creați un nou CV"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Creați mai întâi un CV, apoi întrebați despre el."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Creați un cont pentru a conecta {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Creați un cont pentru a conecta o aplicație."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Ștergeți contul"
 msgid "Delete conversation"
 msgstr "Șterge conversația"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Șterge documente și date ale contului."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Ștergeți intrarea"
@@ -2157,6 +2215,10 @@ msgstr "Detalii"
 msgid "Details from the provider:"
 msgstr "Detalii de la furnizor:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "Nu l-ați primit?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Renunță la modificări"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Renunți la modificările nesalvate?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Deconectează"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Deconectați „{name}”?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Deconectați {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Deconectați o aplicație de la contul dvs."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "„{name}” a fost deconectat."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "E-mail"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "Adresă de e-mail"
@@ -2418,6 +2496,11 @@ msgstr "Adresa de e-mail nu va fi recunoscută"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "Livrarea e-mailului nu este configurată pe acest server, așa că adresa nu este verificată."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "E-mail sau nume de utilizator"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Introdu un cod de rezervă."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Introduceți un nume, până la 64 de caractere."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Introdu o parolă nouă pentru cont."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Fiecare rol spune ce ai făcut. Opinii despre formulare live în fila Sc
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Ieșiți din modul de focalizare"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Estimat"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "Pentru LibreOffice și alte editoare open-source. Aspectul este simplifi
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Pentru portaluri sau recrutori care solicită Word. Aspectul este simplificat."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Pentru scripturi, extensii și clienți MCP. Tastele acționează ca dvs. și vă pot citi și edita documentele."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Doar pentru această vizită"
@@ -2748,6 +2828,10 @@ msgstr "de la asistent sau API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "Din intrările dvs. de experiență"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Acces complet"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Du-te acasă"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Mergi la panoul de control"
@@ -2994,6 +3079,10 @@ msgstr "Pictograma…"
 msgid "Icons in contact line"
 msgstr "Pictograme în linia de contact"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Dacă un cont folosește acea adresă, un link de resetare este pe drum."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Dacă provine dintr-o scanare, este de așteptat. În caz contrar, eliminați-l; recrutorii îl interpretează ca îndesare de cuvinte cheie."
@@ -3009,6 +3098,10 @@ msgstr "Dacă cineva ți-a trimis acest link, cere-i unul nou."
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Dacă închizi această fereastră, modificările se vor pierde."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Dacă nu v-ați verificat niciodată adresa de e-mail, o resetare a parolei dezactivează verificarea în doi pași. Altfel, resetarea o păstrează activă, așa că cereți persoanei care administrează acest server Reactive Resume să o dezactiveze pentru contul dvs. Apoi autentificați-vă cu parola și activați-o din nou cu o aplicație de autentificare nouă."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Problemele și potrivirea jobului încă funcționează fără AI."
 msgid "It has entries but isn't placed on a page."
 msgstr "Are intrări, dar nu este plasat pe o pagină."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Își pierde accesul acum. Pentru a o folosi din nou, conectați-o din aplicație. Această acțiune nu poate fi anulată."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Va fi șters definitiv și nu poate fi restaurat."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Păstrați o singură adresă, ca programele să nu fie nevoite să ghicească pe care să o folosească."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Să păstreze accesul când nu folosești aplicația."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Cheie stocată criptată"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Tastele acționează ca dvs. și vă pot citi și edita documentele."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Cheile acționează în numele tău cu accesul ales de tine. Cheile noi pornesc cu acces doar pentru citire."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Lungime"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Lungimea nu este un defect, iar nu există o regulă universală a unei singure pagini. Păstrați paginile care își merită locul."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Permiteți clienților AI precum Claude sau Cursor să vă citească și să vă editeze CV-urile, folosind o cheie API de mai sus."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Pagina nouă"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Parolă nouă"
@@ -3912,6 +4007,10 @@ msgstr "Secțiune nouă"
 msgid "Next issue"
 msgstr "Următorul număr"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Nici coduri de rezervă?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "Nu a fost găsită nicio listă cu puncte."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "Nicio comandă nu se potrivește cu această căutare."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Nicio aplicație conectată încă. Aplicațiile cărora le permiți accesul la cont apar aici."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Deschideți {title}"
 msgid "Open AI settings"
 msgstr "Deschideți setările AI"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Deschide aplicația de e-mail"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Deschide modul de focalizare"
@@ -4352,6 +4446,10 @@ msgstr "Passkey"
 msgid "Passkeys"
 msgstr "Chei de acces"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Cheile de acces necesită un e-mail verificat, pe care acest server nu îl poate trimite."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Parolă"
 msgid "Password changed"
 msgstr "Parola a fost schimbată"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Parola a fost schimbată. Ați fost deconectat peste tot; autentificați-vă, apoi adăugați din nou cheile de acces sau cheile API."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "Parola a fost eliminată"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "Parola a fost resetată. Autentifică-te cu noua parolă."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Parola setată"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Parola a fost setată. Acum vă puteți autentifica și cu ea."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Acces numai în citire"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "Accesul numai în citire nu poate modifica sau șterge nimic."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Citiți atașamentul"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Să citească adresa ta de e-mail."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Să citească informațiile din profilul tău."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Solicitați o parolă"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Retrimiteți"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Rezervați majusculele pentru titluri scurte. Acestea încetinesc citirea și pot afecta căutările sensibile la majuscule și minuscule."
@@ -4981,6 +5101,10 @@ msgstr "CV-uri"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "CV-urile se redau întotdeauna pe hârtie albă, indiferent de temă."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Revoca"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Revocați {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Revocați accesul"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Revocați accesul unei aplicații la contul dvs."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Foaie de stil CSS semantică"
 msgid "Send"
 msgstr "Trimite"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Trimiteți din nou"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Trimiteți-o în antetul <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Trimite linkul de resetare"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Trimiteți din nou linkul de aprobare"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Trimite textul CV-ului dvs. numai către {0} · {1}, cu cheia dvs."
 msgid "Sent"
 msgstr "Trimis"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Trimis din nou. Poate dura un minut până ajunge."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Trimis la Lumen"
 msgid "Serbian"
 msgstr "Sârbă"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Setați o parolă"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Setează parola"
@@ -5354,6 +5489,10 @@ msgstr "Setați limba documentului la exportare."
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Configurează aplicația de autentificare"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Se setează parola…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Barele laterale sunt adesea citite ultimele sau amestecate în coloana p
 msgid "Sign in"
 msgstr "Autentificare"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Conectează-te din clientul tău AI sau folosește o cheie API."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Conectați-vă acum"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Autentificați-vă pentru a conecta {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Autentificați-vă pentru a conecta o aplicație."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Unele caractere apar ca semne de întrebare."
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Unele verificări au nevoie de informații pe care acest fișier nu le conține: conținut de pagină care nu a putut fi inspectat sau text într-o limbă pe care aceste verificări nu o acoperă. Nu se socotesc nici ca trecute, nici ca picate."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "Unele fonturi lipsesc din oglinda de fonturi a acestui server. Cereți administratorului să le adauge."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Unele glife nu au sens în afara acestui fișier."
@@ -5666,6 +5821,10 @@ msgstr "O parte din text este rotită."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "Unele fișiere încărcate au fost omise. Verifică upload-manifest.json din arhivă."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "Textul de sub {minimum} pt poate fi citit greșit atunci când un sistem
 msgid "Thai"
 msgstr "Thailandeză"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "Parola acelui cont a fost schimbată și contul a fost deconectat peste tot. Acest browser este încă autentificat ca {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Parola nu este corectă. Verific-o cu proprietarul CV-ului și încearcă din nou."
@@ -6170,6 +6334,10 @@ msgstr "Ei caută rubrici precum Experiență, Educație și Abilități."
 msgid "Thinking…"
 msgstr "Gândire…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Această cerere de conectare este invalidă sau a expirat. Reia conectarea din clientul tău."
@@ -6317,6 +6485,14 @@ msgstr "Acest CV a fost actualizat de un agent de inteligență artificială."
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "Setările de partajare ale acestui CV s-au modificat în altă parte."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Acest server nu poate trimite e-mailuri, așa că resetarea parolei nu este disponibilă. Cereți persoanei care îl administrează să vă reseteze parola."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Acest server nu poate trimite e-mailuri, așa că adresa nu poate fi schimbată aici. Cereți persoanei care îl administrează."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Utilizați 3 până la 64 de litere mici, cifre, puncte, cratime și lin
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Folosește cel puțin 3 caractere."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Verifică"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Verifică cu un cod de rezervă"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Verificați-vă e-mailul pentru a adăuga o cheie de acces. Linkul este în Detaliile contului, mai sus."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "Utilizați deja acest lucru pentru „{0}”."
 msgid "You answered: {answer}"
 msgstr "Ai răspuns: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "Vă puteți autentifica și cu numele de utilizator."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "O puteți deconecta oricând din Setări → AI și dezvoltator."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Vă conectați fără unul"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Ești offline. Reconectați-vă pentru a salva modificările înainte de a pleca."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com sau numele dvs. de utilizator"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

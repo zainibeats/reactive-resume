@@ -546,6 +546,10 @@ msgstr "Afegeix un enllaç"
 msgid "Add a location"
 msgstr "Afegeix una ubicació"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Afegeix una contrasenya com a una altra manera d'iniciar sessió. Els altres mètodes d'inici de sessió i dispositius es mantenen tal com són."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Afegeix un número de telèfon"
@@ -787,10 +791,6 @@ msgstr "Alinea a la dreta"
 msgid "All"
 msgstr "Tots"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Permet l'accés"
@@ -1031,6 +1031,7 @@ msgstr "Torna a ara"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Torna a l'inici de sessió"
@@ -1138,11 +1139,17 @@ msgstr "entrada de llista {n}"
 msgid "Bulleted list"
 msgstr "Llista amb pics"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "No pots escanejar? Introdueix aquesta clau a l'aplicació:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Canvia foto"
 msgid "Change theme to…"
 msgstr "Canvia el tema a…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "El canvi a {pendingEmail} espera l'aprovació de {0}. L'enllaç funciona durant una hora."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "El canvi a {pendingEmail} està pendent: obre l'enllaç que hi hem enviat. L'enllaç funciona durant una hora."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Canvieu la contrasenya"
@@ -1206,6 +1222,10 @@ msgstr "Has canviat d’idea? Canvia el nom del currículum per fer-lo més desc
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Canvia només els títols de les seccions i les paraules de la data, no el contingut."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Comprova la teva connexió i torna-ho a provar."
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Comproveu el correu electrònic"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Comprova el correu electrònic per trobar un enllaç per restablir la contrasenya."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Trieu un fitxer"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Trieu un fitxer per importar"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Tria una contrasenya nova. Això tanca la teva sessió a tot arreu i elimina les claus d'accés, les claus d'API i les aplicacions connectades."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "ID del client"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Connecteu el vostre propi proveïdor d'IA perquè un model d'idioma lleg
 msgid "Connected"
 msgstr "Connectat"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Connectat el {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Aplicacions connectades"
@@ -1511,6 +1537,10 @@ msgstr "Converses"
 msgid "Copied"
 msgstr "Copiat"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "S'ha copiat la configuració MCP amb aquesta clau."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Copia-ho ara. Per la vostra seguretat, no es tornarà a mostrar."
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Copia l'enllaç"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Copia la configuració MCP"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "No s'ha pogut connectar. Comprova la clau i torna-ho a provar."
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "No s'ha pogut copiar la transcripció. Torneu-ho a provar."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "No s'ha pogut copiar al porta-retalls. Torneu-ho a provar."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "No s'ha pogut definir la contrasenya. Torneu-ho a provar."
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "No s'ha pogut configurar la verificació en dos passos. Torneu-ho a provar."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "No s'ha pogut establir la teva contrasenya. Torna-ho a provar."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "No s'ha pogut mostrar la previsualització."
@@ -1876,6 +1918,18 @@ msgstr "Crea un currículum nou"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Creeu primer un currículum i després pregunteu-ne."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Crea un compte per connectar {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Crea un compte per connectar una aplicació."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Suprimeix el compte"
 msgid "Delete conversation"
 msgstr "Suprimeix la conversa"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Suprimeix documents i dades del compte."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Esborra l'entrada"
@@ -2157,6 +2215,10 @@ msgstr "Detalls"
 msgid "Details from the provider:"
 msgstr "Detalls del proveïdor:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "No l'has rebut?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Descarta els canvis"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Voleu descartar els canvis no desats?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Desconnecta"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Vols desconnectar «{name}»?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Desconnecta {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Desconnecta una aplicació del teu compte."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "S'ha desconnectat «{name}»."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "Correu electrònic"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "Adreça electrònica"
@@ -2418,6 +2496,11 @@ msgstr "L'adreça electrònica no es reconeixerà"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "L'enviament de correu electrònic no està configurat en aquest servidor, de manera que l'adreça no està verificada."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "Correu electrònic o nom d'usuari"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Introduïu un codi de seguretat."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Introduïu un nom, fins a 64 caràcters."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Introduïu una contrasenya nova per al vostre compte."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Cada paper diu el que has fet. Opinions sobre la redacció en directe a 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Surt del mode d'enfocament"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Previst"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "Per a LibreOffice i altres editors de codi obert. El disseny es simplifi
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Per a portals o reclutadors que demanen Word. El disseny es simplifica."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Per a scripts, extensions i clients MCP. Les claus actuen com tu i poden llegir i editar els teus documents."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Només per aquesta visita"
@@ -2748,6 +2828,10 @@ msgstr "de l'assistent o API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "A partir de les teves entrades d'experiència"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Accés complet"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Torna a casa"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Ves al tauler"
@@ -2994,6 +3079,10 @@ msgstr "Icona…"
 msgid "Icons in contact line"
 msgstr "Icones a la línia de contacte"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Si un compte utilitza aquesta adreça, hi ha un enllaç de restabliment en camí."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Si prové d'un escaneig, és normal. Si no, elimina-ho; els reclutadors ho interpreten com a farciment de paraules clau."
@@ -3009,6 +3098,10 @@ msgstr "Si algú us ha enviat aquest enllaç, demaneu-li un de nou."
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Si tanqueu aquest diàleg, es perdran els canvis."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Si mai has verificat la teva adreça de correu, restablir la contrasenya desactiva la verificació en dos passos. Si no, un restabliment la manté activada, així que demana a la persona que administra aquest servidor de Reactive Resume que la desactivi per al teu compte. Després inicia sessió amb la teva contrasenya i torna a activar-la amb un autenticador nou."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Els problemes i la concordança de treball encara funcionen sense IA."
 msgid "It has entries but isn't placed on a page."
 msgstr "Té entrades però no es col·loca en una pàgina."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Perdrà l'accés ara. Per tornar-lo a utilitzar, connecta'l des de l'aplicació. Això no es pot desfer."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Se suprimirà definitivament i no es podrà restaurar."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Fes servir una sola adreça, perquè el programari no hagi d'endevinar quina ha de fer servir."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Mantenir l'accés quan no estiguis utilitzant l'aplicació."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Clau emmagatzemada encriptada"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Les claus actuen com tu i poden llegir i editar els teus documents."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Les claus actuen en nom teu amb l'accés que triïs. Les claus noves comencen amb accés de només lectura."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Longitud"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "La longitud no és cap defecte, i no hi ha cap regla universal d'una sola pàgina. Conserva les pàgines que es guanyen el seu lloc."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Permeteu que clients d'IA com Claude o Cursor llegeixin i editin els vostres currículums, utilitzant una clau API anterior."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Pàgina nova"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Contrasenya nova"
@@ -3912,6 +4007,10 @@ msgstr "Nova secció"
 msgid "Next issue"
 msgstr "Següent número"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Tampoc tens codis de recuperació?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "No s'ha trobat cap llista de vinyetes."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "Cap ordre no coincideix amb aquesta cerca."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Encara no hi ha aplicacions connectades. Aquí apareixeran les aplicacions a les quals permeteu accedir al vostre compte."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Obriu el {title}"
 msgid "Open AI settings"
 msgstr "Obriu la configuració de l'IA"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Obre l'aplicació de correu"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Obre el mode d'enfocament"
@@ -4352,6 +4446,10 @@ msgstr "Clau d'accés"
 msgid "Passkeys"
 msgstr "Claus d'accés"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Les claus d'accés necessiten un correu verificat, i aquest servidor no el pot enviar."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Contrasenya"
 msgid "Password changed"
 msgstr "S'ha canviat la contrasenya"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Contrasenya canviada. S'ha tancat la sessió a tot arreu; inicia sessió i torna a afegir les claus d'accés o d'API."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "S'ha eliminat la contrasenya"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "S'ha restablert la contrasenya. Inicieu la sessió amb la contrasenya nova."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Contrasenya establerta"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Contrasenya establerta. Ara també pots iniciar-hi sessió."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Accés només de lectura"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "El mode de només lectura no pot canviar ni suprimir res."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Llegeix el fitxer adjunt"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Llegir la teva adreça de correu electrònic."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Llegir la informació del teu perfil."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Requereix una contrasenya"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Torna a enviar"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Reserva les majúscules per a encapçalaments curts. Alenteixen la lectura i poden fer fallar les cerques sensibles a majúscules."
@@ -4981,6 +5101,10 @@ msgstr "Currículums"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "Els currículums sempre es mostren en paper blanc, sigui quin sigui el tema."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Revocar"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Revocar {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Revoca l'accés"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Revoca l'accés d'una aplicació al teu compte."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Full d'estil CSS semàntic"
 msgid "Send"
 msgstr "Enviar"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Torna a enviar"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Envia'l a la capçalera <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Envia l'enllaç de restabliment"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Torna a enviar l'enllaç d'aprovació"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Envia el text del vostre currículum només a {0} · {1}, amb la vostra 
 msgid "Sent"
 msgstr "Enviat"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Tornat a enviar. Pot trigar un minut a arribar."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Enviat a Lumen"
 msgid "Serbian"
 msgstr "Serbi"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Estableix una contrasenya"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Defineix la contrasenya"
@@ -5354,6 +5489,10 @@ msgstr "Estableix l'idioma del document en exportar."
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Configureu l'aplicació d'autenticació"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Establint la teva contrasenya…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Les barres laterals es llegeixen sovint per últim o es barregen a la co
 msgid "Sign in"
 msgstr "Inicia sessió"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Inicia la sessió des del teu client d'IA o utilitza una clau API."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Inicia la sessió ara"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Inicia sessió per connectar {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Inicia sessió per connectar una aplicació."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Alguns caràcters surten com a signes d'interrogació."
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Algunes comprovacions necessiten informació que aquest fitxer no conté: contingut de pàgines que no s'ha pogut inspeccionar, o text en un idioma que aquestes comprovacions no cobreixen. No compten ni com a aprovat ni com a error."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "Falten algunes fonts al mirall de fonts d'aquest servidor. Demaneu a l'administrador que les afegeixi."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Alguns glifs no tenen cap significat fora d'aquest fitxer."
@@ -5666,6 +5821,10 @@ msgstr "Part del text està girat."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "S'han omès alguns fitxers pujats. Consulta upload-manifest.json dins de l'arxiu."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "El text sota {minimum} pt es pot malinterpretar quan un sistema el torna
 msgid "Thai"
 msgstr "Tai"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "La contrasenya d'aquell compte ha canviat i s'ha tancat la sessió a tot arreu. Aquest navegador encara té la sessió iniciada com a {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Aquesta contrasenya no és correcta. Comproveu-la amb el propietari del currículum i torneu-ho a provar."
@@ -6170,6 +6334,10 @@ msgstr "Busquen títols com ara Experiència, Educació i Competències."
 msgid "Thinking…"
 msgstr "Pensant…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Aquesta sol·licitud de connexió no és vàlida o ha caducat. Torneu a iniciar la connexió des del vostre client."
@@ -6317,6 +6485,14 @@ msgstr "Aquest currículum ha estat actualitzat per un agent d'IA."
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "La configuració de compartició d'aquest currículum ha canviat en altres llocs."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Aquest servidor no pot enviar correu, per tant el restabliment de contrasenya no està disponible. Demana a la persona que l'administra que et restableixi la contrasenya."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Aquest servidor no pot enviar correu, per tant l'adreça no es pot canviar aquí. Demana-ho a la persona que l'administra."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Utilitzeu de 3 a 64 lletres minúscules, números, punts, guions i guion
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Feu servir almenys 3 caràcters."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Verifica"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Verifica amb un codi de seguretat"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Verifica el teu correu per afegir una clau d'accés. L'enllaç és a Dades del compte, a dalt."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "Ja ho feu servir per a \"{0}\"."
 msgid "You answered: {answer}"
 msgstr "Has respost: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "També pots iniciar sessió amb el teu nom d'usuari."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "Pots desconnectar-lo en qualsevol moment a Configuració → IA i desenvolupador."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Inicieu la sessió sense cap"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Estàs fora de línia. Torneu a connectar-vos per desar els vostres canvis abans de sortir."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com o el teu nom d'usuari"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

@@ -546,6 +546,10 @@ msgstr "Pridėti nuorodą"
 msgid "Add a location"
 msgstr "Pridėti vietą"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Pridėkite slaptažodį kaip papildomą prisijungimo būdą. Kiti jūsų prisijungimo būdai ir įrenginiai liks tokie pat."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Pridėkite telefono numerį"
@@ -787,10 +791,6 @@ msgstr "Lygiuoti dešinėje"
 msgid "All"
 msgstr "Visi"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Leisti prieigą"
@@ -1031,6 +1031,7 @@ msgstr "Grįžti į dabar"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Grįžti į prisijungimą"
@@ -1138,11 +1139,17 @@ msgstr "sąrašo įrašas {n}"
 msgid "Bulleted list"
 msgstr "Sąrašas su ženkleliais"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "Nepavyksta nuskaityti? Įveskite šį raktą programėlėje:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Keisti nuotrauką"
 msgid "Change theme to…"
 msgstr "Pakeisti temą į…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "Pakeitimas į {pendingEmail} laukia patvirtinimo iš {0}. Nuoroda veikia vieną valandą."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "Pakeitimas į {pendingEmail} laukia: atidarykite ten išsiųstą nuorodą. Nuoroda veikia vieną valandą."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Pakeiskite slaptažodį"
@@ -1206,6 +1222,10 @@ msgstr "Persigalvojote? Pervardinkite savo gyvenimo aprašymą į apibūdinantį
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Keičiami tik skilčių pavadinimai ir datos žodžiai, o ne jūsų turinys."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Patikrinkite ryšį ir bandykite dar kartą."
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Patikrinkite el. paštą"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Patikrinkite el. paštą – ten rasite nuorodą slaptažodžiui atkurti."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Pasirinkite failą"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Pasirinkite failą, kurį norite importuoti"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Pasirinkite naują slaptažodį. Tai jus visur atjungs ir pašalins jūsų passkey, API raktus ir prijungtas programas."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "Kliento ID"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Prijunkite savo AI teikėją, kad kalbos modelis perskaitytų sąrašo �
 msgid "Connected"
 msgstr "Prijungtas"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Prijungta {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Prijungtos programos"
@@ -1511,6 +1537,10 @@ msgstr "Pokalbiai"
 msgid "Copied"
 msgstr "Nukopijuota"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "MCP konfigūracija nukopijuota su šiuo raktu."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Nukopijuokite jį dabar. Jūsų saugumo sumetimais jis daugiau nebus rod
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Nukopijuoti nuorodą"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Kopijuoti MCP konfigūraciją"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "Nepavyko prisijungti. Patikrinkite raktą ir bandykite dar kartą."
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "Nepavyko nukopijuoti nuorašo. Bandykite dar kartą."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "Nepavyko nukopijuoti į iškarpinę. Bandykite dar kartą."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "Nepavyko nustatyti slaptažodžio. Bandykite dar kartą."
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "Nepavyko nustatyti dviejų veiksmų patvirtinimo. Bandykite dar kartą."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "Nepavyko nustatyti slaptažodžio. Bandykite dar kartą."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "Nepavyko parodyti peržiūros."
@@ -1876,6 +1918,18 @@ msgstr "Sukurti naują gyvenimo aprašymą"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Pirmiausia sukurkite gyvenimo aprašymą, tada paklauskite apie tai."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Sukurkite paskyrą, kad prijungtumėte {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Sukurkite paskyrą, kad prijungtumėte programą."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Ištrinti paskyrą"
 msgid "Delete conversation"
 msgstr "Ištrinti pokalbį"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Ištrinti dokumentus ir paskyros duomenis."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Ištrinti įrašą"
@@ -2157,6 +2215,10 @@ msgstr "Detalės"
 msgid "Details from the provider:"
 msgstr "Informacija iš tiekėjo:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "Negavote laiško?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Atmesti pakeitimus"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Atmesti neišsaugotus pakeitimus?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Atsijungti"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Atjungti „{name}“?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Atjungti {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Atjungti programą nuo jūsų paskyros."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "„{name}“ atjungta."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "El. paštas"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "El. pašto adresas"
@@ -2418,6 +2496,11 @@ msgstr "El. pašto adresas nebus atpažintas"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "El. pašto pristatymas šiame serveryje nenustatytas, todėl adresas nėra patvirtintas."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "El. paštas arba naudotojo vardas"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Įveskite atsarginį kodą."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Įveskite pavadinimą, iki 64 simbolių."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Įveskite naują paskyros slaptažodį."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Kiekvienas vaidmuo sako, ką tu padarei. Nuomonės apie formuluotę gyve
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Išeiti iš fokusavimo režimo"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Numatoma"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "LibreOffice ir kitoms atvirojo kodo redagavimo programoms. Išdėstymas 
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Portalams ar įdarbintojams, kurie prašo Word. Išdėstymas supaprastintas."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Skriptams, plėtiniams ir MCP klientams. Klavišai veikia kaip jūs ir galite skaityti bei redaguoti savo dokumentus."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Tik šiam apsilankymui"
@@ -2748,6 +2828,10 @@ msgstr "iš asistento arba API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "Iš savo patirties įrašų"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Pilna prieiga"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Eik namo"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Eikite į skydelį"
@@ -2994,6 +3079,10 @@ msgstr "Piktograma…"
 msgid "Icons in contact line"
 msgstr "Piktogramos kontaktinėje linijoje"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Jei egzistuoja paskyra su tokiu adresu, atkūrimo nuoroda netrukus bus išsiųsta."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Jei tai atsirado iš skenuotos kopijos, tai natūralu. Priešingu atveju pašalinkite – darbdaviai tai vertina kaip raktažodžių prikimšimą."
@@ -3009,6 +3098,10 @@ msgstr "Jei kas nors jums atsiuntė šią nuorodą, paprašykite naujos."
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Jei uždarysite šį langą, pakeitimai bus prarasti."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Jei niekada nepatvirtinote savo el. pašto adreso, slaptažodžio atkūrimas išjungs patvirtinimą dviem veiksmais. Kitu atveju atkūrimas jį palieka įjungtą, todėl paprašykite žmogaus, valdančio šį Reactive Resume serverį, jūsų paskyroje jį išjungti. Tada prisijunkite su slaptažodžiu ir vėl įjunkite su nauja autentifikatoriaus programa."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Problemos ir darbo atitikimas vis dar veikia be AI."
 msgid "It has entries but isn't placed on a page."
 msgstr "Jame yra įrašų, bet jis nėra įdėtas į puslapį."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Prieiga nutraukiama dabar. Norėdami naudoti dar kartą, prijunkite iš programos. To atšaukti negalima."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Jis bus visam laikui ištrintas ir jo nebus galima atkurti."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Naudokite vieną adresą, kad programinei įrangai nereikėtų spėlioti, kurį pasirinkti."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Turėkite prieigą, kai nenaudojate programos."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Raktas saugomas užšifruotas"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Klavišai veikia kaip jūs ir galite skaityti bei redaguoti savo dokumentus."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Raktai veikia jūsų vardu su pasirinktomis prieigos teisėmis. Nauji raktai iš pradžių turi tik skaitymo prieigą."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Ilgis"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Ilgis nėra trūkumas, ir universalios vieno puslapio taisyklės nėra. Palikite tuos puslapius, kurie to verti."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Leiskite dirbtinio intelekto klientams, pvz., Claude arba Cursor, skaityti ir redaguoti jūsų gyvenimo aprašymus, naudodami aukščiau pateiktą API klavišą."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Naujas puslapis"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Naujas slaptažodis"
@@ -3912,6 +4007,10 @@ msgstr "Nauja skiltis"
 msgid "Next issue"
 msgstr "Kitas numeris"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Net ir atsarginių kodų nėra?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "Sąrašų su punktais nerasta."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "Pagal šią paiešką komandų nerasta."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Prijungtų programų dar nėra. Čia rodomos programos, kurioms leidžiate pasiekti jūsų paskyrą."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Atidarykite {title}"
 msgid "Open AI settings"
 msgstr "Atidarykite AI nustatymus"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Atidaryti el. pašto programą"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Atidaryti fokusavimo režimą"
@@ -4352,6 +4446,10 @@ msgstr "Passkey"
 msgid "Passkeys"
 msgstr "Passkeys"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Passkey reikalauja patvirtinto el. pašto, kurio šis serveris negali išsiųsti."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Slaptažodis"
 msgid "Password changed"
 msgstr "Slaptažodis pakeistas"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Slaptažodis pakeistas. Esate atjungti visur; prisijunkite ir vėl pridėkite passkey bei API raktus."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "Slaptažodis pašalintas"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "Slaptažodis atkurtas. Prisijunkite su nauju slaptažodžiu."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Slaptažodis nustatytas"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Slaptažodis nustatytas. Dabar galite ir su juo prisijungti."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Tik skaitymo prieiga"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "Tik skaitymas negali nieko pakeisti ar ištrinti."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Perskaitykite priedą"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Perskaitykite savo el. pašto adresą."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Perskaitykite savo profilio informaciją."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Reikalauti slaptažodžio"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Siųsti iš naujo"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Didžiąsias raides naudokite tik trumpoms antraštėms. Jos lėtina skaitymą ir gali sutrikdyti raidžių dydį skiriančią paiešką."
@@ -4981,6 +5101,10 @@ msgstr "Gyvenimo aprašymai"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "gyvenimo aprašymai visada pateikiami ant balto popieriaus, nesvarbu, kokia tema."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Atšaukti"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Atšaukti {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Atšaukti prieigą"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Atšaukti programos prieigą prie paskyros."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Semantinis CSS stiliaus lapas"
 msgid "Send"
 msgstr "Siųsti"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Siųsti dar kartą"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Siųskite jį antraštėje <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Siųsti atkūrimo nuorodą"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Vėl atsiųsti patvirtinimo nuorodą"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Jūsų gyvenimo aprašymo tekstas siunčiamas tik į {0} · {1} su jūs�
 msgid "Sent"
 msgstr "Išsiųsta"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Išsiųsta dar kartą. Gali užtrukti minutę, kol atvyks."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Išsiųsta Lumen"
 msgid "Serbian"
 msgstr "Serbų"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Nustatykite slaptažodį"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Nustatyti slaptažodį"
@@ -5354,6 +5489,10 @@ msgstr "Eksportuodami nustatykite dokumento kalbą."
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Nustatykite autentifikavimo programą"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Nustatomas slaptažodis…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Šoninės juostos dažnai skaitomos paskutinės arba įtraukiamos į pag
 msgid "Sign in"
 msgstr "Prisijungti"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Prisijunkite iš savo DI kliento arba naudokite API raktą."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Prisijunkite dabar"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Prisijunkite, kad prijungtumėte {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Prisijunkite, kad prijungtumėte programą."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Kai kurie simboliai pasirodo kaip klaustukai."
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Kai kurioms patikroms reikia informacijos, kurios šiame faile nėra: puslapių turinio, kurio nepavyko peržiūrėti, arba teksto kalba, kurios šios patikros neapima. Jos neskaičiuojamos nei kaip praėjusios, nei kaip neišlaikytos."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "Šio serverio šriftų veidrodyje trūksta kai kurių šriftų. Paprašykite administratoriaus juos pridėti."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Kai kurie glifai už šio failo ribų neturi jokios reikšmės."
@@ -5666,6 +5821,10 @@ msgstr "Dalis teksto pasukta."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "Kai kurie įkelti failai praleisti. Patikrinkite archyve esantį upload-manifest.json."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "Tekstas po {minimum} pt gali būti neteisingai perskaitytas, kai sistema
 msgid "Thai"
 msgstr "Tajų"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "Tos paskyros slaptažodis pasikeitė ir ji atjungta visur. Ši naršyklė vis dar prisijungusi kaip {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Slaptažodis neteisingas. Pasitikslinkite jį pas gyvenimo aprašymo savininką ir bandykite dar kartą."
@@ -6170,6 +6334,10 @@ msgstr "Jie ieško tokių antraščių kaip Patirtis, Išsilavinimas ir Įgūdž
 msgid "Thinking…"
 msgstr "Galvoju…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Ši ryšio užklausa neteisinga arba nebegalioja. Pradėkite ryšį iš naujo iš savo kliento."
@@ -6317,6 +6485,14 @@ msgstr "Šį gyvenimo aprašymą atnaujino dirbtinio intelekto agentas."
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "Šio gyvenimo aprašymo bendrinimo nustatymai pakeisti kitur."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Šis serveris negali siųsti el. laiškų, todėl slaptažodžio atkūrimas neprieinamas. Paprašykite jį valdančio žmogaus iš naujo nustatyti jūsų slaptažodį."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Šis serveris negali siųsti el. laiškų, todėl adreso čia pakeisti negalima. Paprašykite jį valdančio žmogaus."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Naudokite 3–64 mažąsias raides, skaičius, taškus, brūkšnelius ir
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Naudokite bent 3 simbolius."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Patvirtinti"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Patvirtinti atsarginiu kodu"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Patvirtinkite el. paštą, kad pridėtumėte passkey. Nuoroda yra aukščiau, Paskyros duomenyse."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "Jau naudojate tai „{0}“."
 msgid "You answered: {answer}"
 msgstr "Jūs atsakėte: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "Taip pat galite prisijungti su savo naudotojo vardu."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "Galite jį atjungti bet kada Nustatymai → DI ir kūrėjai."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Prisijungiate be jo"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Esate neprisijungęs. Prisijunkite iš naujo, kad išsaugotumėte pakeitimus prieš išeidami."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com arba jūsų naudotojo vardas"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

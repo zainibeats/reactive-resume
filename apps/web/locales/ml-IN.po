@@ -546,6 +546,10 @@ msgstr "ഒരു ലിങ്ക് ചേർക്കുക"
 msgid "Add a location"
 msgstr "ഒരു ലൊക്കേഷൻ ചേർക്കുക"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "സൈൻ ഇൻ ചെയ്യാനുള്ള മറ്റൊരു മാർഗ്ഗമായി ഒരു പാസ്‌വേഡ് ചേർക്കുക. നിങ്ങളുടെ മറ്റ് സൈൻ-ഇൻ രീതികളും ഉപകരണങ്ങളും അതേപടി തുടരും."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "ഒരു ഫോൺ നമ്പർ ചേർക്കുക"
@@ -787,10 +791,6 @@ msgstr "വലത്തേക്ക് വിന്യസിക്കുക"
 msgid "All"
 msgstr "എല്ലാം"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "പ്രവേശനം അനുവദിക്കുക"
@@ -1031,6 +1031,7 @@ msgstr "ഇപ്പോൾ തിരികെ"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "സൈൻ ഇന്നിലേക്ക് മടങ്ങുക"
@@ -1138,11 +1139,17 @@ msgstr "ലിസ്റ്റ് എൻട്രി {n}"
 msgid "Bulleted list"
 msgstr "ബുള്ളറ്റ് ലിസ്റ്റ്"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "സ്കാൻ ചെയ്യാനാവില്ലേ? ഈ കീ ആപ്പിൽ നൽകുക:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "ഫോട്ടോ മാറ്റുക"
 msgid "Change theme to…"
 msgstr "തീം… ആക്കുക"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "{pendingEmail}-ലേക്കുള്ള മാറ്റം {0} അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു. ലിങ്ക് ഒരു മണിക്കൂർ പ്രാവർത്തികമാണ്."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "{pendingEmail}-ലേക്കുള്ള മാറ്റം കാത്തിരിക്കുന്നു: അവിടേക്ക് ഞങ്ങൾ അയച്ച ലിങ്ക് തുറക്കുക. ലിങ്ക് ഒരു മണിക്കൂർ പ്രാവർത്തികമാണ്."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "നിങ്ങളുടെ പാസ്‌വേഡ് മാറ്റുക"
@@ -1206,6 +1222,10 @@ msgstr "കരുതൽ മാറിയോ? നിങ്ങളുടെ റി�
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "വിഭാഗ ശീർഷകങ്ങളും തീയതി വാക്കുകളും മാത്രം മാറ്റുന്നു, നിങ്ങളുടെ ഉള്ളടക്കമല്ല."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "നിങ്ങളുടെ കണക്ഷൻ പരിശോധിച�
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "നിങ്ങളുടെ ഇമെയിൽ പരിശോധിക്കുക"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "നിങ്ങളുടെ പാസ്‌വേഡ് റീസെറ്റ് ചെയ്യുന്നതിനുള്ള ഒരു ലിങ്കിനായി നിങ്ങളുടെ ഇമെയിൽ പരിശോധിക്കുക."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "ഒരു ഫയൽ തിരഞ്ഞെടുക്കുക"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "ഇറക്കുമതി ചെയ്യാൻ ഒരു ഫയൽ തിരഞ്ഞെടുക്കുക"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "ഒരു പുതിയ പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുക. ഇത് നിങ്ങളെ എല്ലിടത്തുനിന്നും സൈൻ ഔട്ട് ചെയ്യിക്കുകയും നിങ്ങളുടെ പാസ്‌കീകൾ, API കീകൾ, കണക്ട് ചെയ്ത ആപ്പുകൾ എന്നിവ നീക്കം ചെയ്യുകയും ചെയ്യും."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "ക്ലയൻ്റ് ഐഡി"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "നിങ്ങളുടെ ലിസ്റ്റ് എൻട്രി�
 msgid "Connected"
 msgstr "ബന്ധിപ്പിച്ചു"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "കണക്ട് ചെയ്തത് {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "ബന്ധിപ്പിച്ച ആപ്ലിക്കേഷനുകൾ"
@@ -1511,6 +1537,10 @@ msgstr "സംഭാഷണങ്ങൾ"
 msgid "Copied"
 msgstr "പകർത്തി"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "ഈ കീയോടെ MCP കോൺഫിഗ് പകർത്തി."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "ഇപ്പോൾ പകർത്തുക. നിങ്ങളുടെ
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "ലിങ്ക് പകർത്തുക"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "MCP കോൺഫിഗ് പകർത്തുക"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "ബന്ധിപ്പിക്കാൻ കഴിഞ്ഞില്�
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "ട്രാൻസ്ക്രിപ്റ്റ് പകർത്താനായില്ല. വീണ്ടും ശ്രമിക്കുക."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്താനായില്ല. വീണ്ടും ശ്രമിക്കുക."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "പാസ്‌വേഡ് സജ്ജമാക്കാനായി�
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "രണ്ട്-ഘട്ട സ്ഥിരീകരണം സജ്ജമാക്കാനായില്ല. വീണ്ടും ശ്രമിക്കുക."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "നിങ്ങളുടെ പാസ്‌വേഡ് സജ്ജമാക്കാനായില്ല. വീണ്ടും ശ്രമിക്കുക."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "പ്രിവ്യൂ കാണിക്കാനായില്ല."
@@ -1876,6 +1918,18 @@ msgstr "ഒരു പുതിയ റിസ്യൂം സൃഷ്‌ടിക
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "ആദ്യം ഒരു റെസ്യൂമെ സൃഷ്ടിക്കുക, തുടർന്ന് അതിനെക്കുറിച്ച് ചോദിക്കുക."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "{name} കണക്ട് ചെയ്യാൻ ഒരു അക്കൗൺ്റ്റ് ഉണ്ടാക്കുക."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "ഒരു അപേക്ഷ കണക്ട് ചെയ്യാൻ ഒരു അക്കൗൺ്റ്റ് ഉണ്ടാക്കുക."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "അക്കൗണ്ട് ഇല്ലാതാക്കുക"
 msgid "Delete conversation"
 msgstr "സംഭാഷണം ഇല്ലാതാക്കുക"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "പ്രമാണങ്ങളും അക്കൗൺ്റ്റ് ഡാറ്റയും ഡിലീറ്റ് ചെയ്യുക."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "എൻട്രി ഇല്ലാതാക്കുക"
@@ -2157,6 +2215,10 @@ msgstr "വിശദാംശങ്ങൾ"
 msgid "Details from the provider:"
 msgstr "ദാതാവിൽ നിന്നുള്ള വിശദാംശങ്ങൾ:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "ലഭിച്ചില്ലോ?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "മാറ്റങ്ങൾ ഉപേക്ഷിക്കുക"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "സേവ് ചെയ്യാത്ത മാറ്റങ്ങൾ ഉപേക്ഷിക്കണോ?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "ഡിസ്കണക്റ്റ് ചെയ്യുക"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "“{name}” ഡിസ്കണക്ട് ചെയ്യണോ?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "{0} ഡിസ്കണക്ട് ചെയ്യുക"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "നിങ്ങളുടെ അക്കൗൺ്റ്റിൽ നിന്ന് ഒരു ആപ്പ് ഡിസ്കണക്ട് ചെയ്യുക."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "“{name}” ഡിസ്കണക്ട് ചെയ്തു."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "ഇമെയിൽ"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "ഇമെയിൽ വിലാസം"
@@ -2418,6 +2496,11 @@ msgstr "ഇമെയിൽ വിലാസം തിരിച്ചറിയപ�
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "ഈ സെർവറിൽ ഇമെയിൽ ഡെലിവറി സജ്ജീകരിച്ചിട്ടില്ല, അതിനാൽ വിലാസം പരിശോധിച്ചുറപ്പിച്ചിട്ടില്ല."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "ഇമെയിൽ അല്ലെങ്കിൽ ഉപയോക്തൃനാമം"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "ഒരു ബാക്കപ്പ് കോഡ് നൽകുക."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "64 പ്രതീകങ്ങൾ വരെ ഒരു പേര് നൽകുക."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "നിങ്ങളുടെ അക്കൗണ്ടിന് ഒരു പുതിയ പാസ്‌വേഡ് നൽകുക."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "നിങ്ങൾ എന്താണ് ചെയ്തതെന്ന�
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "ഫോക്കസ് മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "പ്രതീക്ഷിക്കുന്നു"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "LibreOffice-നും മറ്റ് ഓപ്പൺ സോഴ്സ്
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Word ആവശ്യപ്പെടുന്ന പോർട്ടലുകൾക്കോ ​​റിക്രൂട്ടർമാർക്കോ വേണ്ടി. ലേഔട്ട് ലളിതമാക്കിയിരിക്കുന്നു."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "സ്ക്രിപ്റ്റുകൾക്കും വിപുലീകരണങ്ങൾക്കും MCP ക്ലയൻ്റുകൾക്കും. കീകൾ നിങ്ങളെപ്പോലെ പ്രവർത്തിക്കുകയും നിങ്ങളുടെ പ്രമാണങ്ങൾ വായിക്കാനും എഡിറ്റുചെയ്യാനും കഴിയും."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "ഈ സന്ദർശനത്തിന് മാത്രം"
@@ -2748,6 +2828,10 @@ msgstr "അസിസ്റ്റൻ്റിൽ നിന്നോ API-ൽ ന�
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "നിങ്ങളുടെ അനുഭവക്കുറിപ്പുകളിൽ നിന്ന്"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "പൂർണ്ണ ആക്സസ്"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "വീട്ടിലേക്ക് പോകൂ"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "ഡാഷ്ബോർഡിലേക്കു പോകുക"
@@ -2994,6 +3079,10 @@ msgstr "ഐക്കൺ..."
 msgid "Icons in contact line"
 msgstr "കോൺടാക്റ്റ് ലൈനിലെ ഐക്കണുകൾ"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "ആ വിലാസം ഉപയോഗിക്കുന്ന ഒരു അക്കൗൺ്റ്റ് ഉണ്ടെങ്കിൽ, ഒരു റീസെറ്റ് ലിങ്ക് വരികയാണ്."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "അത് ഒരു സ്കാനിൽ നിന്നാണെങ്കിൽ, അത് പ്രതീക്ഷിക്കാവുന്നതാണ്. അല്ലാത്തപക്ഷം അത് നീക്കം ചെയ്യുക; റിക്രൂട്ടർമാർ ഇതിനെ കീവേഡ് സ്റ്റഫിംഗായി കാണും."
@@ -3009,6 +3098,10 @@ msgstr "ആരെങ്കിലും നിങ്ങൾക്ക് ഈ ലി
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "ഈ ഡയലോഗ് അടച്ചാൽ, നിങ്ങളുടെ മാറ്റങ്ങൾ നഷ്ടമാകും."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "നിങ്ങൾ ഇമെയിൽ വിലാസം ഒരിക്കലും വെരിഫൈ ചെയ്തിട്ടില്ലെങ്കിൽ, പാസ്‌വേഡ് റീസെറ്റ് രണ്ട്-ഘട്ട പരിശോധന ഓഫാക്കും. അല്ലെങ്കിൽ റീസെറ്റ് അത് ഓണായി നിലനിർത്തും; അങ്ങനെയെങ്കിൽ ഈ Reactive Resume സെർവർ നടത്തുന്ന വ്യക്തിയോട് നിങ്ങളുടെ അക്കൗൺ്റ്റിൽ അത് ഓഫാക്കാൻ ആവശ്യപ്പെടുക. തുടർന്ന് നിങ്ങളുടെ പാസ്‌വേഡ് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്ത് ഒരു പുതിയ ഓതന്റിക്കേറ്ററുമായി അത് വീണ്ടും ഓണാക്കുക."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "പ്രശ്‌നങ്ങളും ജോബ് പൊരുത്�
 msgid "It has entries but isn't placed on a page."
 msgstr "ഇതിന് എൻട്രികളുണ്ടെങ്കിലും ഒരു പേജിൽ സ്ഥാപിച്ചിട്ടില്ല."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "ഇതിൻ്റെ ആക്സസ് ഇപ്പോൾ നഷ്ടപ്പെടും. വീണ്ടും ഉപയോഗിക്കാൻ, ആപ്പിൽ നിന്ന് അത് കണക്ട് ചെയ്യുക. ഇത് പഴയപടിയാക്കാനാവില്ല."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "ഇത് നല്ല രീതിയിൽ ഇല്ലാതാക്കപ്പെടും, പുനഃസ്ഥാപിക്കാൻ കഴിയില്ല."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "ഒരൊറ്റ വിലാസം മാത്രം വയ്ക്കുക; അപ്പോൾ ഏതാണ് ഉപയോഗിക്കേണ്ടതെന്ന് സോഫ്റ്റ്‌വെയറിന് ഊഹിക്കേണ്ടിവരില്ല."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "നിങ്ങൾ ആപ്ലിക്കേഷൻ ഉപയോഗിക്കാത്തപ്പോൾ ആക്സസ് നിലനിർത്തുക."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "കീ എൻക്രിപ്റ്റ് ചെയ്തു സംഭരിച്ചു"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "കീകൾ നിങ്ങളെപ്പോലെ പ്രവർത്തിക്കുകയും നിങ്ങളുടെ പ്രമാണങ്ങൾ വായിക്കാനും എഡിറ്റുചെയ്യാനും കഴിയും."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന പ്രവേശനാനുമതിയോടെ കീകൾ നിങ്ങളുടെ പേരിൽ പ്രവർത്തിക്കുന്നു. പുതിയ കീകൾക്ക് തുടക്കത്തിൽ വായിക്കാൻ മാത്രമേ അനുമതിയുള്ളൂ."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "നീളം"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "നീളം ഒരു കുറവല്ല, ഒരു സാർവത്രിക ഒറ്റ-പേജ് നിയമവുമില്ല. അർഹമായ പേജുകൾ നിലനിർത്തുക."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Claude അല്ലെങ്കിൽ Cursor പോലുള്ള AI ക്ലയൻ്റുകളെ മുകളിലുള്ള API കീ ഉപയോഗിച്ച് നിങ്ങളുടെ റെസ്യൂമെകൾ വായിക്കാനും എഡിറ്റ് ചെയ്യാനും അനുവദിക്കുക."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "പുതിയ പേജ്"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "പുതിയ പാസ്‌വേഡ്"
@@ -3912,6 +4007,10 @@ msgstr "പുതിയ വിഭാഗം"
 msgid "Next issue"
 msgstr "അടുത്ത ലക്കം"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "ബാക്കപ്പ് കോഡുകളും ഇല്ലയോ?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "ബുള്ളറ്റ് ലിസ്റ്റുകളൊന്നും കണ്ടെത്തിയില്ല."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "ആ തിരയലിന് ചേരുന്ന കമാൻഡുകളൊന്നുമില്ല."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "ഇതുവരെ ബന്ധിപ്പിച്ച ആപ്ലിക്കേഷനുകളൊന്നുമില്ല. നിങ്ങളുടെ അക്കൗണ്ട് ആക്സസ് ചെയ്യാൻ നിങ്ങൾ അനുവദിക്കുന്ന ആപ്പുകൾ ഇവിടെ ദൃശ്യമാകും."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "{title} തുറക്കുക"
 msgid "Open AI settings"
 msgstr "AI ക്രമീകരണങ്ങൾ തുറക്കുക"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "ഇമെയിൽ ആപ്പ് തുറക്കുക"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "ഫോക്കസ് മോഡ് തുറക്കുക"
@@ -4352,6 +4446,10 @@ msgstr "പാസ്‌കീ"
 msgid "Passkeys"
 msgstr "പാസ്‌കീകൾ"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "പാസ്‌കീകൾക്ക് വെരിഫൈ ചെയ്ത ഇമെയിൽ ആവശ്യമാണ്; ഈ സെർവറിന് അത് അയയ്ക്കാനാവില്ല."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "പാസ്‌വേഡ്"
 msgid "Password changed"
 msgstr "പാസ്‌വേഡ് മാറ്റി"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "പാസ്‌വേഡ് മാറ്റി. നിങ്ങൾ എല്ലിടത്തുനിന്നും സൈൻ ഔട്ട് ചെയ്തു; സൈൻ ഇൻ ചെയ്ത്, പാസ്‌കീകളോ API കീകളോ വീണ്ടും ചേർക്കുക."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "പാസ്‌വേഡ് നീക്കം ചെയ്‌തു"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "പാസ്‌വേഡ് റീസെറ്റ് ചെയ്തു. നിങ്ങളുടെ പുതിയ പാസ്‌വേഡ് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "പാസ്‌വേഡ് സെറ്റ്"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "പാസ്‌വേഡ് സജ്ജമാക്കി. ഇപ്പോൾ അതും ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യാം."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "വായന-മാത്രം ആക്സസ്"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "വായന-മാത്രം ഒന്നും മാറ്റാനോ ഡിലീറ്റ് ചെയ്യാനോ കഴിയില്ല."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "അറ്റാച്ച്മെൻ്റ് വായിക്കുക"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "നിങ്ങളുടെ ഇമെയിൽ വിലാസം വായിക്കുക."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "നിങ്ങളുടെ പ്രൊഫൈൽ വിവരങ്ങൾ വായിക്കുക."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "ഒരു പാസ്‌വേഡ് ആവശ്യമാണ്"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "വീണ്ടും അയയ്ക്കുക"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "ചെറിയ തലക്കെട്ടുകൾക്കായി ക്യാപിറ്റൽസ് നീക്കിവയ്ക്കുക. അവ വായന മന്ദഗതിയിലാക്കുകയും കേസ്-സെൻസിറ്റീവ് തിരയലിനെ പരാജയപ്പെടുത്തുകയും ചെയ്യും."
@@ -4981,6 +5101,10 @@ msgstr "റെസ്യൂമെകൾ"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "തീം എന്തുതന്നെയായാലും റെസ്യൂമെകൾ എല്ലായ്പ്പോഴും വെള്ള പേപ്പറിൽ റെൻഡർ ചെയ്യുന്നു."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "അസാധുവാക്കുക"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "{0} അസാധുവാക്കുക"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "ആക്സസ് റദ്ദാക്കുക"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "നിങ്ങളുടെ അക്കൗണ്ടിലേക്കുള്ള ഒരു ആപ്ലിക്കേഷൻ്റെ ആക്‌സസ് റദ്ദാക്കുക."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "സെമാന്റിക് CSS സ്റ്റൈൽഷീറ്റ�
 msgid "Send"
 msgstr "അയക്കുക"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "വീണ്ടും അയയ്ക്കുക"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "<0>x-api-key</0> ഹെഡറിലൂടെ അയയ്ക്കുക."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "റീസെറ്റ് ലിങ്ക് അയയ്ക്കുക"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "അംഗീകാര ലിങ്ക് വീണ്ടും അയയ്ക്കുക"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "നിങ്ങളുടെ കീ ഉപയോഗിച്ച് {0} ·
 msgid "Sent"
 msgstr "അയച്ചു"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "വീണ്ടും അയച്ചു. എത്താൻ ഒരു മിനിറ്റ് എടുത്തേക്കാം."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Lumen-ന് അയച്ചു"
 msgid "Serbian"
 msgstr "സെർബിയൻ"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "ഒരു രഹസ്യവാക്ക് സജ്ജമാക്കുക"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "പാസ്‌വേഡ് സജ്ജമാക്കുക"
@@ -5354,6 +5489,10 @@ msgstr "എക്സ്പോർട്ട് ചെയ്യുമ്പോൾ �
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "നിങ്ങളുടെ ഓതന്റിക്കേറ്റർ ആപ്പ് സജ്ജമാക്കുക"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "നിങ്ങളുടെ പാസ്‌വേഡ് സജ്ജമാക്കുന്നു…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "സൈഡ്‌ബാറുകൾ പലപ്പോഴും അവസ�
 msgid "Sign in"
 msgstr "സൈൻ ഇൻ"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "നിങ്ങളുടെ AI ക്ലയന്റിൽ നിന്ന് സൈൻ ഇൻ ചെയ്യുക, അല്ലെങ്കിൽ ഒരു API കീ ഉപയോഗിക്കുക."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "ഇപ്പോൾ സൈൻ ഇൻ ചെയ്യുക"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "{name} കണക്ട് ചെയ്യാൻ സൈൻ ഇൻ ചെയ്യുക."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "ഒരു ആപ്പ് കണക്ട് ചെയ്യാൻ സൈൻ ഇൻ ചെയ്യുക."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "ചില അക്ഷരങ്ങൾ ചോദ്യചിഹ്നങ�
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "ചില പരിശോധനകൾക്ക് ഈ ഫയലിൽ ഇല്ലാത്ത വിവരങ്ങൾ വേണം: പരിശോധിക്കാൻ കഴിയാത്ത പേജ് ഉള്ളടക്കം, അല്ലെങ്കിൽ ഈ പരിശോധനകൾ ഉൾക്കൊള്ളാത്ത ഭാഷയിലുള്ള വാചകം. അവ വിജയമായും കണക്കാക്കില്ല, പരാജയമായും കണക്കാക്കില്ല."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "ഈ സെർവറിന്റെ ഫോണ്ട് മിററിൽ ചില ഫോണ്ടുകൾ ഇല്ല. അവ ചേർക്കാൻ അഡ്മിനിസ്ട്രേറ്ററോട് ആവശ്യപ്പെടുക."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "ചില ഗ്ലിഫുകൾക്ക് ഈ ഫയലിന് പുറത്ത് അർത്ഥമില്ല."
@@ -5666,6 +5821,10 @@ msgstr "ചില ടെക്സ്റ്റ് തിരിഞ്ഞിരി�
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "അപ്‌ലോഡ് ചെയ്ത ചില ഫയലുകൾ ഒഴിവാക്കി. ആർക്കൈവിലെ upload-manifest.json പരിശോധിക്കുക."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "{minimum} pt-ന് കീഴിലുള്ള ടെക്‌സ്‌
 msgid "Thai"
 msgstr "തായ്"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "ആ അക്കൗൺ്റ്റിൻ്റെ പാസ്‌വേഡ് മാറി; എല്ലിടത്തും സൈൻ ഔട്ട് ചെയ്യപ്പെട്ടു. ഈ ബ്രൗസർ ഇപ്പോഴും {0} ആയി സൈൻ ഇൻ ചെയ്തിരിക്കുന്നു."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "ആ പാസ്‌വേഡ് ശരിയല്ല. റെസ്യൂമെ ഉടമയോട് ചോദിച്ച് ഉറപ്പാക്കി വീണ്ടും ശ്രമിക്കുക."
@@ -6170,6 +6334,10 @@ msgstr "അവർ അനുഭവം, വിദ്യാഭ്യാസം, ക�
 msgid "Thinking…"
 msgstr "ചിന്തിക്കുന്നു..."
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "ഈ കണക്ഷൻ അഭ്യർത്ഥന അസാധുവാണ് അല്ലെങ്കിൽ കാലഹരണപ്പെട്ടു. നിങ്ങളുടെ ക്ലയന്റിൽ നിന്ന് കണക്ഷൻ വീണ്ടും ആരംഭിക്കുക."
@@ -6317,6 +6485,14 @@ msgstr "ഈ റെസ്യൂമെ ഒരു AI ഏജന്റ് അപ്�
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "ഈ റെസ്യൂമെയുടെ പങ്കിടൽ ക്രമീകരണങ്ങൾ മറ്റെവിടെയെങ്കിലും മാറ്റി."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "ഈ സെർവറിന് ഇമെയിൽ അയയ്ക്കാനാവില്ല; അതിനാൽ പാസ്‌വേഡ് റീസെറ്റ് ലഭ്യമല്ല. നിങ്ങളുടെ പാസ്‌വേഡ് റീസെറ്റ് ചെയ്യാൻ അത് നടത്തുന്ന വ്യക്തിയോട് ആവശ്യപ്പെടുക."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "ഈ സെർവറിന് ഇമെയിൽ അയയ്ക്കാനാവില്ല; അതിനാൽ വിലാസം ഇവിടെ മാറ്റാനാവില്ല. അത് നടത്തുന്ന വ്യക്തിയോട് ചോദിക്കുക."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "3 മുതൽ 64 വരെ ചെറിയ അക്ഷരങ്ങൾ,
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "കുറഞ്ഞത് 3 അക്ഷരങ്ങൾ ഉപയോഗിക്കുക."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "സ്ഥിരീകരിക്കുക"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "ഒരു ബാക്കപ്പ് കോഡ് ഉപയോഗിച്ച് സ്ഥിരീകരിക്കുക"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "ഒരു പാസ്‌കീ ചേർക്കാൻ നിങ്ങളുടെ ഇമെയിൽ വെരിഫൈ ചെയ്യുക. ലിങ്ക് മുകളിലുള്ള അക്കൗൺ്റ്റ് വിവരങ്ങളിലാണ്."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "\"{0}\" എന്നതിനായി നിങ്ങൾ ഇതിന�
 msgid "You answered: {answer}"
 msgstr "നിങ്ങൾ ഉത്തരം നൽകി: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "നിങ്ങളുടെ യൂസർനെയിം ഉപയോഗിച്ചും സൈൻ ഇൻ ചെയ്യാം."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "ക്രമീകരണങ്ങൾ → AI & developer എന്നതിൽ എപ്പോഴും ഇത് ഡിസ്കണക്ട് ചെയ്യാം."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "ഒന്നുമില്ലാതെ നിങ്ങൾ സൈൻ ഇ
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "നിങ്ങൾ ഓഫ്‌ലൈനാണ്. പുറപ്പെടുന്നതിന് മുമ്പ് നിങ്ങളുടെ മാറ്റങ്ങൾ സംരക്ഷിക്കാൻ വീണ്ടും കണക്റ്റുചെയ്യുക."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com അല്ലെങ്കിൽ നിങ്ങളുടെ ഉപയോക്തൃനാമം"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

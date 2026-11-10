@@ -546,6 +546,10 @@ msgstr "Pievienojiet saiti"
 msgid "Add a location"
 msgstr "Pievienojiet atrašanās vietu"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "Pievienojiet paroli kā citu pieteikšanās veidu. Jūsu pārējie pieteikšanās veidi un ierīces paliek, kā ir."
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "Pievienojiet tālruņa numuru"
@@ -787,10 +791,6 @@ msgstr "Līdzināt pa labi"
 msgid "All"
 msgstr "Visi"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "Atļaut piekļuvi"
@@ -1031,6 +1031,7 @@ msgstr "Atpakaļ uz tagadni"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "Atpakaļ uz pieteikšanos"
@@ -1138,11 +1139,17 @@ msgstr "saraksta ieraksts {n}"
 msgid "Bulleted list"
 msgstr "Saraksts ar aizzīmēm"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "Nevarat noskanēt? Ievadiet šo atslēgu lietotnē:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "Mainīt fotoattēlu"
 msgid "Change theme to…"
 msgstr "Mainīt tēmu uz…"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "Maiņa uz {pendingEmail} gaida apstiprinājumu no {0}. Saite ir derīga stundu."
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "Maiņa uz {pendingEmail} gaida: atveriet saiti, kuru tur nosūtījām. Saite ir derīga stundu."
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "Mainiet savu paroli"
@@ -1206,6 +1222,10 @@ msgstr "Pārdomājāt? Pārsauciet savu CV par kaut ko aprakstošāku."
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "Maina tikai sadaļu nosaukumus un datuma vārdus, nevis jūsu saturu."
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "Pārbaudiet savienojumu un mēģiniet vēlreiz."
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "Pārbaudiet savu e-pastu"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "Pārbaudiet savu e-pastu, lai atrastu saiti paroles atiestatīšanai."
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "Izvēlieties failu"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "Izvēlieties importējamo failu"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "Izvēlieties jaunu paroli. Tas jūs izrakstīs visur un noņems jūsu piekļuves atslēgas, API atslēgas un savienotās lietotnes."
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "Klienta ID"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "Pievienojiet savu AI pakalpojumu sniedzēju, lai valodas modelis lasītu
 msgid "Connected"
 msgstr "Savienots"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "Savienots {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "Saistītās lietojumprogrammas"
@@ -1511,6 +1537,10 @@ msgstr "Sarunas"
 msgid "Copied"
 msgstr "Kopēts"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "Nokopēta MCP konfigurācija ar šo atslēgu."
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "Kopējiet to tūlīt. Jūsu drošībai tas vairs netiks rādīts."
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "Kopēt saiti"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "Kopēt MCP konfigurāciju"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "Nevarēja izveidot savienojumu. Pārbaudiet atslēgu un mēģiniet vēlr
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "Nevarēja nokopēt atšifrējumu. Mēģiniet vēlreiz."
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "Nevarēja nokopēt starpliktuvē. Mēģiniet vēlreiz."
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "Nevarēja iestatīt paroli. Mēģiniet vēlreiz."
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "Nevarēja iestatīt divpakāpju verifikāciju. Mēģiniet vēlreiz."
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "Nevarēja iestatīt jūsu paroli. Mēģiniet vēlreiz."
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "Nevarēja parādīt priekšskatījumu."
@@ -1876,6 +1918,18 @@ msgstr "Izveidot jaunu CV"
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "Vispirms izveidojiet CV, pēc tam jautājiet par to."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "Izveidojiet kontu, lai savienotu {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "Izveidojiet kontu, lai savienotu lietotni."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "Dzēst kontu"
 msgid "Delete conversation"
 msgstr "Dzēst sarunu"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "Dzēst dokumentus un konta datus."
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "Dzēst ierakstu"
@@ -2157,6 +2215,10 @@ msgstr "Sīkāka informācija"
 msgid "Details from the provider:"
 msgstr "Informācija no pakalpojumu sniedzēja:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "Nesaņēmāt to?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "Atmest izmaiņas"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "Vai atmest nesaglabātās izmaiņas?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "Atvienot"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "Atvienot “{name}”?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "Atvienot {0}"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "Atvienojiet lietotni no sava konta."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "Atvienots: “{name}”."
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "E-pasts"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "E-pasta adrese"
@@ -2418,6 +2496,11 @@ msgstr "E-pasta adrese netiks atpazīta"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "E-pasta piegāde šajā serverī nav iestatīta, tāpēc adrese nav verificēta."
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "E-pasts vai lietotājvārds"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "Ievadiet rezerves kodu."
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "Ievadiet nosaukumu, līdz 64 rakstzīmēm."
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "Ievadiet jaunu sava konta paroli."
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "Katra loma saka, ko jūs izdarījāt. Viedokļi par formulējumu dzīvo 
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "Iziet no fokusa režīma"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "Paredzēts"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "LibreOffice un citiem atvērtā koda redaktoriem. Izkārtojums ir vienk�
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "Portāliem vai vervētājiem, kuri lūdz Word. Izkārtojums ir vienkāršots."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "Skriptiem, paplašinājumiem un MCP klientiem. Taustiņi darbojas kā jūs un varat lasīt un rediģēt savus dokumentus."
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "Tikai šim apmeklējumam"
@@ -2748,6 +2828,10 @@ msgstr "no asistenta vai API"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "No jūsu pieredzes ierakstiem"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "Pilna piekļuve"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "Ej mājās"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "Doties uz vadības paneli"
@@ -2994,6 +3079,10 @@ msgstr "Ikona…"
 msgid "Icons in contact line"
 msgstr "Ikonas kontaktlīnijā"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "Ja kāds konts izmanto šo adresi, atiestatīšanas saite jau ir ceļā."
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "Ja tas radies no skenējuma, tas ir sagaidāms. Citādi noņemiet to; personāla speciālisti to uztver kā atslēgvārdu pārblīvēšanu."
@@ -3009,6 +3098,10 @@ msgstr "Ja kāds jums nosūtīja šo saiti, pieprasiet viņam jaunu."
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "Ja aizvērsiet šo dialogu, jūsu izmaiņas tiks zaudētas."
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "Ja nekad neesat apstiprinājis savu e-pasta adresi, paroles atiestatīšana izslēdz divpakāpju verifikāciju. Citādi atiestatīšana to atstāj ieslēgtu, tāpēc lūdziet šī Reactive Resume servera administratoram to izslēgt jūsu kontam. Pēc tam piesakieties ar paroli un atkal ieslēdziet to ar jaunu autentifikatoru."
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "Problēmas un darba atbilstība joprojām darbojas bez AI."
 msgid "It has entries but isn't placed on a page."
 msgstr "Tajā ir ieraksti, bet tas nav ievietots lapā."
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "Tas uzreiz zaudē piekļuvi. Lai to atkal izmantotu, savienojiet to no lietotnes. To nevar atsaukt."
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "Tas tiks dzēsts uz visiem laikiem, un to nevarēs atjaunot."
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "Izmantojiet vienu vienīgu adresi, lai programmatūrai nebūtu jāmin, kuru lietot."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "Saglabājiet piekļuvi, kad neizmantojat lietojumprogrammu."
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "Atslēga saglabāta šifrēta"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "Taustiņi darbojas kā jūs un varat lasīt un rediģēt savus dokumentus."
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "Atslēgas darbojas jūsu vārdā ar jūsu izvēlētajām piekļuves tiesībām. Jaunām atslēgām sākotnēji ir tikai lasīšanas piekļuve."
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "Garums"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "Garums nav trūkums, un nepastāv universāls vienas lapas noteikums. Saglabājiet tās lapas, kas ir pelnījušas savu vietu."
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Ļaujiet AI klientiem, piemēram, Claude vai Cursor, lasīt un rediģēt jūsu CV, izmantojot iepriekš norādīto taustiņu API."
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "Jauna lapa"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "Jaunā parole"
@@ -3912,6 +4007,10 @@ msgstr "Jauna sadaļa"
 msgid "Next issue"
 msgstr "Nākamais numurs"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "Vai rezerves kodu arī nav?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "Aizzīmju saraksti nav atrasti."
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "Šai meklēšanai neatbilst neviena komanda."
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "Vēl nav pievienotu lietotņu. Šeit parādās lietotnes, kurām atļaujat piekļūt jūsu kontam."
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "Atveriet {title}"
 msgid "Open AI settings"
 msgstr "Atveriet AI iestatījumus"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "Atvērt e-pasta lietotni"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "Atvērt fokusa režīmu"
@@ -4352,6 +4446,10 @@ msgstr "Piekļuves atslēga"
 msgid "Passkeys"
 msgstr "Piekļuves atslēgas"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "Piekļuves atslēgām nepieciešams apstiprināts e-pasts, ko šis serveris nevar nosūtīt."
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "Parole"
 msgid "Password changed"
 msgstr "Parole nomainīta"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "Parole mainīta. Esat izrakstījies visur; piesakieties un pēc tam atkal pievienojiet piekļuves atslēgas vai API atslēgas."
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "Parole noņemta"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "Parole atiestatīta. Piesakieties ar jauno paroli."
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "Parole iestatīta"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "Parole iestatīta. Tagad varat ar to arī pieteikties."
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "Tikai lasīšanas piekļuve"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "Tikai lasīšanas piekļuve nevar neko mainīt vai izdzēst."
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "Izlasiet pielikumu"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "Izlasiet savu e-pasta adresi."
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "Izlasiet sava profila informāciju."
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "Pieprasīt paroli"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "Nosūtīt vēlreiz"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "Lielos burtus izmantojiet tikai īsiem virsrakstiem. Tie palēnina lasīšanu un var traucēt reģistrjutīgu meklēšanu."
@@ -4981,6 +5101,10 @@ msgstr "CV"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "CV vienmēr renderē uz balta papīra neatkarīgi no tēmas."
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "Atsaukt"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "Atsaukt {0}"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "Atsaukt piekļuvi"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "Atsauciet lietojumprogrammas piekļuvi jūsu kontam."
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "Semantiskā CSS stila lapa"
 msgid "Send"
 msgstr "Sūtīt"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "Nosūtīt vēlreiz"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "Nosūtiet to galvenē <0>x-api-key</0>."
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "Nosūtīt atiestatīšanas saiti"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "Nosūtīt apstiprinājuma saiti vēlreiz"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "Nosūta jūsu CV tekstu tikai uz {0} · {1} ar jūsu atslēgu."
 msgid "Sent"
 msgstr "Nosūtīts"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "Nosūtīts vēlreiz. Ierašanās var aizņemt minūti."
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Nosūtīts uz Lumen"
 msgid "Serbian"
 msgstr "Serbu"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "Iestatiet paroli"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "Iestatīt paroli"
@@ -5354,6 +5489,10 @@ msgstr "Eksportējot iestatiet dokumenta valodu."
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "Iestatiet autentifikatora lietotni"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "Iestata jūsu paroli…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "Sānjoslas bieži tiek lasītas pēdējās vai sajauktas galvenajā kolo
 msgid "Sign in"
 msgstr "Pieteikties"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "Pierakstieties no sava MI klienta vai izmantojiet API atslēgu."
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "Pierakstīties tagad"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "Piesakieties, lai savienotu {name}."
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "Piesakieties, lai savienotu lietotni."
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "Dažas rakstzīmes parādās kā jautājuma zīmes."
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "Dažām pārbaudēm nepieciešama informācija, kuras šajā failā nav: lapu saturs, ko nevarēja aplūkot, vai teksts valodā, ko šīs pārbaudes neaptver. Tās netiek ieskaitītas ne kā izturētas, ne kā neizturētas."
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "Šī servera fontu spogulī trūkst dažu fontu. Lūdziet administratoram tos pievienot."
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "Dažiem glifiem ārpus šī faila nav nozīmes."
@@ -5666,6 +5821,10 @@ msgstr "Daļa teksta ir pagriezta."
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "Daži augšupielādētie faili tika izlaisti. Pārbaudiet upload-manifest.json arhīvā."
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "Teksts zem {minimum} pt var tikt nepareizi nolasīts, kad sistēma to at
 msgid "Thai"
 msgstr "Taju"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "Tā konta parole ir mainīta, un tajā visur izrakstīts. Šis pārlūks joprojām ir pieteicies kā {0}."
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "Parole nav pareiza. Pārbaudiet to pie CV īpašnieka un mēģiniet vēlreiz."
@@ -6170,6 +6334,10 @@ msgstr "Viņi meklē tādus virsrakstus kā Pieredze, Izglītība un Prasmes."
 msgid "Thinking…"
 msgstr "Domājot…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "Šis savienojuma pieprasījums nav derīgs vai ir beidzies. Sāciet savienojumu vēlreiz no sava klienta."
@@ -6317,6 +6485,14 @@ msgstr "Šo CV atjaunināja mākslīgā intelekta aģents."
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "Šī CV kopīgošanas iestatījumi ir mainīti citur."
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "Šis serveris nevar sūtīt e-pastu, tāpēc paroles atiestatīšana nav pieejama. Lūdziet tā administratoram atiestatīt jūsu paroli."
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "Šis serveris nevar sūtīt e-pastu, tāpēc adresi šeit nevar mainīt. Lūdziet tā administratoram."
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "Izmantojiet 3–64 mazos burtus, ciparus, punktus, defises un pasvītras
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "Izmantojiet vismaz 3 rakstzīmes."
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "Verificēt"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "Verificēt ar rezerves kodu"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "Apstipriniet savu e-pastu, lai pievienotu piekļuves atslēgu. Saite ir augstāk sadaļā Konta dati."
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "Jūs to jau izmantojat priekš “{0}”."
 msgid "You answered: {answer}"
 msgstr "Jūs atbildējāt: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "Jūs varat pieteikties arī ar savu lietotājvārdu."
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "To varat atvienot jebkurā laikā sadaļā Iestatījumi → AI un izstrādātājiem."
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "Jūs pierakstāties bez viena"
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "Jūs esat bezsaistē. Atkārtoti izveidojiet savienojumu, lai pirms aiziešanas saglabātu izmaiņas."
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com vai jūsu lietotājvārds"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."

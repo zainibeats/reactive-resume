@@ -546,6 +546,10 @@ msgstr "একটি লিঙ্ক যোগ করুন"
 msgid "Add a location"
 msgstr "একটি অবস্থান যোগ করুন"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Add a password as another way to sign in. Your other sign-in methods and devices stay as they are."
+msgstr "সাইন ইনের আরেকটি উপায় হিসেবে পাসওয়ার্ড যোগ করুন। আপনার অন্য সাইন-ইন পদ্ধতি ও ডিভাইস আগের মতোই থাকবে।"
+
 #: src/features/resume/editor/check/issues.ts
 msgid "Add a phone number"
 msgstr "একটি ফোন নম্বর যোগ করুন"
@@ -787,10 +791,6 @@ msgstr "ডানে সারিবদ্ধ করুন"
 msgid "All"
 msgstr "সব"
 
-#: src/features/settings/account/data.tsx
-msgid "All documents as JSON, in one zip"
-msgstr ""
-
 #: src/features/auth/pages/consent.tsx
 msgid "Allow access"
 msgstr "অ্যাক্সেসের অনুমতি দিন"
@@ -1031,6 +1031,7 @@ msgstr "এখন ফিরে যান"
 #. Action returning the visitor to the sign-in page after a failed sign-in
 #. Secondary navigation button on 2FA verification screen
 #: src/features/auth/pages/error.tsx
+#: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Back to sign in"
 msgstr "সাইন ইনে ফিরে যান"
@@ -1138,11 +1139,17 @@ msgstr "তালিকা এন্ট্রি {n}"
 msgid "Bulleted list"
 msgstr "বুলেটেড তালিকা"
 
+#: src/dialogs/auth/enable-two-factor.tsx
+msgid "Can't scan? Enter this key in the app:"
+msgstr "স্ক্যান করা যাচ্ছে না? অ্যাপে এই কীটি লিখুন:"
+
 #. Secondary action button to close two-factor setup dialog
 #: src/dialogs/auth/enable-two-factor.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/builder/password-dialog.tsx
 #: src/features/resume/editor/write/picture-settings.tsx
+#: src/features/settings/account/data.tsx
+#: src/features/settings/account/profile.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/web-access.tsx
 #: src/hooks/use-confirm.tsx
@@ -1187,6 +1194,15 @@ msgstr "ছবি পরিবর্তন করুন"
 msgid "Change theme to…"
 msgstr "থিম পরিবর্তন করে… করুন"
 
+#. placeholder {0}: user.email
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting for approval from {0}. The link works for an hour."
+msgstr "{pendingEmail}-এ পরিবর্তনটি {0}-এর অনুমোদনের অপেক্ষায় আছে। লিঙ্কটি এক ঘণ্টা কাজ করবে।"
+
+#: src/features/settings/account/profile.tsx
+msgid "Change to {pendingEmail} is waiting: open the link we sent there. The link works for an hour."
+msgstr "{pendingEmail}-এ পরিবর্তনটি অপেক্ষা করছে: ওখানে পাঠানো লিঙ্কটি খুলুন। লিঙ্কটি এক ঘণ্টা কাজ করবে।"
+
 #: src/dialogs/auth/change-password.tsx
 msgid "Change your password"
 msgstr "আপনার পাসওয়ার্ড পরিবর্তন করুন"
@@ -1206,6 +1222,10 @@ msgstr "মত বদলেছেন? আপনার জীবনবৃত্�
 #: src/features/resume/editor/design/style-groups.tsx
 msgid "Changes section titles and date words only, not your content."
 msgstr "শুধুমাত্র বিভাগের শিরোনাম এবং তারিখের শব্দ পরিবর্তন করে, আপনার বিষয়বস্তু নয়।"
+
+#: src/features/settings/account/profile.tsx
+msgid "Changing it asks your current address to approve, then confirms the new one. Your username is part of every public link."
+msgstr ""
 
 #: src/features/settings/account/profile.tsx
 msgid "Changing it sends a confirmation to the new address. Your username is part of every public link."
@@ -1240,10 +1260,6 @@ msgstr "আপনার সংযোগ পরীক্ষা করুন এ�
 #: src/features/auth/pages/register.tsx
 msgid "Check your email"
 msgstr "আপনার ইমেইল দেখুন"
-
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Check your email for a link to reset your password."
-msgstr "আপনার পাসওয়ার্ড রিসেট করার লিঙ্কের জন্য ইমেইল চেক করুন।"
 
 #: src/features/auth/pages/register.tsx
 msgid "Check your email for a link to verify your account."
@@ -1284,6 +1300,10 @@ msgstr "একটি ফাইল নির্বাচন করুন"
 #: src/features/documents/new-document-dialog.tsx
 msgid "Choose a file to import"
 msgstr "আমদানি করার জন্য একটি ফাইল চয়ন করুন৷"
+
+#: src/features/auth/pages/reset-password.tsx
+msgid "Choose a new password. This signs you out everywhere and removes your passkeys, API keys and connected apps."
+msgstr "নতুন পাসওয়ার্ড বেছে নিন। এতে আপনি সব জায়গা থেকে সাইন আউট হবেন এবং আপনার পাসকি, API কী ও কানেক্ট করা অ্যাপ মুছে যাবে।"
 
 #: src/dialogs/auth/change-password.tsx
 msgid "Choose a password that's different from your current one."
@@ -1341,6 +1361,7 @@ msgstr "ক্লায়েন্ট আইডি"
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/documents/new-document-dialog.tsx
 #: src/features/resume/editor/check/page-layer.tsx
 #: src/features/resume/editor/chrome/share-sheet.tsx
@@ -1455,6 +1476,11 @@ msgstr "একটি ভাষা মডেল আপনার তালিক�
 msgid "Connected"
 msgstr "সংযুক্ত"
 
+#. placeholder {0}: i18n.date(new Date(connection.createdAt), { dateStyle: "medium" })
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Connected {0}"
+msgstr "কানেক্ট করা হয়েছে: {0}"
+
 #: src/features/settings/ai/connected-apps.tsx
 msgid "Connected applications"
 msgstr "সংযুক্ত অ্যাপ্লিকেশন"
@@ -1511,6 +1537,10 @@ msgstr "কথোপকথন"
 msgid "Copied"
 msgstr "কপি করা হয়েছে"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copied the MCP config with this key."
+msgstr "এই কী সহ MCP কনফিগ কপি করা হয়েছে।"
+
 #: src/features/resume/share/link-tab.tsx
 #: src/features/settings/ai/api-keys.tsx
 #: src/features/settings/ai/mcp.tsx
@@ -1529,6 +1559,10 @@ msgstr "এখন কপি করুন। আপনার নিরাপত�
 #: src/features/resume/public/public-resume.tsx
 msgid "Copy link"
 msgstr "লিঙ্ক কপি করুন"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Copy MCP config"
+msgstr "MCP কনফিগ কপি করুন"
 
 #. Accessible label for the button that copies the two-factor secret key
 #: src/dialogs/auth/enable-two-factor.tsx
@@ -1584,6 +1618,10 @@ msgstr "সংযোগ করা যায়নি। কী চেক কর�
 #: src/features/assistant/conversation.tsx
 msgid "Couldn't copy the transcript. Try again."
 msgstr "ট্রান্সক্রিপ্টটি কপি করা যায়নি। আবার চেষ্টা করুন।"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Couldn't copy to the clipboard. Try again."
+msgstr "ক্লিপবোর্ডে কপি করা যায়নি। আবার চেষ্টা করুন।"
 
 #: src/features/documents/use-start-document.ts
 msgid "Couldn't create the document. Try again."
@@ -1759,6 +1797,10 @@ msgstr "পাসওয়ার্ড সেট করা যায়নি।
 msgid "Couldn't set up two-step verification. Try again."
 msgstr "দ্বি-পদক্ষেপ যাচাইকরণ সেট আপ করা যায়নি। আবার চেষ্টা করুন।"
 
+#: src/dialogs/auth/set-password.tsx
+msgid "Couldn't set your password. Try again."
+msgstr "আপনার পাসওয়ার্ড সেট করা যায়নি। আবার চেষ্টা করুন।"
+
 #: src/features/resume/preview/preview.browser.tsx
 msgid "Couldn't show the preview."
 msgstr "প্রিভিউ দেখানো যায়নি।"
@@ -1876,6 +1918,18 @@ msgstr "একটি নতুন জীবনবৃত্তান্ত তৈ
 #: src/features/command-palette/pages/ask.tsx
 msgid "Create a resume first, then ask about it."
 msgstr "প্রথমে একটি জীবনবৃত্তান্ত তৈরি করুন, তারপর এটি সম্পর্কে জিজ্ঞাসা করুন।"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect {name}."
+msgstr "{name} কানেক্ট করতে একটি অ্যাকাউন্ট তৈরি করুন।"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Create an account to connect an application."
+msgstr "অ্যাপ্লিকেশন কানেক্ট করতে একটি অ্যাকাউন্ট তৈরি করুন।"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Create and change documents and your profile."
+msgstr ""
 
 #: src/features/auth/pages/consent.tsx
 msgid "Create and change your documents."
@@ -2047,6 +2101,10 @@ msgstr "অ্যাকাউন্ট মুছুন"
 msgid "Delete conversation"
 msgstr "কথোপকথন মুছে ফেলুন"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Delete documents and account data."
+msgstr "নথিপত্র ও অ্যাকাউন্টের ডেটা মুছে ফেলুন।"
+
 #: src/features/resume/editor/write/entry-card.tsx
 msgid "Delete entry"
 msgstr "এন্ট্রি মুছুন"
@@ -2157,6 +2215,10 @@ msgstr "বিস্তারিত"
 msgid "Details from the provider:"
 msgstr "প্রদানকারীর কাছ থেকে বিবরণ:"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Didn't get it?"
+msgstr "পাননি?"
+
 #: src/hooks/use-form-blocker.tsx
 msgid "Discard changes"
 msgstr "পরিবর্তন বাতিল করুন"
@@ -2166,8 +2228,26 @@ msgid "Discard unsaved changes?"
 msgstr "অসংরক্ষিত পরিবর্তন বাতিল করবেন?"
 
 #: src/features/settings/account/security.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Disconnect"
 msgstr "ডিসকনেক্ট করুন"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect “{name}”?"
+msgstr "“{name}” ডিসকানেক্ট করবেন?"
+
+#. placeholder {0}: connection.clientName
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect {0}"
+msgstr "{0} ডিসকানেক্ট করুন"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnect an application from your account."
+msgstr "আপনার অ্যাকাউন্ট থেকে একটি অ্যাপ্লিকেশন ডিসকানেক্ট করুন।"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Disconnected “{name}”."
+msgstr "“{name}” ডিসকানেক্ট করা হয়েছে।"
 
 #: src/features/settings/account/auth-hooks.ts
 msgid "Disconnecting your {providerName} account…"
@@ -2404,9 +2484,7 @@ msgstr "ইমেইল"
 
 #. Label for email input on forgot-password form
 #. Label for email input on registration form
-#. Label for login identifier input that accepts email or username
 #: src/features/auth/pages/forgot-password.tsx
-#: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Email address"
 msgstr "ইমেইল ঠিকানা"
@@ -2418,6 +2496,11 @@ msgstr "ইমেইল ঠিকানা চেনা যাবে না"
 #: src/features/settings/account/profile.tsx
 msgid "Email delivery isn't set up on this server, so the address isn't verified."
 msgstr "এই সার্ভারে ইমেল ডেলিভারি সেট আপ করা হয়নি, তাই ঠিকানা যাচাই করা হয়নি৷"
+
+#. Label for login identifier input that accepts email or username
+#: src/features/auth/pages/login.tsx
+msgid "Email or username"
+msgstr "ইমেইল বা ইউজারনেম"
 
 #: src/features/ats-checker/messages.ts
 msgid "Embed all fonts when exporting, so characters map the way you intended."
@@ -2450,10 +2533,6 @@ msgstr "একটি ব্যাকআপ কোড লিখুন।"
 #: src/features/settings/account/profile.tsx
 msgid "Enter a name, up to 64 characters."
 msgstr "একটি নাম লিখুন, 64টি অক্ষর পর্যন্ত।"
-
-#: src/features/auth/pages/reset-password.tsx
-msgid "Enter a new password for your account."
-msgstr "আপনার অ্যাকাউন্টের জন্য একটি নতুন পাসওয়ার্ড লিখুন।"
 
 #: src/features/resume/editor/write/dates-field.tsx
 msgid "Enter a readable date or clear the text to use date fields."
@@ -2543,6 +2622,11 @@ msgstr "প্রতিটি ভূমিকা বলে আপনি কি �
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Exit focus mode"
 msgstr "ফোকাস মোড থেকে প্রস্থান করুন"
+
+#. Switch on an education entry's dates: the end date is still to come
+#: src/features/resume/editor/write/dates-field.tsx
+msgid "Expected"
+msgstr "প্রত্যাশিত"
 
 #: src/libs/resume/section.tsx
 msgid "Experience"
@@ -2697,10 +2781,6 @@ msgstr "LibreOffice এবং অন্যান্য ওপেন-সোর্
 msgid "For portals or recruiters who ask for Word. Layout is simplified."
 msgstr "পোর্টাল বা নিয়োগকারীদের জন্য যারা Word এর জন্য জিজ্ঞাসা করে। বিন্যাস সরলীকৃত হয়."
 
-#: src/features/settings/ai/api-keys.tsx
-msgid "For scripts, extensions and MCP clients. Keys act as you and can read and edit your documents."
-msgstr "স্ক্রিপ্ট, এক্সটেনশন এবং MCP ক্লায়েন্টদের জন্য। কীগুলি আপনার মতো কাজ করে এবং আপনার নথিগুলি পড়তে এবং সম্পাদনা করতে পারে।"
-
 #: src/features/resume/editor/check/job-match.tsx
 msgid "For this visit only"
 msgstr "শুধুমাত্র এই সফরের জন্য"
@@ -2748,6 +2828,10 @@ msgstr "সহকারী বা API থেকে"
 #: src/features/assistant/assistant-panel.tsx
 msgid "From your experience entries"
 msgstr "আপনার অভিজ্ঞতা এন্ট্রি থেকে"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Full access"
+msgstr "সম্পূর্ণ অ্যাক্সেস"
 
 #: src/features/resume/editor/write/basics-card.tsx
 msgid "Full name"
@@ -2801,6 +2885,7 @@ msgstr "বাড়ি যান"
 
 #: src/components/layout/error-screen.tsx
 #: src/components/layout/not-found-screen.tsx
+#: src/features/auth/pages/consent.tsx
 #: src/routes/_home/-sections/header.tsx
 msgid "Go to dashboard"
 msgstr "ড্যাশবোর্ডে যান"
@@ -2994,6 +3079,10 @@ msgstr "আইকন..."
 msgid "Icons in contact line"
 msgstr "যোগাযোগ লাইনে আইকন"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "If an account uses that address, a reset link is on its way."
+msgstr "সেই ঠিকানায় কোনো অ্যাকাউন্ট থাকলে, একটি রিসেট লিঙ্ক পাঠানো হচ্ছে।"
+
 #: src/features/ats-checker/messages.ts
 msgid "If it came from a scan, that is expected. Otherwise remove it; recruiters read it as keyword stuffing."
 msgstr "যদি এটি স্ক্যান থেকে এসে থাকে, তা প্রত্যাশিত। অন্যথায় এটি সরিয়ে দিন; নিয়োগকারীরা এটিকে কীওয়ার্ড স্টাফিং হিসেবে দেখেন।"
@@ -3009,6 +3098,10 @@ msgstr "যদি কেউ আপনাকে এই লিঙ্কটি প�
 #: src/hooks/use-form-blocker.tsx
 msgid "If you close this dialog, your changes are lost."
 msgstr "এই ডায়ালগ বন্ধ করলে আপনার পরিবর্তনগুলো হারিয়ে যাবে।"
+
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "If you never verified your email address, a password reset turns two-step verification off. Otherwise a reset keeps it on, so ask the person who runs this Reactive Resume server to turn it off for your account. Then sign in with your password and turn it on again with a new authenticator."
+msgstr "আপনি কখনো আপনার ইমেইল ঠিকানা যাচাই করেননি থাকলে, পাসওয়ার্ড রিসেট দ্বি-পদক্ষেপ যাচাইকরণ বন্ধ করে দেয়। অন্যথায় রিসেট এটি চালু রাখে, তাই এই Reactive Resume সার্ভারের পরিচালকের কাছে আপনার অ্যাকাউন্টের জন্য এটি বন্ধ করতে বলুন। তারপর আপনার পাসওয়ার্ড দিয়ে সাইন ইন করে নতুন অথেনটিকেটর দিয়ে আবার চালু করুন।"
 
 #: src/features/resume/editor/check/check-panel.tsx
 msgid "Ignore"
@@ -3150,6 +3243,10 @@ msgstr "ইস্যু এবং কাজের মিল এখনও AI ছ�
 msgid "It has entries but isn't placed on a page."
 msgstr "এটিতে এন্ট্রি আছে কিন্তু একটি পৃষ্ঠায় স্থাপন করা হয় না।"
 
+#: src/features/settings/ai/connected-apps.tsx
+msgid "It loses access now. To use it again, connect it from the app. This cannot be undone."
+msgstr "এটি এখনই অ্যাক্সেস হারাবে। আবার ব্যবহার করতে, অ্যাপ থেকে এটি কানেক্ট করুন। এটি পূর্বাবস্থায় ফেরানো যাবে না।"
+
 #: src/features/documents/document-actions.tsx
 msgid "It will be deleted for good and can't be restored."
 msgstr "এটি ভালভাবে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।"
@@ -3213,6 +3310,7 @@ msgid "Keep a single address, so software does not have to guess which one to us
 msgstr "একটিই ঠিকানা রাখুন, যাতে কোনটি ব্যবহার করতে হবে তা সফটওয়্যারকে আন্দাজ করতে না হয়।"
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Keep access when you are not using the application."
 msgstr "আপনি যখন অ্যাপ্লিকেশন ব্যবহার করছেন না তখন অ্যাক্সেস রাখুন।"
 
@@ -3287,8 +3385,8 @@ msgid "Key stored encrypted"
 msgstr "কী সংরক্ষিত এনক্রিপ্টেড"
 
 #: src/features/settings/ai/api-keys.tsx
-msgid "Keys act as you and can read and edit your documents."
-msgstr "কীগুলি আপনার মতো কাজ করে এবং আপনার নথিগুলি পড়তে এবং সম্পাদনা করতে পারে।"
+msgid "Keys act as you with the access you choose. New keys start read-only."
+msgstr "কীগুলো আপনার বেছে নেওয়া অনুমতি অনুযায়ী আপনার হয়ে কাজ করে। নতুন কীগুলো শুরুতে শুধু পড়ার অনুমতি পায়।"
 
 #: src/features/resume/editor/write/section-row.tsx
 msgid "Keyword layout"
@@ -3394,10 +3492,6 @@ msgstr "দৈর্ঘ্য"
 #: src/features/ats-checker/messages.ts
 msgid "Length is not a defect, and there is no universal one-page rule. Keep the pages that earn their place."
 msgstr "দৈর্ঘ্য কোনো ত্রুটি নয়, এবং সর্বজনীন এক-পৃষ্ঠার নিয়ম বলে কিছু নেই। যে পৃষ্ঠাগুলো তাদের জায়গা অর্জন করে তা রাখুন।"
-
-#: src/features/settings/ai/mcp.tsx
-msgid "Let AI clients like Claude or Cursor read and edit your resumes, using an API key above."
-msgstr "Claude বা Cursor এর মতো AI ক্লায়েন্টদের উপরে একটি API কী ব্যবহার করে আপনার জীবনবৃত্তান্ত পড়তে এবং সম্পাদনা করতে দিন।"
 
 #: src/features/documents/documents-page.tsx
 msgid "Let's start with what you have"
@@ -3900,6 +3994,7 @@ msgstr "নতুন পাতা"
 
 #. Label for new password input on reset-password form
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "New password"
 msgstr "নতুন পাসওয়ার্ড"
@@ -3912,6 +4007,10 @@ msgstr "নতুন বিভাগ"
 msgid "Next issue"
 msgstr "পরবর্তী সংখ্যা"
 
+#: src/features/auth/pages/verify-2fa.tsx
+msgid "No backup codes either?"
+msgstr "ব্যাকআপ কোডও নেই?"
+
 #: src/features/ats-checker/messages.ts
 msgid "No bullet lists were found."
 msgstr "কোনো বুলেট তালিকা পাওয়া যায়নি।"
@@ -3922,7 +4021,7 @@ msgid "No commands match that search."
 msgstr "ওই অনুসন্ধানের সঙ্গে কোনো কমান্ড মেলে না।"
 
 #: src/features/settings/ai/connected-apps.tsx
-msgid "No connected applications yet. Apps you allow to access your account appear here."
+msgid "No connected applications. Apps you allow appear here."
 msgstr "এখনও কোনো সংযুক্ত অ্যাপ্লিকেশন নেই। আপনার অ্যাকাউন্টে অ্যাক্সেসের অনুমতি দেওয়া অ্যাপগুলো এখানে দেখা যাবে।"
 
 #: src/features/ats-checker/messages.ts
@@ -4179,11 +4278,6 @@ msgstr "{title} খুলুন"
 msgid "Open AI settings"
 msgstr "AI সেটিংস খুলুন"
 
-#. Button label to open the user's default email app
-#: src/features/auth/pages/forgot-password.tsx
-msgid "Open email app"
-msgstr "ইমেইল অ্যাপ খুলুন"
-
 #: src/features/resume/stylesheet/toolbar.tsx
 msgid "Open focus mode"
 msgstr "ফোকাস মোড খুলুন"
@@ -4352,6 +4446,10 @@ msgstr "পাসকি"
 msgid "Passkeys"
 msgstr "পাসকি"
 
+#: src/features/settings/account/security.tsx
+msgid "Passkeys need a verified email, which this server can't send."
+msgstr "পাসকির জন্য যাচাই করা ইমেইল দরকার, যা এই সার্ভার পাঠাতে পারে না।"
+
 #. Authentication provider display name in account settings
 #. Label for password input on login form
 #. Label for password input on protected resume access form
@@ -4372,17 +4470,21 @@ msgstr "পাসওয়ার্ড"
 msgid "Password changed"
 msgstr "পাসওয়ার্ড পরিবর্তন করা হয়েছে"
 
+#: src/features/auth/pages/reset-password.tsx
+msgid "Password changed. You're signed out everywhere; sign in, then add any passkeys or API keys again."
+msgstr "পাসওয়ার্ড পরিবর্তিত হয়েছে। আপনি সব জায়গা থেকে সাইন আউট হয়েছেন; সাইন ইন করে, তারপর পাসকি বা API কী আবার যোগ করুন।"
+
 #: src/features/resume/share/link-tab.tsx
 msgid "Password removed"
 msgstr "পাসওয়ার্ড সরানো হয়েছে"
 
-#: src/features/auth/pages/reset-password.tsx
-msgid "Password reset. Sign in with your new password."
-msgstr "পাসওয়ার্ড রিসেট হয়েছে। আপনার নতুন পাসওয়ার্ড দিয়ে সাইন ইন করুন।"
-
 #: src/features/resume/share/link-tab.tsx
 msgid "Password set"
 msgstr "পাসওয়ার্ড সেট"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Password set. You can now sign in with it too."
+msgstr "পাসওয়ার্ড সেট হয়েছে। এখন এটি দিয়েও সাইন ইন করতে পারবেন।"
 
 #: src/features/assistant/assistant-panel.tsx
 msgid "Past conversations"
@@ -4689,6 +4791,10 @@ msgstr ""
 msgid "Read only"
 msgstr "শুধুমাত্র-পঠন অ্যাক্সেস"
 
+#: src/features/settings/ai/api-keys.tsx
+msgid "Read only can't change or delete anything."
+msgstr "শুধুই পাঠ কোনো কিছু বদলাতে বা মুছতে পারে না।"
+
 #: src/features/assistant/conversation.tsx
 msgid "Read the attachment"
 msgstr "সংযুক্তি পড়ুন"
@@ -4706,12 +4812,22 @@ msgid "Read your documents."
 msgstr ""
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your email address."
 msgstr "আপনার ইমেইল ঠিকানা পড়ুন।"
 
 #: src/features/auth/pages/consent.tsx
+#: src/features/settings/ai/connected-apps.tsx
 msgid "Read your profile information."
 msgstr "আপনার প্রোফাইলের তথ্য পড়ুন।"
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read your whole account, including exports."
+msgstr ""
+
+#: src/features/settings/ai/connected-apps.tsx
+msgid "Read, change and delete documents (legacy connection)."
+msgstr ""
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Read, write and delete"
@@ -4903,6 +5019,10 @@ msgstr ""
 msgid "Require a password"
 msgstr "একটি পাসওয়ার্ড প্রয়োজন"
 
+#: src/features/settings/account/profile.tsx
+msgid "Resend"
+msgstr "আবার পাঠান"
+
 #: src/features/ats-checker/messages.ts
 msgid "Reserve capitals for short headings. They slow reading and can defeat case-sensitive search."
 msgstr "সংক্ষিপ্ত শিরোনামের জন্য বড় হাতের অক্ষর সংরক্ষণ রাখুন। এগুলো পড়া ধীর করে দেয় এবং কেস-সংবেদনশীল সার্চ ব্যর্থ করতে পারে।"
@@ -4981,6 +5101,10 @@ msgstr "জীবনবৃত্তান্তসমূহ"
 msgid "Resumes always render on white paper, whatever the theme."
 msgstr "জীবনবৃত্তান্ত সবসময় সাদা কাগজে রেন্ডার হয়, থিম যাই হোক না কেন।"
 
+#: src/features/settings/account/data.tsx
+msgid "Resumes, version history and uploaded files in one zip. Check the file manifest for omissions."
+msgstr ""
+
 #: src/features/assistant/conversation.tsx
 #: src/features/resume/editor/check/writing-tab.tsx
 #: src/features/resume/editor/save-status.tsx
@@ -5019,14 +5143,6 @@ msgstr "প্রত্যাহার করুন"
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoke {0}"
 msgstr "{0} প্রত্যাহার করুন"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke access"
-msgstr "অ্যাক্সেস প্রত্যাহার করুন"
-
-#: src/features/settings/ai/connected-apps.tsx
-msgid "Revoke an application's access to your account."
-msgstr "আপনার অ্যাকাউন্টে একটি অ্যাপ্লিকেশনের অ্যাক্সেস প্রত্যাহার করুন৷"
 
 #: src/features/settings/ai/api-keys.tsx
 msgid "Revoked “{name}”. Apps using it stop working now."
@@ -5291,10 +5407,22 @@ msgstr "সিমান্টিক সিএসএস স্টাইলশি�
 msgid "Send"
 msgstr "পাঠান"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Send again"
+msgstr "আবার পাঠান"
+
+#: src/features/settings/ai/api-keys.tsx
+msgid "Send it in the <0>x-api-key</0> header."
+msgstr "<0>x-api-key</0> হেডারে এটি পাঠান।"
+
 #. Primary action button label on forgot-password form
 #: src/features/auth/pages/forgot-password.tsx
 msgid "Send reset link"
 msgstr "রিসেট লিঙ্ক পাঠান"
+
+#: src/features/settings/account/profile.tsx
+msgid "Send the approval link again"
+msgstr "অনুমোদনের লিঙ্কটি আবার পাঠান"
 
 #: src/features/ats-checker/messages.ts
 msgid "Send the resume itself rather than a portfolio wrapper."
@@ -5326,6 +5454,10 @@ msgstr "আপনার চাবি সহ আপনার জীবনবৃ�
 msgid "Sent"
 msgstr "পাঠানো হয়েছে"
 
+#: src/features/auth/pages/forgot-password.tsx
+msgid "Sent again. It can take a minute to arrive."
+msgstr "আবার পাঠানো হয়েছে। পৌঁছাতে এক মিনিট সময় লাগতে পারে।"
+
 #. placeholder {0}: version.name
 #: src/features/resume/share/format.ts
 msgid "Sent to {0}"
@@ -5339,10 +5471,13 @@ msgstr "Lumen-এ পাঠানো হয়েছে"
 msgid "Serbian"
 msgstr "সার্বিয়ান"
 
+#: src/dialogs/auth/set-password.tsx
 #: src/features/settings/account/security.tsx
 msgid "Set a password"
 msgstr "একটি পাসওয়ার্ড সেট করুন"
 
+#. Primary action button to add a password to an account without one
+#: src/dialogs/auth/set-password.tsx
 #: src/features/resume/builder/password-dialog.tsx
 msgid "Set password"
 msgstr "পাসওয়ার্ড সেট করুন"
@@ -5354,6 +5489,10 @@ msgstr "এক্সপোর্ট করার সময় ডকুমেন
 #: src/dialogs/auth/enable-two-factor.tsx
 msgid "Set up your authenticator app"
 msgstr "আপনার অথেন্টিকেটর অ্যাপ সেট আপ করুন"
+
+#: src/dialogs/auth/set-password.tsx
+msgid "Setting your password…"
+msgstr "আপনার পাসওয়ার্ড সেট করা হচ্ছে…"
 
 #: src/features/command-palette/pages/navigation.tsx
 #: src/features/settings/root.tsx
@@ -5485,12 +5624,24 @@ msgstr "সাইডবার প্রায়ই শেষ পড়া হ�
 msgid "Sign in"
 msgstr "সাইন ইন"
 
+#: src/features/settings/ai/mcp.tsx
+msgid "Sign in from your AI client, or use an API key."
+msgstr "আপনার AI ক্লায়েন্ট থেকে সাইন ইন করুন, অথবা একটি API কী ব্যবহার করুন।"
+
 #. Call-to-action link from forgot-password page to login page
 #. Call-to-action link from registration page to login page
 #: src/features/auth/pages/forgot-password.tsx
 #: src/features/auth/pages/register.tsx
 msgid "Sign in now"
 msgstr "এখন সাইন ইন করুন"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect {name}."
+msgstr "{name} কানেক্ট করতে সাইন ইন করুন।"
+
+#: src/features/auth/components/connecting-client.tsx
+msgid "Sign in to connect an application."
+msgstr "অ্যাপ্লিকেশন কানেক্ট করতে সাইন ইন করুন।"
 
 #. Title on the login page
 #: src/features/auth/pages/login.tsx
@@ -5635,6 +5786,10 @@ msgstr "কিছু অক্ষর প্রশ্নবোধক চিহ্
 msgid "Some checks need information this file does not carry: page contents that could not be inspected, or text in a language these checks do not cover. They count as neither a pass nor a fail."
 msgstr "কিছু পরীক্ষার জন্য এমন তথ্য দরকার যা এই ফাইলে নেই: যে পৃষ্ঠার বিষয়বস্তু পরীক্ষা করা যায়নি, কিংবা এমন ভাষার লেখা যা এই পরীক্ষাগুলো বোঝে না। সেগুলো পাস বা ফেল কোনোটাই ধরা হয় না।"
 
+#: src/libs/error-message.ts
+msgid "Some fonts are missing from this server's font mirror. Ask the administrator to add them."
+msgstr "এই সার্ভারের ফন্ট মিররে কিছু ফন্ট নেই। অ্যাডমিনিস্ট্রেটরকে সেগুলো যোগ করতে বলুন।"
+
 #: src/features/ats-checker/messages.ts
 msgid "Some glyphs have no meaning outside this file."
 msgstr "কিছু গ্লিফের এই ফাইলের বাইরে কোনো অর্থ নেই।"
@@ -5666,6 +5821,10 @@ msgstr "কিছু টেক্সট ঘোরানো আছে।"
 #: src/libs/error-message.ts
 msgid "Some updates overlap your own edits. Select them again to replace your version."
 msgstr ""
+
+#: src/features/settings/account/data.tsx
+msgid "Some uploaded files were skipped. Check upload-manifest.json in the archive."
+msgstr "কিছু আপলোড করা ফাইল বাদ দেওয়া হয়েছে। আর্কাইভের upload-manifest.json দেখুন।"
 
 #: src/features/documents/documents-page.tsx
 msgid "Sort"
@@ -5961,6 +6120,11 @@ msgstr "{minimum} pt এর অধীনে পাঠ্য ভুল পড়�
 msgid "Thai"
 msgstr "থাই"
 
+#. placeholder {0}: still.user.email
+#: src/features/auth/pages/reset-password.tsx
+msgid "That account's password changed and it's signed out everywhere. This browser is still signed in as {0}."
+msgstr "সেই অ্যাকাউন্টের পাসওয়ার্ড পরিবর্তিত হয়েছে এবং সব জায়গা থেকে সাইন আউট হয়েছে। এই ব্রাউজারটি এখনও {0} হিসেবে সাইন ইন আছে।"
+
 #: src/features/auth/pages/resume-password.tsx
 msgid "That password isn't correct. Check it with the resume owner and try again."
 msgstr "পাসওয়ার্ডটি সঠিক নয়। জীবনবৃত্তান্তের মালিকের কাছ থেকে যাচাই করে আবার চেষ্টা করুন।"
@@ -6170,6 +6334,10 @@ msgstr "তারা অভিজ্ঞতা, শিক্ষা এবং দ�
 msgid "Thinking…"
 msgstr "ভাবছেন…"
 
+#: src/features/settings/account/data.tsx
+msgid "This account is too large for one archive. Export resumes one at a time instead."
+msgstr ""
+
 #: src/features/auth/pages/consent.tsx
 msgid "This connection request is invalid or has expired. Start the connection again from your client."
 msgstr "এই সংযোগ অনুরোধটি অবৈধ বা মেয়াদোত্তীর্ণ। আপনার ক্লায়েন্ট থেকে আবার সংযোগ শুরু করুন।"
@@ -6317,6 +6485,14 @@ msgstr "এই জীবনবৃত্তান্তটি একটি এআ
 #: src/features/resume/builder/draft.ts
 msgid "This resume's sharing settings changed elsewhere."
 msgstr "এই জীবনবৃত্তান্তের শেয়ার করার সেটিংস অন্য কোথাও পরিবর্তিত হয়েছে।"
+
+#: src/features/auth/pages/forgot-password.tsx
+msgid "This server can't send email, so password reset isn't available. Ask the person who runs it to reset your password."
+msgstr "এই সার্ভার ইমেইল পাঠাতে পারে না, তাই পাসওয়ার্ড রিসেট পাওয়া যায় না। এর পরিচালকের কাছে আপনার পাসওয়ার্ড রিসেট করতে বলুন।"
+
+#: src/features/settings/account/profile.tsx
+msgid "This server can't send email, so the address can't be changed here. Ask the person who runs it."
+msgstr "এই সার্ভার ইমেইল পাঠাতে পারে না, তাই ঠিকানাটি এখানে বদলানো যায় না। এর পরিচালকের কাছে বলুন।"
 
 #: src/features/auth/pages/error.tsx
 msgid "This server isn't accepting new accounts. Sign in with an existing account."
@@ -6629,6 +6805,7 @@ msgstr "3 থেকে 64 ছোট হাতের অক্ষর, সংখ�
 #: src/dialogs/auth/change-password.tsx
 #: src/dialogs/auth/disable-two-factor.tsx
 #: src/dialogs/auth/enable-two-factor.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/login.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
@@ -6661,6 +6838,7 @@ msgid "Use at least 3 characters."
 msgstr "অন্তত 3টি অক্ষর ব্যবহার করুন।"
 
 #: src/dialogs/auth/change-password.tsx
+#: src/dialogs/auth/set-password.tsx
 #: src/features/auth/pages/register.tsx
 #: src/features/auth/pages/reset-password.tsx
 msgid "Use at least 8 characters."
@@ -6743,6 +6921,10 @@ msgstr "যাচাই করুন"
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verify with a backup code"
 msgstr "ব্যাকআপ কোড দিয়ে যাচাই করুন"
+
+#: src/features/settings/account/security.tsx
+msgid "Verify your email to add a passkey. The link is in Account details above."
+msgstr "পাসকি যোগ করতে আপনার ইমেইল যাচাই করুন। লিঙ্কটি উপরের অ্যাকাউন্টের বিবরণে আছে।"
 
 #: src/features/auth/pages/verify-2fa.tsx
 msgid "Verifying backup code..."
@@ -6971,9 +7153,9 @@ msgstr "আপনি ইতিমধ্যেই এটি \"{0}\" এর জন
 msgid "You answered: {answer}"
 msgstr "আপনি উত্তর দিয়েছেন: {answer}"
 
-#: src/features/auth/pages/login.tsx
-msgid "You can also sign in with your username."
-msgstr "আপনি আপনার ইউজারনেম দিয়েও সাইন ইন করতে পারেন।"
+#: src/features/auth/pages/consent.tsx
+msgid "You can disconnect it anytime in Settings → AI & developer."
+msgstr "সেটিংস → AI ও ডেভেলপার-এ যেকোনো সময় এটি ডিসকানেক্ট করতে পারবেন।"
 
 #: src/features/resume/editor/save-status.tsx
 msgid "You can keep editing. Changes sync when you're back online. Download and Share need a connection."
@@ -6994,6 +7176,14 @@ msgstr "আপনি একটি ছাড়া সাইন ইন করু�
 #: src/features/resume/builder/draft.ts
 msgid "You're offline. Reconnect to save your changes before leaving."
 msgstr "আপনি অফলাইনে আছেন। যাওয়ার আগে আপনার পরিবর্তনগুলি সংরক্ষণ করতে পুনরায় সংযোগ করুন৷"
+
+#: src/features/auth/pages/login.tsx
+msgid "you@example.com or your username"
+msgstr "you@example.com বা আপনার ইউজারনেম"
+
+#: src/features/auth/pages/register.tsx
+msgid "Your account is ready"
+msgstr ""
 
 #: src/features/settings/account/data.tsx
 msgid "Your account was deleted."
