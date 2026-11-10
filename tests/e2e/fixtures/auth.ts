@@ -14,7 +14,7 @@ export async function registerViaUi(page: Page, account: E2EAccount, callbackURL
 	await page.getByLabel("Email address", { exact: true }).fill(account.email);
 	await page.getByLabel("Password", { exact: true }).fill(account.password);
 	await page.getByRole("button", { name: "Sign up" }).click();
-	await page.getByRole("button", { name: "Continue" }).click();
+	await page.getByRole("link", { name: "Continue" }).click();
 	await page.waitForURL(/\/dashboard/);
 }
 
