@@ -38,7 +38,7 @@ function AuthEmailLayout({ preview, heading, intro, details, actionLabel, action
 					<Container className="mx-auto w-full max-w-xl bg-zinc-900 p-6 text-zinc-50">
 						<Section>
 							<Text className="text-base font-medium">{appName}</Text>
-							<Heading className="mt-6 text-2xl leading-0 font-medium tracking-tighter whitespace-break-spaces md:text-5xl">
+							<Heading className="mt-6 text-2xl leading-tight font-medium tracking-tighter whitespace-break-spaces md:text-5xl">
 								{heading}
 							</Heading>
 
@@ -57,10 +57,8 @@ function AuthEmailLayout({ preview, heading, intro, details, actionLabel, action
 							</Button>
 
 							<Section className="mt-8">
-								<Text className="leading-0">
-									If the button does not work, copy and paste this link into your browser:
-								</Text>
-								<Link className="leading-0 text-zinc-200/60 underline underline-offset-2" href={actionUrl}>
+								<Text>If the button does not work, copy and paste this link into your browser:</Text>
+								<Link dir="ltr" className="break-all text-zinc-200/60 underline underline-offset-2" href={actionUrl}>
 									{actionUrl}
 								</Link>
 							</Section>
@@ -90,7 +88,7 @@ export function ResetPasswordEmail({ url }: ResetPasswordEmailProps) {
 			preview={`Reset your ${appName} password`}
 			heading="Reset your password"
 			intro={`We received a request to reset your ${appName} password.`}
-			details="If this was not you, you can ignore this message and your password will remain unchanged."
+			details="Resetting signs you out on every device and removes your passkeys, API keys and connected apps. If this was not you, ignore this message and your password will remain unchanged."
 			actionLabel="Create new password"
 			actionUrl={url}
 			outro="For security, only use links from emails sent by Reactive Resume."
