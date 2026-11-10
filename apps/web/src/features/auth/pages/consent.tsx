@@ -32,8 +32,10 @@ function redirectDestination(redirectUri: string | null) {
 	if (!redirectUri) return null;
 	try {
 		const url = new URL(redirectUri);
-		// Native apps return through their own scheme, which has no host.
-		return url.host || url.protocol.replace(/:$/, "");
+		if (url.protocol === "http:" || url.protocol === "https:") return url.host;
+		// Any installed app can claim a custom scheme, even one spelled like a website, so keep the scheme and its
+		// separator: a site's host never ends in ":".
+		return url.host ? `${url.protocol}//${url.host}` : url.protocol;
 	} catch {
 		return null;
 	}
@@ -57,7 +59,11 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 		enabled: validRequest,
 		retry: false,
 		queryFn: async () => {
-			const { data, error } = await authClient.oauth2.publicClient({ query: { client_id: clientId } });
+			// The provider checks the request's signature and expiry here, so a forged or expired request reads as invalid.
+			const { data, error } = await authClient.oauth2.publicClientPrelogin({
+				client_id: clientId,
+				oauth_query: oauthQuery,
+			});
 			if (error || !data)
 				throw new Error(
 					t`This connection request is invalid or has expired. Start the connection again from your client.`,

@@ -6,7 +6,7 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { compare, hash } from "bcryptjs";
 import { APIError, betterAuth } from "better-auth";
-import { createAuthMiddleware } from "better-auth/api";
+import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { jwt, openAPI } from "better-auth/plugins";
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { twoFactor } from "better-auth/plugins/two-factor";
@@ -40,16 +40,25 @@ const OAUTH_AUDIENCES = [
 	`${oauthAudienceBase}/mcp`,
 	`${oauthAudienceBase}/mcp/`,
 ];
+const oauthIssuer = `${authBaseUrl}/api/auth`;
+const missingResourceDescription = `Send resource=${oauthAudienceBase}; see /.well-known/oauth-protected-resource.`;
 
 export async function verifyOAuthToken(token: string): Promise<JWTPayload> {
 	// Use the same in-process verification on Docker and Vercel. Access tokens must
 	// identify a live client/grant and cannot use proof binding without a DPoP proof.
 	const { payload } = await jwtVerify(token, createLocalJWKSet(await auth.api.getJwks()), {
-		issuer: `${authBaseUrl}/api/auth`,
+		issuer: oauthIssuer,
 		audience: OAUTH_AUDIENCES,
 		requiredClaims: ["sub", "exp", "iat", "azp"],
 	});
-	if (payload.cnf || typeof payload.sub !== "string" || typeof payload.azp !== "string") {
+	if (payload.cnf) throw new APIError("UNAUTHORIZED", { message: "Invalid bearer token." });
+	await validateOAuthGrant(payload);
+	return payload;
+}
+
+/** The provider already verified signatures; all token consumers must also check the live grant. */
+async function validateOAuthGrant(payload: JWTPayload) {
+	if (typeof payload.sub !== "string" || typeof payload.azp !== "string") {
 		throw new APIError("UNAUTHORIZED", { message: "Invalid bearer token." });
 	}
 	const [client] = await db
@@ -90,7 +99,29 @@ export async function verifyOAuthToken(token: string): Promise<JWTPayload> {
 	) {
 		throw new APIError("UNAUTHORIZED", { message: "OAuth access has been revoked. Reconnect the application." });
 	}
-	return payload;
+}
+
+/**
+ * Without `resource` the provider issues an opaque token that no API accepts, so the request is refused.
+ * As RFC 6749 §4.1.2.1 requires, the error goes to the client's callback only when the client is enabled
+ * and the callback matches its registration exactly. Returns that callback, or null to answer directly.
+ */
+async function missingResourceRedirect(params: Record<string, unknown> | undefined) {
+	const clientId = typeof params?.client_id === "string" ? params.client_id : undefined;
+	const redirectUri = typeof params?.redirect_uri === "string" ? params.redirect_uri : undefined;
+	if (!clientId || !redirectUri) return null;
+	const [client] = await db
+		.select({ redirectUris: schema.oauthClient.redirectUris, disabled: schema.oauthClient.disabled })
+		.from(schema.oauthClient)
+		.where(eq(schema.oauthClient.clientId, clientId))
+		.limit(1);
+	if (!client || client.disabled || !client.redirectUris.includes(redirectUri)) return null;
+	const target = new URL(redirectUri);
+	target.searchParams.append("error", "invalid_target");
+	target.searchParams.append("error_description", missingResourceDescription);
+	if (typeof params?.state === "string") target.searchParams.append("state", params.state);
+	target.searchParams.append("iss", oauthIssuer);
+	return target.toString();
 }
 
 export function isCustomOAuthProviderEnabled() {
@@ -193,6 +224,31 @@ const getAuthConfig = () => {
 
 		hooks: {
 			before: createAuthMiddleware(async (ctx) => {
+				if (ctx.path === "/oauth2/authorize") {
+					// Read the request the way the provider does: a direct POST carries it in the form body, while
+					// continue and consent re-enter this endpoint with the signed query.
+					const isFormPost =
+						ctx.request?.method === "POST" && new URL(ctx.request.url).pathname.endsWith("/oauth2/authorize");
+					const params = (isFormPost ? ctx.body : ctx.query) as Record<string, unknown> | undefined;
+					if (!params?.resource) {
+						const redirect = await missingResourceRedirect(params);
+						if (redirect) throw ctx.redirect(redirect);
+						return ctx.json(
+							{ error: "invalid_target", error_description: missingResourceDescription },
+							{ status: 400 },
+						);
+					}
+				}
+				if (ctx.path === "/oauth2/public-client-prelogin") {
+					// The provider checks only that oauth_query is signed and unexpired. Tie the requested client to that
+					// signed request, so a request for one client can't read another client's public details.
+					const body = ctx.body as { client_id?: unknown; oauth_query?: unknown } | undefined;
+					const signedClientId =
+						typeof body?.oauth_query === "string" ? new URLSearchParams(body.oauth_query).get("client_id") : null;
+					if (!signedClientId || body?.client_id !== signedClientId) {
+						throw new APIError("BAD_REQUEST", { error: "invalid_request", error_description: "client_id mismatch" });
+					}
+				}
 				if (ctx.path === "/sign-in/username" && env.FLAG_DISABLE_EMAIL_AUTH)
 					throw new APIError("FORBIDDEN", { message: "Password sign-in is turned off on this server." });
 				// Internal issuance is gated by the application's session-only, recent-sign-in procedure.
@@ -272,6 +328,22 @@ const getAuthConfig = () => {
 							message: "redirect_uri is not allowed for dynamic client registration",
 						});
 					}
+				}
+			}),
+			after: createAuthMiddleware(async (ctx) => {
+				const payload = ctx.context.returned as JWTPayload | undefined;
+				if (ctx.path === "/oauth2/public-client-prelogin" && payload && typeof payload.client_id === "string") {
+					return ctx.json({ client_id: payload.client_id, client_name: payload.client_name });
+				}
+				// Run after the provider authenticates the introspecting client and verifies the token.
+				if (ctx.path !== "/oauth2/introspect" || !payload || payload.active !== true || typeof payload.azp !== "string")
+					return;
+				try {
+					await validateOAuthGrant(payload);
+				} catch (error) {
+					// Only a refused grant makes the token inactive; a failed lookup is a server error, not a revocation.
+					if (!isAPIError(error) || error.statusCode !== 401) throw error;
+					return ctx.json({ active: false });
 				}
 			}),
 		},
@@ -432,6 +504,18 @@ const getAuthConfig = () => {
 				extensions: [
 					{
 						claims: {
+							userInfo: async ({ jwt }) => {
+								try {
+									await validateOAuthGrant(jwt);
+								} catch (error) {
+									if (!isAPIError(error) || error.statusCode !== 401) throw error;
+									throw new APIError("UNAUTHORIZED", {
+										error: "invalid_token",
+										error_description: "Reconnect the application to restore access.",
+									});
+								}
+								return {};
+							},
 							accessToken: async ({ user, client }) => {
 								if (!user) return {};
 								const [consent] = await db
@@ -452,6 +536,11 @@ const getAuthConfig = () => {
 				// Required for MCP client onboarding (RFC 7591). Redirect URI validation
 				// and explicit user consent protect access by dynamically registered clients.
 				allowUnauthenticatedClientRegistration: true,
+				// Desktop MCP clients (Cursor, older Claude Code) omit application_type while registering
+				// loopback or custom-scheme callbacks; register those as native. An explicit type is kept.
+				clientRegistrationDefaultApplicationType: "infer",
+				// The consent page loads the client through this endpoint, which verifies the signed request first.
+				allowPublicClientPrelogin: true,
 				rateLimit: oauthProviderRateLimit,
 				silenceWarnings: { oauthAuthServerConfig: true },
 			}) as WithoutEndpointMetadata<ReturnType<typeof oauthProvider>>,

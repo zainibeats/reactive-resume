@@ -89,7 +89,7 @@ describe("document WebMCP tools", () => {
 	it("doesn't navigate to a document that isn't there", async () => {
 		const tools = mountTools(true);
 
-		await expect(tools.get("open_document")?.execute({ id: "missing" })).rejects.toThrow("No resume with ID missing.");
+		await expect(tools.get("open_document")?.execute({ id: "missing" })).resolves.toMatch("No resume with ID missing.");
 		expect(mocks.navigate).not.toHaveBeenCalled();
 	});
 });
