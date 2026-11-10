@@ -13,6 +13,8 @@ type GeneratedSpecView = {
 		Record<
 			string,
 			{
+				summary?: string;
+				description?: string;
 				requestBody?: {
 					content?: Record<string, { schema?: unknown }>;
 				};
@@ -69,6 +71,18 @@ function findImpossibleRequestSchemas(spec: GeneratedSpecView) {
 }
 
 describe("generateOpenApiSpec", () => {
+	it("describes every published HTTP operation", async () => {
+		const spec = (await generateSpec()) as GeneratedSpecView;
+		const missing: string[] = [];
+		for (const [path, operations] of Object.entries(spec.paths ?? {})) {
+			for (const [method, operation] of Object.entries(operations)) {
+				if (!["get", "post", "put", "patch", "delete"].includes(method)) continue;
+				if (!(operation.summary?.trim() || operation.description?.trim())) missing.push(`${method} ${path}`);
+			}
+		}
+		expect(missing).toEqual([]);
+	}, 15_000);
+
 	it("keeps instance homepage resolution out of the public API", async () => {
 		const spec = (await generateSpec()) as GeneratedSpecView;
 		expect(spec.paths).not.toHaveProperty("/resume/getRoot");
