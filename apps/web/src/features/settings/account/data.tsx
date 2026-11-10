@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Plural, Trans } from "@lingui/react/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,9 +16,9 @@ import {
 import { Button } from "@reactive-resume/ui/components/button";
 import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { AccountExportLimitError, buildAccountZip } from "@reactive-resume/utils/account-zip";
 import { downloadWithAnchor } from "@reactive-resume/utils/file";
 import { SettingsRow, SettingsSection } from "../section";
-import { buildAccountZip } from "./export";
 import { clearAccountData } from "@/libs/auth/clear-account-data";
 import { authClient } from "@/libs/auth/client";
 import { getReadableErrorMessage } from "@/libs/error-message";
@@ -28,17 +28,37 @@ const CONFIRMATION = "delete";
 
 export function DataSection() {
 	const [deleting, setDeleting] = useState(false);
+	const exportRequest = useRef<AbortController | null>(null);
+	useEffect(() => () => exportRequest.current?.abort(), []);
 
 	const exportAll = useMutation({
 		mutationFn: async () => {
-			const zip = buildAccountZip(await client.auth.exportData());
-			const date = new Date().toISOString().slice(0, 10);
-			downloadWithAnchor(new Blob([zip as BlobPart], { type: "application/zip" }), `reactive-resume-${date}.zip`);
+			const request = new AbortController();
+			exportRequest.current = request;
+			try {
+				const data = await client.auth.exportData({ includeUploads: true }, { signal: request.signal });
+				if (request.signal.aborted) return;
+				const zip = buildAccountZip(data);
+				const date = new Date().toISOString().slice(0, 10);
+				downloadWithAnchor(new Blob([zip as BlobPart], { type: "application/zip" }), `reactive-resume-${date}.zip`);
+				if (data.uploads?.skipped.length)
+					toast.add({
+						type: "warning",
+						description: t`Some uploaded files were skipped. Check upload-manifest.json in the archive.`,
+					});
+			} catch (error) {
+				if (!request.signal.aborted) throw error;
+			} finally {
+				if (exportRequest.current === request) exportRequest.current = null;
+			}
 		},
 		onError: (error) =>
 			toast.add({
 				type: "error",
-				description: getReadableErrorMessage(error, t`Couldn't export your data. Try again.`),
+				description:
+					error instanceof AccountExportLimitError
+						? t`This account is too large for one archive. Export resumes one at a time instead.`
+						: getReadableErrorMessage(error, t`Couldn't export your data. Try again.`),
 			}),
 	});
 
@@ -46,8 +66,15 @@ export function DataSection() {
 		<SettingsSection title={<Trans>Your data</Trans>}>
 			<SettingsRow
 				title={<Trans>Export everything</Trans>}
-				description={<Trans>All documents as JSON, in one zip</Trans>}
+				description={
+					<Trans>Resumes, version history and uploaded files in one zip. Check the file manifest for omissions.</Trans>
+				}
 			>
+				{exportAll.isPending && (
+					<Button size="sm" variant="ghost" onClick={() => exportRequest.current?.abort()}>
+						<Trans>Cancel</Trans>
+					</Button>
+				)}
 				<Button size="sm" variant="secondary" loading={exportAll.isPending} onClick={() => exportAll.mutate()}>
 					<Trans>Export</Trans>
 				</Button>

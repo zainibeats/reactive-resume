@@ -6,6 +6,7 @@ vi.mock("@reactive-resume/db/client", () => ({ db: { select: mocks.select } }));
 vi.mock("@reactive-resume/db/schema", () => ({
 	user: { id: "user.id" },
 	resume: { userId: "resume.userId" },
+	resumeVersion: { userId: "resumeVersion.userId" },
 }));
 vi.mock("drizzle-orm", () => ({ eq: (column: unknown, value: unknown) => ({ column, value }) }));
 vi.mock("@reactive-resume/env/server", () => ({ env: {} }));
@@ -14,8 +15,12 @@ vi.mock("../storage/service", () => ({ getStorageService: vi.fn() }));
 const { authService } = await import("./service");
 
 describe("account backup", () => {
-	it("exports the owner's profile and resumes only", async () => {
-		for (const rows of [[{ id: "owner", name: "Owner" }], [{ id: "resume", data: defaultResumeData }]]) {
+	it("exports the owner's profile, resumes and their versions only", async () => {
+		for (const rows of [
+			[{ id: "owner", name: "Owner" }],
+			[{ id: "resume", data: defaultResumeData }],
+			[{ id: "version", resumeId: "resume", data: defaultResumeData }],
+		]) {
 			mocks.select.mockReturnValueOnce({
 				from: () => ({
 					where: (predicate: unknown) => {
@@ -32,11 +37,14 @@ describe("account backup", () => {
 			exportedAt: expect.any(String),
 			user: { id: "owner", name: "Owner" },
 			resumes: [{ id: "resume", data: defaultResumeData }],
+			documentVersions: { resumes: [{ id: "version", resumeId: "resume", data: defaultResumeData }] },
 		});
-		expect(mocks.select).toHaveBeenCalledTimes(2);
+		expect(exported).not.toHaveProperty("uploads");
+		expect(mocks.select).toHaveBeenCalledTimes(3);
 		expect(mocks.predicates).toEqual([
 			{ column: "user.id", value: "owner" },
 			{ column: "resume.userId", value: "owner" },
+			{ column: "resumeVersion.userId", value: "owner" },
 		]);
 	});
 });

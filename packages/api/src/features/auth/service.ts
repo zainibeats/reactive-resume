@@ -6,6 +6,7 @@ import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
 import { getStorageService } from "../storage/service";
+import { exportAccountUploads } from "./export-uploads";
 
 type ProviderList = Partial<Record<AuthProvider, string>>;
 
@@ -27,7 +28,12 @@ export const authService = {
 
 	// GDPR-style export of everything the user owns. Selects explicit columns so
 	// secrets (password hashes, tokens, api keys) never leak into the export.
-	exportData: async (input: { userId: string }) => {
+	exportData: async (input: {
+		userId: string;
+		includeUploads?: boolean | undefined;
+		signal?: AbortSignal | undefined;
+	}) => {
+		input.signal?.throwIfAborted();
 		const [userRecord] = await db
 			.select({
 				id: schema.user.id,
@@ -61,7 +67,28 @@ export const authService = {
 			.from(schema.resume)
 			.where(eq(schema.resume.userId, input.userId));
 
-		return { exportedAt: new Date().toISOString(), user: userRecord, resumes };
+		const resumeVersions = await db
+			.select({
+				id: schema.resumeVersion.id,
+				resumeId: schema.resumeVersion.resumeId,
+				kind: schema.resumeVersion.kind,
+				name: schema.resumeVersion.name,
+				data: schema.resumeVersion.data,
+				createdAt: schema.resumeVersion.createdAt,
+			})
+			.from(schema.resumeVersion)
+			.where(eq(schema.resumeVersion.userId, input.userId));
+
+		const result = {
+			exportedAt: new Date().toISOString(),
+			user: userRecord,
+			resumes,
+			documentVersions: { resumes: resumeVersions },
+		};
+		return {
+			...result,
+			...(input.includeUploads ? { uploads: await exportAccountUploads(input.userId, result, input.signal) } : {}),
+		};
 	},
 
 	deleteAccount: async (input: { userId: string }): Promise<void> => {

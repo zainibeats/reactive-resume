@@ -4,6 +4,7 @@ import z from "zod";
 import { auth } from "@reactive-resume/auth/config";
 import * as schema from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
+import { accountBackupLimits, accountUploadSkipReasons } from "@reactive-resume/utils/account-zip";
 import { protectedProcedure, publicProcedure } from "../../context";
 import { resumeDto } from "../../dto/resume";
 import { authService } from "./service";
@@ -103,13 +104,37 @@ export const authRouter = {
 			operationId: "exportAccountData",
 			summary: "Export user account data",
 			description:
-				"Returns a JSON-serializable export of the authenticated user's data, including their public profile fields and resumes. Images remain URL references. Secrets such as password hashes, tokens, and API keys are never included. Requires authentication.",
+				"Returns the authenticated user's profile fields, resumes and their version histories. Set includeUploads to include bounded base64 bytes for files the exported resumes reference, with explicit omissions; external URLs are not fetched. Secrets such as password hashes, tokens and API keys are never included. Requires authentication.",
 			successDescription: "The user's exported account data.",
 		})
-		.input(z.object({}).optional())
+		.input(z.object({ includeUploads: z.union([z.boolean(), z.literal("")]).optional() }).optional())
 		.output(
 			z.object({
 				exportedAt: z.string(),
+				uploads: z
+					.object({
+						files: z
+							.array(
+								z.object({ key: z.string(), base64: z.string().max(Math.ceil(accountBackupLimits.fileBytes / 3) * 4) }),
+							)
+							.max(accountBackupLimits.files),
+						skipped: z.array(z.object({ key: z.string(), reason: z.enum(accountUploadSkipReasons) })),
+					})
+					.optional(),
+				documentVersions: z
+					.object({
+						resumes: z.array(
+							z.object({
+								id: z.string(),
+								resumeId: z.string(),
+								kind: z.enum(schema.RESUME_VERSION_KINDS),
+								name: z.string().nullable(),
+								data: resumeDto.getById.output.shape.data,
+								createdAt: z.date(),
+							}),
+						),
+					})
+					.optional(),
 				user: createSelectSchema(schema.user).pick({
 					id: true,
 					name: true,
@@ -132,7 +157,9 @@ export const authRouter = {
 				),
 			}),
 		)
-		.handler(({ context }) => authService.exportData({ userId: context.user.id })),
+		.handler(({ context, input, signal }) =>
+			authService.exportData({ userId: context.user.id, includeUploads: input?.includeUploads === true, signal }),
+		),
 
 	deleteAccount: protectedProcedure
 		.route({

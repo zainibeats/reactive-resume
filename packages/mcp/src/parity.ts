@@ -176,9 +176,12 @@ export function parityToolContract(path: string, procedure: AnyProcedure): Parit
 	const cached = contracts?.get(path);
 	if (cached) return cached;
 	const definition = procedure["~orpc"];
-	const inputJson = definition.inputSchema
-		? wireJsonSchema(requireZod(definition.inputSchema), "input")
-		: z.toJSONSchema(z.object({}));
+	const inputJson =
+		path === "auth.exportData"
+			? z.toJSONSchema(z.object({}))
+			: definition.inputSchema
+				? wireJsonSchema(requireZod(definition.inputSchema), "input")
+				: z.toJSONSchema(z.object({}));
 	if (path === "ai.parsePdf" || path === "ai.parseDocx" || path === "agent.attachments.create") {
 		const properties = inputJson.properties as Record<string, unknown>;
 		properties[path === "agent.attachments.create" ? "data" : "file"] = z.toJSONSchema(fileInputSchema);
@@ -354,6 +357,8 @@ export function registerParityTools(
 							? 25 * 1024 * 1024
 							: 10 * 1024 * 1024;
 				let input = await decodeInput(params, inputJson as Record<string, unknown>, userId, maxBytes);
+				// File collection sees private profile references before MCP removes that profile. Keep this export records-only.
+				if (path === "auth.exportData") input = { includeUploads: false };
 				if (path === "ai.parsePdf" || path === "ai.parseDocx" || path === "agent.attachments.create") {
 					const record = input as Record<string, unknown>;
 					const field = path === "agent.attachments.create" ? "data" : "file";
@@ -383,6 +388,11 @@ export function registerParityTools(
 					});
 				} else {
 					result = await getClientCall(client, path === "resume.updates.subscribe" ? "resume.getById" : path)(input);
+					// Uploaded bytes stay out of model tool results; download them with Export everything in Settings.
+					if (path === "auth.exportData" && result && typeof result === "object") {
+						const { uploads: _privateFiles, ...backup } = result as Record<string, unknown>;
+						result = backup;
+					}
 				}
 				if (streamingPaths.has(path)) {
 					const events: string[] = [];
