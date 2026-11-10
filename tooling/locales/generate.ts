@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { generatePresentLabels, generateSectionTitleCatalog } from "./section-titles";
+import { generateExpectedLabels, generatePresentLabels, generateSectionTitleCatalog } from "./section-titles";
 
 const catalogs = fileURLToPath(new URL("../../apps/web/locales/", import.meta.url));
 
@@ -13,3 +13,8 @@ const presentLabels = await generatePresentLabels(catalogs);
 const presentOutput = new URL("../../packages/schema/src/resume/present-labels.json", import.meta.url);
 await writeFile(presentOutput, `${JSON.stringify(presentLabels, null, "\t")}\n`);
 console.log(`Updated "Present" for ${Object.keys(presentLabels).length} locales.`);
+
+const expectedLabels = await generateExpectedLabels(catalogs);
+const expectedOutput = new URL("../../packages/schema/src/resume/expected-labels.json", import.meta.url);
+await writeFile(expectedOutput, `${JSON.stringify(expectedLabels, null, "\t")}\n`);
+console.log(`Updated "Expected" for ${Object.keys(expectedLabels).length} locales.`);

@@ -180,6 +180,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.experience.items[].dates.end` | `string` | yes (variant 1 at sections.experience.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.experience.items[].dates.end` | `null` | yes (variant 2 at sections.experience.items[].dates.end) | — | — |
 | `sections.experience.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.experience.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.experience.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.experience.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The website of the company or organization, if any. |
 | `sections.experience.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -199,6 +200,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.experience.items[].roles[].dates.end` | `string` | yes (variant 1 at sections.experience.items[].roles[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.experience.items[].roles[].dates.end` | `null` | yes (variant 2 at sections.experience.items[].roles[].dates.end) | — | — |
 | `sections.experience.items[].roles[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.experience.items[].roles[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.experience.items[].roles[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.experience.items[].roles[].description` | `string` | yes | — | The description of this specific role. This should be a HTML-formatted string. |
 | `sections.education` | `object` | yes | — | The section to display the education of the author. |
@@ -228,6 +230,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.education.items[].dates.end` | `string` | yes (variant 1 at sections.education.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.education.items[].dates.end` | `null` | yes (variant 2 at sections.education.items[].dates.end) | — | — |
 | `sections.education.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.education.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.education.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.education.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The website of the school or institution, if any. |
 | `sections.education.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -257,6 +260,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.projects.items[].dates.end` | `string` | yes (variant 1 at sections.projects.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.projects.items[].dates.end` | `null` | yes (variant 2 at sections.projects.items[].dates.end) | — | — |
 | `sections.projects.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.projects.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.projects.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.projects.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The link to the project, if any. |
 | `sections.projects.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -341,6 +345,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.awards.items[].dates.end` | `string` | yes (variant 1 at sections.awards.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.awards.items[].dates.end` | `null` | yes (variant 2 at sections.awards.items[].dates.end) | — | — |
 | `sections.awards.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.awards.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.awards.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.awards.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The website of the award, if any. |
 | `sections.awards.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -371,6 +376,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.certifications.items[].dates.end` | `string` | yes (variant 1 at sections.certifications.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.certifications.items[].dates.end` | `null` | yes (variant 2 at sections.certifications.items[].dates.end) | — | — |
 | `sections.certifications.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.certifications.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.certifications.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.certifications.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The website of the certification, if any. |
 | `sections.certifications.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -400,6 +406,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.publications.items[].dates.end` | `string` | yes (variant 1 at sections.publications.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.publications.items[].dates.end` | `null` | yes (variant 2 at sections.publications.items[].dates.end) | — | — |
 | `sections.publications.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.publications.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.publications.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.publications.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The link to the publication, if any. |
 | `sections.publications.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -429,6 +436,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `sections.volunteer.items[].dates.end` | `string` | yes (variant 1 at sections.volunteer.items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `sections.volunteer.items[].dates.end` | `null` | yes (variant 2 at sections.volunteer.items[].dates.end) | — | — |
 | `sections.volunteer.items[].dates.present` | `boolean` | yes | default: false | Whether it's ongoing, printed as 'Present'. |
+| `sections.volunteer.items[].dates.expected` | `boolean` | no | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `sections.volunteer.items[].dates.raw` | `string` | no | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `sections.volunteer.items[].website` | `object` | yes | default: {"url":"","label":"","inlineLink":false} | The link to the organization or company, if any. |
 | `sections.volunteer.items[].website.url` | `string` | yes | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -525,6 +533,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type experience, schema experienceItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type experience, schema experienceItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type experience, schema experienceItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type experience, schema experienceItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type experience, schema experienceItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type experience, schema experienceItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The website of the company or organization, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type experience, schema experienceItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -544,6 +553,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].roles[].dates.end` | `string` | yes (type experience, schema experienceItemSchema at customSections[]; variant 1 at customSections[].items[].roles[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].roles[].dates.end` | `null` | yes (type experience, schema experienceItemSchema at customSections[]; variant 2 at customSections[].items[].roles[].dates.end) | — | — |
 | `customSections[].items[].roles[].dates.present` | `boolean` | yes (type experience, schema experienceItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].roles[].dates.expected` | `boolean` | no (type experience, schema experienceItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].roles[].dates.raw` | `string` | no (type experience, schema experienceItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].roles[].description` | `string` | yes (type experience, schema experienceItemSchema at customSections[]) | — | The description of this specific role. This should be a HTML-formatted string. |
 | `customSections[]` | `object` | — (type education, schema educationItemSchema at customSections[]) | — | — |
@@ -576,6 +586,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type education, schema educationItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type education, schema educationItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type education, schema educationItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type education, schema educationItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type education, schema educationItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type education, schema educationItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The website of the school or institution, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type education, schema educationItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -608,6 +619,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type projects, schema projectItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type projects, schema projectItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type projects, schema projectItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type projects, schema projectItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type projects, schema projectItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type projects, schema projectItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The link to the project, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type projects, schema projectItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -702,6 +714,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type awards, schema awardItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type awards, schema awardItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type awards, schema awardItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type awards, schema awardItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type awards, schema awardItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type awards, schema awardItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The website of the award, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type awards, schema awardItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -735,6 +748,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type certifications, schema certificationItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type certifications, schema certificationItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type certifications, schema certificationItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type certifications, schema certificationItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type certifications, schema certificationItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type certifications, schema certificationItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The website of the certification, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type certifications, schema certificationItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -767,6 +781,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type publications, schema publicationItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type publications, schema publicationItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type publications, schema publicationItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type publications, schema publicationItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type publications, schema publicationItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type publications, schema publicationItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The link to the publication, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type publications, schema publicationItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
@@ -799,6 +814,7 @@ Choose one coherent shape for each union value. Required fields are local to tha
 | `customSections[].items[].dates.end` | `string` | yes (type volunteer, schema volunteerItemSchema at customSections[]; variant 1 at customSections[].items[].dates.end) | — | A year ("2022") or a year and month ("2022-03"). |
 | `customSections[].items[].dates.end` | `null` | yes (type volunteer, schema volunteerItemSchema at customSections[]; variant 2 at customSections[].items[].dates.end) | — | — |
 | `customSections[].items[].dates.present` | `boolean` | yes (type volunteer, schema volunteerItemSchema at customSections[]) | default: false | Whether it's ongoing, printed as 'Present'. |
+| `customSections[].items[].dates.expected` | `boolean` | no (type volunteer, schema volunteerItemSchema at customSections[]) | — | Whether the end date is still to come, such as a degree in progress: printed as 'Expected May 2027'. Ignored while present is true. |
 | `customSections[].items[].dates.raw` | `string` | no (type volunteer, schema volunteerItemSchema at customSections[]) | — | Custom date text, also used for imported text that could not be read exactly. Printed verbatim, overriding start/end formatting. Preserve it when editing other fields; remove it only when the user chooses preset date fields. |
 | `customSections[].items[].website` | `object` | yes (type volunteer, schema volunteerItemSchema at customSections[]) | default: {"url":"","label":"","inlineLink":false} | The link to the organization or company, if any. |
 | `customSections[].items[].website.url` | `string` | yes (type volunteer, schema volunteerItemSchema at customSections[]) | — | The URL to show as a link. Must be a valid URL with a protocol (http:// or https://). |
