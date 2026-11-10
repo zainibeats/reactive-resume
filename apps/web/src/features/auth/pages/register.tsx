@@ -131,6 +131,7 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 
 			{!disableEmailAuth && (
 				<form
+					noValidate
 					className="space-y-6"
 					onSubmit={(event) => {
 						event.preventDefault();
@@ -183,6 +184,7 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 												message: "john.doe",
 											})}
 											className="lowercase"
+											dir="ltr"
 											name={field.name}
 											value={field.state.value}
 											onBlur={field.handleBlur}
@@ -250,7 +252,7 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 				</form>
 			)}
 
-			<SocialAuth />
+			<SocialAuth signUp />
 		</>
 	);
 }

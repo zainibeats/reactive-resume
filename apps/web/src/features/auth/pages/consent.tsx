@@ -1,6 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@reactive-resume/ui/components/button";
 import { cn } from "@reactive-resume/utils/style";
@@ -94,9 +95,16 @@ export function OAuthConsentPage({ oauthQuery, email }: OAuthConsentPageProps) {
 				</p>
 			</div>
 			{!validRequest || isError ? (
-				<p key="invalid" role="alert" className={ENTER_CLASS}>
-					<Trans>This connection request is invalid or has expired. Start the connection again from your client.</Trans>
-				</p>
+				<div key="invalid" className={cn(ENTER_CLASS, "grid justify-items-center gap-4 text-center")}>
+					<p role="alert" className="rounded-lg bg-warn-soft px-3 py-2.5 text-sm text-warn-text">
+						<Trans>
+							This connection request is invalid or has expired. Start the connection again from your client.
+						</Trans>
+					</p>
+					<Button variant="secondary" nativeButton={false} render={<Link to="/dashboard" />}>
+						<Trans>Go to dashboard</Trans>
+					</Button>
+				</div>
 			) : isPending ? (
 				<p role="status">
 					<Trans>Loading connection request...</Trans>

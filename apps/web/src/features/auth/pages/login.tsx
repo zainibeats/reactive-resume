@@ -7,7 +7,7 @@ import { Link, useNavigate, useRouter, useSearch } from "@tanstack/react-router"
 import { useEffect, useRef } from "react";
 import z from "zod";
 import { Button } from "@reactive-resume/ui/components/button";
-import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
+import { FormControl, FormItem, FormLabel, FormMessage } from "@reactive-resume/ui/components/form";
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
@@ -171,6 +171,7 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 
 			{!disableEmailAuth && (
 				<form
+					noValidate
 					className="space-y-6"
 					onSubmit={(event) => {
 						event.preventDefault();
@@ -182,14 +183,15 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 						{(field) => (
 							<FormItem hasError={field.state.meta.isTouched && field.state.meta.errors.length > 0}>
 								<FormLabel>
-									<Trans comment="Label for login identifier input that accepts email or username">Email address</Trans>
+									<Trans comment="Label for login identifier input that accepts email or username">
+										Email or username
+									</Trans>
 								</FormLabel>
 								<FormControl
 									render={
 										<Input
 											autoComplete="section-login username webauthn"
-											placeholder="john.doe@example.com"
-											className="lowercase"
+											placeholder={t`you@example.com or your username`}
 											name={field.name}
 											value={field.state.value}
 											onBlur={field.handleBlur}
@@ -198,9 +200,6 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 									}
 								/>
 								<FormMessage errors={field.state.meta.errors} />
-								<FormDescription>
-									<Trans>You can also sign in with your username.</Trans>
-								</FormDescription>
 							</FormItem>
 						)}
 					</form.Field>
