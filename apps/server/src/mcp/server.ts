@@ -81,7 +81,7 @@ export function createMcpServer(
 		signal: request.signal,
 	});
 	registerPrompts(server, client);
-	registerToolDiscovery(server);
+	registerToolDiscovery(server, { canWrite: authentication.permissions.includes("write") });
 
 	return server;
 }

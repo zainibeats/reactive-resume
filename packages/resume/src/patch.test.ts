@@ -3,6 +3,7 @@ import { describe, expect, it } from "vite-plus/test";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import {
 	applyResumePatches,
+	describeResumePatchError,
 	createResumePatches,
 	findRebasedResumePatchConflicts,
 	findResumePatchConflicts,
@@ -88,6 +89,19 @@ describe("createResumePatches", () => {
 });
 
 describe("applyResumePatches", () => {
+	it("names the failing operation and path", () => {
+		let caught: unknown;
+		try {
+			applyResumePatches(defaultResumeData, [{ op: "replace", path: "/basics/nope/x", value: "y" }]);
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toBeInstanceOf(ResumePatchError);
+		expect(describeResumePatchError(caught as ResumePatchError)).toMatch(
+			/^The replace operation at \/basics\/nope\/x failed: /,
+		);
+	});
+
 	it("applies a single replace op", () => {
 		const result = applyResumePatches(defaultResumeData, [{ op: "replace", path: "/basics/name", value: "Alice" }]);
 

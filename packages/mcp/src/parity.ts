@@ -3,7 +3,7 @@ import type { AnyProcedure, InferRouterInitialContext, RouterClient } from "@orp
 import type { RequestAuthentication } from "@reactive-resume/api/context";
 import { call, ORPCError } from "@orpc/server";
 import z from "zod";
-import { requiredPermission } from "@reactive-resume/api/context";
+import { missingPermissionMessage, requiredPermission } from "@reactive-resume/api/context";
 import { restAliases } from "@reactive-resume/api/rest";
 import router from "@reactive-resume/api/routers";
 import { env } from "@reactive-resume/env/server";
@@ -96,7 +96,7 @@ const BROWSER_HANDOFFS = {
 	"aiProviders.update": "ai",
 	"webAccess.save": "ai",
 	"resume.getRoot": "",
-	"auth.createApiKey": "api-keys",
+	"auth.createApiKey": "ai?newKey=true#api-keys",
 	"auth.deleteAccount": "account",
 } as const;
 
@@ -209,6 +209,13 @@ export function parityToolContract(path: string, procedure: AnyProcedure): Parit
 	contracts.set(path, contract);
 	return contract;
 }
+
+/** Parity tools a read-only credential can't call: their route needs write or delete, whatever their annotations say. */
+export const PARITY_WRITE_TOOLS: ReadonlySet<string> = new Set(
+	Object.entries(PARITY_PROCEDURES)
+		.filter(([, procedure]) => requiredPermission(procedure["~orpc"].route) !== "read")
+		.map(([path]) => parityToolName(path)),
+);
 
 export const PARITY_TOOL_META: Record<
 	string,
@@ -337,7 +344,9 @@ export function registerParityTools(
 				const userId = context.authentication.user.id;
 				const permission = requiredPermission(definition.route);
 				if (!context.authentication.permissions.includes(permission))
-					throw new ORPCError("FORBIDDEN", { message: `This credential requires api:${permission} permission.` });
+					throw new ORPCError("FORBIDDEN", {
+						message: missingPermissionMessage(context.authentication.method, permission),
+					});
 				const maxBytes =
 					path === "rest.checkPdf"
 						? 25_000_000

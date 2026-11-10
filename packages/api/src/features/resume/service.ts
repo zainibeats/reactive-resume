@@ -11,6 +11,7 @@ import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import {
 	applyResumePatches,
+	describeResumePatchError,
 	createResumePatches,
 	findRebasedResumePatchConflicts,
 	ResumePatchError,
@@ -163,7 +164,7 @@ async function applyResumePatchTx(
 		if (error instanceof ResumePatchError) {
 			throw new ORPCError("INVALID_PATCH_OPERATIONS", {
 				status: 400,
-				message: error.message,
+				message: describeResumePatchError(error),
 				data: { code: error.code, index: error.index, operation: error.operation },
 			});
 		}

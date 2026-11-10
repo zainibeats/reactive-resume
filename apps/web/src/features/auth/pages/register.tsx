@@ -12,6 +12,7 @@ import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
 import { cn } from "@reactive-resume/utils/style";
+import { ConnectingClient } from "../components/connecting-client";
 import { SocialAuth } from "../components/social-auth";
 import { getAuthRedirectOptions, getOAuthSignInOptions, isOAuthRedirect } from "../redirect";
 import { PasswordInput } from "@/components/input/password-input";
@@ -108,6 +109,7 @@ export function RegisterPage({ disableEmailAuth }: Props) {
 				<h1 className="text-2xl font-semibold tracking-tight">
 					<Trans>Create a new account</Trans>
 				</h1>
+				<ConnectingClient callbackURL={callbackURL} register />
 
 				<div className="text-ink-3">
 					<Trans>

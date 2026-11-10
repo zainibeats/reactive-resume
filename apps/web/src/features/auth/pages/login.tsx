@@ -11,6 +11,7 @@ import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "
 import { Icon } from "@reactive-resume/ui/components/icon";
 import { Input } from "@reactive-resume/ui/components/input";
 import { toast } from "@reactive-resume/ui/components/toast";
+import { ConnectingClient } from "../components/connecting-client";
 import { SocialAuth } from "../components/social-auth";
 import { getAuthRedirectOptions, getOAuthPasskeyOptions, getOAuthSignInOptions, isOAuthRedirect } from "../redirect";
 import { PasswordInput } from "@/components/input/password-input";
@@ -144,6 +145,7 @@ export function LoginPage({ disableEmailAuth, disableSignups }: Props) {
 				<h1 className="text-2xl font-semibold tracking-tight">
 					<Trans comment="Title on the login page">Sign in to your account</Trans>
 				</h1>
+				<ConnectingClient callbackURL={callbackURL} />
 
 				{!disableSignups && (
 					<div className="text-ink-3">

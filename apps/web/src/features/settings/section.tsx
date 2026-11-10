@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useEffect, useId, useRef } from "react";
 import { cn } from "@reactive-resume/utils/style";
 
 type SettingsSectionProps = {
@@ -9,15 +10,30 @@ type SettingsSectionProps = {
 	action?: ReactNode;
 	children: ReactNode;
 	className?: string;
+	/** An anchor for links straight to this group, e.g. `/dashboard/settings/ai#api-keys`. */
+	id?: string;
 };
 
 /** A settings group: a title and its rows, divided from the group above by a rule. No card around it. */
-export function SettingsSection({ title, description, action, children, className }: SettingsSectionProps) {
+export function SettingsSection({ title, description, action, children, className, id }: SettingsSectionProps) {
+	const titleId = useId();
+	const ref = useRef<HTMLElement>(null);
+	// A link to this group (an agent's settings handoff, an old settings address) lands on it, not at the page top.
+	useEffect(() => {
+		if (id && window.location.hash === `#${id}`) ref.current?.scrollIntoView({ block: "start" });
+	}, [id]);
 	return (
-		<section className={cn("grid gap-3 border-t border-line pt-6 first:border-t-0 first:pt-0", className)}>
+		<section
+			ref={ref}
+			id={id}
+			aria-labelledby={titleId}
+			className={cn("grid scroll-mt-6 gap-3 border-t border-line pt-6 first:border-t-0 first:pt-0", className)}
+		>
 			<div className="flex items-center justify-between gap-3">
 				<div className="grid gap-0.5">
-					<h2 className="text-[17px] font-semibold">{title}</h2>
+					<h2 id={titleId} className="text-[17px] font-semibold">
+						{title}
+					</h2>
 					{description && <p className="text-sm text-ink-3">{description}</p>}
 				</div>
 				{action}

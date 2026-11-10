@@ -129,7 +129,7 @@ describe("registerTools", () => {
 			["RESUME_LOCKED", undefined, `Ask the user before unlocking with \`${MCP_TOOL_NAME.unlockResume}\`.`],
 			["NOT_FOUND", undefined, `\`${MCP_TOOL_NAME.listResumes}\` returns valid resume IDs.`],
 			["RESUME_SLUG_ALREADY_EXISTS", 400, "The slug is already in use."],
-			["FORBIDDEN", undefined, "Permission denied."],
+			["FORBIDDEN", undefined, "Not allowed."],
 			["BAD_REQUEST", undefined, "Check the input parameters against the tool's schema."],
 		])("hints on %s", async (code, status, expected) => {
 			const result = await readResume(new ORPCError(code, status ? { status } : undefined));
