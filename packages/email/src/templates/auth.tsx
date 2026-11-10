@@ -88,7 +88,7 @@ export function ResetPasswordEmail({ url }: ResetPasswordEmailProps) {
 			preview={`Reset your ${appName} password`}
 			heading="Reset your password"
 			intro={`We received a request to reset your ${appName} password.`}
-			details="Resetting signs you out on every device and removes your passkeys, API keys and connected apps. If this was not you, ignore this message and your password will remain unchanged."
+			details="The link works for 1 hour. Resetting signs you out on every device and removes your passkeys, API keys and connected apps. If you didn't ask for this, ignore this email; your password stays the same."
 			actionLabel="Create new password"
 			actionUrl={url}
 			outro="For security, only use links from emails sent by Reactive Resume."
@@ -105,7 +105,7 @@ export function VerifyEmail({ url }: VerifyEmailProps) {
 		<AuthEmailLayout
 			preview={`Verify your email for ${appName}`}
 			heading="Verify your email"
-			intro={`Thanks for signing up for ${appName}. Verify your email address to continue.`}
+			intro={`Confirm this is your email address for ${appName}. The link works for 1 hour.`}
 			details="This confirms the address belongs to you, which keeps your account secure."
 			actionLabel="Verify email"
 			actionUrl={url}
@@ -130,6 +130,25 @@ export function VerifyEmailChange({ url, previousEmail, newEmail }: VerifyEmailC
 			actionLabel="Approve change"
 			actionUrl={url}
 			outro="If you did not request this change, ignore this email and change your password. The address on the account will not change without your approval."
+		/>
+	);
+}
+
+interface ConfirmNewEmailProps {
+	url: string;
+}
+
+/** Sent to the new address of an email change, instead of the sign-up verification email. */
+export function ConfirmNewEmail({ url }: ConfirmNewEmailProps) {
+	return (
+		<AuthEmailLayout
+			preview={`Confirm your new ${appName} email address`}
+			heading="Confirm your new email address"
+			intro={`Confirm this address to finish changing your ${appName} email. The link works for 1 hour.`}
+			details="This confirms the address belongs to you, which keeps your account secure."
+			actionLabel="Confirm email"
+			actionUrl={url}
+			outro="If you didn't ask for this, ignore this email; your account won't change."
 		/>
 	);
 }
