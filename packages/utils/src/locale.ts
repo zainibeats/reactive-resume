@@ -137,6 +137,7 @@ export type Script =
 	| "sinhala"
 	| "ethiopic"
 	| "khmer"
+	| "georgian"
 	| "emoji"
 	| "arrows"
 	| "symbols";
