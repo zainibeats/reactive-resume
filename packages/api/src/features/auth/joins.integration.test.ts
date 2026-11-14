@@ -5,7 +5,8 @@ import { auth } from "@reactive-resume/auth/config";
 import { withDatabasePool } from "@reactive-resume/db/client";
 import { env } from "@reactive-resume/env/server";
 
-// Uses an explicitly supplied disposable, migrated database and private fixture tables.
+// Uses an explicitly supplied disposable, migrated database and private fixture tables. The copied tables keep the
+// fork's single-owner index, so the fixture has one user.
 describe.skipIf(!process.env.OAUTH_TEST_DATABASE_URL)("joined authentication reads", () => {
 	const schemaName = `auth_joins_${randomUUID().replaceAll("-", "")}`;
 	let admin: Pool;
@@ -19,16 +20,13 @@ describe.skipIf(!process.env.OAUTH_TEST_DATABASE_URL)("joined authentication rea
 		}
 		pool = new Pool({ connectionString: process.env.OAUTH_TEST_DATABASE_URL, options: `-c search_path=${schemaName}` });
 		await pool.query(`INSERT INTO "user" (id,name,email,username,display_username) VALUES
-			('owner','Owner','owner@example.test','owner','owner'),
-			('other','Other','other@example.test','other','other')`);
+			('owner','Owner','owner@example.test','owner','owner')`);
 		await pool.query(`INSERT INTO session (id,token,user_id,expires_at) VALUES
 			('owner-session','owner-token','owner',now() + interval '7 days'),
-			('other-session','other-token','other',now() + interval '7 days'),
 			('expired-session','expired-token','owner',now() - interval '1 day')`);
 		await pool.query(`INSERT INTO account (id,account_id,provider_id,user_id,password) VALUES
 			('owner-password','owner','credential','owner','private-password-hash'),
-			('owner-github','github-owner','github','owner',NULL),
-			('other-github','github-other','github','other',NULL)`);
+			('owner-github','github-owner','github','owner',NULL)`);
 	});
 
 	afterAll(async () => {
@@ -78,8 +76,8 @@ describe.skipIf(!process.env.OAUTH_TEST_DATABASE_URL)("joined authentication rea
 				expect(queries).toHaveBeenCalledTimes(1);
 				queries.mockClear();
 				await expect(
-					internalAdapter.findAccountOwnerByKey({ providerId: "github", accountId: "github-other" }),
-				).resolves.toMatchObject({ kind: "owned", account: { id: "other-github" }, user: { id: "other" } });
+					internalAdapter.findAccountOwnerByKey({ providerId: "github", accountId: "github-owner" }),
+				).resolves.toMatchObject({ kind: "owned", account: { id: "owner-github" }, user: { id: "owner" } });
 				expect(queries).toHaveBeenCalledTimes(1);
 			} finally {
 				queries.mockRestore();
