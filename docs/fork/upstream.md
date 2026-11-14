@@ -12,6 +12,7 @@ The fork was fully merged up to upstream `11571ae` (v6.0.0 + fixes). **From then
 
 - Pick fixes and resume-builder improvements. Skip commits that only serve Career, Applications or cover-letter documents, and drop their hunks from mixed commits.
 - **Do not copy upstream migration folders.** Upstream's later migrations chain through its Career snapshot (`20261007205051_career_platform`), which this fork does not have. Apply the commit's `packages/db/src/schema/*` change, then run `pnpm db:generate` and review the SQL (see "Environment and database" in `AGENTS.md`).
+- **Sync on `claude/dev`.** Upstream picks land on the long-lived `claude/dev` branch, which merges `main` in before each sync and reaches `main` through a pull request. Pushes to `claude/dev` run the same workflows as `main` (Code Quality, E2E Tests, Build Docker Image); the image build there only tags `sha-<commit>`, never `nightly` or a release.
 - Record every decision in the ledger below. `git log --grep "cherry picked from"` also lists taken commits through the `-x` trailer, but skipped commits leave no trace in git, so the ledger is the only record of them.
 
 ## Ledger
