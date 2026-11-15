@@ -323,15 +323,21 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 		primaryColorHex: colorHex,
 	};
 	const showHeader = !isCoverLetterOnlyDocument(data);
+	// The header prints once, with the first page, as in the PDF. It sits in a column only when that page splits:
+	// single-column first pages print it across the page.
+	const firstPage = data.metadata.layout.pages.at(0);
+	const firstPageSplits =
+		firstPage !== undefined && planPageColumns(firstPage, data.metadata.template).kind === "split";
+	const headerPlacement = firstPageSplits ? layout.headerPlacement : "full-width";
 
 	// Header placement depends on template
-	if (layout.headerPlacement === "full-width" && showHeader) {
+	if (headerPlacement === "full-width" && showHeader) {
 		setRenderConfig(mainConfig);
 		documentChildren.push(...buildHeader(data, colorHex, textColorHex));
 	}
 
 	// Process each page in the layout
-	for (const layoutPage of data.metadata.layout.pages) {
+	for (const [pageIndex, layoutPage] of data.metadata.layout.pages.entries()) {
 		const plan = planPageColumns(layoutPage, data.metadata.template);
 
 		if (plan.kind === "single") {
@@ -344,7 +350,7 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 			setRenderConfig(mainConfig);
 
 			const mainParagraphs: Paragraph[] = [];
-			if (layout.headerPlacement === "main-only" && showHeader) {
+			if (pageIndex === 0 && headerPlacement === "main-only" && showHeader) {
 				mainParagraphs.push(...buildHeader(data, colorHex, textColorHex));
 			}
 			for (const sectionId of layoutPage.main) {
@@ -355,7 +361,7 @@ export function buildDocument(data: ResumeData, resolveTitle?: SectionTitleResol
 			setRenderConfig({ ...mainConfig, textColorHex: sidebarTextColorHex, primaryColorHex: sidebarHeadingColorHex });
 
 			const sidebarParagraphs: Paragraph[] = [];
-			if (layout.headerPlacement === "sidebar-only" && showHeader) {
+			if (pageIndex === 0 && headerPlacement === "sidebar-only" && showHeader) {
 				sidebarParagraphs.push(...buildHeader(data, sidebarHeadingColorHex, sidebarTextColorHex));
 			}
 			for (const sectionId of layoutPage.sidebar) {

@@ -239,7 +239,7 @@ export const crudRouter = {
 				name: input.name ?? original.name,
 				...(input.slug ? { slug: input.slug } : {}),
 				tags: input.tags ?? original.tags,
-				locale: context.locale,
+				// A copy keeps its source's page language.
 				data,
 			});
 		}),

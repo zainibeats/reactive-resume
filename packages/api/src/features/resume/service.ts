@@ -40,7 +40,7 @@ import {
 	saveSessionVersion,
 	writeVersion,
 } from "./version-history";
-import { clientKeyFromHeaders, shouldCountView } from "./view-dedup";
+import { countVisit } from "./view-dedup";
 
 type ResumeSyncDiff = {
 	op: JsonPatchOperation["op"];
@@ -243,10 +243,8 @@ const statistics = {
 		}
 
 		// Like views, a visitor's downloads count once an hour, so repeated calls can't inflate the number.
-		const key = `download:${resume.id}:${clientKeyFromHeaders(input.trustedClient)}`;
-		if (shouldCountForStatistics(resume, viewer) && (await shouldCountView(key, Date.now()))) {
-			await statistics.increment({ id: resume.id, downloads: true });
-		}
+		if (shouldCountForStatistics(resume, viewer))
+			await countVisit({ kind: "download", resumeId: resume.id, trustedClient: input.trustedClient });
 		return true;
 	},
 
@@ -376,7 +374,7 @@ function toSharedResumeResponse(
 	};
 }
 
-async function notifyResumeUpdated(event: ResumeUpdatedEvent) {
+export async function notifyResumeUpdated(event: ResumeUpdatedEvent) {
 	try {
 		await publishResumeUpdated(event);
 	} catch (error) {
@@ -629,12 +627,8 @@ export const resumeService = {
 			});
 		}
 
-		if (shouldCountForStatistics(resume, viewer)) {
-			const key = `${resume.id}:${clientKeyFromHeaders(input.trustedClient)}`;
-			if (await shouldCountView(key, Date.now())) {
-				await resumeService.statistics.increment({ id: resume.id, views: true });
-			}
-		}
+		if (shouldCountForStatistics(resume, viewer))
+			await countVisit({ kind: "view", resumeId: resume.id, trustedClient: input.trustedClient });
 
 		const current = { ...resume, data: parseStoredResumeData(resume.data) };
 		return toSharedResumeResponse(redactResumeForViewer(current, isOwner(current, viewer)), resume.hasPassword);
@@ -647,7 +641,8 @@ export const resumeService = {
 		/** Generated from the name, and made unique among the user's resumes, when omitted. */
 		slug?: string;
 		tags: string[];
-		locale: Locale;
+		/** The page language; when omitted, the data keeps its own. */
+		locale?: Locale;
 		data?: ResumeData;
 		/** The first version in History: "created", or "import" for an imported document. */
 		origin?: "created" | "import";
@@ -656,7 +651,7 @@ export const resumeService = {
 	}) => {
 		const id = input.id ?? generateId();
 		const data = parseWritableResumeData(structuredClone(input.data ?? defaultResumeData));
-		data.metadata.page.locale = input.locale;
+		if (input.locale) data.metadata.page.locale = input.locale;
 
 		try {
 			const slug = input.slug ?? (await findFreeSlug(db, input.userId, input.name));

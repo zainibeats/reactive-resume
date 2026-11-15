@@ -3,6 +3,7 @@ import { createRouterClient } from "@orpc/server";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 
 const mocks = vi.hoisted(() => ({
+	getById: vi.fn(),
 	create: vi.fn(),
 	update: vi.fn(),
 	snapshot: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock("../../context", async () => {
 
 vi.mock("./service", () => ({
 	resumeService: {
+		getById: mocks.getById,
 		create: mocks.create,
 		update: mocks.update,
 		versions: { snapshot: mocks.snapshot },
@@ -52,6 +54,19 @@ describe("resume write route validation", () => {
 		expect(mocks.create).not.toHaveBeenCalled();
 		expect(mocks.update).not.toHaveBeenCalled();
 		expect(mocks.snapshot).not.toHaveBeenCalled();
+	});
+
+	it("keeps the source page language on a copy", async () => {
+		const source = structuredClone(defaultResumeData);
+		source.metadata.page.locale = "de-DE";
+		mocks.getById.mockResolvedValueOnce({ id: "resume-id", name: "Original", tags: [], data: source });
+		const client = createRouterClient(crudRouter, {
+			context: { locale: "en-US", reqHeaders: new Headers(), user: { id: "owner" } } as never,
+		});
+		await client.duplicate({ id: "resume-id", name: "Copy" });
+		const created = mocks.create.mock.calls[0]?.[0];
+		expect(created.locale).toBeUndefined();
+		expect(created.data.metadata.page.locale).toBe("de-DE");
 	});
 
 	it.each([false, true])("puts the account holder's name on a new resume (sample data: %s)", async (withSampleData) => {

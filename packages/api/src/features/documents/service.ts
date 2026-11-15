@@ -3,7 +3,7 @@ import { ORPCError } from "@orpc/client";
 import { and, count, eq, isNotNull, isNull, lt } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
-import { resumeService } from "../resume/service";
+import { notifyResumeUpdated, resumeService } from "../resume/service";
 
 type DocumentRef = { userId: string; id: string };
 
@@ -14,8 +14,20 @@ const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const owned = ({ id, userId }: DocumentRef) => and(eq(schema.resume.id, id), eq(schema.resume.userId, userId));
 
 async function update(ref: DocumentRef, changes: Partial<typeof schema.resume.$inferInsert>) {
-	const rows = await db.update(schema.resume).set(changes).where(owned(ref)).returning({ id: schema.resume.id });
-	if (rows.length === 0) throw new ORPCError("NOT_FOUND");
+	const [row] = await db
+		.update(schema.resume)
+		.set(changes)
+		.where(owned(ref))
+		.returning({ updatedAt: schema.resume.updatedAt });
+	if (!row) throw new ORPCError("NOT_FOUND");
+	// Like every other resume write: an open editor reads the resume again instead of saving over this change.
+	await notifyResumeUpdated({
+		type: "resume.updated",
+		resumeId: ref.id,
+		userId: ref.userId,
+		updatedAt: row.updatedAt.toISOString(),
+		mutation: "update",
+	});
 }
 
 async function readState(ref: DocumentRef) {

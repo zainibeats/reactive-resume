@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 const dbMock = vi.hoisted(() => ({ select: vi.fn(), update: vi.fn() }));
 const resumeServiceMock = vi.hoisted(() => ({ delete: vi.fn(), setLocked: vi.fn() }));
 vi.mock("@reactive-resume/db/client", () => ({ db: dbMock }));
-vi.mock("../resume/service", () => ({ resumeService: resumeServiceMock }));
+vi.mock("../resume/service", () => ({ resumeService: resumeServiceMock, notifyResumeUpdated: vi.fn() }));
 
 const { documentsService } = await import("./service");
 
@@ -12,7 +12,7 @@ const rows = (result: unknown[]) => ({ from: () => ({ where: () => Promise.resol
 
 const updates = () => {
 	const set = vi.fn((_changes: Record<string, unknown>) => ({
-		where: () => ({ returning: async () => [{ id: "r1" }] }),
+		where: () => ({ returning: async () => [{ id: "r1", updatedAt: new Date() }] }),
 	}));
 	dbMock.update.mockReturnValue({ set });
 	return set;
