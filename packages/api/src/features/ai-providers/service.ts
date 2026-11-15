@@ -1,7 +1,7 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
 import { ORPCError } from "@orpc/client";
 import { and, asc, desc, eq, isNull, ne, sql } from "drizzle-orm";
-import { aiProviderSchema } from "@reactive-resume/ai/types";
+import { aiProviderSchema, isApiKeyOptional } from "@reactive-resume/ai/types";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
@@ -224,6 +224,9 @@ export const aiProvidersService = {
 		const existing = await getOwnedProvider(input);
 		const provider = input.provider ?? aiProviderSchema.parse(existing.provider);
 		const nextApiKey = input.apiKey !== undefined ? input.apiKey.trim() : undefined;
+		// An update may omit the provider, so an empty key is checked against the one it ends up with.
+		if (nextApiKey === "" && !isApiKeyOptional(provider))
+			throw new ORPCError("BAD_REQUEST", { message: "An API key is required for this provider." });
 		const nextBaseUrl =
 			input.baseURL !== undefined ? normalizeBaseUrl({ provider, baseURL: input.baseURL }) : existing.baseUrl;
 		const providerChanged = input.provider !== undefined && input.provider !== existing.provider;
@@ -238,7 +241,7 @@ export const aiProvidersService = {
 			});
 		}
 
-		// A sent key replaces the saved one even when empty (Ollama and LM Studio run without one).
+		// A sent key replaces the saved one even when empty (local servers may run without one).
 		const encrypted = nextApiKey !== undefined ? encryptCredential(nextApiKey) : {};
 		const credentialChanged = nextApiKey !== undefined;
 		const runtimeChanged = credentialChanged || providerChanged || modelChanged || baseUrlChanged;

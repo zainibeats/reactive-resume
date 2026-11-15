@@ -298,14 +298,14 @@ function ProviderFieldsForm({ provider, value, onChange, keyOptional, keyAgain }
 									? t`Optional for local and self-hosted servers`
 									: undefined
 					}
-					required={keyAgain && provider !== "ollama"}
+					required={keyAgain && !isApiKeyOptional(provider)}
 					aria-describedby={keyAgain ? `${id}-key-hint` : undefined}
 					onChange={(event) => set({ apiKey: event.target.value })}
 					{...secretInputProps}
 				/>
 				{keyAgain && (
 					<p id={`${id}-key-hint`} className="text-xs leading-5 text-ink-3">
-						{provider === "ollama" ? (
+						{isApiKeyOptional(provider) ? (
 							<Trans>The saved key isn't sent to a new base URL. Enter it again if this server needs one.</Trans>
 						) : (
 							<Trans>The saved key isn't sent to a new base URL. Enter it again.</Trans>
@@ -554,8 +554,8 @@ function EditProviderForm({ provider, onClose }: EditProviderFormProps) {
 	// An empty field means the provider's own address.
 	const newURL = (fields.baseURL.trim() || defaultURL) !== (provider.baseURL ?? defaultURL);
 	const apiKey = fields.apiKey.trim();
-	// The server won't send the saved key to a new address, so the key comes with it (Ollama may have none).
-	const keyMissing = newURL && provider.provider !== "ollama" && !apiKey;
+	// The server won't send the saved key to a new address, so the key comes with it. Local servers may have none.
+	const keyMissing = newURL && !isApiKeyOptional(provider.provider) && !apiKey;
 	const changes = {
 		...(fields.label.trim() && fields.label.trim() !== provider.label ? { label: fields.label.trim() } : {}),
 		...(fields.model.trim() && fields.model.trim() !== provider.model ? { model: fields.model.trim() } : {}),
