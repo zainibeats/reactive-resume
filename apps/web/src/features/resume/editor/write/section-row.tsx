@@ -31,7 +31,7 @@ import { cn } from "@reactive-resume/utils/style";
 import { pendingProposals } from "../proposals/proposals";
 import { useEditorStore } from "../store";
 import { addEntryTo } from "./actions";
-import { countEntriesToCheck, getEntries, getSectionObject } from "./model";
+import { countEntriesToCheck, describeEntry, getEntries, getSectionObject } from "./model";
 import { IconPicker } from "@/components/input/icon-picker";
 import { useCurrentBuilderResumeSelector, useResumeStore, useUpdateResumeData } from "@/features/resume/builder/draft";
 import { usePrompt } from "@/hooks/use-confirm";
@@ -197,7 +197,7 @@ function SectionMenu({ section, title, onMove }: SectionMenuProps) {
 		toast.add({ description, actionProps: { children: t`Undo`, onClick: () => useResumeStore.getState().undo() } });
 
 	const isSkills = section.type === "skills";
-	const canSort = section.type === "experience" || section.type === "education";
+	const canSort = section.type === "experience" || section.type === "education" || section.type === "publications";
 	const columns =
 		isSkills && (settings as { layout?: string }).layout === "inline" ? "inline" : String(settings.columns);
 
@@ -205,16 +205,11 @@ function SectionMenu({ section, title, onMove }: SectionMenuProps) {
 		let unresolved: string[] = [];
 		updateResumeData(
 			(draft) => {
-				const entries = getEntries(draft, section) as never as {
-					id: string;
-					period: string;
-					company?: string;
-					school?: string;
-				}[];
+				const entries = getEntries(draft, section);
 				const result = sortSectionItemsByPeriod(entries, locale);
 				unresolved = result.unresolvedIds.map((id) => {
 					const entry = entries.find((item) => item.id === id);
-					return (entry?.company || entry?.school || id).trim();
+					return (entry ? describeEntry(section.type, entry).title || id : id).trim();
 				});
 				entries.splice(0, entries.length, ...result.items);
 			},
