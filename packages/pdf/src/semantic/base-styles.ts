@@ -2,8 +2,10 @@ import type { ResolvedNodeStyle, SemanticNode } from "@reactive-resume/resume/st
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
 import type { Template } from "@reactive-resume/schema/templates";
 import { resolveBoldFontWeight } from "@reactive-resume/fonts";
+import { entryHeaderOf } from "@reactive-resume/schema/resume/data";
 import { findSection } from "../section-title";
 import { resolveMainEntryBoldWeight } from "../templates/shared/base-template-styles";
+import { leadsWithRole } from "../templates/shared/entry-header";
 import { getTemplatePageSize } from "../templates/shared/page-size";
 
 export type BuildPdfBaseStylesInput = {
@@ -40,8 +42,10 @@ type SectionBreaks = {
 	startOnNewPage?: boolean;
 };
 
+type SectionItemFields = { id: string; mainEntryBold?: boolean | undefined } & Readonly<Record<string, unknown>>;
+
 type SectionWithItems = SectionBreaks & {
-	items?: readonly { id: string; mainEntryBold?: boolean | undefined }[] | undefined;
+	items?: readonly SectionItemFields[] | undefined;
 };
 
 const resolveSection = (data: ResumeData, id: string | undefined): SectionWithItems | undefined =>
@@ -62,6 +66,12 @@ const MAIN_ENTRY_BOLD_FIELDS: Readonly<Record<string, string>> = {
 	skills: "name",
 };
 
+/** With Design → Entries → Row order set to the role, the toggle moves to the role field these entries lead with. */
+const MAIN_ENTRY_ROLE_FIELDS: Readonly<Record<string, string>> = {
+	experience: "position",
+	education: "area",
+};
+
 /** Section/item ancestry carried down the tree walk so field nodes can find their own item. */
 type ItemContext = {
 	sectionId?: string | undefined;
@@ -69,13 +79,31 @@ type ItemContext = {
 	itemId?: string | undefined;
 };
 
-const isMainEntryBoldField = (node: SemanticNode, context: ItemContext): boolean =>
-	context.sectionType !== undefined && MAIN_ENTRY_BOLD_FIELDS[context.sectionType] === node.attributes.name;
+const findItem = (data: ResumeData, context: ItemContext): SectionItemFields | undefined =>
+	resolveSection(data, context.sectionId)?.items?.find((item) => item.id === context.itemId);
 
-const isMainEntryBold = (data: ResumeData, context: ItemContext): boolean => {
-	const items = resolveSection(data, context.sectionId)?.items;
-	return items?.find((item) => item.id === context.itemId)?.mainEntryBold ?? false;
+/**
+ * How a field's weight follows the toggle: `toggle` for the field the entry leads with, `plain` for an organization
+ * that a role-first entry demotes to its second row (drawn unbold), and `undefined` for every other field.
+ */
+const mainEntryRole = (data: ResumeData, node: SemanticNode, context: ItemContext): "toggle" | "plain" | undefined => {
+	const { sectionType } = context;
+	if (sectionType === undefined) return undefined;
+	const organizationField = MAIN_ENTRY_BOLD_FIELDS[sectionType];
+	const roleField = MAIN_ENTRY_ROLE_FIELDS[sectionType];
+	const name = node.attributes.name;
+	if (name !== organizationField && (roleField === undefined || name !== roleField)) return undefined;
+	const item = findItem(data, context);
+	const roleFirst =
+		roleField !== undefined &&
+		item !== undefined &&
+		leadsWithRole(entryHeaderOf(data.metadata.design).lead, sectionType, item);
+	if (name === organizationField) return roleFirst ? "plain" : "toggle";
+	return roleFirst ? "toggle" : undefined;
 };
+
+const isMainEntryBold = (data: ResumeData, context: ItemContext): boolean =>
+	findItem(data, context)?.mainEntryBold ?? false;
 
 export function buildPdfBaseStyles({
 	data,
@@ -93,9 +121,9 @@ export function buildPdfBaseStyles({
 
 	const resolveTextWeight = (node: SemanticNode, context: ItemContext) => {
 		if (headingKinds.has(node.kind)) return headingWeight;
-		if (isMainEntryBoldField(node, context)) {
-			return isMainEntryBold(data, context) ? mainEntryBoldWeight : bodyWeight;
-		}
+		const entryRole = mainEntryRole(data, node, context);
+		if (entryRole === "plain") return bodyWeight;
+		if (entryRole === "toggle") return isMainEntryBold(data, context) ? mainEntryBoldWeight : bodyWeight;
 		if (node.roles.includes("primary-text") || node.kind === "strong") return boldWeight;
 
 		return bodyWeight;

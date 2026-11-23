@@ -7,7 +7,7 @@ const source = readFileSync(fileURLToPath(new URL("./sections.tsx", import.meta.
 // This fork renders main entry headings unbold by default behind a per-item "Bold" toggle (`mainEntryBold`).
 describe("ItemTitle", () => {
 	it("renders award titles without the bold style", () => {
-		expect(source).toContain("const ItemTitle = ({ children, website, field, bold = true }: ItemTitleProps)");
+		expect(source).toContain("const ItemTitle = ({ children, website, field, bold = true, style }: ItemTitleProps)");
 		expect(source).toContain('<ItemTitle field="title" website={item.website} bold={false}>');
 	});
 
@@ -25,9 +25,14 @@ describe("ItemTitle", () => {
 	});
 
 	it("wires the bold toggle into every section that exposes it", () => {
+		// Experience and education: the toggle bolds whichever field leads (Design → Entries → Row order).
 		for (const section of ["ExperienceSection", "EducationSection"]) {
 			const block = source.match(new RegExp(`const ${section} = [\\s\\S]*?\\n};`))?.[0];
-			expect(block).toContain("bold={item.mainEntryBold ?? false}");
+			expect(block).toContain("const leadBold = item.mainEntryBold ?? false;");
+			expect(block).toContain("bold={leadBold}");
+			expect(block).toContain("bold: leadBold }}");
+			expect(block).toContain("bold: roleFirst && leadBold");
+			expect(block).toContain("bold={!roleFirst && leadBold}");
 		}
 
 		// Projects and certifications share the dated-item layout with publications, which stay always bold.

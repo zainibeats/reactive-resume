@@ -42,8 +42,8 @@ type DesignWriter = (key: string, mutate: (metadata: WritableDraft<Metadata>) =>
 
 type DesignSource = { metadata: Metadata | undefined; write: DesignWriter };
 
-/** The open resume's design, for the Type, Color and Page groups. */
-function useDesign(): DesignSource {
+/** The open resume's design, for the Type, Color, Page and Entries groups. */
+export function useDesign(): DesignSource {
 	const data = useResumeData();
 	const updateResumeData = useUpdateResumeData();
 	return {

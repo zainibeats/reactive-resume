@@ -263,6 +263,29 @@ describe("mainEntryBold in DOCX export", () => {
 		expect(isRunBold(paragraphs, text)).toBe(true);
 	});
 
+	// Design → Entries → Row order: the toggle bolds the role when it leads, as the PDF does.
+	it("bolds the leading role and leaves the company plain when entries lead with the role", () => {
+		setRenderConfig({ ...baseConfig, lead: "role" });
+		try {
+			const item = {
+				...baseItem,
+				company: "Analytical Engines",
+				position: "Engineer",
+				location: "",
+				period: "",
+				roles: [],
+			};
+			const bold = renderBuiltInSection("experience", itemSection("experience", { ...item, mainEntryBold: true }), HEX);
+			const plain = renderBuiltInSection("experience", itemSection("experience", item), HEX);
+
+			expect(isRunBold(bold, "Engineer")).toBe(true);
+			expect(isRunBold(bold, " — Analytical Engines")).toBe(false);
+			expect(isRunBold(plain, "Engineer")).toBe(false);
+		} finally {
+			setRenderConfig(baseConfig);
+		}
+	});
+
 	it("keeps headings without the toggle bold, and award titles unbold", () => {
 		const publication = renderBuiltInSection(
 			"publications",
