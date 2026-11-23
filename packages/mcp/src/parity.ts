@@ -1,3 +1,4 @@
+import type { BehaviorAnnotations } from "./annotations";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AnyProcedure, InferRouterInitialContext, RouterClient } from "@orpc/server";
 import type { RequestAuthentication } from "@reactive-resume/api/context";
@@ -7,6 +8,14 @@ import { missingPermissionMessage, requiredPermission } from "@reactive-resume/a
 import { restAliases } from "@reactive-resume/api/rest";
 import router from "@reactive-resume/api/routers";
 import { env } from "@reactive-resume/env/server";
+import {
+	READ_EXTERNAL,
+	READ_IDEMPOTENT,
+	WRITE_DESTRUCTIVE,
+	WRITE_DESTRUCTIVE_EXTERNAL,
+	WRITE_EXTERNAL,
+	WRITE_NON_IDEMPOTENT,
+} from "./annotations";
 import { fileInputSchema, toWireObjectSchema, wireJsonSchema } from "./contracts";
 import { readMcpFile } from "./files";
 import { json, withErrorHandling } from "./results";
@@ -78,17 +87,73 @@ function parityToolName(path: string): string {
 }
 
 const streamingPaths = new Set(["agent.messages.send", "agent.messages.resume"]);
-const readOnlyPosts = new Set([
-	"ai.parsePdf",
-	"ai.parseDocx",
-	"ai.atsReview",
-	"ai.improve",
-	"rest.checkResume",
-	"rest.checkPdf",
-	"rest.matchResume",
-	"webAccess.test",
-]);
 const exportPaths = new Set(["rest.documentExports.resume"]);
+
+// Behavior is explicit: HTTP methods and names miss cleanup, publication and provider calls.
+const PARITY_ANNOTATIONS = {
+	"resume.listVersions": READ_IDEMPOTENT,
+	"resume.getVersion": READ_IDEMPOTENT,
+	"resume.createVersion": WRITE_NON_IDEMPOTENT,
+	"resume.renameVersion": WRITE_DESTRUCTIVE,
+	"resume.deleteVersion": WRITE_DESTRUCTIVE,
+	// Restoring or removing a password changes what the public link shows.
+	"resume.restoreVersion": WRITE_DESTRUCTIVE_EXTERNAL,
+	"resume.removePassword": WRITE_DESTRUCTIVE_EXTERNAL,
+	// Reading a public resume counts a view.
+	"resume.getBySlug": WRITE_EXTERNAL,
+	"resume.checkSlug": READ_IDEMPOTENT,
+	"resume.update": WRITE_DESTRUCTIVE_EXTERNAL,
+	"resume.statistics.getDailyById": READ_IDEMPOTENT,
+	"resume.statistics.recordDownload": WRITE_NON_IDEMPOTENT,
+	"resume.updates.subscribe": READ_IDEMPOTENT,
+	// The fork's Trash listing purges nothing; expired resumes go through documents.purgeExpired.
+	"documents.list": READ_IDEMPOTENT,
+	"documents.counts": READ_IDEMPOTENT,
+	"documents.rename": WRITE_DESTRUCTIVE,
+	"documents.setTags": WRITE_DESTRUCTIVE,
+	"documents.setLocked": WRITE_DESTRUCTIVE,
+	// Trash and restore take a public resume offline and bring it back.
+	"documents.trash": WRITE_DESTRUCTIVE_EXTERNAL,
+	"documents.restore": WRITE_DESTRUCTIVE_EXTERNAL,
+	"documents.purge": WRITE_DESTRUCTIVE,
+	"documents.purgeExpired": WRITE_DESTRUCTIVE,
+	// AI calls reach the user's provider and, with server-managed AI, rewrite the account's provider record.
+	"ai.parsePdf": WRITE_DESTRUCTIVE_EXTERNAL,
+	"ai.parseDocx": WRITE_DESTRUCTIVE_EXTERNAL,
+	"ai.atsReview": WRITE_DESTRUCTIVE_EXTERNAL,
+	"ai.improve": WRITE_DESTRUCTIVE_EXTERNAL,
+	"aiProviders.list": WRITE_DESTRUCTIVE,
+	"aiProviders.delete": WRITE_DESTRUCTIVE,
+	// Replaces the saved test status and enables or disables the provider.
+	"aiProviders.test": WRITE_DESTRUCTIVE_EXTERNAL,
+	"webAccess.status": READ_IDEMPOTENT,
+	"webAccess.delete": WRITE_DESTRUCTIVE,
+	// Probes search and reading without saving a result.
+	"webAccess.test": READ_EXTERNAL,
+	"agent.threads.list": READ_IDEMPOTENT,
+	"agent.threads.start": WRITE_DESTRUCTIVE,
+	// Opening a thread clears a dead run's claim.
+	"agent.threads.get": WRITE_DESTRUCTIVE,
+	"agent.threads.update": WRITE_DESTRUCTIVE,
+	"agent.threads.delete": WRITE_DESTRUCTIVE,
+	"agent.messages.send": WRITE_DESTRUCTIVE_EXTERNAL,
+	"agent.messages.stop": WRITE_DESTRUCTIVE,
+	"agent.messages.resume": READ_IDEMPOTENT,
+	"agent.messages.setEditStatus": WRITE_DESTRUCTIVE,
+	"agent.attachments.create": WRITE_NON_IDEMPOTENT,
+	"agent.attachments.delete": WRITE_DESTRUCTIVE,
+	"auth.providers.list": READ_IDEMPOTENT,
+	"auth.exportData": READ_IDEMPOTENT,
+	"flags.get": READ_IDEMPOTENT,
+	// Removes the file behind an uploaded-file URL.
+	"storage.deleteFile": WRITE_DESTRUCTIVE_EXTERNAL,
+	"rest.documentExports.resume": READ_IDEMPOTENT,
+	"rest.checkResume": READ_IDEMPOTENT,
+	"rest.checkPdf": READ_IDEMPOTENT,
+	"rest.matchResume": READ_IDEMPOTENT,
+	"rest.importResumeFile": WRITE_NON_IDEMPOTENT,
+	"rest.fileUpload": WRITE_EXTERNAL,
+} satisfies Record<keyof typeof PARITY_PROCEDURES, BehaviorAnnotations>;
 
 /** These workflows require browser interaction so secrets and security ceremonies stay with the user. */
 const BROWSER_HANDOFFS = {
@@ -120,14 +185,14 @@ const RESUME_PASSWORD_HANDOFFS = {
 	},
 };
 
-const handoffAnnotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+const handoffAnnotations = READ_IDEMPOTENT;
 const handoffOutputSchema = z.object({ url: z.url(), action: z.string(), requiresBrowser: z.literal(true) });
 type HandoffToolMeta = {
 	title: string;
 	description: string;
 	inputSchema: z.ZodObject;
 	outputSchema: typeof handoffOutputSchema;
-	annotations: typeof handoffAnnotations;
+	annotations: BehaviorAnnotations;
 };
 const browserToolMeta: Record<string, HandoffToolMeta> = Object.fromEntries([
 	...Object.keys(BROWSER_HANDOFFS).map((path) => [
@@ -225,14 +290,12 @@ export const PARITY_TOOL_META: Record<
 	Pick<ReturnType<typeof parityToolContract>, "inputSchema" | "outputSchema"> & {
 		title: string;
 		description: string;
-		annotations: typeof handoffAnnotations;
+		annotations: BehaviorAnnotations;
 	}
 > = {
 	...Object.fromEntries(
 		Object.entries(PARITY_PROCEDURES).map(([path, procedure]) => {
 			const route = procedure["~orpc"].route;
-			const readOnly =
-				(route.method === "GET" || readOnlyPosts.has(path)) && !["resume.getBySlug", "aiProviders.list"].includes(path);
 			const contract = parityToolContract(path, procedure);
 			return [
 				parityToolName(path),
@@ -241,12 +304,7 @@ export const PARITY_TOOL_META: Record<
 					description: `${route.description ?? route.summary ?? path}${path === "resume.updates.subscribe" ? " Returns an owned snapshot; poll updatedAt for changes over stateless MCP." : ""}${streamingPaths.has(path) ? " Returns collected stream chunks, at most 500,000 characters; use the thread getter to retrieve persisted assistant replies." : ""}${exportPaths.has(path) ? " Returns an authenticated REST download URL; send the same bearer token or API key to download. Rendering occurs when downloaded." : ""}`,
 					inputSchema: contract.inputSchema,
 					outputSchema: contract.outputSchema,
-					annotations: {
-						readOnlyHint: readOnly,
-						destructiveHint: !readOnly && /update|delete|purge|remove|restore|password|trash|set/i.test(path),
-						idempotentHint: readOnly && !/draft|parse|test|search|improve|review/i.test(path),
-						openWorldHint: /ai|webAccess|storage|attachments|Exports|importResumeFile/i.test(path),
-					},
+					annotations: PARITY_ANNOTATIONS[path as keyof typeof PARITY_ANNOTATIONS],
 				},
 			];
 		}),

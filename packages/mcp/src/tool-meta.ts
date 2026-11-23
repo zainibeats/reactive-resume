@@ -2,43 +2,12 @@
  * Canonical tool metadata (title, description, inputSchema, annotations) declared once.
  * Consumed by both `registerTools` (raw Zod) and `buildMcpServerCard` (toJsonSchemaCompat).
  */
-import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import z from "zod";
 import { resumePatchOperationsSchema } from "@reactive-resume/ai/tools/resume-tool-contracts";
 import { resumeDto } from "@reactive-resume/api/dto/resume";
+import { READ_IDEMPOTENT, WRITE_DESTRUCTIVE, WRITE_DESTRUCTIVE_EXTERNAL, WRITE_NON_IDEMPOTENT } from "./annotations";
 import { toWireObjectSchema, toWireSchema } from "./contracts";
 import { MCP_TOOL_NAME as T } from "./mcp-tool-names";
-
-const READ_IDEMPOTENT: ToolAnnotations = {
-	readOnlyHint: true,
-	destructiveHint: false,
-	idempotentHint: true,
-	openWorldHint: false,
-};
-const READ_NON_IDEMPOTENT: ToolAnnotations = {
-	readOnlyHint: true,
-	destructiveHint: false,
-	idempotentHint: false,
-	openWorldHint: false,
-};
-const WRITE_NON_IDEMPOTENT: ToolAnnotations = {
-	readOnlyHint: false,
-	destructiveHint: false,
-	idempotentHint: false,
-	openWorldHint: false,
-};
-const WRITE_DESTRUCTIVE: ToolAnnotations = {
-	readOnlyHint: false,
-	destructiveHint: true,
-	idempotentHint: false,
-	openWorldHint: false,
-};
-const WRITE_IDEMPOTENT: ToolAnnotations = {
-	readOnlyHint: false,
-	destructiveHint: false,
-	idempotentHint: true,
-	openWorldHint: false,
-};
 
 // ponytail: shared schema fragment; exported so server-card can re-use without re-importing
 const resumeIdSchema = z.string().min(1).describe(`Resume ID. Use \`${T.listResumes}\` to find valid IDs.`);
@@ -128,7 +97,7 @@ const BASE_TOOL_META = {
 			contentType: z.literal("application/pdf"),
 		}),
 		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
-		annotations: READ_NON_IDEMPOTENT,
+		annotations: READ_IDEMPOTENT,
 	},
 	[T.createResume]: {
 		title: "Create Resume",
@@ -234,7 +203,7 @@ const BASE_TOOL_META = {
 				operations: resumePatchOperationsSchema,
 			}),
 		),
-		annotations: { ...WRITE_NON_IDEMPOTENT, destructiveHint: true, openWorldHint: true },
+		annotations: WRITE_DESTRUCTIVE_EXTERNAL,
 	},
 	[T.updateResume]: {
 		title: "Update Resume (metadata)",
@@ -272,7 +241,7 @@ const BASE_TOOL_META = {
 					),
 			}),
 		),
-		annotations: { ...WRITE_NON_IDEMPOTENT, destructiveHint: true, openWorldHint: true },
+		annotations: WRITE_DESTRUCTIVE_EXTERNAL,
 	},
 	[T.deleteResume]: {
 		title: "Delete Resume",
@@ -284,7 +253,7 @@ const BASE_TOOL_META = {
 		].join("\n"),
 		outputSchema: messageOutput,
 		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
-		annotations: { ...WRITE_DESTRUCTIVE, openWorldHint: true },
+		annotations: WRITE_DESTRUCTIVE_EXTERNAL,
 	},
 	[T.lockResume]: {
 		title: "Lock Resume",
@@ -297,14 +266,14 @@ const BASE_TOOL_META = {
 		].join("\n"),
 		outputSchema: messageOutput,
 		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
-		annotations: WRITE_IDEMPOTENT,
+		annotations: WRITE_DESTRUCTIVE,
 	},
 	[T.unlockResume]: {
 		title: "Unlock Resume",
 		description: "Unlock a previously locked resume, re-enabling edits, patches, and deletion.",
 		outputSchema: messageOutput,
 		inputSchema: wireInput(z.strictObject({ id: resumeIdSchema })),
-		annotations: WRITE_IDEMPOTENT,
+		annotations: WRITE_DESTRUCTIVE,
 	},
 	[T.getResumeStatistics]: {
 		title: "Get Resume Statistics",
