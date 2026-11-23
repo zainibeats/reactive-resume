@@ -2,7 +2,7 @@
 
 # Base image only; pnpm self-manages to the `packageManager` version in package.json.
 ARG PNPM_VERSION=12.9.1
-ARG NODE_VERSION=24
+ARG NODE_VERSION=26
 ARG TURBO_VERSION=2.11.7
 
 FROM ghcr.io/pnpm/pnpm:${PNPM_VERSION} AS base
