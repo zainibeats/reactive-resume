@@ -203,6 +203,20 @@ Prefer package filters over repo-wide runs, e.g. `pnpm --filter web typecheck`, 
 - Document succinctly: docstrings for public APIs, README to outline high‑level project conventions.
 - If changes are agreed upon, git add and commit your changes when necessary
 
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.md`.
+
 <!-- BEGIN:turborepo-agent-rules -->
 
 # This is NOT the Turborepo you know
