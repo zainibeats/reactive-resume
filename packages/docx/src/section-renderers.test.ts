@@ -286,6 +286,29 @@ describe("mainEntryBold in DOCX export", () => {
 		}
 	});
 
+	// Education leads with its field of study only, as the PDF does: a degree alone keeps the school first.
+	it("leads education with the role only when the field of study is filled in", () => {
+		setRenderConfig({ ...baseConfig, lead: "role" });
+		try {
+			const item = { ...baseItem, school: "Cambridge", degree: "BSc", area: "", grade: "", location: "", period: "" };
+			const degreeOnly = renderBuiltInSection(
+				"education",
+				itemSection("education", { ...item, mainEntryBold: true }),
+				HEX,
+			);
+			const withArea = renderBuiltInSection(
+				"education",
+				itemSection("education", { ...item, area: "Mathematics", mainEntryBold: true }),
+				HEX,
+			);
+
+			expect(isRunBold(degreeOnly, "Cambridge")).toBe(true);
+			expect(isRunBold(withArea, "BSc, Mathematics")).toBe(true);
+		} finally {
+			setRenderConfig(baseConfig);
+		}
+	});
+
 	it("keeps headings without the toggle bold, and award titles unbold", () => {
 		const publication = renderBuiltInSection(
 			"publications",
