@@ -108,9 +108,13 @@ function titleAndSubtitle(primary: string, secondary: string, rightText?: string
 	});
 }
 
-/** Puts the role before the organization when the resume leads with the role and the item has one. */
-const byLead = (organization: string, role: string): [string, string] =>
-	config.lead === "role" && role.trim() ? [role, organization] : [organization, role];
+/**
+ * Puts the role before the organization when the resume leads with the role and the item has one. `leadField` is the
+ * field that decides it when it differs from the displayed role (Education leads only with its field of study, as in
+ * the PDF).
+ */
+const byLead = (organization: string, role: string, leadField = role): [string, string] =>
+	config.lead === "role" && leadField.trim() ? [role, organization] : [organization, role];
 
 function locationLine(location: string): Paragraph[] {
 	if (!location) return [];
@@ -200,7 +204,7 @@ const renderExperience = (section: Sections["experience"], colorHex: string) =>
 const renderEducation = (section: Sections["education"], colorHex: string) =>
 	renderEntries(section, colorHex, (item, baseRun) => [
 		titleAndSubtitle(
-			...byLead(item.school, [item.degree, item.area].filter(Boolean).join(", ")),
+			...byLead(item.school, [item.degree, item.area].filter(Boolean).join(", "), item.area),
 			item.period,
 			item.mainEntryBold ?? false,
 		),
