@@ -102,6 +102,7 @@ Rules:
 - Adding new fields is safe. The site ignores anything it does not read.
 - Failure mode: if the file is missing, returns non-2xx (for example a 403 from Cloudflare Bot Fight Mode on the custom domain, which is why the site uses the `r2.dev` URL) or has a different shape, the Vercel build fails. At runtime, Next.js keeps serving the last good render.
 - Upstream cherry-picks that touch `packages/schema/src/resume/*` or the JSON export path need the same check.
+- Guards: `tooling/portfolio/contract.ts` encodes this table. Its unit test runs in CI (`e2e.yml`) and fails typecheck/tests if the schema or export breaks it; `.github/workflows/portfolio-contract.yml` checks the live R2 file daily. Update the contract when the portfolio reads new fields.
 
 ## Ownership map
 
