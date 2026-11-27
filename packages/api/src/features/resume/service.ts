@@ -9,14 +9,8 @@ import { and, arrayContains, asc, desc, eq, gte, isNotNull, isNull, lt, sql } fr
 import { match } from "ts-pattern";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
-import {
-	applyResumePatches,
-	describeResumePatchError,
-	createResumePatches,
-	findRebasedResumePatchConflicts,
-	ResumePatchError,
-	rebaseResumePatchOperations,
-} from "@reactive-resume/resume/patch";
+import { planParentSync, selectParentSyncEntries } from "@reactive-resume/resume/parent-sync";
+import { applyResumePatches, describeResumePatchError, ResumePatchError } from "@reactive-resume/resume/patch";
 import { defaultResumeData } from "@reactive-resume/schema/resume/default";
 import { generateId } from "@reactive-resume/utils/string";
 import { consumeResumePasswordLimit } from "../../middleware/rate-limit";
@@ -41,22 +35,6 @@ import {
 	writeVersion,
 } from "./version-history";
 import { countVisit } from "./view-dedup";
-
-type ResumeSyncDiff = {
-	op: JsonPatchOperation["op"];
-	path: string;
-	from: string | null;
-	hasPrevious: boolean;
-	hasNext: boolean;
-	previous: unknown | null;
-	next: unknown | null;
-	hasConflict: boolean;
-};
-
-type ResumeSyncPlanEntry = {
-	baseOperation: JsonPatchOperation;
-	operation: JsonPatchOperation;
-};
 
 function resumeVersionConflict(updatedAt: Date) {
 	return new ORPCError("RESUME_VERSION_CONFLICT", {
@@ -380,80 +358,6 @@ export async function notifyResumeUpdated(event: ResumeUpdatedEvent) {
 	} catch (error) {
 		console.warn("Failed to publish resume.updated event:", error);
 	}
-}
-
-function getSyncPlan(input: { parentData: ResumeData; parentSnapshot: ResumeData; childData: ResumeData }) {
-	const parentOperations = createResumePatches(input.parentSnapshot, input.parentData);
-	const rebasedOperations = rebaseResumePatchOperations({
-		base: input.parentSnapshot,
-		target: input.childData,
-		operations: parentOperations,
-	});
-	const entries = rebasedOperations.map(({ baseOperation, operation }) => ({ baseOperation, operation }));
-	const operations = rebasedOperations.map(({ operation }) => operation);
-	const conflicts = findRebasedResumePatchConflicts({
-		base: input.parentSnapshot,
-		target: input.childData,
-		operations: rebasedOperations,
-	});
-
-	return {
-		entries,
-		operations,
-		conflicts,
-		diffs: createResumeSyncDiffs({
-			entries,
-			conflicts,
-			previousData: input.parentSnapshot,
-			nextData: input.parentData,
-		}),
-		hasConflicts: conflicts.length > 0,
-	};
-}
-
-function decodeJsonPointerSegment(segment: string): string {
-	return segment.replaceAll("~1", "/").replaceAll("~0", "~");
-}
-
-function getValueAtJsonPointer(document: unknown, path: string): unknown {
-	if (path === "") return document;
-	if (!path.startsWith("/")) return undefined;
-
-	return path
-		.slice(1)
-		.split("/")
-		.map(decodeJsonPointerSegment)
-		.reduce<unknown>((value, segment) => {
-			if (value === undefined || value === null) return undefined;
-			if (Array.isArray(value)) return value[segment === "-" ? value.length : Number(segment)];
-			if (typeof value === "object") return (value as Record<string, unknown>)[segment];
-			return undefined;
-		}, document);
-}
-
-function createResumeSyncDiffs(input: {
-	entries: ResumeSyncPlanEntry[];
-	conflicts: string[];
-	previousData: ResumeData;
-	nextData: ResumeData;
-}): ResumeSyncDiff[] {
-	return input.entries.map(({ baseOperation, operation }) => {
-		const previous = getValueAtJsonPointer(input.previousData, baseOperation.path);
-		const next = getValueAtJsonPointer(input.nextData, baseOperation.path);
-
-		return {
-			op: baseOperation.op,
-			path: baseOperation.path,
-			from: "from" in baseOperation ? baseOperation.from : null,
-			hasPrevious: baseOperation.op !== "add" && previous !== undefined,
-			hasNext: baseOperation.op !== "remove" && next !== undefined,
-			previous: baseOperation.op !== "add" && previous !== undefined ? previous : null,
-			next: baseOperation.op !== "remove" && next !== undefined ? next : null,
-			hasConflict: input.conflicts.some(
-				(conflict) => operation.path === conflict || operation.path.startsWith(`${conflict}/`),
-			),
-		};
-	});
 }
 
 // One conditional UPDATE skips locked rows atomically; only a miss pays for the read that says why.
@@ -808,7 +712,7 @@ export const resumeService = {
 			};
 		}
 
-		const plan = getSyncPlan({
+		const plan = planParentSync({
 			parentData: parent.data,
 			parentSnapshot: child.parentData,
 			childData: child.data,
@@ -861,21 +765,15 @@ export const resumeService = {
 
 			if (!parent) throw new ORPCError("RESUME_PARENT_NOT_FOUND", { status: 404 });
 
-			const plan = getSyncPlan({
+			const plan = planParentSync({
 				parentData: parent.data,
 				parentSnapshot: child.parentData,
 				childData: child.data,
 			});
 
-			const selectedPaths = input.paths ? new Set(input.paths) : null;
-			const selectedEntries = selectedPaths
-				? plan.entries.filter(({ baseOperation }) => selectedPaths.has(baseOperation.path))
-				: plan.entries;
-			const hasSelectedConflicts = selectedEntries.some(({ operation }) =>
-				plan.conflicts.some((conflict) => operation.path === conflict || operation.path.startsWith(`${conflict}/`)),
-			);
+			const selection = selectParentSyncEntries(plan, input.paths);
 
-			if (hasSelectedConflicts && !input.force) {
+			if (selection.hasConflicts && !input.force) {
 				throw new ORPCError("RESUME_SYNC_CONFLICT", {
 					status: 409,
 					message: "The child resume has changes that overlap with parent updates.",
@@ -883,13 +781,13 @@ export const resumeService = {
 				});
 			}
 
-			const selectedBaseOperations = selectedEntries.map(({ baseOperation }) => baseOperation);
-			const selectedOperations = selectedEntries.map(({ operation }) => operation);
-			const parentData =
-				selectedPaths && selectedBaseOperations.length < plan.entries.length
-					? applyResumePatches(child.parentData, selectedBaseOperations)
-					: parent.data;
-			const parentRevision = selectedBaseOperations.length === plan.entries.length ? parent.revision : undefined;
+			const selectedBaseOperations = selection.entries.map(({ baseOperation }) => baseOperation);
+			const selectedOperations = selection.entries.map(({ operation }) => operation);
+			// A partial apply advances the snapshot by the selected parent operations only, so the rest stay pending.
+			const parentData = selection.isComplete
+				? parent.data
+				: applyResumePatches(child.parentData, selectedBaseOperations);
+			const parentRevision = selection.isComplete ? parent.revision : undefined;
 			let data = child.data;
 
 			if (selectedOperations.length > 0) {

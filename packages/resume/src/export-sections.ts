@@ -1,4 +1,5 @@
 import type { ResumeData } from "@reactive-resume/schema/resume/data";
+import { filterSections } from "./filtering";
 
 export type ResumeExportTarget = "resume" | "cover-letter";
 
@@ -10,9 +11,14 @@ const isVisibleCoverLetterSection = (section: ResumeData["customSections"][numbe
 export const getVisibleCoverLetterSectionIds = (data: ResumeData) =>
 	data.customSections.filter(isVisibleCoverLetterSection).map((section) => section.id);
 
-/** True when every laid-out section is a visible cover letter; such a document prints no resume header. */
+/**
+ * True when every visible laid-out section is a cover letter; such a document prints no resume header. Hidden and
+ * empty sections are ignored, matching what the exports actually render.
+ */
 export function isCoverLetterOnlyDocument(data: ResumeData): boolean {
-	const sectionIds = data.metadata.layout.pages.flatMap((page) => [...page.main, ...page.sidebar]);
+	const sectionIds = data.metadata.layout.pages.flatMap((page) =>
+		filterSections([...page.main, ...page.sidebar], data),
+	);
 	const letterIds = new Set(getVisibleCoverLetterSectionIds(data));
 	return sectionIds.length > 0 && sectionIds.every((sectionId) => letterIds.has(sectionId));
 }

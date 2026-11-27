@@ -39,9 +39,12 @@ function website({ url, label }: { url: string; label: string }): OdtBlock[] {
 
 type Lead = EntryHeader["lead"];
 
-/** Design → Entries → Row order, as the DOCX export reads it: the role first when the resume leads with it. */
-const byLead = (lead: Lead, organization: string, role: string): [string, string] =>
-	lead === "role" && role.trim() ? [role, organization] : [organization, role];
+/**
+ * Design → Entries → Row order, as the DOCX export reads it: the role first when the resume leads with it. `leadField`
+ * decides it when it differs from the displayed role: Education leads only with its field of study, as in the PDF.
+ */
+const byLead = (lead: Lead, organization: string, role: string, leadField = role): [string, string] =>
+	lead === "role" && leadField.trim() ? [role, organization] : [organization, role];
 
 /** Each built-in item type to its blocks, mirroring the DOCX and Markdown exports. */
 const renderItem: { [T in SectionType]: (item: ItemOf<T>, section: Sections[T], lead: Lead) => OdtBlock[] } = {
@@ -59,7 +62,7 @@ const renderItem: { [T in SectionType]: (item: ItemOf<T>, section: Sections[T], 
 	},
 	education: (item, _section, lead) => [
 		entryHeading(
-			...byLead(lead, item.school, [item.degree, item.area].filter(Boolean).join(", ")),
+			...byLead(lead, item.school, [item.degree, item.area].filter(Boolean).join(", "), item.area),
 			item.period,
 			mainEntryBold(item),
 		),
