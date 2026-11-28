@@ -95,6 +95,16 @@ pnpm test
 pnpm exec turbo boundaries
 ```
 
+## MCP
+
+The server exposes MCP at `/mcp` (API key via `x-api-key`, or OAuth). For Claude Code or another MCP client, copy
+`.mcp.example.json` to `.mcp.json` (gitignored), create an API key in Settings → API Keys, and export it:
+
+```bash
+export RXRESUME_API_KEY=<your-key>
+export RXRESUME_MCP_URL=https://resume.example.com/mcp  # optional, defaults to http://localhost:3000/mcp
+```
+
 ## Architecture
 
 This pnpm/Turborepo workspace has two deployable apps:
