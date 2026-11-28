@@ -1,0 +1,41 @@
+name: Portfolio Contract
+
+# The czaini.net portfolio renders from the resume JSON uploaded to R2 (see AGENTS.md).
+# The unit test in tooling/portfolio guards the export shape on every PR (via e2e.yml);
+# this job checks the live uploaded file, which the repository never sees.
+on:
+  schedule:
+    - cron: "17 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --filter @reactive-resume/tooling...
+
+      - name: Check live resume JSON
+        run: pnpm --filter @reactive-resume/tooling portfolio:check

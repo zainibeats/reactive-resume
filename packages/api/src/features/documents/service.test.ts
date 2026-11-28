@@ -10,9 +10,9 @@ const { documentsService } = await import("./service");
 // `select().from().where()` resolving to `rows`.
 const rows = (result: unknown[]) => ({ from: () => ({ where: () => Promise.resolve(result) }) });
 
-const updates = () => {
+const updates = (returned: unknown[] = [{ id: "r1", updatedAt: new Date() }]) => {
 	const set = vi.fn((_changes: Record<string, unknown>) => ({
-		where: () => ({ returning: async () => [{ id: "r1", updatedAt: new Date() }] }),
+		where: () => ({ returning: async () => returned }),
 	}));
 	dbMock.update.mockReturnValue({ set });
 	return set;
@@ -24,13 +24,21 @@ beforeEach(() => {
 
 describe("Trash", () => {
 	it("won't move a locked document, and keeps the resume's error code", async () => {
+		// The guarded UPDATE matches no row because the resume is locked.
+		updates([]);
 		dbMock.select.mockReturnValueOnce(rows([{ isLocked: true, trashedAt: null }]));
 
 		await expect(documentsService.trash({ userId: "u1", id: "r1" })).rejects.toMatchObject({
 			code: "RESUME_LOCKED",
 			status: 403,
 		});
-		expect(dbMock.update).not.toHaveBeenCalled();
+	});
+
+	it("reports a missing document as not found", async () => {
+		updates([]);
+		dbMock.select.mockReturnValueOnce(rows([]));
+
+		await expect(documentsService.trash({ userId: "u1", id: "r1" })).rejects.toMatchObject({ code: "NOT_FOUND" });
 	});
 
 	it("deletes for good only what is already in Trash", async () => {
@@ -64,11 +72,11 @@ describe("library", () => {
 	});
 
 	it("ends automatic naming when a resume is renamed by hand", async () => {
-		dbMock.select.mockReturnValueOnce(rows([{ isLocked: false, trashedAt: null }]));
 		const set = updates();
 
 		await documentsService.rename({ userId: "u1", id: "r1", name: "Mine" });
 
-		expect(set).toHaveBeenCalledWith({ name: "Mine", autoName: false });
+		expect(set).toHaveBeenCalledWith(expect.objectContaining({ name: "Mine", autoName: false }));
+		expect(set.mock.calls[0]?.[0]).toHaveProperty("revision");
 	});
 });

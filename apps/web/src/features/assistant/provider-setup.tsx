@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import { AI_PROVIDER_DEFAULT_MODELS } from "@reactive-resume/ai/defaults";
+import { isApiKeyOptional } from "@reactive-resume/ai/types";
 import { Button, buttonVariants } from "@reactive-resume/ui/components/button";
 import { Collapsible, CollapsibleContent } from "@reactive-resume/ui/components/collapsible";
 import { Icon } from "@reactive-resume/ui/components/icon";
@@ -116,7 +117,8 @@ function ConnectForm({ choice }: { choice: Choice }) {
 			setFailure(getOrpcErrorMessage(error, { fallback: t`Couldn't connect. Check the key and try again.` })),
 	});
 
-	const ready = apiKey.trim() && model.trim() && (!choice.needsBaseURL || baseURL.trim());
+	const keyOptional = isApiKeyOptional(choice.provider);
+	const ready = (keyOptional || apiKey.trim()) && model.trim() && (!choice.needsBaseURL || baseURL.trim());
 
 	return (
 		<form
@@ -148,6 +150,7 @@ function ConnectForm({ choice }: { choice: Choice }) {
 					type="password"
 					autoComplete="off"
 					value={apiKey}
+					placeholder={keyOptional ? t`Optional for local and self-hosted servers` : undefined}
 					onChange={(event) => setApiKey(event.target.value)}
 				/>
 			</div>

@@ -20,7 +20,7 @@ export const jsonPatchOperationSchema = z.discriminatedUnion("op", [
 
 export type JsonPatchOperation = z.infer<typeof jsonPatchOperationSchema>;
 
-type RebasedResumePatchOperation = {
+export type RebasedResumePatchOperation = {
 	baseOperation: JsonPatchOperation;
 	operation: JsonPatchOperation;
 };
@@ -44,7 +44,8 @@ function encodeJsonPointerSegment(segment: string): string {
 	return segment.replaceAll("~", "~0").replaceAll("/", "~1");
 }
 
-function getValueAtJsonPointer(document: unknown, path: string): unknown {
+/** Reads the value at an RFC 6901 JSON Pointer; returns `undefined` when any segment is missing. */
+export function getValueAtJsonPointer(document: unknown, path: string): unknown {
 	if (path === "") return document;
 	if (!path.startsWith("/")) return undefined;
 
