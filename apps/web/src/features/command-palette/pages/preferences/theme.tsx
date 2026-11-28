@@ -11,7 +11,7 @@ export function ThemeCommandPage() {
 	const setOpen = useCommandPaletteStore((state) => state.setOpen);
 
 	const handleThemeChange = (theme: Theme) => {
-		setTheme(theme, { playSound: false });
+		setTheme(theme);
 		setOpen(false);
 	};
 

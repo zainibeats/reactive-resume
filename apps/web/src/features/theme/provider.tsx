@@ -9,8 +9,8 @@ type ThemeContextValue = {
 	theme: Theme;
 	/** What's on screen right now. */
 	resolvedTheme: ResolvedTheme;
-	setTheme: (value: Theme, options?: { playSound?: boolean }) => void;
-	toggleTheme: (options?: { playSound?: boolean }) => void;
+	setTheme: (value: Theme) => void;
+	toggleTheme: () => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -49,27 +49,16 @@ export function ThemeProvider({ children, theme }: Props) {
 		applyThemeClass(resolvedTheme);
 	}, [resolvedTheme]);
 
-	async function setTheme(value: Theme, options: { playSound?: boolean } = {}) {
-		const { playSound = true } = options;
+	function setTheme(value: Theme) {
 		const next = resolveTheme(value, systemPrefersDark());
 
 		applyThemeClass(next);
 		setThemeCookie(value);
 		void router.invalidate();
-
-		if (!playSound) return;
-
-		const soundClip = next === "dark" ? "/sounds/switch-off.mp3" : "/sounds/switch-on.mp3";
-		try {
-			const audio = new Audio(soundClip);
-			await audio.play();
-		} catch {
-			// ignore errors
-		}
 	}
 
-	function toggleTheme(options: { playSound?: boolean } = {}) {
-		void setTheme(resolvedTheme === "dark" ? "light" : "dark", options);
+	function toggleTheme() {
+		setTheme(resolvedTheme === "dark" ? "light" : "dark");
 	}
 
 	return <ThemeContext value={{ theme, resolvedTheme, setTheme, toggleTheme }}>{children}</ThemeContext>;
