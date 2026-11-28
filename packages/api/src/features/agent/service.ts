@@ -735,7 +735,9 @@ function createAgent(input: {
 	};
 	model: ReturnType<typeof getModel>;
 	connection: WebAccessConnection | null;
-	/** Whether web search is available: through the connection, or the server's SearXNG without one. */
+	/** The user's own SearXNG; the server's `WEB_SEARCH_SEARXNG_URL` still wins. */
+	searxngUrl: string | null;
+	/** Whether web search is available: through the connection, or SearXNG without one. */
 	search: boolean;
 	signal: AbortSignal;
 }) {
@@ -779,6 +781,7 @@ function createAgent(input: {
 			searchWeb: timedToolHandler("search_web", async (query: string, signal: AbortSignal) => {
 				const result = await searchWeb(query, {
 					connection: input.connection,
+					searxngUrl: input.searxngUrl,
 					userId: input.userId,
 					signal,
 				});
@@ -1243,8 +1246,11 @@ export const agentService = {
 						? [contextMessage, draftUiMessage]
 						: [withAttachmentUiParts(input.message, attachmentsForModel)]
 					: messages;
-				const connection = await webAccessService.resolve(input.userId);
-				const search = webAccessService.canSearch(connection !== null);
+				const [connection, searxngUrl] = await Promise.all([
+					webAccessService.resolve(input.userId),
+					webAccessService.resolveSearxng(input.userId),
+				]);
+				const search = webAccessService.canSearch(connection !== null, searxngUrl);
 				const modelMessages = await convertToModelMessages(
 					replay.map((message) => toModelInputMessage(message, runnableProvider, search)),
 				);
@@ -1273,6 +1279,7 @@ export const agentService = {
 							.flatMap((message) => messageText(message).match(/https?:\/\/[^\s<>")]+/g) ?? []),
 					],
 					connection,
+					searxngUrl,
 					search,
 					signal: controller.signal,
 					provider: {

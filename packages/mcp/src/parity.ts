@@ -55,6 +55,7 @@ const PARITY_PROCEDURES = {
 	"aiProviders.test": router.aiProviders.test,
 	"webAccess.status": router.webAccess.status,
 	"webAccess.delete": router.webAccess.delete,
+	"webAccess.deleteSearxng": router.webAccess.deleteSearxng,
 	"webAccess.test": router.webAccess.test,
 	"agent.threads.list": router.agent.threads.list,
 	"agent.threads.start": router.agent.threads.start,
@@ -128,6 +129,7 @@ const PARITY_ANNOTATIONS = {
 	"aiProviders.test": WRITE_DESTRUCTIVE_EXTERNAL,
 	"webAccess.status": READ_IDEMPOTENT,
 	"webAccess.delete": WRITE_DESTRUCTIVE,
+	"webAccess.deleteSearxng": WRITE_DESTRUCTIVE,
 	// Probes search and reading without saving a result.
 	"webAccess.test": READ_EXTERNAL,
 	"agent.threads.list": READ_IDEMPOTENT,
@@ -160,6 +162,8 @@ const BROWSER_HANDOFFS = {
 	"aiProviders.create": "ai",
 	"aiProviders.update": "ai",
 	"webAccess.save": "ai",
+	// The instance address decides where the server sends requests, so it is set in the browser.
+	"webAccess.saveSearxng": "ai",
 	"resume.getRoot": "",
 	"auth.createApiKey": "ai?newKey=true#api-keys",
 	"auth.deleteAccount": "account",

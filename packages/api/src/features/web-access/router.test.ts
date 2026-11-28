@@ -10,7 +10,11 @@ vi.mock("../../context", async () => {
 	return { protectedProcedure: os.$context<{ user: { id: string } }>() };
 });
 vi.mock("./credentials", () => ({
-	webAccessService: { resolve: vi.fn(), canSearch: vi.fn((hasConnection: boolean) => hasConnection) },
+	webAccessService: {
+		resolve: vi.fn(),
+		resolveSearxng: vi.fn(async () => null),
+		canSearch: vi.fn((hasConnection: boolean, searxngUrl: string | null) => hasConnection || !!searxngUrl),
+	},
 }));
 vi.mock("./service", () => ({ probeWebAccess: vi.fn() }));
 
@@ -24,17 +28,20 @@ describe("web connection probe transport", () => {
 		await expect(client.test()).rejects.toMatchObject({ code: "RATE_LIMIT_EXCEEDED", status: 429 });
 	});
 
-	it("tests the server's SearXNG search without a web connection", async () => {
+	it("tests SearXNG search without a web connection", async () => {
 		vi.mocked(webAccessService.resolve).mockResolvedValue(null);
-		vi.mocked(webAccessService.canSearch).mockReturnValueOnce(true);
+		vi.mocked(webAccessService.resolveSearxng).mockResolvedValueOnce("http://searxng:8080" as never);
 		const result = { search: { success: true }, read: { success: false, error: "unavailable" as const } };
 		vi.mocked(probeWebAccess).mockResolvedValue(result);
 		const client = createRouterClient(webAccessRouter, {
 			context: { user: { id: "alice" }, reqHeaders: new Headers() } as never,
 		});
 		await expect(client.test()).resolves.toEqual(result);
-		expect(webAccessService.canSearch).toHaveBeenCalledWith(false);
-		expect(probeWebAccess).toHaveBeenLastCalledWith(null, expect.objectContaining({ userId: "alice" }));
+		expect(webAccessService.canSearch).toHaveBeenCalledWith(false, "http://searxng:8080");
+		expect(probeWebAccess).toHaveBeenLastCalledWith(
+			null,
+			expect.objectContaining({ userId: "alice", searxngUrl: "http://searxng:8080" }),
+		);
 	});
 
 	it("refuses the test with neither SearXNG nor a web connection", async () => {
@@ -45,5 +52,15 @@ describe("web connection probe transport", () => {
 		});
 		await expect(client.test()).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 		expect(probeWebAccess).not.toHaveBeenCalled();
+	});
+
+	it("rejects SearXNG addresses with credentials or other protocols", async () => {
+		const client = createRouterClient(webAccessRouter, {
+			context: { user: { id: "alice" }, reqHeaders: new Headers() } as never,
+		});
+		await expect(client.saveSearxng({ url: "http://user:pass@searxng:8080" })).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+		await expect(client.saveSearxng({ url: "ftp://searxng" })).rejects.toMatchObject({ code: "BAD_REQUEST" });
 	});
 });

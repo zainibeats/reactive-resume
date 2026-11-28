@@ -14,6 +14,10 @@ export const webAccessDto = {
 			search: z.boolean(),
 			/** Searches go to the server's SearXNG rather than the connection. Older servers leave it out. */
 			searxng: z.boolean(),
+			/** SearXNG is set by the server's `WEB_SEARCH_SEARXNG_URL` and can't be changed here. */
+			searxngManaged: z.boolean(),
+			/** The user's own SearXNG address; null when unset or managed by the server. */
+			searxngUrl: z.string().nullable(),
 			read: z.literal(true),
 		}),
 	},
@@ -22,5 +26,20 @@ export const webAccessDto = {
 		output: z.void(),
 	},
 	delete: { output: z.void() },
+	saveSearxng: {
+		input: z.object({
+			// Self-hosted instances usually sit on a private address, so LAN and loopback hosts are allowed.
+			url: z
+				.url({ protocol: /^https?$/ })
+				.trim()
+				.max(2_000)
+				.refine((value) => {
+					const url = new URL(value);
+					return !url.username && !url.password;
+				}, "Leave credentials out of the SearXNG address."),
+		}),
+		output: z.void(),
+	},
+	deleteSearxng: { output: z.void() },
 	test: { output: z.object({ search: capabilityTest, read: capabilityTest }) },
 };

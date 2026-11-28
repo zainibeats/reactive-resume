@@ -15,6 +15,11 @@ const errors = {
 	},
 };
 
+const searxngForbidden = {
+	message: "SearXNG is set by the server administrator and can't be changed here.",
+	status: 403,
+};
+
 export const webAccessRouter = {
 	status: protectedProcedure
 		.route({
@@ -51,6 +56,30 @@ export const webAccessRouter = {
 		.input(z.object({}).optional())
 		.output(webAccessDto.delete.output)
 		.handler(({ context }) => webAccessService.delete(context.user.id)),
+	saveSearxng: protectedProcedure
+		.route({
+			...route,
+			method: "PUT",
+			path: "/integrations/web-access/searxng",
+			operationId: "saveSearxngUrl",
+			summary: "Set your own SearXNG instance for web search",
+		})
+		.input(webAccessDto.saveSearxng.input)
+		.errors({ FORBIDDEN: searxngForbidden })
+		.output(webAccessDto.saveSearxng.output)
+		.handler(({ context, input }) => webAccessService.saveSearxng(context.user.id, input.url)),
+	deleteSearxng: protectedProcedure
+		.route({
+			...route,
+			method: "DELETE",
+			path: "/integrations/web-access/searxng",
+			operationId: "deleteSearxngUrl",
+			summary: "Remove your own SearXNG instance",
+		})
+		.input(z.object({}).optional())
+		.errors({ FORBIDDEN: searxngForbidden })
+		.output(webAccessDto.deleteSearxng.output)
+		.handler(({ context }) => webAccessService.deleteSearxng(context.user.id)),
 	test: protectedProcedure
 		.route({
 			...route,
@@ -66,14 +95,21 @@ export const webAccessRouter = {
 		.input(z.object({}).optional())
 		.output(webAccessDto.test.output)
 		.handler(async ({ context, signal }) => {
-			const connection = await webAccessService.resolve(context.user.id);
-			// The server's SearXNG can be tested without a connection; reading then reports the built-in reader only.
-			if (!webAccessService.canSearch(connection !== null))
+			const [connection, searxngUrl] = await Promise.all([
+				webAccessService.resolve(context.user.id),
+				webAccessService.resolveSearxng(context.user.id),
+			]);
+			// SearXNG can be tested without a connection; reading then reports the built-in reader only.
+			if (!webAccessService.canSearch(connection !== null, searxngUrl))
 				throw new ORPCError("PRECONDITION_FAILED", {
 					message: "Set up web access in Settings → AI & developer first.",
 				});
 			try {
-				return await probeWebAccess(connection, { userId: context.user.id, ...(signal ? { signal } : {}) });
+				return await probeWebAccess(connection, {
+					userId: context.user.id,
+					searxngUrl,
+					...(signal ? { signal } : {}),
+				});
 			} catch (error) {
 				if (!signal?.aborted && error instanceof WebAccessError && error.reason === "rate-limit")
 					throw new ORPCError("RATE_LIMIT_EXCEEDED", {

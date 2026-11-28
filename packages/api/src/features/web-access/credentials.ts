@@ -2,7 +2,7 @@ import type { WebAccessConnection, WebAccessProvider } from "./contracts";
 import { ORPCError } from "@orpc/client";
 import { eq } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
-import { webAccessCredential } from "@reactive-resume/db/schema";
+import { webAccessCredential, webSearchSetting } from "@reactive-resume/db/schema";
 import { env } from "@reactive-resume/env/server";
 import { decryptCredential, encryptCredential } from "../ai/credentials";
 
@@ -39,9 +39,25 @@ function assertPersonalKeysAllowed() {
 		});
 }
 
-/** Search runs through the web connection or, without one, through the operator's SearXNG. Reading needs neither. */
-function canSearch(hasConnection: boolean) {
-	return hasConnection || !!env.WEB_SEARCH_SEARXNG_URL;
+async function savedSearxngUrl(userId: string) {
+	const [setting] = await db
+		.select({ searxngUrl: webSearchSetting.searxngUrl })
+		.from(webSearchSetting)
+		.where(eq(webSearchSetting.userId, userId))
+		.limit(1);
+	return setting?.searxngUrl ?? null;
+}
+
+function assertSearxngEditable() {
+	if (env.WEB_SEARCH_SEARXNG_URL)
+		throw new ORPCError("FORBIDDEN", {
+			message: "SearXNG is set by the server administrator and can't be changed here.",
+		});
+}
+
+/** Search runs through SearXNG when one is set, otherwise through the web connection. Reading needs neither. */
+function canSearch(hasConnection: boolean, searxngUrl: string | null) {
+	return hasConnection || !!searxngUrl;
 }
 
 export const webAccessService = {
@@ -50,15 +66,19 @@ export const webAccessService = {
 		const global = serverConfig();
 		const saved = !global && env.ENCRYPTION_SECRET ? await savedCredential(userId) : undefined;
 		const provider = global?.provider ?? saved?.provider ?? null;
+		const searxngManaged = !!env.WEB_SEARCH_SEARXNG_URL;
+		const searxngUrl = searxngManaged ? null : await savedSearxngUrl(userId);
 		return {
 			builtInReader: true as const,
 			configured: provider !== null,
 			provider,
 			managed: !!global,
 			canSave: !global && !!env.ENCRYPTION_SECRET,
-			search: canSearch(provider !== null),
-			// Searches go to the operator's SearXNG, whatever the connection.
-			searxng: !!env.WEB_SEARCH_SEARXNG_URL,
+			search: canSearch(provider !== null, env.WEB_SEARCH_SEARXNG_URL ?? searxngUrl),
+			// Searches go to SearXNG, whatever the connection.
+			searxng: searxngManaged || searxngUrl !== null,
+			searxngManaged,
+			searxngUrl,
 			read: true as const,
 		};
 	},
@@ -74,6 +94,20 @@ export const webAccessService = {
 					...(saved.provider === "firecrawl" ? { apiUrl: "https://api.firecrawl.dev" } : {}),
 				}
 			: null;
+	},
+	/** The SearXNG that searches go to: the operator's when set, otherwise the user's own. */
+	resolveSearxng: async (userId: string): Promise<string | null> =>
+		env.WEB_SEARCH_SEARXNG_URL ?? (await savedSearxngUrl(userId)),
+	saveSearxng: async (userId: string, searxngUrl: string) => {
+		assertSearxngEditable();
+		await db
+			.insert(webSearchSetting)
+			.values({ userId, searxngUrl })
+			.onConflictDoUpdate({ target: webSearchSetting.userId, set: { searxngUrl } });
+	},
+	deleteSearxng: async (userId: string) => {
+		assertSearxngEditable();
+		await db.delete(webSearchSetting).where(eq(webSearchSetting.userId, userId));
 	},
 	save: async (userId: string, provider: WebAccessProvider, apiKey: string) => {
 		assertPersonalKeysAllowed();

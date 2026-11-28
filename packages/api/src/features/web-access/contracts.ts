@@ -12,6 +12,8 @@ export type WebAccessConnection = {
 
 export type WebAccessContext = {
 	connection: WebAccessConnection | null;
+	/** The user's own SearXNG; the server's `WEB_SEARCH_SEARXNG_URL` still wins. */
+	searxngUrl?: string | null | undefined;
 	userId: string;
 	signal?: AbortSignal | undefined;
 };

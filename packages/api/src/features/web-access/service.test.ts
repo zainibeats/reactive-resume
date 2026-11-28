@@ -412,6 +412,17 @@ describe("search through a self-hosted SearXNG", () => {
 		expect(requests[0]?.url).toBe("/searxng/search?q=designer&format=json");
 	});
 
+	it("searches the user's own SearXNG when the server sets none", async () => {
+		delete fixtures.env.WEB_SEARCH_SEARXNG_URL;
+		await searchWeb("designer", { userId: "user", connection: null, searxngUrl: `${endpoint}/mine` });
+		expect(requests[0]?.url).toBe("/mine/search?q=designer&format=json");
+	});
+
+	it("prefers the server's SearXNG over the user's", async () => {
+		await probeWebAccess(null, { userId: "user", searxngUrl: `${endpoint}/mine` });
+		expect(requests[0]?.url).toBe("/searxng/search?q=example+domain&format=json");
+	});
+
 	it.each(PROVIDERS)("searches SearXNG instead of a saved %s connection", async (provider) => {
 		await searchWeb("designer", context(provider));
 		expect(requests.map((request) => request.provider)).toEqual(["searxng"]);

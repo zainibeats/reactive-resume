@@ -10,6 +10,7 @@ import { SegmentedControl, SegmentedControlItem } from "@reactive-resume/ui/comp
 import { Spinner } from "@reactive-resume/ui/components/spinner";
 import { cn } from "@reactive-resume/utils/style";
 import { useHasUsableAiProvider } from "../integrations/hooks/use-has-usable-ai-provider";
+import { SearxngRow } from "./searxng";
 import { getOrpcErrorMessage } from "@/libs/error-message";
 import { orpc } from "@/libs/orpc/client";
 
@@ -47,7 +48,11 @@ export function WebAccessSection() {
 	const failure = error || save.error || remove.error || test.error;
 	const connectedProvider = status?.provider ? PROVIDERS[status.provider] : null;
 	// Older servers leave `searxng` out.
-	const serverSearch = status?.searxng === true;
+	const searxngSearch = status?.searxng === true;
+	const onSearxngChange = () => {
+		test.reset();
+		void queryClient.invalidateQueries({ queryKey: orpc.webAccess.status.key() });
+	};
 	const openEditor = () => {
 		setProvider(status?.provider ?? "firecrawl");
 		setApiKey("");
@@ -90,6 +95,14 @@ export function WebAccessSection() {
 				</div>
 			</div>
 
+			{status && (
+				<SearxngRow
+					managed={status.searxngManaged === true}
+					url={status.searxngUrl ?? null}
+					onChange={onSearxngChange}
+				/>
+			)}
+
 			<div className="grid gap-4 px-5 py-4 max-sm:px-4">
 				<div className="flex items-start gap-3">
 					<Icon name="magnifying-glass" size={20} className="mt-0.5 shrink-0 text-ink-2" />
@@ -116,10 +129,9 @@ export function WebAccessSection() {
 							)}
 						</div>
 						<p className="max-w-[58ch] text-[13px] leading-5 text-ink-3">
-							{serverSearch ? (
+							{searxngSearch ? (
 								<Trans>
-									Your server provides search for the assistant. Connect a service to read pages the built-in reader
-									can't.
+									SearXNG handles the assistant's searches. Connect a service to read pages the built-in reader can't.
 								</Trans>
 							) : (
 								<Trans>Lets the assistant search the web and read pages the built-in reader can't.</Trans>
@@ -213,7 +225,7 @@ export function WebAccessSection() {
 								</div>
 							</div>
 						)}
-						{serverSearch && !status.configured && (
+						{searxngSearch && !status.configured && (
 							<Button
 								variant="secondary"
 								size="sm"
@@ -227,12 +239,12 @@ export function WebAccessSection() {
 						)}
 						{test.isPending && (
 							<p role="status" className="text-[13px] text-ink-2">
-								{!serverSearch ? (
+								{!searxngSearch ? (
 									<Trans>Testing search and reading with {connectedProvider}…</Trans>
 								) : connectedProvider ? (
-									<Trans>Testing your server's search, and reading with {connectedProvider}…</Trans>
+									<Trans>Testing SearXNG search, and reading with {connectedProvider}…</Trans>
 								) : (
-									<Trans>Testing your server's search…</Trans>
+									<Trans>Testing SearXNG search…</Trans>
 								)}
 							</p>
 						)}
@@ -267,12 +279,12 @@ export function WebAccessSection() {
 									</p>
 								)}
 								<p className="text-xs text-ink-3">
-									{!serverSearch ? (
+									{!searxngSearch ? (
 										<Trans>Tested with {connectedProvider}. Only this service was tested.</Trans>
 									) : connectedProvider ? (
-										<Trans>Search was tested with your server's search, and reading with {connectedProvider}.</Trans>
+										<Trans>Search was tested with SearXNG, and reading with {connectedProvider}.</Trans>
 									) : (
-										<Trans>Search was tested with your server's search. Links are read with the built-in reader.</Trans>
+										<Trans>Search was tested with SearXNG. Links are read with the built-in reader.</Trans>
 									)}
 								</p>
 							</div>
@@ -396,15 +408,13 @@ export function WebAccessSection() {
 						<Trans>AI is optional. Everything else works without it.</Trans>
 					) : !hasUsableProvider ? (
 						<Trans>Connect an AI provider above to use the assistant.</Trans>
-					) : serverSearch && connectedProvider ? (
+					) : searxngSearch && connectedProvider ? (
 						<Trans>
-							Searches with your server's search and reads pages with {connectedProvider}, whichever AI provider you
-							use.
+							Searches with SearXNG and reads pages with {connectedProvider}, whichever AI provider you use.
 						</Trans>
-					) : serverSearch ? (
+					) : searxngSearch ? (
 						<Trans>
-							Searches with your server's search and reads links with the built-in reader, whichever AI provider you
-							use.
+							Searches with SearXNG and reads links with the built-in reader, whichever AI provider you use.
 						</Trans>
 					) : connectedProvider ? (
 						<Trans>Searches and reads pages with {connectedProvider}, whichever AI provider you use.</Trans>

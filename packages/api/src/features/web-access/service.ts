@@ -71,9 +71,9 @@ function log(operation: "search" | "read", provider: string, started: number, ou
 
 type SearchResults = Awaited<ReturnType<typeof externalSearch>>;
 
-/** Where searches go: the operator's SearXNG when set, otherwise the web connection's provider. */
+/** Where searches go: SearXNG when set (the operator's, then the user's), otherwise the web connection's provider. */
 function searchBackend(context: WebAccessContext, signal: AbortSignal) {
-	const baseUrl = env.WEB_SEARCH_SEARXNG_URL;
+	const baseUrl = env.WEB_SEARCH_SEARXNG_URL ?? context.searxngUrl ?? undefined;
 	if (baseUrl)
 		return {
 			name: "searxng",
@@ -176,16 +176,16 @@ export async function readPage(input: string, context: WebAccessContext): Promis
 
 /**
  * Explicit settings test. Provider operations are independent and never use the built-in fallback. Search is tested
- * against SearXNG when the server sends searches there, and the log names which service each operation tested.
+ * against SearXNG when searches go there, and the log names which service each operation tested.
  * Without a connection, reading is not tested and reports `unavailable`: only the built-in reader serves it.
  */
 export async function probeWebAccess(
 	connection: WebAccessConnection | null,
-	context: { userId: string; signal?: AbortSignal | undefined },
+	context: { userId: string; searxngUrl?: string | null | undefined; signal?: AbortSignal | undefined },
 ) {
 	const signal = deadline(context.signal);
 	await consume(context.userId, signal);
-	const searxng = env.WEB_SEARCH_SEARXNG_URL;
+	const searxng = env.WEB_SEARCH_SEARXNG_URL ?? context.searxngUrl ?? undefined;
 	const probe = async (operation: "search" | "read") => {
 		const started = Date.now();
 		const provider = operation === "search" && searxng ? "searxng" : (connection?.provider ?? "builtin");
