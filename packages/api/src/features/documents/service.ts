@@ -1,6 +1,6 @@
 import type { DocumentSummary } from "../../dto/documents";
 import { ORPCError } from "@orpc/client";
-import { and, count, eq, isNotNull, isNull, lt } from "drizzle-orm";
+import { and, count, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
 import { db } from "@reactive-resume/db/client";
 import * as schema from "@reactive-resume/db/schema";
 import { notifyResumeUpdated, resumeService } from "../resume/service";
@@ -13,13 +13,27 @@ const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 /** The resume's row, scoped to its owner. */
 const owned = ({ id, userId }: DocumentRef) => and(eq(schema.resume.id, id), eq(schema.resume.userId, userId));
 
-async function update(ref: DocumentRef, changes: Partial<typeof schema.resume.$inferInsert>) {
+type UpdateOptions = { requireUnlocked?: boolean };
+
+/**
+ * Writes `changes` and bumps `revision`, like every other resume write. With `requireUnlocked`, the lock is checked in
+ * the same UPDATE, so a lock set after a separate read can't be missed.
+ */
+async function update(
+	ref: DocumentRef,
+	changes: Partial<typeof schema.resume.$inferInsert>,
+	{ requireUnlocked = false }: UpdateOptions = {},
+) {
 	const [row] = await db
 		.update(schema.resume)
-		.set(changes)
-		.where(owned(ref))
+		.set({ ...changes, revision: sql`${schema.resume.revision} + 1` })
+		.where(requireUnlocked ? and(owned(ref), eq(schema.resume.isLocked, false)) : owned(ref))
 		.returning({ updatedAt: schema.resume.updatedAt });
-	if (!row) throw new ORPCError("NOT_FOUND");
+	if (!row) {
+		// Tell a locked resume (the error code API and MCP clients already handle) from a missing one.
+		if (requireUnlocked) await assertUnlocked(ref);
+		throw new ORPCError("NOT_FOUND");
+	}
 	// Like every other resume write: an open editor reads the resume again instead of saving over this change.
 	await notifyResumeUpdated({
 		type: "resume.updated",
@@ -99,24 +113,17 @@ export const documentsService = {
 	},
 
 	/** A name typed by hand ends a blank resume's automatic naming. Locked resumes keep their details. */
-	rename: async (input: DocumentRef & { name: string }) => {
-		await assertUnlocked(input);
-		await update(input, { name: input.name, autoName: false });
-	},
+	rename: (input: DocumentRef & { name: string }) =>
+		update(input, { name: input.name, autoName: false }, { requireUnlocked: true }),
 
-	setTags: async (input: DocumentRef & { tags: string[] }) => {
-		await assertUnlocked(input);
-		await update(input, { tags: [...new Set(input.tags)] });
-	},
+	setTags: (input: DocumentRef & { tags: string[] }) =>
+		update(input, { tags: [...new Set(input.tags)] }, { requireUnlocked: true }),
 
 	setLocked: (input: DocumentRef & { isLocked: boolean }) =>
 		resumeService.setLocked({ id: input.id, userId: input.userId, isLocked: input.isLocked }),
 
 	/** Undoable: Trash hides the resume and stops its public link; Restore brings it back intact. */
-	trash: async (input: DocumentRef) => {
-		await assertUnlocked(input);
-		await update(input, { trashedAt: new Date() });
-	},
+	trash: (input: DocumentRef) => update(input, { trashedAt: new Date() }, { requireUnlocked: true }),
 
 	restore: (input: DocumentRef) => update(input, { trashedAt: null }),
 

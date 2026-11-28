@@ -9,10 +9,10 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    # Not exposed on the host by default: these credentials are public, and Docker's published ports bypass
-    # host firewalls. Uncomment the ports block below if you need host access for tooling.
-    # ports:
-    #   - "127.0.0.1:5432:5432"
+    # Exposed on localhost only because the app container uses host networking. Bound to 127.0.0.1 since
+    # these credentials are public and Docker's published ports bypass host firewalls.
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
